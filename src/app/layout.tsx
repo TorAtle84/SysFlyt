@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import AuthSessionProvider from "@/components/providers/session-provider";
 
 export const metadata: Metadata = {
   title: "Sluttfase - Prosjekthåndtering",
@@ -13,7 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="no">
-      <body>{children}</body>
+      <body>
+        <AuthSessionProvider>{children}</AuthSessionProvider>
+      </body>
     </html>
   );
 }

@@ -9,12 +9,15 @@ import { Badge } from "@/components/ui/badge";
 
 interface MassListItem {
   id: string;
-  typeCode: string;
-  description: string;
-  quantity?: number;
-  unit?: string;
-  location?: string;
-  status?: string;
+  typeCode: string | null;
+  description: string | null;
+  tfm?: string | null;
+  building?: string | null;
+  system?: string | null;
+  component?: string | null;
+  productName?: string | null;
+  location?: string | null;
+  zone?: string | null;
 }
 
 interface MassListTableProps {
@@ -28,8 +31,8 @@ export function MassListTable({ data, onDelete, onDeleteAll }: MassListTableProp
 
   const filtered = data.filter(
     (item) =>
-      item.typeCode.toLowerCase().includes(search.toLowerCase()) ||
-      item.description.toLowerCase().includes(search.toLowerCase())
+      (item.typeCode?.toLowerCase() || "").includes(search.toLowerCase()) ||
+      (item.description?.toLowerCase() || "").includes(search.toLowerCase())
   );
 
   if (data.length === 0) {
@@ -79,9 +82,9 @@ export function MassListTable({ data, onDelete, onDeleteAll }: MassListTableProp
               <tr className="border-b border-border text-left text-sm text-muted-foreground">
                 <th className="pb-3 pr-4 font-medium">TFM-kode</th>
                 <th className="pb-3 pr-4 font-medium">Beskrivelse</th>
-                <th className="pb-3 pr-4 font-medium">Mengde</th>
-                <th className="pb-3 pr-4 font-medium">Enhet</th>
-                <th className="pb-3 pr-4 font-medium">Status</th>
+                <th className="pb-3 pr-4 font-medium">Produkt</th>
+                <th className="pb-3 pr-4 font-medium">Plassering</th>
+                <th className="pb-3 pr-4 font-medium">Sone</th>
                 <th className="pb-3 font-medium">Handlinger</th>
               </tr>
             </thead>
@@ -93,22 +96,20 @@ export function MassListTable({ data, onDelete, onDeleteAll }: MassListTableProp
                 >
                   <td className="py-3 pr-4">
                     <span className="font-mono font-medium text-primary">
-                      {item.typeCode}
+                      {item.typeCode || "-"}
                     </span>
                   </td>
                   <td className="py-3 pr-4 text-foreground">
-                    {item.description}
+                    {item.description || "-"}
                   </td>
                   <td className="py-3 pr-4 text-muted-foreground">
-                    {item.quantity || "-"}
+                    {item.productName || "-"}
                   </td>
                   <td className="py-3 pr-4 text-muted-foreground">
-                    {item.unit || "-"}
+                    {item.location || "-"}
                   </td>
-                  <td className="py-3 pr-4">
-                    <Badge tone={item.status === "completed" ? "success" : "muted"}>
-                      {item.status || "pending"}
-                    </Badge>
+                  <td className="py-3 pr-4 text-muted-foreground">
+                    {item.zone || "-"}
                   </td>
                   <td className="py-3">
                     <Button
