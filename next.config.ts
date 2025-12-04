@@ -12,10 +12,9 @@ const nextConfig: NextConfig = {
     return config;
   },
   allowedDevOrigins: [
-    '*.replit.dev',
-    '*.repl.co',
-    'localhost',
-    '127.0.0.1'
+    'https://*.replit.dev',
+    'https://*.repl.co',
+    'https://*.kirk.replit.dev',
   ],
 };
 

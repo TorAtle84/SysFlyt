@@ -56,6 +56,8 @@ model User {
   
   totpSecret   String?
   totpEnabled  Boolean        @default(false)
+  totpFailedAttempts Int      @default(0)
+  totpLockedUntil    DateTime?
 
   accounts     Account[]
   sessions     Session[]
