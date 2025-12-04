@@ -10,7 +10,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <div>
               <p className="text-xs uppercase tracking-[0.35em] text-muted-foreground">SysLink</p>
               <h1 className="mt-4 flex flex-wrap items-center gap-3 text-4xl font-semibold leading-tight text-foreground md:text-5xl">
-                Byggebransjen møter FlytLink
+                Byggebransjen møter SysLink
                 <img src="/syslink-logo.png" alt="SysLink Logo" className="h-[2.25em] rounded-lg shadow-sm" />
               </h1>
               <p className="mt-4 max-w-xl text-lg text-muted-foreground">

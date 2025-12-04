@@ -46,7 +46,7 @@ export default async function DashboardPage() {
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-white/70">Kontrollsenter</p>
                 <h1 className="mt-2 flex flex-wrap items-center gap-3 text-3xl font-semibold leading-tight lg:text-4xl">
-                  Byggebransjen møter FlytLink
+                  Byggebransjen møter SysLink
                   <img src="/syslink-logo.png" alt="SysLink Logo" className="h-[2.25em] rounded-lg shadow-sm" />
                 </h1>
               </div>
