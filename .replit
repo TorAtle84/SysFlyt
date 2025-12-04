@@ -11,3 +11,35 @@ channel = "stable-25_05"
 NEXTAUTH_SECRET = "9ecb772315d69dd8d180678bd52867dcc13855c5bc9be2221a2e0f10067ab499"
 NEXTAUTH_URL = "https://${REPLIT_DEV_DOMAIN}"
 DEFAULT_ADMIN_PASSWORD = "Admin123!"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 44013
+externalPort = 3000
