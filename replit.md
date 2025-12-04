@@ -60,11 +60,16 @@ The application implements comprehensive security measures:
 - **Authenticator app support**: Users can enable TOTP using Google Authenticator, Microsoft Authenticator, or any standard authenticator app.
 - **QR code setup**: Easy setup via QR code scanning or manual secret entry.
 - **Rate limiting**: After 5 failed TOTP attempts, account is locked for 15 minutes.
+- **14-day activation deadline**: New users must enable TOTP within 14 days of account activation or their account will be suspended.
+- **Warning banner**: Users without TOTP see a countdown banner with days remaining and links to authenticator setup guides.
+- **Auto-suspension**: Accounts are automatically suspended on login if the TOTP deadline has passed.
 - **API routes** (`src/app/api/totp/`):
   - `POST /api/totp/setup` - Generate new secret and QR code
   - `POST /api/totp/verify` - Verify TOTP code and enable 2FA
   - `POST /api/totp/disable` - Disable 2FA (requires valid TOTP code)
+  - `GET /api/totp/status` - Get TOTP status and deadline warning
 - **Profile integration**: Users can manage TOTP from their profile settings.
+- **Authenticator guides**: Links to official Google and Microsoft Authenticator setup documentation.
 
 ### Secure Password Change
 - **Current password verification**: Users must provide current password to change it

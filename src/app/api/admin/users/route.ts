@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { Role, UserStatus } from "@prisma/client";
 import { requireAdmin } from "@/lib/auth-helpers";
 
+const TOTP_DEADLINE_DAYS = 14;
+
 export async function GET() {
   const authResult = await requireAdmin();
   if (!authResult.success) {
@@ -64,12 +66,25 @@ export async function PATCH(req: Request) {
     );
   }
 
+  const updateData: Record<string, unknown> = {};
+  
+  if (status) {
+    updateData.status = status;
+  }
+  
+  if (role) {
+    updateData.role = role;
+  }
+  
+  if (status === UserStatus.ACTIVE && targetUser.status === UserStatus.PENDING) {
+    const totpDeadline = new Date();
+    totpDeadline.setDate(totpDeadline.getDate() + TOTP_DEADLINE_DAYS);
+    updateData.totpDeadline = totpDeadline;
+  }
+
   const updated = await prisma.user.update({
     where: { id: userId },
-    data: {
-      status: status || undefined,
-      role: role || undefined,
-    },
+    data: updateData,
     select: {
       id: true,
       email: true,

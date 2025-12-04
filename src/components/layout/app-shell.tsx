@@ -16,6 +16,14 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { TotpWarningBanner } from "@/components/totp/totp-warning-banner";
+
+interface TotpWarning {
+  daysRemaining: number;
+  deadline: string;
+  expired: boolean;
+  message: string;
+}
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -35,8 +43,29 @@ export function AppShell({ children, sidebar }: AppShellProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [totpWarning, setTotpWarning] = useState<TotpWarning | null>(null);
 
   const isAdmin = session?.user?.role === "ADMIN";
+
+  useEffect(() => {
+    async function checkTotpStatus() {
+      try {
+        const res = await fetch("/api/totp/status");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.warning && !data.totpEnabled) {
+            setTotpWarning(data.warning);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to check TOTP status:", error);
+      }
+    }
+    
+    if (session?.user) {
+      checkTotpStatus();
+    }
+  }, [session?.user]);
 
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -166,7 +195,15 @@ export function AppShell({ children, sidebar }: AppShellProps) {
           "flex-1 p-4 pt-16 sm:p-6 sm:pt-6 lg:pt-6",
           sidebar ? "lg:pl-72" : ""
         )}>
-          <div className="mx-auto max-w-6xl">{children}</div>
+          <div className="mx-auto max-w-6xl">
+            {totpWarning && totpWarning.daysRemaining > 0 && (
+              <TotpWarningBanner 
+                daysRemaining={totpWarning.daysRemaining}
+                onDismiss={() => setTotpWarning(null)}
+              />
+            )}
+            {children}
+          </div>
         </main>
       </div>
 

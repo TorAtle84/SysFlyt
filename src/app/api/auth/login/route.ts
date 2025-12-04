@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     const now = new Date();
     const daysRemaining = Math.ceil((totpDeadline.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
 
-    if (!user.totpEnabled && daysRemaining < 0) {
+    if (!user.totpEnabled && now >= totpDeadline) {
       await prisma.user.update({
         where: { id: user.id },
         data: { status: "SUSPENDED" },

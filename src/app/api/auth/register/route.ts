@@ -5,6 +5,8 @@ import { z } from "zod";
 import prisma from "@/lib/db";
 import { adminEmails, titleCase } from "@/lib/utils";
 
+const TOTP_DEADLINE_DAYS = 14;
+
 const registerSchema = z.object({
   firstName: z.string().min(1, "Fornavn er påkrevd"),
   lastName: z.string().min(1, "Etternavn er påkrevd"),
@@ -37,6 +39,9 @@ export async function POST(req: Request) {
 
     const passwordHash = await bcrypt.hash(data.password, 10);
 
+    const totpDeadline = new Date();
+    totpDeadline.setDate(totpDeadline.getDate() + TOTP_DEADLINE_DAYS);
+
     const user = await prisma.user.create({
       data: {
         firstName: titleCase(data.firstName),
@@ -50,6 +55,7 @@ export async function POST(req: Request) {
         passwordHash,
         role,
         status,
+        totpDeadline: isAdmin ? totpDeadline : null,
       },
     });
 
