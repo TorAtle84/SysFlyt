@@ -58,6 +58,8 @@ model User {
   totpEnabled  Boolean        @default(false)
   totpFailedAttempts Int      @default(0)
   totpLockedUntil    DateTime?
+  totpDeadline       DateTime?
+  totpWarningDismissed DateTime?
 
   accounts     Account[]
   sessions     Session[]

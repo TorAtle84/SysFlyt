@@ -3,6 +3,8 @@ import prisma from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { authenticator } from "otplib";
 
+const TOTP_DEADLINE_DAYS = 14;
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -29,6 +31,8 @@ export async function POST(request: NextRequest) {
         totpSecret: true,
         totpFailedAttempts: true,
         totpLockedUntil: true,
+        totpDeadline: true,
+        createdAt: true,
       },
     });
 
@@ -64,6 +68,21 @@ export async function POST(request: NextRequest) {
     if (user.status !== "ACTIVE") {
       return NextResponse.json(
         { error: "Kontoen din er ikke aktiv." },
+        { status: 403 }
+      );
+    }
+
+    const totpDeadline = user.totpDeadline || new Date(user.createdAt.getTime() + TOTP_DEADLINE_DAYS * 24 * 60 * 60 * 1000);
+    const now = new Date();
+    const daysRemaining = Math.ceil((totpDeadline.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+
+    if (!user.totpEnabled && daysRemaining < 0) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { status: "SUSPENDED" },
+      });
+      return NextResponse.json(
+        { error: "Kontoen din er deaktivert fordi tofaktor-autentisering ikke ble aktivert innen fristen. Kontakt administrator." },
         { status: 403 }
       );
     }
@@ -124,6 +143,16 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const totpWarning = !user.totpEnabled && daysRemaining > 0 && daysRemaining <= TOTP_DEADLINE_DAYS
+      ? {
+          daysRemaining,
+          deadline: totpDeadline.toISOString(),
+          message: daysRemaining === 1
+            ? "Du har 1 dag igjen til å aktivere tofaktor-autentisering"
+            : `Du har ${daysRemaining} dager igjen til å aktivere tofaktor-autentisering`,
+        }
+      : null;
+
     return NextResponse.json({
       success: true,
       user: {
@@ -133,6 +162,7 @@ export async function POST(request: NextRequest) {
         role: user.role,
         status: user.status,
       },
+      totpWarning,
     });
   } catch (error) {
     console.error("Login error:", error);
