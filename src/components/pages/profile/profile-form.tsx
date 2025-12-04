@@ -6,7 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDraftPersistence } from "@/hooks/use-draft-persistence";
+import { DISCIPLINES } from "@/lib/constants";
 
 interface ProfileFormProps {
   user: {
@@ -179,13 +181,24 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 className="text-base"
               />
 
-              <Input
-                label="Fagområde"
-                value={formData.discipline}
-                onChange={(e) => updateField("discipline", e.target.value)}
-                placeholder="F.eks. Elektro, VVS, Bygg"
-                className="text-base"
-              />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-foreground">Fagområde</label>
+                <Select
+                  value={formData.discipline}
+                  onValueChange={(value) => updateField("discipline", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Velg fagområde..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DISCIPLINES.map((discipline) => (
+                      <SelectItem key={discipline.value} value={discipline.value}>
+                        {discipline.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
               {error && (
                 <p className="text-sm text-danger">{error}</p>
