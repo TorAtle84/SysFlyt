@@ -9,36 +9,37 @@ This is a Next.js-based project management platform for construction projects (N
 - User approval workflow (PENDING users need admin approval)
 
 ## Recent Changes (Dec 4, 2024)
-- **GitHub Import Setup**: Configured the project to run in Replit environment
-- **Created missing infrastructure files**:
-  - `src/lib/auth.ts` - NextAuth configuration with credentials provider
-  - `src/lib/db.ts` - Prisma client singleton
-  - `src/lib/utils.ts` - Utility functions including adminEmails array
-  - `src/types/next-auth.d.ts` - TypeScript type extensions for NextAuth
-  - `src/app/api/auth/[...nextauth]/route.ts` - NextAuth route handler
-- **Created basic UI components** (GitHub import was missing the full components directory):
-  - `src/components/ui/button.tsx` - Basic button component
-  - `src/components/ui/input.tsx` - Basic input component with label and hint support
-- **Configured Tailwind CSS v4**: Updated `src/app/globals.css` to use Tailwind v4's @theme syntax
-- **Database Setup**: Connected to Replit PostgreSQL (Neon), ran migrations and seeding
-- **Environment Configuration**:
-  - NEXTAUTH_SECRET - Generated secure secret
-  - NEXTAUTH_URL - Set to Replit dev domain
-  - DATABASE_URL - Replit PostgreSQL connection
-  - DEFAULT_ADMIN_PASSWORD - Set for admin seeding (Admin123!)
-- **Next.js Configuration**: Updated for Replit (port 5000, host 0.0.0.0, allowedDevOrigins for proxy)
-- **Workflow**: Configured to run `npm run dev` on port 5000 with webview output
-
-## Known Issues and Limitations
-⚠️ **IMPORTANT**: The GitHub import was incomplete and missing the entire `src/components` directory except for the basic UI components created above. The application will have limited functionality until the full component library is restored. Missing components include:
-- AppShell layout components
-- ProjectExplorer, ProjectHeader, ProjectSidebar, ProjectContentSwitcher
-- MassListUpload, MassListTable
-- PDFViewerWrapper, SaveAndCloseButton
-- ApprovalPanel
-- BackupTrigger
-- Card, CardContent, CardHeader, CardTitle, Badge
-- And many other page-specific components
+- **Complete Component Library Rebuild**: After incomplete GitHub import, rebuilt the entire component library
+- **UI Components Created**:
+  - `src/components/ui/` - card, badge, button, input, separator, dialog, select, checkbox, label, popover, textarea
+- **Layout Components**:
+  - `src/components/layout/app-shell.tsx` - Main app layout with responsive sidebar navigation
+- **Dashboard Components**:
+  - `src/components/dashboard/project-explorer.tsx` - Project browsing and navigation
+  - `src/components/dashboard/backup-trigger.tsx` - Database backup interface
+  - `src/components/dashboard/control-center.tsx` - Dashboard control panel
+- **Project Management Components**:
+  - `src/components/projects/project-sidebar.tsx` - Project document navigation
+  - `src/components/projects/project-header.tsx` - Project header with actions
+  - `src/components/projects/project-content-switcher.tsx` - Content tab switcher
+- **Mass List Components**:
+  - `src/components/mass-list/mass-list-upload.tsx` - Excel import interface
+  - `src/components/mass-list/mass-list-table.tsx` - TFM data display table
+- **PDF Viewer Components**:
+  - `src/components/pdf-viewer/pdf-viewer-wrapper.tsx` - PDF viewing with annotations
+  - `src/components/pdf-viewer/save-and-close-button.tsx` - Save annotation actions
+- **Admin & Profile Components**:
+  - `src/components/admin/approval-panel.tsx` - User approval interface
+  - `src/components/profile/profile-form.tsx` - User profile editing
+- **API Routes Created**:
+  - `src/app/api/projects/route.ts` - Project CRUD operations
+  - `src/app/api/mass-list/route.ts` - Mass list operations
+  - `src/app/api/profile/route.ts` - User profile management
+- **Infrastructure Setup**:
+  - NextAuth configuration with credentials provider
+  - Prisma client singleton
+  - Tailwind CSS v4 configuration
+  - Database connected and seeded
 
 ## Admin Accounts
 The database has been seeded with two admin accounts:
@@ -61,9 +62,16 @@ src/
 ├── app/                    # Next.js App Router
 │   ├── (auth)/            # Auth pages (login, register, reset, pending)
 │   ├── (app)/             # Protected app pages (dashboard, projects, profile, admin)
-│   └── api/               # API routes (auth, admin, annotations)
-├── components/            # React components (⚠️ mostly missing from import)
-│   └── ui/                # Basic UI components (button, input)
+│   └── api/               # API routes (auth, admin, annotations, projects, mass-list)
+├── components/            # React components
+│   ├── ui/                # UI primitives (button, card, badge, input, etc.)
+│   ├── layout/            # Layout components (app-shell)
+│   ├── dashboard/         # Dashboard components (project-explorer, backup-trigger)
+│   ├── projects/          # Project page components (sidebar, header, content-switcher)
+│   ├── mass-list/         # Mass list components (upload, table)
+│   ├── pdf-viewer/        # PDF viewer components (wrapper, save-button)
+│   ├── admin/             # Admin components (approval-panel)
+│   └── profile/           # Profile components (profile-form)
 ├── lib/                   # Utility libraries
 │   ├── auth.ts           # NextAuth configuration
 │   ├── db.ts             # Prisma client
@@ -90,7 +98,7 @@ Key models:
 - **Document**: With annotations, system tags, and components
 - **Annotation**: For PDF markup with comments
 - **SystemAnnotation**: For system-level annotations with polygon support
-- **MassList**: TFM component tracking
+- **MassList**: TFM component tracking (building, system, component, typeCode, productName, location, zone)
 - **Notification**: User notification system
 
 ## User Preferences
