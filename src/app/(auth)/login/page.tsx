@@ -22,32 +22,53 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     
-    const res = await signIn("credentials", { 
-      redirect: false, 
-      email, 
-      password,
-      totpCode: showTotp ? totpCode : undefined,
-    });
-    
-    setLoading(false);
-    
-    if (res?.error) {
-      if (res.error === "TOTP_REQUIRED") {
+    try {
+      const checkRes = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          totpCode: showTotp ? totpCode : undefined,
+        }),
+      });
+      
+      const checkData = await checkRes.json();
+      
+      if (checkData.requiresTotp) {
         setShowTotp(true);
-        setError(null);
-      } else if (res.error === "Ugyldig verifiseringskode") {
-        setError("Ugyldig verifiseringskode. Prøv igjen.");
-        setTotpCode("");
-      } else if (res.error.includes("For mange feilede forsøk")) {
-        setError(res.error);
-        setTotpCode("");
-      } else if (res.error.includes("suspendert") || res.error.includes("venter på godkjenning") || res.error.includes("ikke aktiv")) {
-        setError(res.error);
-      } else {
-        setError("Feil e-post eller passord");
+        setLoading(false);
+        return;
       }
-    } else {
-      router.replace("/dashboard");
+      
+      if (checkData.error) {
+        setError(checkData.error);
+        if (checkData.error.includes("verifiseringskode")) {
+          setTotpCode("");
+        }
+        setLoading(false);
+        return;
+      }
+      
+      if (checkData.success) {
+        const res = await signIn("credentials", { 
+          redirect: false, 
+          email, 
+          password,
+          totpCode: showTotp ? totpCode : undefined,
+        });
+        
+        if (res?.error) {
+          setError("Innlogging feilet. Prøv igjen.");
+        } else {
+          router.replace("/dashboard");
+        }
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Nettverksfeil - prøv igjen");
+    } finally {
+      setLoading(false);
     }
   }
 
