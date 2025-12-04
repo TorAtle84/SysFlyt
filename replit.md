@@ -141,6 +141,14 @@ Key models:
 - **MassList**: TFM component tracking (building, system, component, typeCode, productName, location, zone)
 - **Notification**: User notification system
 
+## Mobile UX Features
+The application is optimized for mobile use:
+- **Draft Persistence**: Form data is automatically saved to localStorage while typing, protecting against page reloads and app switches
+- **Navigation Guards**: Users are warned before leaving pages with unsaved changes (both browser refresh and in-app navigation)
+- **Touch-Friendly UI**: All buttons and inputs have minimum 44px touch targets for easy mobile interaction
+- **Responsive Layouts**: Forms stack properly on mobile with primary actions positioned for thumb reach
+- **Mobile Menu**: Hamburger menu with scroll lock and safe-area padding for modern smartphones
+
 ## User Preferences
 - Language: Norwegian (Bokmål)
 - Admin emails are configured in `src/lib/utils.ts`
