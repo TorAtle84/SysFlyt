@@ -56,6 +56,16 @@ The application implements comprehensive security measures:
 - **Middleware protection**: All protected routes and APIs verify user status; suspended users are blocked and redirected.
 - **JWT session management**: Secure session handling with NextAuth and encrypted tokens.
 
+### Two-Factor Authentication (TOTP)
+- **Authenticator app support**: Users can enable TOTP using Google Authenticator, Microsoft Authenticator, or any standard authenticator app.
+- **QR code setup**: Easy setup via QR code scanning or manual secret entry.
+- **Rate limiting**: After 5 failed TOTP attempts, account is locked for 15 minutes.
+- **API routes** (`src/app/api/totp/`):
+  - `POST /api/totp/setup` - Generate new secret and QR code
+  - `POST /api/totp/verify` - Verify TOTP code and enable 2FA
+  - `POST /api/totp/disable` - Disable 2FA (requires valid TOTP code)
+- **Profile integration**: Users can manage TOTP from their profile settings.
+
 ### Authorization (RBAC)
 - **Centralized auth helpers** (`src/lib/auth-helpers.ts`):
   - `requireAuth()` - Verifies user is authenticated and ACTIVE
