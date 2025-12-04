@@ -1,0 +1,64 @@
+[2025-11-25T06:24:52.968Z] Starting logo upload request
+[2025-11-25T06:24:53.004Z] Processing project: cmidnjmdf0005axjnss8kkho7
+[2025-11-25T06:24:53.014Z] Reading form data...
+[2025-11-25T06:24:53.021Z] File received: Bergen.png, size: 100242, type: image/png
+[2025-11-25T06:24:53.027Z] Writing file to: C:\Sluttfase\public\uploads\cmidnjmdf0005axjnss8kkho7-1764051893027.png
+[2025-11-25T06:24:53.034Z] File written successfully
+[2025-11-25T06:24:53.047Z] CRITICAL ERROR: PrismaClientValidationError: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].project.update()` invocation in
+C:\Sluttfase\.next\dev\server\chunks\[root-of-the-server]__80fe17a5._.js:647:165
+
+  644 }
+  645 await __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["promises"].writeFile(uploadPath, buffer);
+  646 await logToFile("File written successfully");
+→ 647 const updated = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].project.update({
+        where: {
+          id: "cmidnjmdf0005axjnss8kkho7"
+        },
+        data: {
+          logoUrl: "/uploads/cmidnjmdf0005axjnss8kkho7-1764051893027.png",
+          ~~~~~~~
+      ?   id?: String | StringFieldUpdateOperationsInput,
+      ?   name?: String | StringFieldUpdateOperationsInput,
+      ?   description?: String | NullableStringFieldUpdateOperationsInput | Null,
+      ?   status?: ProjectStatus | EnumProjectStatusFieldUpdateOperationsInput,
+      ?   archivedAt?: DateTime | NullableDateTimeFieldUpdateOperationsInput | Null,
+      ?   createdAt?: DateTime | DateTimeFieldUpdateOperationsInput,
+      ?   updatedAt?: DateTime | DateTimeFieldUpdateOperationsInput,
+      ?   createdBy?: UserUpdateOneWithoutProjectsNestedInput,
+      ?   members?: ProjectMemberUpdateManyWithoutProjectNestedInput,
+      ?   comments?: CommentUpdateManyWithoutProjectNestedInput,
+      ?   documents?: DocumentUpdateManyWithoutProjectNestedInput,
+      ?   massList?: MassListUpdateManyWithoutProjectNestedInput
+        }
+      })
+
+Unknown argument `logoUrl`. Available options are marked with ?.
+[2025-11-25T07:04:57.497Z] Starting logo upload request
+[2025-11-25T07:04:57.534Z] Processing project: cmidnjmdf0005axjnss8kkho7
+[2025-11-25T07:04:57.542Z] Reading form data...
+[2025-11-25T07:04:57.554Z] File received: Bergen.png, size: 100242, type: image/png
+[2025-11-25T07:04:57.557Z] Writing file to: C:\Sluttfase\public\uploads\cmidnjmdf0005axjnss8kkho7-1764054297557.png
+[2025-11-25T07:04:57.566Z] File written successfully
+[2025-11-25T07:04:57.585Z] Database updated
+[2025-11-25T07:09:17.707Z] Starting logo upload request
+[2025-11-25T07:09:17.733Z] Processing project: cmidnjmdf0005axjnss8kkho7
+[2025-11-25T07:09:17.740Z] Reading form data...
+[2025-11-25T07:09:17.747Z] File received: Bergen.png, size: 100242, type: image/png
+[2025-11-25T07:09:17.750Z] Writing file to: C:\Sluttfase\public\uploads\cmidnjmdf0005axjnss8kkho7-1764054557750.png
+[2025-11-25T07:09:17.758Z] File written successfully
+[2025-11-25T07:09:17.771Z] Database updated
+[2025-11-26T06:55:31.234Z] Starting logo upload request
+[2025-11-26T06:55:31.260Z] Processing project: cmifncyvt00053765504vhw7b
+[2025-11-26T06:55:31.270Z] Reading form data...
+[2025-11-26T06:55:31.280Z] File received: helsebergen.png, size: 7704, type: image/png
+[2025-11-26T06:55:31.284Z] Writing file to: C:\Sluttfase\public\uploads\cmifncyvt00053765504vhw7b-1764140131284.png
+[2025-11-26T06:55:31.291Z] File written successfully
+[2025-11-26T06:55:31.304Z] Database updated
+[2025-11-26T11:12:27.785Z] Starting logo upload request
+[2025-11-26T11:12:27.815Z] Processing project: cmifwldlr0001nyzc6qcq1uo8
+[2025-11-26T11:12:27.823Z] Reading form data...
+[2025-11-26T11:12:27.831Z] File received: helsebergen.png, size: 7704, type: image/png
+[2025-11-26T11:12:27.837Z] Writing file to: C:\Sluttfase\public\uploads\cmifwldlr0001nyzc6qcq1uo8-1764155547837.png
+[2025-11-26T11:12:27.844Z] File written successfully
+[2025-11-26T11:12:27.857Z] Database updated

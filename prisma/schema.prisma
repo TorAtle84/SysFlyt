@@ -1,0 +1,304 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum Role {
+  ADMIN
+  PROJECT_LEADER
+  USER
+  READER
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum DocumentType {
+  DRAWING
+  SCHEMA
+  MASSLIST
+  OTHER
+}
+
+enum AnnotationStatus {
+  OPEN
+  CLOSED
+}
+
+model User {
+  id           String         @id @default(cuid())
+  firstName    String
+  lastName     String
+  email        String         @unique
+  phone        String?
+  company      String?
+  title        String?
+  discipline   String?
+  other        String?
+  image        String?
+  passwordHash String
+  status       UserStatus     @default(PENDING)
+  role         Role           @default(READER)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  accounts     Account[]
+  sessions     Session[]
+  memberships  ProjectMember[]
+  projects     Project[]      @relation("ProjectCreator")
+  comments     Comment[]
+  annotations  Annotation[]
+  notifications Notification[] @relation("NotificationRecipient")
+  systemAnnotations SystemAnnotation[]
+}
+
+model Project {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  logoUrl     String?
+  discipline  String?
+  status      ProjectStatus   @default(ACTIVE)
+  archivedAt  DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  createdById String?
+
+  createdBy User?           @relation("ProjectCreator", fields: [createdById], references: [id])
+  members   ProjectMember[]
+  comments  Comment[]
+  documents Document[]
+  massList  MassList[]
+}
+
+model ProjectMember {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([projectId, userId])
+}
+
+model Comment {
+  id           String     @id @default(cuid())
+  content      String
+  projectId    String?
+  annotationId String?
+  systemAnnotationId String?
+  authorId     String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  project    Project?    @relation(fields: [projectId], references: [id])
+  annotation Annotation? @relation(fields: [annotationId], references: [id])
+  systemAnnotation SystemAnnotation? @relation(fields: [systemAnnotationId], references: [id])
+  author     User        @relation(fields: [authorId], references: [id])
+  notifications Notification[]
+}
+
+model Document {
+  id          String            @id @default(cuid())
+  projectId   String
+  title       String
+  url         String
+  type        DocumentType      @default(OTHER)
+  description String?
+  systemTags  String[]
+  revision    Int               @default(1)
+  isLatest    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  project     Project           @relation(fields: [projectId], references: [id])
+  annotations Annotation[]
+  tags        DocumentSystemTag[]
+  components  DocumentComponent[]
+  systemAnnotations SystemAnnotation[]
+}
+
+model SystemTag {
+  id          String               @id @default(cuid())
+  code        String
+  description String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  documents DocumentSystemTag[]
+
+  @@unique([code])
+}
+
+model DocumentSystemTag {
+  documentId String
+  systemTagId String
+
+  document Document @relation(fields: [documentId], references: [id])
+  systemTag SystemTag @relation(fields: [systemTagId], references: [id])
+
+  @@id([documentId, systemTagId])
+}
+
+model MassList {
+  id          String   @id @default(cuid())
+  projectId   String
+  
+  // TFM Components
+  tfm         String?  // Full TFM code
+  building    String?  // Byggnr (1)
+  system      String?  // System (2)
+  component   String?  // Komponent (3)
+  typeCode    String?  // Typekode (4)
+  
+  // Additional Info
+  productName String?  // Produktnavn (5)
+  location    String?  // Plassering (6)
+  zone        String?  // Sone/Del (7)
+  
+  description String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+model Annotation {
+  id         String           @id @default(cuid())
+  documentId String
+  authorId   String
+  x          Float
+  y          Float
+  status     AnnotationStatus @default(OPEN)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  document Document @relation(fields: [documentId], references: [id])
+  author   User     @relation(fields: [authorId], references: [id])
+  comments Comment[]
+  notifications Notification[]
+}
+
+model Notification {
+  id           String   @id @default(cuid())
+  userId       String
+  type         String
+  read         Boolean  @default(false)
+  metadata     Json?
+  commentId    String?
+  annotationId String?
+  systemAnnotationId String?
+  createdAt    DateTime @default(now())
+
+  user       User       @relation("NotificationRecipient", fields: [userId], references: [id])
+  comment    Comment?   @relation(fields: [commentId], references: [id])
+  annotation Annotation? @relation(fields: [annotationId], references: [id])
+  systemAnnotation SystemAnnotation? @relation(fields: [systemAnnotationId], references: [id])
+}
+
+model DocumentComponent {
+  id         String   @id @default(cuid())
+  documentId String
+  code       String
+  system     String?
+  
+  // Position (percentages 0-100)
+  x          Float?
+  y          Float?
+  page       Int?
+  
+  createdAt  DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id])
+
+  @@unique([documentId, code])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model SystemAnnotation {
+  id          String   @id @default(cuid())
+  documentId  String
+  
+  type        String   @default("SYSTEM") // "SYSTEM" or "COMMENT"
+  
+  // For System Boxing
+  systemCode  String?
+  
+  // For Comments
+  content     String?
+  mentions    String[] // Array of User IDs
+  
+  // Geometry
+  pageNumber  Int
+  color       String
+  
+  // Legacy Box (keep for backward compatibility or migration)
+  x           Float?
+  y           Float?
+  width       Float?
+  height      Float?
+  
+  // Polygon Points (JSON array of {x, y})
+  points      Json?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+  comments    Comment[]
+  
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id])
+}
