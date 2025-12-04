@@ -4,3 +4,10 @@ expertMode = true
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+NEXTAUTH_SECRET = "9ecb772315d69dd8d180678bd52867dcc13855c5bc9be2221a2e0f10067ab499"
+NEXTAUTH_URL = "https://${REPLIT_DEV_DOMAIN}"
+DEFAULT_ADMIN_PASSWORD = "Admin123!"
