@@ -66,6 +66,14 @@ The application implements comprehensive security measures:
   - `POST /api/totp/disable` - Disable 2FA (requires valid TOTP code)
 - **Profile integration**: Users can manage TOTP from their profile settings.
 
+### Secure Password Change
+- **Current password verification**: Users must provide current password to change it
+- **Password complexity requirements**: 8+ chars, uppercase, lowercase, number, special character
+- **Password reuse prevention**: New password cannot match current password
+- **TOTP verification**: Users with 2FA enabled must provide TOTP code to change password
+- **Rate limiting**: 5 attempts per 15 minutes to prevent brute-force attacks
+- **Audit logging**: Password change events are logged for security tracking
+
 ### Authorization (RBAC)
 - **Centralized auth helpers** (`src/lib/auth-helpers.ts`):
   - `requireAuth()` - Verifies user is authenticated and ACTIVE
