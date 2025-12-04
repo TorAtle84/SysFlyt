@@ -48,12 +48,42 @@ The database has been seeded with two admin accounts:
 
 These emails are hardcoded in `src/lib/utils.ts` as `adminEmails` array and automatically get ACTIVE/ADMIN status upon registration.
 
+## Security Architecture
+The application implements comprehensive security measures:
+
+### Authentication Security
+- **Status-based login blocking**: Only ACTIVE users can log in. PENDING and SUSPENDED users are rejected at authentication time with appropriate error messages.
+- **Middleware protection**: All protected routes and APIs verify user status; suspended users are blocked and redirected.
+- **JWT session management**: Secure session handling with NextAuth and encrypted tokens.
+
+### Authorization (RBAC)
+- **Centralized auth helpers** (`src/lib/auth-helpers.ts`):
+  - `requireAuth()` - Verifies user is authenticated and ACTIVE
+  - `requireAdmin()` - Requires ADMIN role
+  - `requireProjectAccess()` - Verifies project membership
+  - `requireProjectLeaderAccess()` - Requires PROJECT_LEADER role in project
+- **Role-based permissions**: ADMIN, PROJECT_LEADER, USER, READER with granular access control
+
+### File Security
+- **Secure file storage**: Files stored in `/uploads/` directory (outside public folder)
+- **Authenticated file access**: Files served via `/api/files/[...path]` with authentication and project membership verification
+- **File validation** (`src/lib/file-utils.ts`):
+  - Extension validation for allowed file types (PDF, Excel, images)
+  - MIME type verification
+  - File size limits (50MB for documents, 10MB for spreadsheets, 5MB for images)
+  - Path traversal prevention
+
+### Input Sanitization
+- **HTML entity escaping** (`src/lib/sanitize.ts`): All user inputs are sanitized before storage
+- **Length validation**: Input fields have maximum length constraints
+- **Type validation**: Strict type checking for all API inputs
+
 ## Project Architecture
 - **Framework**: Next.js 16 with App Router and Turbopack
 - **Database**: PostgreSQL (Replit/Neon) with Prisma ORM
 - **Authentication**: NextAuth v4 with credentials provider
 - **Styling**: Tailwind CSS v4
-- **File Uploads**: Stored in `public/uploads/`
+- **File Uploads**: Stored in `/uploads/` (authenticated access via API)
 - **PDF Processing**: Using pdfjs-dist and react-pdf
 
 ## Directory Structure
