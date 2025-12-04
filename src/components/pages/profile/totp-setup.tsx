@@ -204,15 +204,16 @@ export function TotpSetup({ totpEnabled: initialEnabled }: TotpSetupProps) {
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
               placeholder="000000"
               hint="Skriv inn 6-sifret kode fra appen"
+              autoComplete="one-time-code"
             />
 
             {error && <p className="text-sm text-danger">{error}</p>}
 
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={cancel} className="flex-1">
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button variant="outline" onClick={cancel} className="flex-1 order-2 sm:order-1">
                 Avbryt
               </Button>
-              <Button onClick={verifyCode} loading={loading} className="flex-1">
+              <Button onClick={verifyCode} loading={loading} className="flex-1 order-1 sm:order-2">
                 Verifiser og aktiver
               </Button>
             </div>
@@ -234,19 +235,20 @@ export function TotpSetup({ totpEnabled: initialEnabled }: TotpSetupProps) {
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
               placeholder="000000"
+              autoComplete="one-time-code"
             />
 
             {error && <p className="text-sm text-danger">{error}</p>}
 
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={cancel} className="flex-1">
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button variant="outline" onClick={cancel} className="flex-1 order-2 sm:order-1">
                 Avbryt
               </Button>
               <Button
                 variant="destructive"
                 onClick={disableTotp}
                 loading={loading}
-                className="flex-1"
+                className="flex-1 order-1 sm:order-2"
               >
                 Deaktiver
               </Button>
