@@ -9,8 +9,13 @@ channel = "stable-25_05"
 
 [userenv.shared]
 NEXTAUTH_SECRET = "9ecb772315d69dd8d180678bd52867dcc13855c5bc9be2221a2e0f10067ab499"
-NEXTAUTH_URL = "https://${REPLIT_DEV_DOMAIN}"
 DEFAULT_ADMIN_PASSWORD = "Admin123!"
+
+[userenv.development]
+NEXTAUTH_URL = "https://${REPLIT_DEV_DOMAIN}"
+
+[userenv.production]
+NEXTAUTH_URL = "https://${REPLIT_DOMAINS}"
 
 [workflows]
 runButton = "Project"
@@ -40,11 +45,7 @@ outputType = "webview"
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 45001
-externalPort = 3000
-
 [deployment]
 deploymentTarget = "autoscale"
-run = ["npm", "start"]
 build = ["npm", "run", "build"]
+run = ["npm", "start"]
