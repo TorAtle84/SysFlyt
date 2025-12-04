@@ -39,7 +39,7 @@ export default async function DashboardPage() {
         <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 opacity-90" />
           <div className="absolute right-6 top-5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-white/80">
-            Sluttfase
+            SysLink
           </div>
           <CardContent className="relative px-6 py-6 text-white">
             <div className="space-y-4">

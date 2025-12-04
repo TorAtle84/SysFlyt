@@ -67,7 +67,7 @@ export default function RegisterPage() {
     <div className="flex flex-col gap-6">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">Opprett konto</p>
-        <h2 className="text-2xl font-semibold text-foreground">Velkommen til SLUTTFASE</h2>
+        <h2 className="text-2xl font-semibold text-foreground">Velkommen til SysLink</h2>
       </div>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Input label="Fornavn" value={form.firstName} onChange={(e) => update("firstName", e.target.value)} required />

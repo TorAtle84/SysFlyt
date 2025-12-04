@@ -1,7 +1,7 @@
-# Sluttfase - Project Documentation
+# SysLink - Project Documentation
 
 ## Overview
-This is a Next.js-based project management platform for construction projects (Norwegian: "Sluttfase"). The application provides:
+This is a Next.js-based project management platform for construction projects. The application provides:
 - Role-based access control (RBAC) with roles: ADMIN, PROJECT_LEADER, USER, READER
 - Project management with document handling
 - PDF annotation and commenting system

@@ -33,7 +33,7 @@ export async function POST() {
     data: { totpSecret: secret },
   });
 
-  const otpauth = authenticator.keyuri(user.email, "Sluttfase", secret);
+  const otpauth = authenticator.keyuri(user.email, "SysLink", secret);
   const qrCodeDataUrl = await QRCode.toDataURL(otpauth);
 
   return NextResponse.json({

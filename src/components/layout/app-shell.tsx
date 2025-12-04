@@ -109,7 +109,7 @@ export function AppShell({ children, sidebar }: AppShellProps) {
       >
         <div className="flex h-16 items-center border-b border-border px-6">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <span className="text-xl font-bold text-foreground">Sluttfase</span>
+            <span className="text-xl font-bold text-foreground">SysLink</span>
           </Link>
         </div>
 

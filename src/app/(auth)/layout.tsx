@@ -8,13 +8,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="grid gap-10 md:grid-cols-[1.2fr,1fr]">
           <div className="flex flex-col justify-between gap-8">
             <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-muted-foreground">Sluttfase</p>
+              <p className="text-xs uppercase tracking-[0.35em] text-muted-foreground">SysLink</p>
               <h1 className="mt-4 flex flex-wrap items-center gap-3 text-4xl font-semibold leading-tight text-foreground md:text-5xl">
                 Byggebransjen møter FlytLink
                 <img src="/logo2.png" alt="FlytLink Logo" className="h-[1.8em] rounded-lg shadow-sm" />
               </h1>
               <p className="mt-4 max-w-xl text-lg text-muted-foreground">
-                Logg inn eller registrer deg for å få tilgang til prosjektrom, dokumenthåndtering og verktøy som er skreddersydd for dine sluttfase-prosjekter.
+                Logg inn eller registrer deg for å få tilgang til prosjektrom, dokumenthåndtering og verktøy som er skreddersydd for dine byggeprosjekter.
               </p>
             </div>
             <div className="hidden items-center gap-3 rounded-2xl border border-border bg-muted/30 p-4 md:flex">
