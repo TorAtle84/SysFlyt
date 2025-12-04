@@ -134,17 +134,17 @@ export function AppShell({ children, sidebar }: AppShellProps) {
         </div>
       </aside>
 
-      {/* Main content */}
-      <div className="flex flex-1 flex-col lg:pl-64">
+      {/* Main content area */}
+      <div className="flex flex-1 lg:pl-64">
         {/* Custom sidebar (for project pages) */}
         {sidebar && (
-          <aside className="hidden w-72 shrink-0 border-r border-border bg-card/50 lg:block">
+          <aside className="fixed inset-y-0 left-64 hidden w-72 shrink-0 border-r border-border bg-card/50 lg:block overflow-y-auto">
             {sidebar}
           </aside>
         )}
 
         {/* Page content */}
-        <main className={cn("flex-1 p-6", sidebar ? "lg:ml-72" : "")}>
+        <main className={cn("flex-1 p-6", sidebar ? "lg:pl-72" : "")}>
           <div className="mx-auto max-w-6xl">{children}</div>
         </main>
       </div>
