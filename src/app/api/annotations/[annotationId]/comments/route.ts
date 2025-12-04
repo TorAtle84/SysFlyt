@@ -1,23 +1,21 @@
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-
-async function getUser() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email) return null;
-  return prisma.user.findUnique({ where: { email: session.user.email } });
-}
+import { requireAuth, canAnnotateDocuments } from "@/lib/auth-helpers";
 
 type Context = { params: Promise<{ annotationId: string }> };
 
 export async function POST(req: NextRequest, context: Context) {
-  const user = await getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = await requireAuth();
+  if (!authResult.success) {
+    return authResult.error;
+  }
 
   const body = await req.json();
   const { content, mentions = [] } = body || {};
-  if (!content) return NextResponse.json({ error: "Innhold mangler" }, { status: 400 });
+  
+  if (!content || typeof content !== "string" || content.trim().length === 0) {
+    return NextResponse.json({ error: "Innhold mangler" }, { status: 400 });
+  }
 
   const { annotationId } = await context.params;
 
@@ -25,28 +23,52 @@ export async function POST(req: NextRequest, context: Context) {
     where: { id: annotationId },
     include: { document: true },
   });
-  if (!annotation) return NextResponse.json({ error: "Annotering ikke funnet" }, { status: 404 });
+
+  if (!annotation) {
+    return NextResponse.json({ error: "Annotering ikke funnet" }, { status: 404 });
+  }
+
+  const membership = await prisma.projectMember.findFirst({
+    where: { 
+      projectId: annotation.document.projectId, 
+      userId: authResult.user.id 
+    },
+  });
+
+  if (!membership && authResult.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Ingen tilgang til dette prosjektet" }, { status: 403 });
+  }
+
+  if (!canAnnotateDocuments(authResult.user.role, membership?.role)) {
+    return NextResponse.json({ error: "Ingen tilgang til å kommentere" }, { status: 403 });
+  }
 
   const comment = await prisma.comment.create({
     data: {
-      content,
+      content: content.trim(),
       annotationId: annotation.id,
-      authorId: user.id,
+      authorId: authResult.user.id,
       projectId: annotation.document.projectId,
     },
     include: { author: true },
   });
 
-  if (Array.isArray(mentions) && mentions.length) {
-    await prisma.notification.createMany({
-      data: mentions.map((userId: string) => ({
-        userId,
-        type: "mention",
-        commentId: comment.id,
-        annotationId: annotation.id,
-        metadata: { from: user.id, annotationId: annotation.id },
-      })),
-    });
+  if (Array.isArray(mentions) && mentions.length > 0) {
+    const validMentions = mentions.filter(
+      (userId: unknown) => typeof userId === "string" && userId.length > 0
+    );
+
+    if (validMentions.length > 0) {
+      await prisma.notification.createMany({
+        data: validMentions.map((userId: string) => ({
+          userId,
+          type: "mention",
+          commentId: comment.id,
+          annotationId: annotation.id,
+          metadata: { from: authResult.user.id, annotationId: annotation.id },
+        })),
+      });
+    }
   }
 
   return NextResponse.json(comment);

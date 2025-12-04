@@ -1,29 +1,41 @@
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
+import { requireAuth, canAnnotateDocuments } from "@/lib/auth-helpers";
 
 export async function DELETE(
     req: NextRequest,
     { params }: { params: Promise<{ annotationId: string }> }
 ) {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authResult = await requireAuth();
+    if (!authResult.success) {
+        return authResult.error;
+    }
 
     const { annotationId } = await params;
 
-    // Check ownership/access via document->project
     const annotation = await prisma.systemAnnotation.findUnique({
         where: { id: annotationId },
         include: { document: true },
     });
 
-    if (!annotation) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!annotation) {
+        return NextResponse.json({ error: "Annotering ikke funnet" }, { status: 404 });
+    }
 
     const membership = await prisma.projectMember.findFirst({
-        where: { projectId: annotation.document.projectId, user: { email: session.user.email } },
+        where: { 
+            projectId: annotation.document.projectId, 
+            userId: authResult.user.id 
+        },
     });
-    if (!membership) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    if (!membership && authResult.user.role !== "ADMIN") {
+        return NextResponse.json({ error: "Ingen tilgang" }, { status: 403 });
+    }
+
+    if (!canAnnotateDocuments(authResult.user.role, membership?.role)) {
+        return NextResponse.json({ error: "Ingen tilgang til å slette annoteringer" }, { status: 403 });
+    }
 
     await prisma.systemAnnotation.delete({
         where: { id: annotationId },

@@ -1,23 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
-import { Role, UserStatus } from "@prisma/client";
+import { Role } from "@prisma/client";
+import { requireAuth } from "@/lib/auth-helpers";
+import { validateAndSanitizeProjectInput } from "@/lib/sanitize";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authResult = await requireAuth();
+    if (!authResult.success) {
+      return authResult.error;
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user || user.status !== UserStatus.ACTIVE) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const user = authResult.user;
 
     const projects = await prisma.project.findMany({
       where: {
@@ -45,36 +39,28 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authResult = await requireAuth();
+    if (!authResult.success) {
+      return authResult.error;
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
+    const user = authResult.user;
 
-    if (!user || user.status !== UserStatus.ACTIVE) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (user.role !== "ADMIN" && user.role !== "PROJECT_LEADER") {
+      return NextResponse.json({ error: "Kun admins og prosjektledere kan opprette prosjekter" }, { status: 403 });
     }
 
-    if (user.role !== Role.ADMIN && user.role !== Role.PROJECT_LEADER) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const body = await request.json();
+    const validation = validateAndSanitizeProjectInput(body);
 
-    const { name, description } = await request.json();
-
-    if (!name) {
-      return NextResponse.json(
-        { error: "Project name is required" },
-        { status: 400 }
-      );
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
     const project = await prisma.project.create({
       data: {
-        name,
-        description,
+        name: validation.name,
+        description: validation.description,
         createdById: user.id,
         members: {
           create: {

@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
+import { requireAuth } from "@/lib/auth-helpers";
+import { validateAndSanitizeProfileInput } from "@/lib/sanitize";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authResult = await requireAuth();
+    if (!authResult.success) {
+      return authResult.error;
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { id: authResult.user.id },
       select: {
         id: true,
         firstName: true,
@@ -27,14 +27,14 @@ export async function GET() {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: "Bruker ikke funnet" }, { status: 404 });
     }
 
     return NextResponse.json(user);
   } catch (error) {
     console.error("Error fetching profile:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Intern serverfeil" },
       { status: 500 }
     );
   }
@@ -42,23 +42,27 @@ export async function GET() {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authResult = await requireAuth();
+    if (!authResult.success) {
+      return authResult.error;
     }
 
-    const { firstName, lastName, phone, company, title, discipline } =
-      await request.json();
+    const body = await request.json();
+    const validation = validateAndSanitizeProfileInput(body);
+
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
+    }
 
     const user = await prisma.user.update({
-      where: { email: session.user.email },
+      where: { id: authResult.user.id },
       data: {
-        firstName,
-        lastName,
-        phone,
-        company,
-        title,
-        discipline,
+        ...(validation.firstName !== undefined && { firstName: validation.firstName }),
+        ...(validation.lastName !== undefined && { lastName: validation.lastName }),
+        ...(validation.phone !== undefined && { phone: validation.phone }),
+        ...(validation.company !== undefined && { company: validation.company }),
+        ...(validation.title !== undefined && { title: validation.title }),
+        ...(validation.discipline !== undefined && { discipline: validation.discipline }),
       },
       select: {
         id: true,
@@ -78,7 +82,7 @@ export async function PATCH(request: NextRequest) {
   } catch (error) {
     console.error("Error updating profile:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Intern serverfeil" },
       { status: 500 }
     );
   }

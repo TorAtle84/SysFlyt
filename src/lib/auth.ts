@@ -21,7 +21,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null;
+          throw new Error("E-post og passord er påkrevd");
         }
 
         const user = await prisma.user.findUnique({
@@ -29,7 +29,7 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user) {
-          return null;
+          throw new Error("Ugyldig e-post eller passord");
         }
 
         const passwordMatch = await bcrypt.compare(
@@ -38,7 +38,19 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!passwordMatch) {
-          return null;
+          throw new Error("Ugyldig e-post eller passord");
+        }
+
+        if (user.status === "SUSPENDED") {
+          throw new Error("Kontoen din er suspendert. Kontakt administrator.");
+        }
+
+        if (user.status === "PENDING") {
+          throw new Error("Kontoen din venter på godkjenning fra administrator.");
+        }
+
+        if (user.status !== "ACTIVE") {
+          throw new Error("Kontoen din er ikke aktiv.");
         }
 
         return {

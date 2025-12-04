@@ -28,8 +28,25 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
+  if (token.status === "SUSPENDED") {
+    if (path.startsWith("/api")) {
+      return NextResponse.json({ error: "Kontoen er suspendert" }, { status: 403 });
+    }
+    return NextResponse.redirect(new URL("/login?error=suspended", req.url));
+  }
+
   if (token.status === "PENDING" && path !== "/pending") {
+    if (path.startsWith("/api")) {
+      return NextResponse.json({ error: "Kontoen venter på godkjenning" }, { status: 403 });
+    }
     return NextResponse.redirect(new URL("/pending", req.url));
+  }
+
+  if (token.status !== "ACTIVE" && path !== "/pending") {
+    if (path.startsWith("/api")) {
+      return NextResponse.json({ error: "Kontoen er ikke aktiv" }, { status: 403 });
+    }
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
   if (path.startsWith("/admin") && token.role !== "ADMIN") {
