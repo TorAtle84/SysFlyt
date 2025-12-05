@@ -25,7 +25,7 @@ export default async function SchemasPage({ params }: SchemasPageProps) {
         include: {
           systemAnnotations: {
             include: {
-              author: {
+              createdBy: {
                 select: { firstName: true, lastName: true },
               },
             },

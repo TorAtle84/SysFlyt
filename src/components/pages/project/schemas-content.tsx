@@ -10,7 +10,6 @@ import {
   Search,
   Eye,
   Tag,
-  AlertCircle,
   CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,8 +19,8 @@ import { Badge } from "@/components/ui/badge";
 
 interface SystemAnnotation {
   id: string;
-  status: string;
-  author: { firstName: string; lastName: string };
+  systemCode?: string | null;
+  createdBy?: { firstName: string; lastName: string } | null;
 }
 
 interface Document {
@@ -140,11 +139,8 @@ export function SchemasContent({
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredDocuments.map((doc) => {
-            const openIssues = doc.systemAnnotations.filter(
-              (a) => a.status === "OPEN"
-            ).length;
-            const closedIssues = doc.systemAnnotations.filter(
-              (a) => a.status === "CLOSED"
+            const totalBoxed = doc.systemAnnotations.filter(
+              (a) => a.systemCode
             ).length;
 
             return (
@@ -185,19 +181,12 @@ export function SchemasContent({
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {openIssues > 0 && (
-                      <Badge variant="destructive" className="gap-1">
-                        <AlertCircle size={12} />
-                        {openIssues} åpne
-                      </Badge>
-                    )}
-                    {closedIssues > 0 && (
+                    {totalBoxed > 0 ? (
                       <Badge variant="secondary" className="gap-1">
                         <CheckCircle2 size={12} />
-                        {closedIssues} bokset
+                        {totalBoxed} bokset
                       </Badge>
-                    )}
-                    {openIssues === 0 && closedIssues === 0 && (
+                    ) : (
                       <span className="text-xs text-muted-foreground">
                         Ingen boksing
                       </span>

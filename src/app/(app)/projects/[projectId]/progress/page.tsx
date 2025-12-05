@@ -49,15 +49,17 @@ export default async function ProgressPage({ params }: ProgressPageProps) {
   }
 
   const totalAnnotations = project.documents.reduce(
-    (acc, doc) => acc + doc.annotations.length + doc.systemAnnotations.length,
+    (acc, doc) => acc + doc.annotations.length,
     0
   );
 
   const closedAnnotations = project.documents.reduce(
-    (acc, doc) =>
-      acc +
-      doc.annotations.filter((a) => a.status === "CLOSED").length +
-      doc.systemAnnotations.filter((a) => a.status === "CLOSED").length,
+    (acc, doc) => acc + doc.annotations.filter((a) => a.status === "CLOSED").length,
+    0
+  );
+
+  const totalSystemBoxed = project.documents.reduce(
+    (acc, doc) => acc + doc.systemAnnotations.length,
     0
   );
 
@@ -67,6 +69,7 @@ export default async function ProgressPage({ params }: ProgressPageProps) {
     totalAnnotations,
     closedAnnotations,
     openAnnotations: totalAnnotations - closedAnnotations,
+    totalSystemBoxed,
     completionRate:
       totalAnnotations > 0
         ? Math.round((closedAnnotations / totalAnnotations) * 100)

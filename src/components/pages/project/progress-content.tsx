@@ -16,6 +16,7 @@ interface ProgressStats {
   totalAnnotations: number;
   closedAnnotations: number;
   openAnnotations: number;
+  totalSystemBoxed: number;
   completionRate: number;
 }
 
