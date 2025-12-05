@@ -3,43 +3,59 @@
 ## Overview
 This is a Next.js-based project management platform for construction projects. The application provides:
 - Role-based access control (RBAC) with roles: ADMIN, PROJECT_LEADER, USER, READER
-- Project management with document handling
-- PDF annotation and commenting system
+- Project management with document handling and archiving
+- PDF annotation and commenting system with interactive pins
 - Mass list management with TFM (Technical Facility Management) codes
 - User approval workflow (PENDING users need admin approval)
+- Light/dark theme support
+- Real-time notifications for @mentions
 
-## Recent Changes (Dec 4, 2024)
-- **Complete Component Library Rebuild**: After incomplete GitHub import, rebuilt the entire component library
-- **UI Components Created**:
-  - `src/components/ui/` - card, badge, button, input, separator, dialog, select, checkbox, label, popover, textarea
-- **Layout Components**:
-  - `src/components/layout/app-shell.tsx` - Main app layout with responsive sidebar navigation
-- **Dashboard Components**:
-  - `src/components/dashboard/project-explorer.tsx` - Project browsing and navigation
-  - `src/components/dashboard/backup-trigger.tsx` - Database backup interface
-  - `src/components/dashboard/control-center.tsx` - Dashboard control panel
-- **Project Management Components**:
-  - `src/components/projects/project-sidebar.tsx` - Project document navigation
-  - `src/components/projects/project-header.tsx` - Project header with actions
-  - `src/components/projects/project-content-switcher.tsx` - Content tab switcher
-- **Mass List Components**:
-  - `src/components/mass-list/mass-list-upload.tsx` - Excel import interface
-  - `src/components/mass-list/mass-list-table.tsx` - TFM data display table
-- **PDF Viewer Components**:
-  - `src/components/pdf-viewer/pdf-viewer-wrapper.tsx` - PDF viewing with annotations
-  - `src/components/pdf-viewer/save-and-close-button.tsx` - Save annotation actions
-- **Admin & Profile Components**:
-  - `src/components/admin/approval-panel.tsx` - User approval interface
-  - `src/components/profile/profile-form.tsx` - User profile editing
-- **API Routes Created**:
-  - `src/app/api/projects/route.ts` - Project CRUD operations
-  - `src/app/api/mass-list/route.ts` - Mass list operations
-  - `src/app/api/profile/route.ts` - User profile management
-- **Infrastructure Setup**:
-  - NextAuth configuration with credentials provider
-  - Prisma client singleton
-  - Tailwind CSS v4 configuration
-  - Database connected and seeded
+## Recent Changes (Dec 5, 2024)
+- **Project Archive/Restore System**:
+  - Archive projects (moves to archive view)
+  - Restore archived projects
+  - Delete projects permanently (admin only, from archive)
+  - Active/Archived tabs in dashboard
+
+- **Member Invitation System**:
+  - Search for active users by name, email, or company
+  - Add members with role selection (Project Leader, User, Reader)
+  - Remove members from projects
+  - Authorization: Only admins and project leaders can invite
+
+- **Project Dashboard Widgets**:
+  - Progress cards (Completed, Issues, Documents, Mass List)
+  - Donut chart visualization for progress
+  - Activity feed showing recent comments
+  - Recent documents list
+
+- **Light/Dark Mode Toggle**:
+  - Theme provider using next-themes
+  - Toggle button in sidebar header
+  - Persists user preference
+
+- **Global Search**:
+  - Search field in project explorer
+  - Filters by project name and description
+
+- **PDF Annotation System**:
+  - Click to create new annotation pins
+  - Open/Closed status with visual indicators
+  - Orange pulsing pins for open issues
+  - Green static pins for closed issues
+  - Toggle status functionality
+  - Comments on annotations
+
+- **Notifications System**:
+  - Bell icon with unread count badge
+  - Dropdown with notification list
+  - Mark as read / Mark all as read
+  - Links to relevant documents
+
+- **Mass List Enhancements**:
+  - Excel export functionality
+  - System filter dropdown
+  - Improved search across all fields
 
 ## Admin Accounts
 The database has been seeded with two admin accounts:
@@ -101,13 +117,23 @@ The application implements comprehensive security measures:
 - **Length validation**: Input fields have maximum length constraints
 - **Type validation**: Strict type checking for all API inputs
 
+## New API Routes (Dec 5, 2024)
+- `POST /api/projects/[projectId]/archive` - Archive a project
+- `POST /api/projects/[projectId]/restore` - Restore archived project
+- `GET/POST/DELETE /api/projects/[projectId]/members` - Member management
+- `GET /api/users/search` - Search for users (authorized)
+- `POST/PATCH /api/documents/[documentId]/annotations` - Annotation CRUD
+- `GET/PATCH /api/notifications` - Notification management
+
 ## Project Architecture
 - **Framework**: Next.js 16 with App Router and Turbopack
 - **Database**: PostgreSQL (Replit/Neon) with Prisma ORM
 - **Authentication**: NextAuth v4 with credentials provider
 - **Styling**: Tailwind CSS v4
+- **Theming**: next-themes for light/dark mode
 - **File Uploads**: Stored in `/uploads/` (authenticated access via API)
 - **PDF Processing**: Using pdfjs-dist and react-pdf
+- **Excel Processing**: Using xlsx library
 
 ## Directory Structure
 ```
@@ -115,19 +141,30 @@ src/
 ├── app/                    # Next.js App Router
 │   ├── (auth)/            # Auth pages (login, register, reset, pending)
 │   ├── (app)/             # Protected app pages (dashboard, projects, profile, admin)
-│   └── api/               # API routes (auth, admin, annotations, projects, mass-list)
+│   └── api/               # API routes
+│       ├── auth/          # Authentication
+│       ├── admin/         # Admin operations
+│       ├── projects/      # Project CRUD + archive/restore + members
+│       ├── documents/     # Document annotations
+│       ├── notifications/ # Notification system
+│       ├── totp/          # Two-factor auth
+│       └── users/         # User search
 ├── components/            # React components
-│   ├── ui/                # UI primitives (button, card, badge, input, etc.)
-│   ├── layout/            # Layout components (app-shell)
-│   ├── dashboard/         # Dashboard components (project-explorer, backup-trigger)
-│   ├── projects/          # Project page components (sidebar, header, content-switcher)
-│   ├── mass-list/         # Mass list components (upload, table)
-│   ├── pdf-viewer/        # PDF viewer components (wrapper, save-button)
-│   ├── admin/             # Admin components (approval-panel)
-│   └── profile/           # Profile components (profile-form)
+│   ├── ui/                # UI primitives (button, card, badge, input, theme-toggle, etc.)
+│   ├── layout/            # Layout components (app-shell, notification-dropdown)
+│   ├── providers/         # Context providers (session, theme)
+│   ├── pages/             # Page-specific components
+│   │   ├── dashboard/     # Project explorer, backup trigger
+│   │   ├── project/       # Project header, sidebar, content, member-invite
+│   │   ├── admin/         # Approval panel
+│   │   └── profile/       # Profile form, password change, TOTP setup
+│   ├── pdf-viewer/        # PDF viewer with annotation support
+│   └── totp/              # TOTP warning banner
 ├── lib/                   # Utility libraries
 │   ├── auth.ts           # NextAuth configuration
+│   ├── auth-helpers.ts   # Authorization helpers
 │   ├── db.ts             # Prisma client
+│   ├── sanitize.ts       # Input sanitization
 │   └── utils.ts          # Helper functions
 └── types/                 # TypeScript type definitions
     └── next-auth.d.ts    # NextAuth type extensions
@@ -146,13 +183,15 @@ prisma/
 
 ## Database Schema
 Key models:
-- **User**: With status (PENDING/ACTIVE/SUSPENDED) and role (ADMIN/PROJECT_LEADER/USER/READER)
-- **Project**: With members, documents, and mass lists
+- **User**: With status (PENDING/ACTIVE/SUSPENDED), role (ADMIN/PROJECT_LEADER/USER/READER), TOTP fields
+- **Project**: With status (ACTIVE/ARCHIVED), members, documents, and mass lists
+- **ProjectMember**: Links users to projects with roles
 - **Document**: With annotations, system tags, and components
-- **Annotation**: For PDF markup with comments
+- **Annotation**: For PDF markup with x/y position, status (OPEN/CLOSED), and comments
 - **SystemAnnotation**: For system-level annotations with polygon support
+- **Comment**: On projects, annotations, or system annotations
 - **MassList**: TFM component tracking (building, system, component, typeCode, productName, location, zone)
-- **Notification**: User notification system
+- **Notification**: User notifications with read status and metadata
 
 ## Mobile UX Features
 The application is optimized for mobile use:
@@ -165,6 +204,7 @@ The application is optimized for mobile use:
 ## User Preferences
 - Language: Norwegian (Bokmål)
 - Admin emails are configured in `src/lib/utils.ts`
+- Theme preference persisted via next-themes
 
 ## Deployment Notes
 - Production will use same port 5000 configuration

@@ -17,6 +17,8 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { TotpWarningBanner } from "@/components/totp/totp-warning-banner";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { NotificationDropdown } from "@/components/layout/notification-dropdown";
 
 interface TotpWarning {
   daysRemaining: number;
@@ -107,10 +109,14 @@ export function AppShell({ children, sidebar }: AppShellProps) {
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex h-16 items-center border-b border-border px-6">
+        <div className="flex h-16 items-center justify-between border-b border-border px-6">
           <Link href="/dashboard" className="flex items-center gap-2">
             <span className="text-xl font-bold text-foreground">SysLink</span>
           </Link>
+          <div className="flex items-center gap-2">
+            <NotificationDropdown />
+            <ThemeToggle />
+          </div>
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto p-4">

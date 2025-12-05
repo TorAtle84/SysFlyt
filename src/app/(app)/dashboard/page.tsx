@@ -31,6 +31,7 @@ export default async function DashboardPage() {
   const mine = projects.filter((p) => p.createdById === user.id || p.members.some((m) => m.userId === user.id));
 
   const canCreate = user.role === Role.ADMIN || user.role === Role.PROJECT_LEADER;
+  const canDelete = user.role === Role.ADMIN;
 
   return (
     <AppShell>
@@ -61,7 +62,7 @@ export default async function DashboardPage() {
         </Card>
 
         {/* Projects */}
-        <ProjectExplorer mine={mine} invited={invited} canCreate={canCreate} userDiscipline={(user as any).discipline} />
+        <ProjectExplorer mine={mine} invited={invited} canCreate={canCreate} canDelete={canDelete} userDiscipline={(user as any).discipline} />
 
         {/* Security */}
         <Card>

@@ -22,7 +22,12 @@ export default async function ProjectPage({ params }: { params: Promise<{ projec
     where: { id: projectId },
     include: {
       members: { include: { user: true } },
-      documents: { include: { tags: { include: { systemTag: true } } } },
+      documents: { 
+        include: { 
+          tags: { include: { systemTag: true } },
+          annotations: { select: { id: true, status: true } },
+        } 
+      },
       massList: true,
       comments: { include: { author: true }, orderBy: { createdAt: "desc" }, take: 10 },
     },
@@ -38,7 +43,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ projec
   return (
     <AppShell sidebar={<ProjectSidebar project={project} />}>
       <div className="space-y-6">
-        <ProjectHeader project={project} canEdit={canEdit} />
+        <ProjectHeader project={project} canEdit={canEdit} currentUserId={user.id} />
         <ProjectContentSwitcher project={project} canEdit={canEdit} />
       </div>
     </AppShell>
