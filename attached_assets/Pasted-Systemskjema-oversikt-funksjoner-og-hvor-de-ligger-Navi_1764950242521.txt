@@ -1,0 +1,32 @@
+Systemskjema-oversikt (funksjoner og hvor de ligger)
+
+  - Navigasjon: Project-sidebar har egen seksjon “Systemskjema”; content-switcher viser DocumentWorkspace med
+    DocumentType.SCHEMA og støtter deep-link til dokumenter og komponentfokus (src/components/pages/project/project-
+    content-switcher.tsx, project-sidebar.tsx).
+  - Opplasting/revisjoner: Form for tittel/fil/type (låst til Systemskjema i denne seksjonen), håndterer revisjoner via
+    samme tittel; lagrer fil til /public/uploads/{projectId}/Systemskjema/ og ekstrakterer PDF-tekst (src/components/
+    pages/project/document-workspace.tsx, src/app/api/projects/[projectId]/documents/route.ts).
+  - Systemtagging: Manuell input + automatisk søk i filnavn/PDF-tekst (inkl. mønster basert på brukerens eksempel,
+    f.eks. 3200.001); lagrer tags via PATCH; viser primær tag i tabellen (document-workspace.tsx, .../documents/
+    [documentId]/route.ts).
+  - Dokumentliste/filtrering: Siste revisjoner tabell med søk på tittel/system, viser type=Systemskjema, rev, oppdatert
+    dato; åpner behandling per rad (document-workspace.tsx).
+  - Verifisering mot masseliste: Knapp “Verifiser mot masseliste” kaller /verify; backend kjører
+    scanDocumentForComponents + verifyAgainstMassList og returnerer unike treff/avvik (document-workspace.tsx, .../
+    documents/[documentId]/verify/route.ts, src/lib/scan.ts).
+  - Komponentuttrekk (tekst/geo): Modal “Komponenter” henter komponenter fra /components (tekstuttrekk med koordinater
+    fra PDF, TFM-regex, optional geometry/polygon-kontekst fra system-annotasjoner); filtrering på system/komponent og
+    pattern-gating; kan lagres tilbake (document-workspace.tsx, .../documents/[documentId]/components/route.ts, src/lib/
+    pdf-text-extractor.ts, src/lib/geometry-utils.ts).
+  - Masseliste-synk: I komponentmodal kan systemfelt oppdateres basert på match mot masseliste (Komponent/System-
+    kolonner); oppdaterer lokale komponenter (document-workspace.tsx).
+  - Avvik: “Godkjenn avvik” øker teller; teller vises på dokumentrad; verifisering-resultat settes som badge (document-
+    workspace.tsx).
+  - MC-eksport: “Send til protokoll (MC)” normaliserer system/komponent, matcher mot masseliste for lokasjon, sender
+    til /api/projects/{id}/mc (ikke vist her) og refresher MC-board (document-workspace.tsx).
+  - Dokumentvisning/annotering: Egen side for systemskjema-dokument viser PDF med annotasjonsverktøy, polygoner per
+    system, komponentmarkører, kommentarer og @mentions; deep-link via query (annotationId/component/x/y/page); lagrer
+    annotasjoner til API (src/app/(app)/projects/[projectId]/documents/[documentId]/page.tsx, src/components/pdf-viewer/
+    *, src/app/api/projects/[projectId]/documents/[documentId]/annotations/route.ts).
+  - Varsler/mentions: Kommentarer med @member sender notifications som vises i topbar; linker kan åpne dokumentet/MC med
+    relevant fokus (pdf-viewer.tsx, src/app/api/notifications/*, src/components/layout/topbar.tsx).
