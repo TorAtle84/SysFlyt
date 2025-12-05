@@ -15,6 +15,17 @@ export async function GET(
       return authResult.error;
     }
 
+    const document = await prisma.document.findUnique({
+      where: { id: documentId, projectId },
+    });
+
+    if (!document) {
+      return NextResponse.json(
+        { error: "Dokument ikke funnet" },
+        { status: 404 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const rescan = searchParams.get("rescan") === "true";
 
@@ -87,6 +98,17 @@ export async function POST(
       return authResult.error;
     }
 
+    const document = await prisma.document.findUnique({
+      where: { id: documentId, projectId },
+    });
+
+    if (!document) {
+      return NextResponse.json(
+        { error: "Dokument ikke funnet" },
+        { status: 404 }
+      );
+    }
+
     const scanResult = await scanDocumentForComponents(documentId);
     const savedCount = await saveComponentsToDocument(documentId, scanResult.components);
 
@@ -117,6 +139,17 @@ export async function PATCH(
       return authResult.error;
     }
 
+    const document = await prisma.document.findUnique({
+      where: { id: documentId, projectId },
+    });
+
+    if (!document) {
+      return NextResponse.json(
+        { error: "Dokument ikke funnet" },
+        { status: 404 }
+      );
+    }
+
     const body = await request.json();
     const { componentId, system } = body;
 
@@ -124,6 +157,17 @@ export async function PATCH(
       return NextResponse.json(
         { error: "componentId er påkrevd" },
         { status: 400 }
+      );
+    }
+
+    const existingComponent = await prisma.documentComponent.findFirst({
+      where: { id: componentId, documentId },
+    });
+
+    if (!existingComponent) {
+      return NextResponse.json(
+        { error: "Komponent ikke funnet" },
+        { status: 404 }
       );
     }
 

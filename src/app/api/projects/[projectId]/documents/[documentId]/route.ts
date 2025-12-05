@@ -81,6 +81,17 @@ export async function PATCH(
       return authResult.error;
     }
 
+    const existingDoc = await prisma.document.findUnique({
+      where: { id: documentId, projectId },
+    });
+
+    if (!existingDoc) {
+      return NextResponse.json(
+        { error: "Dokument ikke funnet" },
+        { status: 404 }
+      );
+    }
+
     const body = await request.json();
     const { title, systemTags, approvedDeviations, type } = body;
 
@@ -130,6 +141,17 @@ export async function DELETE(
     const authResult = await requireProjectLeaderAccess(projectId);
     if (!authResult.success) {
       return authResult.error;
+    }
+
+    const existingDoc = await prisma.document.findUnique({
+      where: { id: documentId, projectId },
+    });
+
+    if (!existingDoc) {
+      return NextResponse.json(
+        { error: "Dokument ikke funnet" },
+        { status: 404 }
+      );
     }
 
     await prisma.document.delete({

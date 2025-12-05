@@ -135,6 +135,7 @@ The application implements comprehensive security measures:
   - `requireProjectAccess()` - Verifies project membership
   - `requireProjectLeaderAccess()` - Requires PROJECT_LEADER role in project
 - **Role-based permissions**: ADMIN, PROJECT_LEADER, USER, READER with granular access control
+- **Project-scoped document access**: All document API routes verify that documents belong to the specified project before performing any operations, preventing cross-project document access
 
 ### File Security
 - **Secure file storage**: Files stored in `/uploads/` directory (outside public folder)
