@@ -57,6 +57,12 @@ This is a Next.js-based project management platform for construction projects. T
   - System filter dropdown
   - Improved search across all fields
 
+- **Project Module Pages** (All functional):
+  - **Arbeidstegninger**: Upload and manage work drawings with annotation tracking
+  - **Systemskjema**: Technical schemas with system coding and boxing status
+  - **Protokoller MC**: Generate mechanical completion protocols from mass list
+  - **Fremdrift**: Project progress dashboard with completion statistics
+
 ## Admin Accounts
 The database has been seeded with two admin accounts:
 - Email: tm5479@gk.no / Password: Admin123!

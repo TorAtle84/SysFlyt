@@ -44,13 +44,11 @@ export function ProjectSidebar({ project, projectId }: ProjectSidebarProps) {
       href: `/projects/${id}/drawings`,
       label: "Arbeidstegninger",
       icon: PenTool,
-      disabled: true,
     },
     {
       href: `/projects/${id}/schemas`,
       label: "Systemskjema",
       icon: Network,
-      disabled: true,
     },
     {
       href: `/projects/${id}/mass-list`,
@@ -61,13 +59,11 @@ export function ProjectSidebar({ project, projectId }: ProjectSidebarProps) {
       href: `/projects/${id}/protocols`,
       label: "Protokoller MC",
       icon: ClipboardCheck,
-      disabled: true,
     },
     {
       href: `/projects/${id}/progress`,
       label: "Fremdrift",
       icon: TrendingUp,
-      disabled: true,
     },
   ];
 
@@ -100,23 +96,16 @@ export function ProjectSidebar({ project, projectId }: ProjectSidebarProps) {
           return (
             <Link
               key={item.href}
-              href={item.disabled ? "#" : item.href}
+              href={item.href}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                item.disabled && "cursor-not-allowed opacity-50",
                 isActive
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
-              onClick={(e) => item.disabled && e.preventDefault()}
             >
               <item.icon size={18} />
               {item.label}
-              {item.disabled && (
-                <span className="ml-auto rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                  Kommer
-                </span>
-              )}
             </Link>
           );
         })}
