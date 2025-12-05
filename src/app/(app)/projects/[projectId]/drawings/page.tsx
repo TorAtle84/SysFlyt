@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { DrawingsContent } from "@/components/pages/project/drawings-content";
+import { Role } from "@prisma/client";
 
 interface DrawingsPageProps {
   params: Promise<{ projectId: string }>;
@@ -42,7 +43,7 @@ export default async function DrawingsPage({ params }: DrawingsPageProps) {
     redirect("/dashboard");
   }
 
-  const isAdmin = session.user.role === "ADMIN";
+  const isAdmin = session.user.role === Role.ADMIN;
   const isMember = project.members.length > 0;
 
   if (!isAdmin && !isMember) {

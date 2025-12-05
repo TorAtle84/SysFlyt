@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { SchemasContent } from "@/components/pages/project/schemas-content";
+import { Role } from "@prisma/client";
 
 interface SchemasPageProps {
   params: Promise<{ projectId: string }>;
@@ -47,7 +48,11 @@ export default async function SchemasPage({ params }: SchemasPageProps) {
     redirect("/dashboard");
   }
 
-  const isAdmin = session.user.role === "ADMIN";
+  const systemTags = await prisma.systemTag.findMany({
+    orderBy: { code: "asc" },
+  });
+
+  const isAdmin = session.user.role === Role.ADMIN;
   const isMember = project.members.length > 0;
 
   if (!isAdmin && !isMember) {
@@ -61,6 +66,7 @@ export default async function SchemasPage({ params }: SchemasPageProps) {
     <SchemasContent
       project={project}
       documents={project.documents}
+      systemTags={systemTags}
       canUpload={canUpload}
     />
   );

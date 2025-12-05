@@ -1,20 +1,14 @@
-import { AppShell } from "@/components/layout/app-shell";
-import { ProjectSidebar } from "@/components/pages/project/project-sidebar";
 import { ProjectHeader } from "@/components/pages/project/project-header";
 import { ProjectContentSwitcher } from "@/components/pages/project/project-content-switcher";
 import prisma from "@/lib/db";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { Role, UserStatus } from "@prisma/client";
+import { Role } from "@prisma/client";
 
 export default async function ProjectPage({ params }: { params: Promise<{ projectId: string }> }) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) redirect("/login");
-  if (session.user.status === UserStatus.PENDING) redirect("/pending");
-
-  const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-  if (!user) redirect("/login");
+  if (!session?.user?.id) redirect("/login");
 
   const { projectId } = await params;
 
@@ -35,17 +29,15 @@ export default async function ProjectPage({ params }: { params: Promise<{ projec
 
   if (!project) redirect("/dashboard");
 
-  const isMember = project.members.some((m) => m.userId === user.id) || user.role === Role.ADMIN;
+  const isMember = project.members.some((m) => m.userId === session.user.id) || session.user.role === Role.ADMIN;
   if (!isMember) redirect("/dashboard");
 
-  const canEdit = user.role === Role.ADMIN || user.role === Role.PROJECT_LEADER;
+  const canEdit = session.user.role === Role.ADMIN || session.user.role === Role.PROJECT_LEADER;
 
   return (
-    <AppShell sidebar={<ProjectSidebar project={project} />}>
-      <div className="space-y-6">
-        <ProjectHeader project={project} canEdit={canEdit} currentUserId={user.id} />
-        <ProjectContentSwitcher project={project} canEdit={canEdit} />
-      </div>
-    </AppShell>
+    <div className="space-y-6">
+      <ProjectHeader project={project} canEdit={canEdit} currentUserId={session.user.id} />
+      <ProjectContentSwitcher project={project} canEdit={canEdit} />
+    </div>
   );
 }

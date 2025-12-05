@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { ProgressContent } from "@/components/pages/project/progress-content";
+import { Role } from "@prisma/client";
 
 interface ProgressPageProps {
   params: Promise<{ projectId: string }>;
@@ -41,7 +42,7 @@ export default async function ProgressPage({ params }: ProgressPageProps) {
     redirect("/dashboard");
   }
 
-  const isAdmin = session.user.role === "ADMIN";
+  const isAdmin = session.user.role === Role.ADMIN;
   const isMember = project.members.length > 0;
 
   if (!isAdmin && !isMember) {

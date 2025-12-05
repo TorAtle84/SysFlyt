@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
     'https://*.replit.dev',
     'https://*.repl.co',
     'https://*.kirk.replit.dev',
+    'http://127.0.0.1:5000',
+    'http://localhost:5000',
   ],
 };
 

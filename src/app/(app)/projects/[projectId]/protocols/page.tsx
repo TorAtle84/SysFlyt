@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { ProtocolsContent } from "@/components/pages/project/protocols-content";
+import { Role } from "@prisma/client";
 
 interface ProtocolsPageProps {
   params: Promise<{ projectId: string }>;
@@ -32,7 +33,7 @@ export default async function ProtocolsPage({ params }: ProtocolsPageProps) {
     redirect("/dashboard");
   }
 
-  const isAdmin = session.user.role === "ADMIN";
+  const isAdmin = session.user.role === Role.ADMIN;
   const isMember = project.members.length > 0;
 
   if (!isAdmin && !isMember) {
