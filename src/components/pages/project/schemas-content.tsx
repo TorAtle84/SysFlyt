@@ -90,7 +90,7 @@ export function SchemasContent({
           </p>
         </div>
         {canUpload && (
-          <div>
+          <>
             <input
               type="file"
               id="schema-upload"
@@ -99,13 +99,15 @@ export function SchemasContent({
               onChange={handleUpload}
               disabled={uploading}
             />
-            <Button asChild disabled={uploading}>
-              <label htmlFor="schema-upload" className="cursor-pointer">
-                <Upload size={16} className="mr-2" />
-                {uploading ? "Laster opp..." : "Last opp skjema"}
-              </label>
+            <Button
+              type="button"
+              disabled={uploading}
+              onClick={() => document.getElementById("schema-upload")?.click()}
+            >
+              <Upload size={16} className="mr-2" />
+              {uploading ? "Laster opp..." : "Last opp skjema"}
             </Button>
-          </div>
+          </>
         )}
       </div>
 

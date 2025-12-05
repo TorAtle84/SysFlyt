@@ -83,7 +83,7 @@ export function DrawingsContent({
           </p>
         </div>
         {canUpload && (
-          <div>
+          <>
             <input
               type="file"
               id="drawing-upload"
@@ -92,13 +92,15 @@ export function DrawingsContent({
               onChange={handleUpload}
               disabled={uploading}
             />
-            <Button asChild disabled={uploading}>
-              <label htmlFor="drawing-upload" className="cursor-pointer">
-                <Upload size={16} className="mr-2" />
-                {uploading ? "Laster opp..." : "Last opp tegning"}
-              </label>
+            <Button
+              type="button"
+              disabled={uploading}
+              onClick={() => document.getElementById("drawing-upload")?.click()}
+            >
+              <Upload size={16} className="mr-2" />
+              {uploading ? "Laster opp..." : "Last opp tegning"}
             </Button>
-          </div>
+          </>
         )}
       </div>
 
