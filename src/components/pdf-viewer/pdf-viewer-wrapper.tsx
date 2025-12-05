@@ -51,6 +51,8 @@ interface PDFViewerWrapperProps {
   projectMembers: ProjectMember[];
   currentUserEmail?: string;
   canEdit?: boolean;
+  initialAnnotationId?: string;
+  initialPage?: number;
 }
 
 export default function PDFViewerWrapper({
@@ -61,14 +63,20 @@ export default function PDFViewerWrapper({
   projectMembers,
   currentUserEmail,
   canEdit = true,
+  initialAnnotationId,
+  initialPage,
 }: PDFViewerWrapperProps) {
   const router = useRouter();
   const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageNumber, setPageNumber] = useState(1);
+  const [pageNumber, setPageNumber] = useState(initialPage || 1);
   const [scale, setScale] = useState(1.0);
   const [loading, setLoading] = useState(true);
   const [annotations, setAnnotations] = useState<Annotation[]>(initialAnnotations);
-  const [selectedAnnotation, setSelectedAnnotation] = useState<Annotation | null>(null);
+  const [selectedAnnotation, setSelectedAnnotation] = useState<Annotation | null>(
+    initialAnnotationId 
+      ? initialAnnotations.find((a) => a.id === initialAnnotationId) || null 
+      : null
+  );
   const [newComment, setNewComment] = useState("");
   const [addingComment, setAddingComment] = useState(false);
   const [isAddingPin, setIsAddingPin] = useState(false);

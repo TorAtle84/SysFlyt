@@ -6,10 +6,20 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { Role } from "@prisma/client";
 
+interface DeepLinkParams {
+  annotationId?: string;
+  component?: string;
+  x?: number;
+  y?: number;
+  page?: number;
+}
+
 export default async function DocumentPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ projectId: string; documentId: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
@@ -27,7 +37,10 @@ export default async function DocumentPage({
   }
 
   const document = await prisma.document.findUnique({
-    where: { id: documentId },
+    where: { 
+      id: documentId,
+      projectId,
+    },
     include: {
       annotations: {
         include: {
@@ -56,6 +69,8 @@ export default async function DocumentPage({
     },
   });
 
+  if (!document) return notFound();
+
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     include: {
@@ -67,7 +82,7 @@ export default async function DocumentPage({
     },
   });
 
-  if (!document || !project) return notFound();
+  if (!project) return notFound();
 
   const membership = project.members.find((m) => m.userId === user.id);
   const isMember = !!membership || user.role === Role.ADMIN;
@@ -102,6 +117,25 @@ export default async function DocumentPage({
     })),
   }));
 
+  const resolvedSearchParams = await searchParams;
+  const deepLink: DeepLinkParams = {
+    annotationId: typeof resolvedSearchParams.annotationId === "string" 
+      ? resolvedSearchParams.annotationId 
+      : undefined,
+    component: typeof resolvedSearchParams.component === "string" 
+      ? resolvedSearchParams.component 
+      : undefined,
+    x: resolvedSearchParams.x 
+      ? parseFloat(resolvedSearchParams.x as string) 
+      : undefined,
+    y: resolvedSearchParams.y 
+      ? parseFloat(resolvedSearchParams.y as string) 
+      : undefined,
+    page: resolvedSearchParams.page 
+      ? parseInt(resolvedSearchParams.page as string, 10) 
+      : undefined,
+  };
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center p-4 border-b border-border/60 bg-card/80 backdrop-blur-xl">
@@ -121,6 +155,8 @@ export default async function DocumentPage({
           projectMembers={members}
           currentUserEmail={session?.user?.email || undefined}
           canEdit={canEdit}
+          initialAnnotationId={deepLink.annotationId}
+          initialPage={deepLink.page}
         />
       </div>
     </div>

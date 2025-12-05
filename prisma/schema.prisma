@@ -65,6 +65,7 @@ model User {
   sessions     Session[]
   memberships  ProjectMember[]
   projects     Project[]      @relation("ProjectCreator")
+  documents    Document[]     @relation("DocumentUploader")
   comments     Comment[]
   annotations  Annotation[]
   notifications Notification[] @relation("NotificationRecipient")
@@ -124,16 +125,21 @@ model Document {
   id          String            @id @default(cuid())
   projectId   String
   title       String
+  fileName    String?
+  fileUrl     String?
   url         String
   type        DocumentType      @default(OTHER)
   description String?
   systemTags  String[]
   revision    Int               @default(1)
   isLatest    Boolean           @default(true)
+  approvedDeviations Int        @default(0)
+  uploadedById String?
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
   project     Project           @relation(fields: [projectId], references: [id])
+  uploadedBy  User?             @relation("DocumentUploader", fields: [uploadedById], references: [id])
   annotations Annotation[]
   tags        DocumentSystemTag[]
   components  DocumentComponent[]

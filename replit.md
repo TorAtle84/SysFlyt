@@ -59,9 +59,36 @@ This is a Next.js-based project management platform for construction projects. T
 
 - **Project Module Pages** (All functional):
   - **Arbeidstegninger**: Upload and manage work drawings with annotation tracking
-  - **Systemskjema**: Technical schemas with system coding and boxing status
+  - **Systemskjema**: Full document workspace with verification and component extraction
   - **Protokoller MC**: Generate mechanical completion protocols from mass list
   - **Fremdrift**: Project progress dashboard with completion statistics
+
+- **Systemskjema Advanced Features**:
+  - **Document Workspace** (src/components/pages/project/document-workspace.tsx):
+    - Table view with revision numbers, boxing status, and approved deviations
+    - Search and filter by system tags
+    - Verify documents against mass list
+    - View extracted components with mass list matching
+    - Approve deviations button with counter
+  - **PDF Text Extraction** (src/lib/pdf-text-extractor.ts):
+    - Extract text with coordinates from PDFs
+    - TFM code pattern matching (e.g., 3200.001, 360.123)
+    - Automatic system code detection from filenames
+  - **Component Verification** (src/lib/scan.ts):
+    - scanDocumentForComponents - finds TFM codes in PDF
+    - verifyAgainstMassList - matches against project mass list
+    - Reports matched/unmatched components
+  - **Polygon/Geometry Support** (src/lib/geometry-utils.ts):
+    - Point-in-polygon detection for system boxing
+    - Polygon area and center calculations
+    - Color palette for system annotations
+  - **Revision Handling**:
+    - Same title = new revision (auto-increment)
+    - Previous versions marked as isLatest=false
+    - Revision number displayed in document list
+  - **Deep-link Support**:
+    - URL params: annotationId, component, x, y, page
+    - Links from notifications open correct page/annotation
 
 ## Admin Accounts
 The database has been seeded with two admin accounts:
@@ -130,6 +157,10 @@ The application implements comprehensive security measures:
 - `GET /api/users/search` - Search for users (authorized)
 - `POST/PATCH /api/documents/[documentId]/annotations` - Annotation CRUD
 - `GET/PATCH /api/notifications` - Notification management
+- `POST /api/projects/[projectId]/documents/[documentId]/verify` - Verify against mass list
+- `GET/POST/PATCH /api/projects/[projectId]/documents/[documentId]/components` - Component CRUD
+- `GET/POST/PATCH/DELETE /api/documents/[documentId]/system-annotations` - System annotation CRUD
+- `GET/POST /api/projects/[projectId]/mc` - MC protocol data
 
 ## Project Architecture
 - **Framework**: Next.js 16 with App Router and Turbopack

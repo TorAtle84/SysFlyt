@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
-import { SchemasContent } from "@/components/pages/project/schemas-content";
+import { DocumentWorkspace } from "@/components/pages/project/document-workspace";
 import { Role } from "@prisma/client";
 
 interface SchemasPageProps {
@@ -21,19 +21,21 @@ export default async function SchemasPage({ params }: SchemasPageProps) {
     where: { id: projectId },
     include: {
       documents: {
-        where: { type: "SCHEMA" },
+        where: { type: "SCHEMA", isLatest: true },
         orderBy: { createdAt: "desc" },
         include: {
           systemAnnotations: {
-            include: {
-              createdBy: {
-                select: { firstName: true, lastName: true },
-              },
-            },
+            select: { id: true, systemCode: true },
           },
           tags: {
             include: {
               systemTag: true,
+            },
+          },
+          _count: {
+            select: {
+              annotations: true,
+              components: true,
             },
           },
         },
@@ -62,11 +64,28 @@ export default async function SchemasPage({ params }: SchemasPageProps) {
   const canUpload =
     isAdmin || project.members.some((m) => m.role !== "READER");
 
+  const formattedDocuments = project.documents.map((doc) => ({
+    id: doc.id,
+    title: doc.title,
+    fileName: doc.fileName,
+    url: doc.url,
+    type: doc.type,
+    revision: doc.revision,
+    isLatest: doc.isLatest,
+    approvedDeviations: doc.approvedDeviations,
+    createdAt: doc.createdAt.toISOString(),
+    updatedAt: doc.updatedAt.toISOString(),
+    tags: doc.tags,
+    systemAnnotations: doc.systemAnnotations,
+    _count: doc._count,
+  }));
+
   return (
-    <SchemasContent
+    <DocumentWorkspace
       project={project}
-      documents={project.documents}
+      documents={formattedDocuments}
       systemTags={systemTags}
+      documentType="SCHEMA"
       canUpload={canUpload}
     />
   );

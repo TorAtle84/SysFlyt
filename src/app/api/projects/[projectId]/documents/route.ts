@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireProjectAccess, canUploadDocuments } from "@/lib/auth-helpers";
 import { validateFileName, validateFileSize, validateFileMimeType, saveFile } from "@/lib/file-utils";
+import { extractSystemCodesFromPDF } from "@/lib/pdf-text-extractor";
 
 export async function GET(
   request: NextRequest,
@@ -15,10 +16,33 @@ export async function GET(
       return authResult.error;
     }
 
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get("type");
+    const latestOnly = searchParams.get("latest") !== "false";
+
+    const whereClause: Record<string, unknown> = { projectId };
+    
+    if (type) {
+      whereClause.type = type;
+    }
+    
+    if (latestOnly) {
+      whereClause.isLatest = true;
+    }
+
     const documents = await prisma.document.findMany({
-      where: { projectId },
+      where: whereClause,
       include: {
         tags: { include: { systemTag: true } },
+        systemAnnotations: {
+          select: { id: true, systemCode: true },
+        },
+        _count: {
+          select: {
+            annotations: true,
+            components: true,
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -59,6 +83,8 @@ export async function POST(
     const formData = await request.formData();
     const file = formData.get("file") as File;
     const title = formData.get("title") as string;
+    const type = (formData.get("type") as string) || "OTHER";
+    const autoTag = formData.get("autoTag") !== "false";
 
     if (!file) {
       return NextResponse.json({ error: "Fil er påkrevd" }, { status: 400 });
@@ -85,9 +111,37 @@ export async function POST(
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
+    const existingDoc = await prisma.document.findFirst({
+      where: {
+        projectId,
+        title: title.trim(),
+        isLatest: true,
+      },
+      orderBy: { revision: "desc" },
+    });
+
+    let revision = 1;
+    if (existingDoc) {
+      revision = existingDoc.revision + 1;
+      
+      await prisma.document.update({
+        where: { id: existingDoc.id },
+        data: { isLatest: false },
+      });
+    }
+
     const saveResult = await saveFile(projectId, file.name, buffer);
     if (!saveResult.success) {
       return NextResponse.json({ error: saveResult.error }, { status: 500 });
+    }
+
+    let systemCodes: string[] = [];
+    if (autoTag && file.name.toLowerCase().endsWith(".pdf")) {
+      try {
+        systemCodes = await extractSystemCodesFromPDF(buffer, file.name);
+      } catch (err) {
+        console.error("Error extracting system codes:", err);
+      }
     }
 
     const document = await prisma.document.create({
@@ -97,9 +151,37 @@ export async function POST(
         fileUrl: saveResult.path,
         url: saveResult.path,
         projectId,
+        type: type as "DRAWING" | "SCHEMA" | "MASSLIST" | "OTHER",
+        revision,
+        isLatest: true,
         uploadedById: authResult.user.id,
+        systemTags: systemCodes,
+      },
+      include: {
+        tags: { include: { systemTag: true } },
       },
     });
+
+    if (systemCodes.length > 0) {
+      for (const code of systemCodes) {
+        try {
+          const systemTag = await prisma.systemTag.upsert({
+            where: { code },
+            update: {},
+            create: { code },
+          });
+
+          await prisma.documentSystemTag.create({
+            data: {
+              documentId: document.id,
+              systemTagId: systemTag.id,
+            },
+          });
+        } catch (err) {
+          console.error(`Error creating system tag ${code}:`, err);
+        }
+      }
+    }
 
     return NextResponse.json(document, { status: 201 });
   } catch (error) {
