@@ -212,9 +212,23 @@ The application is optimized for mobile use:
 - Admin emails are configured in `src/lib/utils.ts`
 - Theme preference persisted via next-themes
 
+## Email Configuration
+SMTP is configured for password reset emails using Gmail:
+- **SMTP_HOST**: smtp.gmail.com
+- **SMTP_PORT**: 587
+- **SMTP_USER**: flytlink.app@gmail.com (stored as secret)
+- **SMTP_PASS**: Gmail app password (stored as secret)
+- **SMTP_FROM**: flytlink.app@gmail.com
+
+The email system (`src/lib/email.ts`) supports:
+- Password reset emails with secure tokens
+- 1-hour token expiration
+- Norwegian language templates
+
 ## Deployment Notes
 - Production will use same port 5000 configuration
 - Requires NEXTAUTH_SECRET, NEXTAUTH_URL, and DATABASE_URL in production environment
+- Requires SMTP_USER and SMTP_PASS for email functionality
 - Run `npm run db:deploy` for production database migrations
 - Build command: `npm run build`
 - Start command: `npm start` (runs on 0.0.0.0:5000)
