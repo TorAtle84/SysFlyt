@@ -10,6 +10,9 @@ channel = "stable-25_05"
 [userenv.shared]
 NEXTAUTH_SECRET = "9ecb772315d69dd8d180678bd52867dcc13855c5bc9be2221a2e0f10067ab499"
 DEFAULT_ADMIN_PASSWORD = "Admin123!"
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = "587"
+SMTP_FROM = "flytlink.app@gmail.com"
 
 [userenv.development]
 NEXTAUTH_URL = "https://${REPLIT_DEV_DOMAIN}"
