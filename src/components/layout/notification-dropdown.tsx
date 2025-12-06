@@ -117,6 +117,20 @@ export function NotificationDropdown() {
       };
     }
 
+    if (notification.type === "chat_mention" && notification.metadata) {
+      const meta = notification.metadata as {
+        senderName?: string;
+        roomName?: string;
+        projectId?: string;
+        messagePreview?: string;
+      };
+      return {
+        icon: MessageSquare,
+        text: `${meta.senderName || "Noen"} nevnte deg i #${meta.roomName || "chat"}`,
+        link: meta.projectId ? `/pratlink/${meta.projectId}` : null,
+      };
+    }
+
     return {
       icon: Bell,
       text: "Ny varsling",

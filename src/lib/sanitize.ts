@@ -1,15 +1,21 @@
-export function sanitizeString(input: unknown): string {
+export function sanitizeString(input: unknown, maxLength?: number): string {
   if (typeof input !== "string") {
     return "";
   }
   
-  return input
+  let sanitized = input
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#x27;")
     .replace(/\//g, "&#x2F;")
     .trim();
+  
+  if (maxLength && sanitized.length > maxLength) {
+    sanitized = sanitized.slice(0, maxLength);
+  }
+  
+  return sanitized;
 }
 
 export function sanitizeStringAllowEmpty(input: unknown): string | null {
