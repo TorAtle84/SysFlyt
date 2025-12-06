@@ -348,11 +348,11 @@ export function ChatRoomView({
     <div className="flex h-[calc(100vh-8rem)] flex-col gap-4 lg:flex-row">
       <div className="flex flex-col gap-4 lg:w-72">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/dashboard">
+          <Link href="/dashboard">
+            <Button variant="ghost" size="sm">
               <ArrowLeft size={16} />
-            </Link>
-          </Button>
+            </Button>
+          </Link>
           <img
             src="/pratlink-logo.png"
             alt="PratLink"
