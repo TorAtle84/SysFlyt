@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { nb } from "date-fns/locale";
-import { Bell, Check, CheckCheck, MessageSquare } from "lucide-react";
+import { Bell, Check, CheckCheck, CheckSquare, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -128,6 +128,20 @@ export function NotificationDropdown() {
         icon: MessageSquare,
         text: `${meta.senderName || "Noen"} nevnte deg i #${meta.roomName || "chat"}`,
         link: meta.projectId ? `/pratlink/${meta.projectId}` : null,
+      };
+    }
+
+    if (notification.type === "task_assigned" && notification.metadata) {
+      const meta = notification.metadata as {
+        taskTitle?: string;
+        projectName?: string;
+        projectId?: string;
+        assignerName?: string;
+      };
+      return {
+        icon: CheckSquare,
+        text: `${meta.assignerName || "Noen"} tildelte deg en oppgave: "${meta.taskTitle || "Oppgave"}"`,
+        link: meta.projectId ? `/pratlink/${meta.projectId}?tab=tasks` : null,
       };
     }
 

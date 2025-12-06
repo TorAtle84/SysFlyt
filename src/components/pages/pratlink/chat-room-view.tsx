@@ -13,6 +13,15 @@ import {
   Users,
   AtSign,
   MessageSquare,
+  CheckSquare,
+  Paperclip,
+  FileText,
+  Image,
+  X,
+  Download,
+  ExternalLink,
+  FileIcon,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +36,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { TaskPanel } from "./task-panel";
 
 interface Member {
   id: string;
@@ -44,6 +54,20 @@ interface Room {
   messageCount: number;
 }
 
+interface Attachment {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  fileType: string | null;
+  fileSize: number | null;
+}
+
+interface MessageLink {
+  id: string;
+  targetType: string;
+  targetId: string;
+}
+
 interface Message {
   id: string;
   content: string;
@@ -53,6 +77,8 @@ interface Message {
     firstName: string;
     lastName: string;
   };
+  attachments?: Attachment[];
+  links?: MessageLink[];
   replies?: Message[];
   _count?: { replies: number };
 }
@@ -77,6 +103,7 @@ export function ChatRoomView({
   canManageRooms,
 }: ChatRoomViewProps) {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<"chat" | "tasks">("chat");
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(
     rooms.find((r) => r.type === "PROJECT") || rooms[0] || null
   );
@@ -89,8 +116,19 @@ export function ChatRoomView({
   const [createRoomOpen, setCreateRoomOpen] = useState(false);
   const [newRoomName, setNewRoomName] = useState("");
   const [creatingRoom, setCreatingRoom] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get("tab");
+    if (tab === "tasks") {
+      setActiveTab("tasks");
+    }
+  }, []);
 
   const fetchMessages = useCallback(async () => {
     if (!selectedRoom) return;
@@ -119,7 +157,7 @@ export function ChatRoomView({
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!messageText.trim() || !selectedRoom) return;
+    if ((!messageText.trim() && selectedFiles.length === 0) || !selectedRoom) return;
     setSending(true);
     try {
       const res = await fetch(
@@ -127,10 +165,29 @@ export function ChatRoomView({
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: messageText }),
+          body: JSON.stringify({ content: messageText || "(fil vedlagt)" }),
         }
       );
       if (res.ok) {
+        const { message } = await res.json();
+
+        if (selectedFiles.length > 0) {
+          setUploadingFiles(true);
+          for (const file of selectedFiles) {
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("messageId", message.id);
+            formData.append("projectId", project.id);
+
+            await fetch("/api/pratlink/attachments", {
+              method: "POST",
+              body: formData,
+            });
+          }
+          setUploadingFiles(false);
+          setSelectedFiles([]);
+        }
+
         setMessageText("");
         fetchMessages();
       }
@@ -138,6 +195,71 @@ export function ChatRoomView({
       console.error(err);
     } finally {
       setSending(false);
+      setUploadingFiles(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles = files.filter((file) => {
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      const allowedExts = ["pdf", "xlsx", "xls", "png", "jpg", "jpeg", "gif", "webp", "doc", "docx"];
+      return ext && allowedExts.includes(ext) && file.size <= 10 * 1024 * 1024;
+    });
+    setSelectedFiles((prev) => [...prev, ...validFiles]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const getFileIcon = (fileType: string | null, fileName: string) => {
+    const ext = fileName.split(".").pop()?.toLowerCase();
+    if (fileType?.startsWith("image/") || ["png", "jpg", "jpeg", "gif", "webp"].includes(ext || "")) {
+      return Image;
+    }
+    return FileText;
+  };
+
+  const getLinkInfo = (link: MessageLink) => {
+    switch (link.targetType) {
+      case "document":
+        return {
+          icon: FileIcon,
+          label: "Dokument",
+          href: `/projects/${project.id}/documents/${link.targetId}`,
+          color: "text-blue-500",
+        };
+      case "annotation":
+        return {
+          icon: AlertCircle,
+          label: "Avvik",
+          href: `/projects/${project.id}/documents?annotationId=${link.targetId}`,
+          color: "text-orange-500",
+        };
+      case "task":
+        return {
+          icon: CheckSquare,
+          label: "Oppgave",
+          href: `/pratlink/${project.id}?tab=tasks`,
+          color: "text-green-500",
+        };
+      default:
+        return {
+          icon: ExternalLink,
+          label: "Lenke",
+          href: "#",
+          color: "text-muted-foreground",
+        };
     }
   };
 
@@ -237,6 +359,33 @@ export function ChatRoomView({
           </div>
         </div>
 
+        <div className="flex rounded-lg border border-border bg-muted p-1">
+          <button
+            onClick={() => setActiveTab("chat")}
+            className={cn(
+              "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              activeTab === "chat"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <MessageSquare size={14} />
+            Chat
+          </button>
+          <button
+            onClick={() => setActiveTab("tasks")}
+            className={cn(
+              "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              activeTab === "tasks"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <CheckSquare size={14} />
+            Oppgaver
+          </button>
+        </div>
+
         <Card className="flex-1 overflow-hidden">
           <CardHeader className="border-b px-4 py-3">
             <div className="flex items-center justify-between">
@@ -334,124 +483,234 @@ export function ChatRoomView({
         </Card>
       </div>
 
-      <Card className="flex flex-1 flex-col overflow-hidden">
-        {selectedRoom ? (
-          <>
-            <CardHeader className="border-b px-4 py-3">
-              <div className="flex items-center gap-2">
-                <Hash size={18} />
-                <CardTitle className="text-base">{selectedRoom.name}</CardTitle>
-                {selectedRoom.type === "PROJECT" && (
-                  <Badge tone="info" className="text-xs">
-                    Hovedrom
-                  </Badge>
-                )}
-              </div>
-              {selectedRoom.description && (
-                <p className="text-sm text-muted-foreground">
-                  {selectedRoom.description}
-                </p>
-              )}
-            </CardHeader>
-
-            <CardContent className="flex-1 overflow-auto p-4">
-              {loading ? (
-                <div className="flex h-full items-center justify-center">
-                  <p className="text-muted-foreground">Laster meldinger...</p>
+      {activeTab === "chat" ? (
+        <Card className="flex flex-1 flex-col overflow-hidden">
+          {selectedRoom ? (
+            <>
+              <CardHeader className="border-b px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <Hash size={18} />
+                  <CardTitle className="text-base">{selectedRoom.name}</CardTitle>
+                  {selectedRoom.type === "PROJECT" && (
+                    <Badge tone="info" className="text-xs">
+                      Hovedrom
+                    </Badge>
+                  )}
                 </div>
-              ) : messages.length === 0 ? (
-                <div className="flex h-full flex-col items-center justify-center text-center">
-                  <MessageSquare className="mb-4 h-12 w-12 text-muted-foreground/50" />
-                  <h3 className="font-medium">Ingen meldinger ennå</h3>
+                {selectedRoom.description && (
                   <p className="text-sm text-muted-foreground">
-                    Vær den første til å skrive noe!
+                    {selectedRoom.description}
                   </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {messages.map((message) => (
-                    <div key={message.id} className="group flex gap-3">
-                      <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
-                        {message.author.firstName[0]}
-                        {message.author.lastName[0]}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-baseline gap-2">
-                          <span className="font-medium">
-                            {message.author.firstName} {message.author.lastName}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {format(
-                              new Date(message.createdAt),
-                              "d. MMM HH:mm",
-                              { locale: nb }
-                            )}
-                          </span>
-                        </div>
-                        <p className="mt-1 whitespace-pre-wrap text-sm">
-                          {message.content}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
-              )}
-            </CardContent>
+                )}
+              </CardHeader>
 
-            <div className="border-t p-4">
-              <div className="relative">
-                {showMentions && filteredMembers.length > 0 && (
-                  <div className="absolute bottom-full left-0 mb-2 w-64 rounded-lg border bg-background p-1 shadow-lg">
-                    {filteredMembers.slice(0, 5).map((member) => (
-                      <button
-                        key={member.id}
-                        onClick={() => insertMention(member)}
-                        className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-muted"
-                      >
-                        <AtSign size={14} className="text-muted-foreground" />
-                        <span>{member.name}</span>
-                      </button>
+              <CardContent className="flex-1 overflow-auto p-4">
+                {loading ? (
+                  <div className="flex h-full items-center justify-center">
+                    <p className="text-muted-foreground">Laster meldinger...</p>
+                  </div>
+                ) : messages.length === 0 ? (
+                  <div className="flex h-full flex-col items-center justify-center text-center">
+                    <MessageSquare className="mb-4 h-12 w-12 text-muted-foreground/50" />
+                    <h3 className="font-medium">Ingen meldinger ennå</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Vær den første til å skrive noe!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {messages.map((message) => (
+                      <div key={message.id} className="group flex gap-3">
+                        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
+                          {message.author.firstName[0]}
+                          {message.author.lastName[0]}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-baseline gap-2">
+                            <span className="font-medium">
+                              {message.author.firstName} {message.author.lastName}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {format(
+                                new Date(message.createdAt),
+                                "d. MMM HH:mm",
+                                { locale: nb }
+                              )}
+                            </span>
+                          </div>
+                          <p className="mt-1 whitespace-pre-wrap text-sm">
+                            {message.content}
+                          </p>
+                          {message.attachments && message.attachments.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {message.attachments.map((attachment) => {
+                                const FileIconComp = getFileIcon(attachment.fileType, attachment.fileName);
+                                return (
+                                  <a
+                                    key={attachment.id}
+                                    href={attachment.fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group/file flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm transition-colors hover:bg-muted"
+                                  >
+                                    <FileIconComp size={16} className="text-muted-foreground" />
+                                    <span className="max-w-[200px] truncate">{attachment.fileName}</span>
+                                    {attachment.fileSize && (
+                                      <span className="text-xs text-muted-foreground">
+                                        {formatFileSize(attachment.fileSize)}
+                                      </span>
+                                    )}
+                                    <Download size={14} className="text-muted-foreground opacity-0 transition-opacity group-hover/file:opacity-100" />
+                                  </a>
+                                );
+                              })}
+                            </div>
+                          )}
+                          {message.links && message.links.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {message.links.map((link) => {
+                                const linkInfo = getLinkInfo(link);
+                                const LinkIcon = linkInfo.icon;
+                                return (
+                                  <Link
+                                    key={link.id}
+                                    href={linkInfo.href}
+                                    className={cn(
+                                      "flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors hover:bg-muted",
+                                      linkInfo.color
+                                    )}
+                                  >
+                                    <LinkIcon size={14} />
+                                    <span>{linkInfo.label}</span>
+                                    <ExternalLink size={12} className="opacity-50" />
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     ))}
+                    <div ref={messagesEndRef} />
                   </div>
                 )}
-                <div className="flex gap-2">
-                  <Textarea
-                    ref={textareaRef}
-                    placeholder={`Skriv en melding i #${selectedRoom.name}...`}
-                    value={messageText}
-                    onChange={handleTextChange}
-                    onKeyDown={handleKeyDown}
-                    className="min-h-[44px] resize-none"
-                    rows={1}
-                  />
-                  <Button
-                    onClick={handleSendMessage}
-                    disabled={sending || !messageText.trim()}
-                    size="icon"
-                    className="h-11 w-11"
-                  >
-                    <Send size={18} />
-                  </Button>
+              </CardContent>
+
+              <div className="border-t p-4">
+                <div className="relative">
+                  {showMentions && filteredMembers.length > 0 && (
+                    <div className="absolute bottom-full left-0 mb-2 w-64 rounded-lg border bg-background p-1 shadow-lg">
+                      {filteredMembers.slice(0, 5).map((member) => (
+                        <button
+                          key={member.id}
+                          onClick={() => insertMention(member)}
+                          className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-muted"
+                        >
+                          <AtSign size={14} className="text-muted-foreground" />
+                          <span>{member.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedFiles.length > 0 && (
+                    <div className="mb-2 flex flex-wrap gap-2">
+                      {selectedFiles.map((file, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-2 py-1 text-sm"
+                        >
+                          <Paperclip size={14} className="text-muted-foreground" />
+                          <span className="max-w-[150px] truncate">{file.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {formatFileSize(file.size)}
+                          </span>
+                          <button
+                            onClick={() => removeSelectedFile(index)}
+                            className="text-muted-foreground hover:text-foreground"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      accept=".pdf,.xlsx,.xls,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-11 w-11 flex-shrink-0"
+                      onClick={() => fileInputRef.current?.click()}
+                      title="Legg til fil"
+                    >
+                      <Paperclip size={18} />
+                    </Button>
+                    <Textarea
+                      ref={textareaRef}
+                      placeholder={`Skriv en melding i #${selectedRoom.name}...`}
+                      value={messageText}
+                      onChange={handleTextChange}
+                      onKeyDown={handleKeyDown}
+                      className="min-h-[44px] resize-none"
+                      rows={1}
+                    />
+                    <Button
+                      onClick={handleSendMessage}
+                      disabled={sending || uploadingFiles || (!messageText.trim() && selectedFiles.length === 0)}
+                      size="icon"
+                      className="h-11 w-11"
+                    >
+                      <Send size={18} />
+                    </Button>
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Bruk @ for å nevne en person. Maks filstørrelse: 10MB
+                  </p>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Bruk @ for å nevne en person
+              </div>
+            </>
+          ) : (
+            <CardContent className="flex h-full items-center justify-center">
+              <div className="text-center">
+                <Hash className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
+                <h3 className="font-medium">Velg et rom</h3>
+                <p className="text-sm text-muted-foreground">
+                  Eller opprett et nytt rom for å starte
                 </p>
               </div>
-            </div>
-          </>
-        ) : (
-          <CardContent className="flex h-full items-center justify-center">
-            <div className="text-center">
-              <Hash className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
-              <h3 className="font-medium">Velg et rom</h3>
-              <p className="text-sm text-muted-foreground">
-                Eller opprett et nytt rom for å starte
-              </p>
-            </div>
-          </CardContent>
-        )}
-      </Card>
+            </CardContent>
+          )}
+        </Card>
+      ) : (
+        <Card className="flex flex-1 flex-col overflow-hidden">
+          <TaskPanel
+            projectId={project.id}
+            members={members.map((m) => ({
+              id: m.id,
+              firstName: m.name.split(" ")[0],
+              lastName: m.name.split(" ").slice(1).join(" ") || "",
+              email: m.email,
+            }))}
+            onNavigateToMessage={(roomId, messageId) => {
+              const room = rooms.find((r) => r.id === roomId);
+              if (room) {
+                setSelectedRoom(room);
+                setActiveTab("chat");
+              }
+            }}
+          />
+        </Card>
+      )}
     </div>
   );
 }

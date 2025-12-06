@@ -134,6 +134,83 @@ export async function sendWelcomeEmail(to: string, firstName: string) {
   }
 }
 
+export async function sendTaskAssignedEmail(
+  to: string,
+  assigneeName: string,
+  taskTitle: string,
+  projectName: string,
+  assignerName: string,
+  dueDate: string | null,
+  taskUrl: string
+) {
+  const dueDateText = dueDate
+    ? `<p style="color: #4b5563; line-height: 1.6; margin: 0 0 16px 0;"><strong>Frist:</strong> ${dueDate}</p>`
+    : "";
+
+  const mailOptions = {
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    to,
+    subject: `Ny oppgave tildelt: ${taskTitle} - SysLink`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 32px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">SysLink</h1>
+            </div>
+            <div style="padding: 32px;">
+              <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 20px;">Ny oppgave tildelt</h2>
+              <p style="color: #4b5563; line-height: 1.6; margin: 0 0 24px 0;">
+                Hei ${assigneeName}, ${assignerName} har tildelt deg en ny oppgave.
+              </p>
+              <div style="background-color: #f3f4f6; border-radius: 8px; padding: 20px; margin: 24px 0;">
+                <p style="color: #1f2937; margin: 0 0 8px 0; font-size: 18px; font-weight: 600;">${taskTitle}</p>
+                <p style="color: #6b7280; margin: 0; font-size: 14px;">Prosjekt: ${projectName}</p>
+              </div>
+              ${dueDateText}
+              <div style="text-align: center; margin: 32px 0;">
+                <a href="${taskUrl}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                  Se oppgave
+                </a>
+              </div>
+            </div>
+            <div style="background-color: #f9fafb; padding: 20px; text-align: center;">
+              <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                © ${new Date().getFullYear()} SysLink. Alle rettigheter forbeholdt.
+              </p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+    text: `
+Ny oppgave tildelt - SysLink
+
+Hei ${assigneeName}, ${assignerName} har tildelt deg en ny oppgave.
+
+Oppgave: ${taskTitle}
+Prosjekt: ${projectName}
+${dueDate ? `Frist: ${dueDate}` : ""}
+
+Se oppgaven: ${taskUrl}
+
+© ${new Date().getFullYear()} SysLink
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Task assigned email sent to ${to}`);
+  } catch (error) {
+    console.error("Failed to send task assigned email:", error);
+  }
+}
+
 export async function sendAccountActivatedEmail(to: string, firstName: string, loginUrl: string) {
   const mailOptions = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER,

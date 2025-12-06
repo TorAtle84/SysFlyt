@@ -78,6 +78,7 @@ export async function GET(
           },
         },
         attachments: true,
+        links: true,
         _count: { select: { replies: true } },
       },
       orderBy: { createdAt: "asc" },
