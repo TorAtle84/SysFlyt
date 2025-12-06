@@ -347,12 +347,17 @@ export function ChatRoomView({
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col gap-4 lg:flex-row">
       <div className="flex flex-col gap-4 lg:w-72">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild>
             <Link href="/dashboard">
               <ArrowLeft size={16} />
             </Link>
           </Button>
+          <img
+            src="/pratlink-logo.png"
+            alt="PratLink"
+            className="h-10 w-10 rounded-lg object-contain"
+          />
           <div className="flex-1">
             <h1 className="font-semibold">{project.name}</h1>
             <p className="text-xs text-muted-foreground">PratLink</p>
