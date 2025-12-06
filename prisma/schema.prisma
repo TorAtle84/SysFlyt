@@ -70,6 +70,14 @@ model User {
   annotations  Annotation[]
   notifications Notification[] @relation("NotificationRecipient")
   systemAnnotations SystemAnnotation[]
+  
+  // PratLink relations
+  chatRoomsCreated    ChatRoom[]       @relation("ChatRoomCreator")
+  chatRoomMemberships ChatRoomMember[]
+  chatMessages        ChatMessage[]    @relation("ChatMessageAuthor")
+  chatMentions        ChatMention[]    @relation("ChatMentionTarget")
+  chatTasksResponsible ChatTask[]      @relation("ChatTaskResponsible")
+  chatTasksCreated    ChatTask[]       @relation("ChatTaskCreator")
 }
 
 model Project {
@@ -89,6 +97,10 @@ model Project {
   comments  Comment[]
   documents Document[]
   massList  MassList[]
+  
+  // PratLink relations
+  chatRooms ChatRoom[]
+  chatTasks ChatTask[]
 }
 
 model ProjectMember {
@@ -314,4 +326,134 @@ model SystemAnnotation {
   
   createdById String?
   createdBy   User?    @relation(fields: [createdById], references: [id])
+}
+
+// ==========================================
+// PratLink (Chat/Correspondence Module)
+// ==========================================
+
+enum ChatRoomType {
+  PROJECT   // Main project room (auto-created)
+  TOPIC     // Topic-specific room (e.g., Avvik, FDV)
+}
+
+enum ChatTaskStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+}
+
+model ChatRoom {
+  id          String       @id @default(cuid())
+  projectId   String
+  name        String
+  description String?
+  type        ChatRoomType @default(PROJECT)
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  createdById String?
+
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy   User?        @relation("ChatRoomCreator", fields: [createdById], references: [id])
+  messages    ChatMessage[]
+  members     ChatRoomMember[]
+
+  @@index([projectId])
+}
+
+model ChatRoomMember {
+  id                   String   @id @default(cuid())
+  roomId               String
+  userId               String
+  notificationsEnabled Boolean  @default(true)
+  joinedAt             DateTime @default(now())
+
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+}
+
+model ChatMessage {
+  id        String    @id @default(cuid())
+  roomId    String
+  parentId  String?   // NULL = top-level message, otherwise = reply/thread
+  authorId  String
+  content   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  editedAt  DateTime?
+  deletedAt DateTime?
+
+  room        ChatRoom        @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  parent      ChatMessage?    @relation("MessageThread", fields: [parentId], references: [id])
+  replies     ChatMessage[]   @relation("MessageThread")
+  author      User            @relation("ChatMessageAuthor", fields: [authorId], references: [id])
+  mentions    ChatMention[]
+  attachments ChatAttachment[]
+  links       ChatMessageLink[]
+  tasks       ChatTask[]
+
+  @@index([roomId])
+  @@index([parentId])
+}
+
+model ChatMention {
+  id              String   @id @default(cuid())
+  messageId       String
+  mentionedUserId String
+  createdAt       DateTime @default(now())
+
+  message       ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  mentionedUser User        @relation("ChatMentionTarget", fields: [mentionedUserId], references: [id])
+
+  @@unique([messageId, mentionedUserId])
+}
+
+model ChatAttachment {
+  id         String   @id @default(cuid())
+  messageId  String
+  fileName   String
+  fileUrl    String
+  fileType   String?
+  fileSize   Int?
+  createdAt  DateTime @default(now())
+
+  message ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+}
+
+model ChatMessageLink {
+  id         String   @id @default(cuid())
+  messageId  String
+  targetType String   // "document", "annotation", "task"
+  targetId   String
+  createdAt  DateTime @default(now())
+
+  message ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([targetType, targetId])
+}
+
+model ChatTask {
+  id                  String         @id @default(cuid())
+  projectId           String
+  createdFromMessageId String?
+  title               String
+  description         String?
+  responsibleUserId   String?
+  dueDate             DateTime?
+  status              ChatTaskStatus @default(OPEN)
+  emailSent           Boolean        @default(false)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  createdById         String?
+
+  project         Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdFromMessage ChatMessage? @relation(fields: [createdFromMessageId], references: [id], onDelete: SetNull)
+  responsibleUser User?        @relation("ChatTaskResponsible", fields: [responsibleUserId], references: [id])
+  createdBy       User?        @relation("ChatTaskCreator", fields: [createdById], references: [id])
+
+  @@index([projectId])
+  @@index([responsibleUserId])
 }
