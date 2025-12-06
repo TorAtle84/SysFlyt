@@ -59,6 +59,24 @@ export default async function PratLinkProjectPage({
   const isOwnerOrAdmin =
     project.createdById === user.id || user.role === Role.ADMIN;
 
+  // Create default "Generelt" room if no rooms exist
+  let chatRooms = project.chatRooms;
+  if (chatRooms.length === 0) {
+    const defaultRoom = await prisma.chatRoom.create({
+      data: {
+        projectId,
+        name: "Generelt",
+        type: "PROJECT",
+        description: "Hovedkanal for prosjektkorrespondanse",
+        createdById: user.id,
+      },
+      include: {
+        _count: { select: { messages: true } },
+      },
+    });
+    chatRooms = [defaultRoom];
+  }
+
   const members = project.members.map((m) => ({
     id: m.user.id,
     name: `${m.user.firstName} ${m.user.lastName}`,
@@ -67,7 +85,7 @@ export default async function PratLinkProjectPage({
     role: m.role,
   }));
 
-  const rooms = project.chatRooms.map((r) => ({
+  const rooms = chatRooms.map((r) => ({
     id: r.id,
     name: r.name,
     type: r.type,
