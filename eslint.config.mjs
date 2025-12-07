@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Ignore bundled/minified worker file that triggers thousands of lint false-positives
+    "public/pdf.worker.min.mjs",
   ]),
 ]);
 
