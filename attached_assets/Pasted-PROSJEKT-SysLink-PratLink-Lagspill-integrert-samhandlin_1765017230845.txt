@@ -1,0 +1,286 @@
+PROSJEKT: SysLink + PratLink (Lagspill) – integrert samhandlingsmodul
+
+ROLLE
+Du er en senior fullstack-utvikler og UX-designer som skal bygge en ny modul, "PratLink" (Lagspill), inne i den eksisterende applikasjonen SysLink. SysLink håndterer allerede:
+- Prosjekter
+- Underlag (systemskjema, arbeidstegninger, FDV osv.)
+- Avvik på underlag
+- Varselsenter (notifikasjoner)
+- E-postutsending (allerede implementert)
+
+Kontekst: Norsk bygg/teknisk bransje (ventilasjon, elektro, rør, byggautomasjon, FDV).
+
+MÅL
+Bygg en Teams-lignende kommunikasjonsmodul – "PratLink" – som:
+- Er prosjektbasert
+- Har chat, tråder og @-mentions
+- Har god saksoppfølging rundt AVVIK på underlag
+- Sender alle @-mentions til eksisterende Varselsenter
+- Kan opprette ToDo-oppgaver fra meldinger (med valgfri e-postvarsling)
+- Er tett integrert med:
+  - Prosjekter
+  - Underlag
+  - Avvik
+  - Varselsenter
+  - E-postfunksjon
+- Fungerer og ser bra ut både på PC og mobil (responsivt UI)
+- Bruker eksisterende design/stil fra SysLink
+
+TEKNISK KONTEKST
+- Backend: Python (Flask) med eksisterende prosjekt- og brukermodell
+- Frontend: HTML, CSS, JavaScript
+  - Bruk eksisterende base.html/stilark/komponenter
+- Database: Bruk eksisterende ORM/DB-oppsett (f.eks. SQLAlchemy) og utvid med nye tabeller for PratLink
+- Autentisering: Gjenbruk eksisterende login/session/roller i SysLink
+- Varselsenter og e-post: Anta at det finnes eksisterende funksjoner som kan kalles, ikke lag nye systemer for dette – bare kall funksjoner/endepunkter.
+
+FUNKSJONELLE KRAV
+
+1) PROSJEKTBASERT STRUKTUR: PROSJEKTROM + TEMAROM
+- Hvert prosjekt i SysLink skal ha:
+  - ÉN hovedkanal / prosjektrom (f.eks. "Prosjekt A – Prat")
+    - Alle brukere som er invitert til prosjektet har tilgang til prosjektrommet, uavhengig av fag.
+- I tillegg kan det finnes temarom, f.eks.:
+  - "Prosjekt A – Avvik"
+  - "Prosjekt A – FDV"
+  - "Prosjekt A – Funksjonstester"
+- Viktig rettighet:
+  - Kun prosjektoppretter (prosjekteier) eller admin kan:
+    - Opprette nye rom i prosjektet
+    - Slette rom i prosjektet
+  - Andre brukere kan delta/følge med, men ikke administrere romstrukturen.
+
+Modeller (forslag):
+- ChatRoom
+  - id
+  - project_id (FK til prosjekt)
+  - name
+  - type = ["prosjekt", "tema"]
+  - is_active
+  - created_at
+  - created_by (user_id)
+- ChatRoomMember
+  - id
+  - room_id
+  - user_id
+  - notifications_enabled (bool)
+
+Alle brukere invitert til prosjektet skal automatisk være medlem av prosjektrommet. Temarom kan enten:
+- automatisk få alle medlemmer, eller
+- ha egen ChatRoomMember-liste – velg det som er enklest å implementere først, men det skal være mulig å se hvem som er i et rom.
+
+2) MELDINGER, TRÅDER OG @MENTIONS
+- Implementer meldinger og tråder:
+  - Message
+    - id
+    - room_id
+    - parent_id (NULL = hovedmelding, ellers = svar/undertråd)
+    - user_id (avsender)
+    - text
+    - created_at
+    - edited_at
+    - deleted_at (nullable)
+- Bruker kan:
+  - Poste en ny melding i et rom
+  - Svare på en melding (threading via parent_id)
+- @mentions:
+  - Støtt kun @brukernavn (ingen rolle-/gruppe-mentions i denne versjonen)
+  - Når en melding inneholder @brukernavn:
+    - Identifiser hvilke brukere som er nevnt
+    - Lagre dette i en MessageMention-tabell:
+      - id
+      - message_id
+      - mentioned_user_id
+      - created_at
+    - Send notifikasjon til Varselsenteret for hver nevnt bruker:
+      - Kall eksisterende funksjon/endepunkt for å opprette varsel
+      - Varsel skal gi info om:
+        - Hvem som nevnte dem
+        - I hvilket prosjekt og rom
+        - Direkte lenke til meldingen
+- Varselsenter:
+  - Ikke implementer nytt system, bare integrer:
+    - Når du lagrer en mention, kaller du en funksjon f.eks. create_notification(user_id, type="mention", payload=...)
+    - Bruk en enkel, konsistent payload-struktur.
+
+3) AVVIK PÅ UNDERLAG KNYTTET TIL MELDINGER
+- SysLink har allerede:
+  - Underlag (dokumenter/tegninger/systemskjema)
+  - Avvik knyttet til underlag
+- I PratLink:
+  - Fra en melding skal man kunne opprette AVVIK på et underlag.
+- Implementer:
+  - MessageLink
+    - id
+    - message_id
+    - target_type (begrens til f.eks. ["underlag", "avvik"])
+    - target_id
+- Funksjonalitet:
+  - "Opprett avvik fra melding":
+    - Bruker velger et underlag (enten via UI-liste, eller via “smart dokumentreferanse”, se punkt 6)
+    - Opprett avvik (bruk eksisterende avvik-modell og -logikk i SysLink)
+    - Lag MessageLink mellom meldingen og det nye avviket, f.eks. target_type="avvik".
+  - I avvik-visning i SysLink:
+    - Vis lenker til relevante meldinger/tråder i PratLink.
+  - I meldingsvisning:
+    - Vis små chips/knapper for tilknyttede avvik/underlag.
+
+4) TODO-OPPGAVER FRA CHAT + E-POST (VALGFRITT)
+- Fra en melding skal man kunne opprette en ToDo-oppgave.
+- Modell:
+  - Task
+    - id
+    - project_id
+    - created_from_message_id
+    - title
+    - description
+    - responsible_user_id
+    - due_date
+    - status = ["åpen", "pågår", "fullført"]
+- UI:
+  - I meny på melding: "Opprett ToDo"
+  - Prefyll tittel og beskrivelse fra meldingen
+  - Velg ansvarlig og frist
+  - Checkbox: "Send e-post til ansvarlig"
+    - Hvis avkrysset:
+      - Kall eksisterende e-postfunksjon i SysLink for å sende e-post til ansvarlig.
+      - E-posten bør minst inneholde:
+        - Prosjektnavn
+        - Tittel på ToDo
+        - Link inn til oppgaven / meldingen
+- Oppgaver skal dukke opp både i:
+  - Prosjektets oppgaveoversikt (gjenbruk dagens logikk)
+  - "Mine oppgaver" for ansvarlig bruker, om det finnes.
+
+5) FIL- OG BILDEOPPLASTING (INNE I CHAT)
+- Meldinger skal støtte vedlegg:
+  - MessageAttachment
+    - id
+    - message_id
+    - file_id (pek mot SysLink sitt eksisterende filsystem)
+    - created_at
+- Bruk SysLink sin eksisterende opplastingslogikk for filer.
+- Viktig:
+  - Optimaliser for mobil:
+    - Skjemaet for opplasting bør støtte:
+      - Velge fil fra enhet
+      - "Ta bilde" direkte fra kamera (standard file input på mobil vil gi dette valget)
+- UI:
+  - Drag & drop på desktop
+  - Synlig "Legg ved fil" / "Ta bilde" knapp
+  - Vis små chips/ikoner i meldingen for vedlegg
+  - Klikk → åpne dokumentvisning i SysLink.
+
+6) SMART DOKUMENTREFERANSE I CHAT (SYSTEMSKJEMA / ARBEIDSTEGNING)
+- Når bruker skriver bestemte nøkkelord i meldingen, skal PratLink hjelpe med å knytte riktig underlag.
+- Krav:
+  - Det skal være case-insensitive match på ord som f.eks.:
+    - "systemskjema"
+    - "arbeidstegning"
+  - Logikk:
+    - Etter at meldingen er skrevet (f.eks. når bruker trykker "Send" eller trykker på et "Lenk dokument"-ikon):
+      - Analyser meldingsteksten for definerte nøkkelord.
+      - Dersom teksten inneholder "systemskjema":
+        - Hent alle underlag for gjeldende prosjekt som har type = systemskjema (eller navn/filtittel som inneholder dette).
+      - Dersom teksten inneholder "arbeidstegning":
+        - Hent alle underlag for gjeldende prosjekt av type arbeidstegning.
+      - Vis en liten dropdown/modal-liste:
+        - "Vil du lenke til et underlag?"
+        - Liste over matchende underlag (tittel, type, evt. system/komponent)
+        - Når bruker klikker på et underlag:
+          - Lag MessageLink med target_type="underlag" og target_id=underlags-ID.
+          - I meldingsvisning vises en dokument-chip som kan klikkes, f.eks. "Systemskjema VAV-401 (PDF)".
+- Det skal være mulig å trigge dokumentlisten manuelt også, f.eks. via et lite dokument-ikon ved siden av meldingsfeltet.
+
+7) VARSELSENTERINTEGRASJON
+- All @-mention skal resultere i varsel i Varselsenteret:
+  - Når melding lagres:
+    - Finn alle nevnte brukere
+    - For hver:
+      - Lag MessageMention
+      - Kall eksisterende varslingsfunksjon, f.eks.:
+        - create_notification(
+            user_id=nevnt_bruker,
+            type="mention",
+            payload={project_id, room_id, message_id, sender_id}
+          )
+- Varsler skal kunne klikkes og sende bruker direkte til riktig rom og markere meldingen.
+
+8) NAVIGASJON OG DESIGN
+- Toppnivå:
+  - Global navbar/toppmeny skal ha:
+    - "SysLink" (eksisterende moduler – prosjekter, underlag, avvik osv.)
+    - "PratLink" / "Lagspill" (ny modul)
+- Inni PratLink:
+  - Layout skal være responsiv og fungere både på desktop og mobil.
+  - På desktop:
+    - Venstre kolonne:
+      - Liste over prosjekter brukeren har tilgang til
+      - Under hvert prosjekt: liste over rom (prosjektrom + temarom)
+    - Midtkolonne:
+      - Valgt rom → meldingsliste/tråder
+    - Høyrekolonne:
+      - Detaljer for valgt tråd/melding:
+        - Tilknyttede avvik
+        - Tilknyttede underlag
+        - Eventuelle ToDo-oppgaver fra meldingen
+  - På mobil:
+    - Bruk tabs eller “swipe”-vennlig navigasjon:
+      - F.eks. "Rom" / "Meldinger" / "Detaljer"
+    - Sørg for at meldingsfelt, vedleggs-knapp og send-knapp er lett tilgjengelig med tommel.
+- Design:
+  - Bruk eksisterende farger, typografi og komponentstiler fra SysLink.
+  - Ikke innfør nye UI-rammeverk (som Tailwind/Bootstrap) hvis de ikke allerede brukes.
+  - Hold UI enkelt og effektivt fremfor flashy.
+
+9) API-ENDPOINTS OG STRUKTUR
+- Lag en egen blueprint/modul for PratLink:
+  - Backend: f.eks. `pratlink_bp` under `/pratlink/...`
+  - Frontend: egen JS-fil, f.eks. `pratlink.js`
+  - Templates: egne Jinja-templates, f.eks. `pratlink_base.html`, `pratlink_room.html`
+- Eksempler på endepunkt:
+  - GET /pratlink
+    - Viser hovedsiden med prosjekter og rom (basert på innlogget bruker)
+  - GET /pratlink/project/<project_id>/rooms
+    - Returnerer rom for valgt prosjekt
+  - POST /pratlink/project/<project_id>/rooms
+    - Opprett nytt rom (kun prosjektoppretter/admin)
+  - DELETE /pratlink/room/<room_id>
+    - Deaktiver/slett rom (kun prosjektoppretter/admin)
+  - GET /pratlink/room/<room_id>/messages
+    - Hent meldinger for rom (med paginering)
+  - POST /pratlink/room/<room_id>/message
+    - Opprett ny melding
+    - Oppdag @mentions → lagre + send varsel
+    - Oppdag dokumentnøkkelord → tilby liste over underlag (via ekstra UI-kall)
+  - POST /pratlink/message/<message_id>/reply
+    - Svar i tråd (parent_id = message_id)
+  - POST /pratlink/message/<message_id>/attachment
+    - Last opp vedlegg (bruk eksisterende filsystem)
+  - POST /pratlink/message/<message_id>/todo
+    - Opprett ToDo-oppgave (med opsjon "send e-post")
+  - POST /pratlink/message/<message_id>/avvik
+    - Opprett avvik knyttet til valgt underlag
+  - POST /pratlink/message/<message_id>/link-underlag
+    - Lenke melding til valgt underlag (via MessageLink)
+
+IKKE-GJØR
+- Ikke lag ny autentisering.
+- Ikke lag nytt varslingssystem eller nytt e-postsystem – gjenbruk det som finnes.
+- Ikke innfør unødvendige rammeverk.
+- Ikke implementer rolle-/gruppe-mentions i denne versjonen (@prosjektleder osv.) – kun @bruker.
+
+ARBEIDSMÅTE
+1. Start med datamodellene (ORM) for ChatRoom, Message, MessageMention, MessageAttachment, MessageLink og Task-kobling.
+2. Lag migrasjoner.
+3. Lag backend-endepunkter for rom, meldinger, mentions, dokumentkobling, oppretting av avvik og ToDo.
+4. Lag frontend (templates + pratlink.js) som:
+   - Fungerer på desktop og mobil
+   - Har god UX for meldingsinput, vedlegg, @mentions og dokumentlenking
+5. Koble @mentions inn mot Varselsenter via eksisterende funksjon/endpoint.
+6. Koble ToDo-oppretting til eksisterende oppgave-/e-postlogikk.
+
+SVARFORMAT
+- Svar med konkret kode (modeller, routes, templates, js) i komplette kodeblokker.
+- Forklar kort hva hver større del gjør.
+- Unngå unødvendig teori; fokuser på implementasjon som passer direkte inn i en typisk Flask + Jinja + JS-struktur.

@@ -56,7 +56,7 @@ async function main() {
       role: Role.PROJECT_LEADER,
       status: UserStatus.ACTIVE,
       title: "Prosjektleder",
-      company: "Sluttfase AS",
+      company: "SysLink AS",
       phone: "+47 999 99 999",
     },
   });
