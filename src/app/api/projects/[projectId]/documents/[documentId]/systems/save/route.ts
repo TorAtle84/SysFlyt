@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { SystemRole } from "@prisma/client";
 import { requireProjectAccess } from "@/lib/auth-helpers";
 
 export async function POST(
@@ -60,8 +61,8 @@ export async function POST(
                         if (!tagId) return null;
                         // Determine role: first system or explicitly marked as PRIMARY gets PRIMARY role
                         const role = sys.role === "PRIMARY" || (index === 0 && !sys.role)
-                            ? "PRIMARY"
-                            : "DELANSVARLIG";
+                            ? SystemRole.PRIMARY
+                            : SystemRole.DELANSVARLIG;
                         return {
                             documentId,
                             systemTagId: tagId,
