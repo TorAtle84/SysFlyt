@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const message = await prisma.chatMessage.findFirst({
       where: {
         id: messageId,
-        senderId: authResult.user.id,
+        authorId: authResult.user.id,
         room: {
           projectId,
         },

@@ -18,6 +18,7 @@ import {
   RotateCcw,
   Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -114,6 +115,7 @@ export function ProjectExplorer({
       }
     } catch (err) {
       console.error(err);
+      toast.error("Kunne ikke opprette prosjekt");
     } finally {
       setLoading(false);
     }
@@ -126,10 +128,14 @@ export function ProjectExplorer({
         method: "POST",
       });
       if (res.ok) {
+        toast.success("Prosjekt arkivert");
         router.refresh();
+      } else {
+        toast.error("Kunne ikke arkivere prosjekt");
       }
     } catch (err) {
       console.error(err);
+      toast.error("Noe gikk galt");
     } finally {
       setActionLoading(null);
     }
@@ -142,10 +148,14 @@ export function ProjectExplorer({
         method: "POST",
       });
       if (res.ok) {
+        toast.success("Prosjekt gjenopprettet");
         router.refresh();
+      } else {
+        toast.error("Kunne ikke gjenopprette prosjekt");
       }
     } catch (err) {
       console.error(err);
+      toast.error("Noe gikk galt");
     } finally {
       setActionLoading(null);
     }
@@ -154,15 +164,20 @@ export function ProjectExplorer({
   async function handleDelete(projectId: string) {
     setActionLoading(projectId);
     try {
-      const res = await fetch(`/api/projects/${projectId}`, {
+      const res = await fetch(`/api/projects/${projectId}/archive`, {
         method: "DELETE",
       });
       if (res.ok) {
         setDeleteConfirmId(null);
+        toast.success("Prosjekt slettet");
         router.refresh();
+      } else {
+        const error = await res.json();
+        toast.error(error.error || "Kunne ikke slette prosjekt");
       }
     } catch (err) {
       console.error(err);
+      toast.error("Noe gikk galt under sletting");
     } finally {
       setActionLoading(null);
     }
@@ -382,7 +397,7 @@ export function ProjectExplorer({
                               <DialogTitle>Slett prosjekt permanent?</DialogTitle>
                             </DialogHeader>
                             <p className="text-sm text-muted-foreground">
-                              Er du sikker på at du vil slette &quot;{project.name}&quot;? 
+                              Er du sikker på at du vil slette &quot;{project.name}&quot;?
                               Denne handlingen kan ikke angres, og alle dokumenter og data vil bli slettet.
                             </p>
                             <div className="flex justify-end gap-2">

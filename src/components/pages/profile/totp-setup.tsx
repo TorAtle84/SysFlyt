@@ -162,10 +162,34 @@ export function TotpSetup({ totpEnabled: initialEnabled }: TotpSetupProps) {
                 Deaktiver tofaktor
               </Button>
             ) : (
-              <Button onClick={startSetup} loading={loading} className="w-full">
-                <ShieldCheck className="mr-2 h-4 w-4" />
-                Aktiver tofaktor
-              </Button>
+              <div className="space-y-4">
+                <Button onClick={startSetup} loading={loading} className="w-full">
+                  <ShieldCheck className="mr-2 h-4 w-4" />
+                  Aktiver tofaktor
+                </Button>
+
+                <div className="pt-2 border-t text-center space-y-2">
+                  <p className="text-xs text-muted-foreground font-medium">Trenger du en authenticator-app?</p>
+                  <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                    <a
+                      href="https://support.microsoft.com/nb-no/account-billing/laste-ned-og-installere-microsoft-authenticator-appen-351498fc-850a-45da-b7b6-27e523b8702a"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-foreground hover:underline transition-colors"
+                    >
+                      Veiledning for Microsoft Authenticator
+                    </a>
+                    <a
+                      href="https://support.google.com/accounts/answer/1066447?hl=no"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-foreground hover:underline transition-colors"
+                    >
+                      Veiledning for Google Authenticator
+                    </a>
+                  </div>
+                </div>
+              </div>
             )}
           </>
         )}

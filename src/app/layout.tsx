@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { Toaster } from "sonner";
 import AuthSessionProvider from "@/components/providers/session-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 
@@ -15,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="no" suppressHydrationWarning>
-      <body>
+      <body suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -23,6 +24,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthSessionProvider>{children}</AuthSessionProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

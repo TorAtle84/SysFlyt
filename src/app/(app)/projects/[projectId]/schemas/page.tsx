@@ -28,6 +28,7 @@ export default async function SchemasPage({ params }: SchemasPageProps) {
             select: { id: true, systemCode: true },
           },
           tags: {
+            orderBy: { order: "asc" },
             include: {
               systemTag: true,
             },

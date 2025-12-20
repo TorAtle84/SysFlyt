@@ -2,7 +2,7 @@ import "@/app/globals.css";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.08),transparent_30%),radial-gradient(circle_at_80%_0%,rgba(16,185,129,0.08),transparent_25%),var(--background)] px-6 py-10">
+    <div className="relative flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.08),transparent_30%),radial-gradient(circle_at_80%_0%,rgba(16,185,129,0.08),transparent_25%),var(--color-background)] px-6 py-10">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_10%,rgba(255,255,255,0.08),transparent_20%),radial-gradient(circle_at_90%_20%,rgba(255,255,255,0.05),transparent_22%)] pointer-events-none" />
       <div className="w-full max-w-5xl rounded-3xl border border-border bg-card/80 p-6 shadow-[0_30px_80px_rgba(0,0,0,0.12)] md:p-12">
         <div className="grid gap-10 md:grid-cols-[1.2fr,1fr]">

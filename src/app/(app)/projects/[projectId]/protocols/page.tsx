@@ -17,36 +17,70 @@ export default async function ProtocolsPage({ params }: ProtocolsPageProps) {
     redirect("/login");
   }
 
+  /* Fetch project for context and permissions */
   const project = await prisma.project.findUnique({
     where: { id: projectId },
+    include: { members: true },
+  });
+
+  if (!project) redirect("/dashboard");
+
+  const membership = project.members.find((m) => m.userId === session.user.id);
+  const isMember = !!membership || session.user.role === Role.ADMIN;
+  if (!isMember) redirect("/dashboard");
+
+  // Allow ADMIN, PROJECT_LEADER (global or project) to create protocols
+  const canCreate =
+    session.user.role === Role.ADMIN ||
+    session.user.role === Role.PROJECT_LEADER ||
+    membership?.role === Role.PROJECT_LEADER;
+
+  /* Fetch protocols with item stats */
+  const protocols = await prisma.mCProtocol.findMany({
+    where: { projectId },
+    orderBy: { systemCode: "asc" },
     include: {
-      massList: {
-        orderBy: { createdAt: "desc" },
-      },
-      members: {
-        where: { userId: session.user.id },
+      items: {
+        select: {
+          columnA: true,
+          columnB: true,
+          columnC: true,
+        },
       },
     },
   });
 
-  if (!project) {
-    redirect("/dashboard");
-  }
+  const protocolsWithStats = protocols.map((p) => {
+    const totalItems = p.items.length;
+    const completedItems = p.items.filter(
+      (i) =>
+        (i.columnA === "COMPLETED" || i.columnA === "NA") &&
+        (i.columnB === "COMPLETED" || i.columnB === "NA") &&
+        (i.columnC === "COMPLETED" || i.columnC === "NA")
+    ).length;
+    const progress = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
 
-  const isAdmin = session.user.role === Role.ADMIN;
-  const isMember = project.members.length > 0;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { items, ...protocolData } = p;
 
-  if (!isAdmin && !isMember) {
-    redirect("/dashboard");
-  }
+    // Override status: if progress is 0, show as NOT_STARTED
+    const derivedStatus = (progress === 0 ? "NOT_STARTED" : protocolData.status) as "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED" | "APPROVED";
 
-  const canCreate =
-    isAdmin || project.members.some((m) => m.role !== "READER");
+    return {
+      ...protocolData,
+      status: derivedStatus,
+      stats: {
+        totalItems,
+        completedItems,
+        progress,
+      },
+    };
+  });
 
   return (
     <ProtocolsContent
       project={project}
-      massListItems={project.massList}
+      protocols={protocolsWithStats}
       canCreate={canCreate}
     />
   );

@@ -157,7 +157,7 @@ export function ProjectContentSwitcher({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-6">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
               <div className="relative h-32 w-32 flex-shrink-0">
                 <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
                   <circle

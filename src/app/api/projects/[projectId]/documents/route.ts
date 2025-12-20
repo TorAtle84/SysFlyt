@@ -3,6 +3,7 @@ import prisma from "@/lib/db";
 import { requireProjectAccess, canUploadDocuments } from "@/lib/auth-helpers";
 import { validateFileName, validateFileSize, validateFileMimeType, saveFile } from "@/lib/file-utils";
 import { extractSystemCodesFromPDF } from "@/lib/pdf-text-extractor";
+import { scanDocumentForComponents, saveComponentsToDocument } from "@/lib/scan";
 
 export async function GET(
   request: NextRequest,
@@ -21,11 +22,11 @@ export async function GET(
     const latestOnly = searchParams.get("latest") !== "false";
 
     const whereClause: Record<string, unknown> = { projectId };
-    
+
     if (type) {
       whereClause.type = type;
     }
-    
+
     if (latestOnly) {
       whereClause.isLatest = true;
     }
@@ -123,7 +124,7 @@ export async function POST(
     let revision = 1;
     if (existingDoc) {
       revision = existingDoc.revision + 1;
-      
+
       await prisma.document.update({
         where: { id: existingDoc.id },
         data: { isLatest: false },
@@ -144,6 +145,8 @@ export async function POST(
       }
     }
 
+    const primarySystem = systemCodes.length > 0 ? systemCodes[0] : null;
+
     const document = await prisma.document.create({
       data: {
         title: title.trim(),
@@ -156,6 +159,7 @@ export async function POST(
         isLatest: true,
         uploadedById: authResult.user.id,
         systemTags: systemCodes,
+        primarySystem,
       },
       include: {
         tags: { include: { systemTag: true } },
@@ -163,7 +167,8 @@ export async function POST(
     });
 
     if (systemCodes.length > 0) {
-      for (const code of systemCodes) {
+      for (let i = 0; i < systemCodes.length; i++) {
+        const code = systemCodes[i];
         try {
           const systemTag = await prisma.systemTag.upsert({
             where: { code },
@@ -175,11 +180,24 @@ export async function POST(
             data: {
               documentId: document.id,
               systemTagId: systemTag.id,
+              order: i,
             },
           });
         } catch (err) {
           console.error(`Error creating system tag ${code}:`, err);
         }
+      }
+    }
+
+    // Auto-scan components if enabled
+    if (autoTag && file.name.toLowerCase().endsWith(".pdf")) {
+      try {
+        console.log(`[Upload] Auto-scanning components for doc ${document.id}`);
+        const scanResult = await scanDocumentForComponents(document.id, { enableGeometry: true });
+        const savedCount = await saveComponentsToDocument(document.id, scanResult.components);
+        console.log(`[Upload] Scanned and saved ${savedCount} components`);
+      } catch (err) {
+        console.error("Error auto-scanning components:", err);
       }
     }
 

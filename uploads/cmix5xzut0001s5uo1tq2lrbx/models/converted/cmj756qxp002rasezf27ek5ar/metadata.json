@@ -1,0 +1,16 @@
+{
+  "generatedAt": "2025-12-15T12:40:52.384Z",
+  "modelId": "cmj756qxp002rasezf27ek5ar",
+  "progress": {
+    "percent": 100,
+    "stage": "Klar"
+  },
+  "stats": {
+    "components": 0,
+    "systems": 0
+  },
+  "artifacts": {
+    "components": "/api/files/cmix5xzut0001s5uo1tq2lrbx/models/converted/cmj756qxp002rasezf27ek5ar/components.json",
+    "metadata": "/api/files/cmix5xzut0001s5uo1tq2lrbx/models/converted/cmj756qxp002rasezf27ek5ar/metadata.json"
+  }
+}

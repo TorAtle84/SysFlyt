@@ -55,6 +55,22 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Kontoen din er ikke aktiv.");
         }
 
+        // Check if TOTP deadline has expired for non-admin users
+        if (user.role !== "ADMIN" && !user.totpEnabled && user.totpDeadline) {
+          const deadline = new Date(user.totpDeadline);
+          const now = new Date();
+
+          if (now >= deadline) {
+            // Automatically deactivate the user
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { status: "PENDING" },
+            });
+
+            throw new Error("TOTP-fristen har utløpt. Kontoen er deaktivert. Kontakt administrator for å reaktivere.");
+          }
+        }
+
         if (user.totpEnabled && user.totpSecret) {
           if (!credentials.totpCode) {
             throw new Error("TOTP_REQUIRED");

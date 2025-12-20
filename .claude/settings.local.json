@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx prisma migrate:*)",
+      "Bash(cat:*)",
+      "Bash(npm run db:migrate:*)",
+      "Bash(npm install)",
+      "Bash(find:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(cmd /c \"taskkill /F /IM node.exe 2>nul & cd /d C:\\Applikasjoner\\SysFlyt & npx prisma generate 2>&1\")",
+      "Bash(powershell -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 2; cd ''C:\\Applikasjoner\\SysFlyt''; npx prisma generate\")",
+      "Bash(cmd /c \"for /f \"\"tokens=5\"\" %a in (''netstat -aon ^| findstr :5000'') do taskkill /F /PID %a\")",
+      "Bash(powershell -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 2; cd ''C:\\Applikasjoner\\SysFlyt''; npm run dev -- -p 5000 2>&1\")",
+      "Bash(taskkill:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

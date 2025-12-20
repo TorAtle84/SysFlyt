@@ -33,8 +33,14 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { TaskPanel } from "./task-panel";
 
@@ -114,21 +120,38 @@ export function ChatRoomView({
   const [showMentions, setShowMentions] = useState(false);
   const [mentionSearch, setMentionSearch] = useState("");
   const [createRoomOpen, setCreateRoomOpen] = useState(false);
+  const [membersOpen, setMembersOpen] = useState(false);
   const [newRoomName, setNewRoomName] = useState("");
   const [creatingRoom, setCreatingRoom] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [deepLinkMessageId, setDeepLinkMessageId] = useState<string | null>(null);
+  const [highlightMessageId, setHighlightMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const deepLinkHandledRef = useRef(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const tab = urlParams.get("tab");
     if (tab === "tasks") {
       setActiveTab("tasks");
+      return;
     }
-  }, []);
+
+    const roomId = urlParams.get("room");
+    const messageId = urlParams.get("message");
+
+    if (roomId) {
+      const room = rooms.find((r) => r.id === roomId);
+      if (room) setSelectedRoom(room);
+    }
+
+    if (messageId) {
+      setDeepLinkMessageId(messageId);
+    }
+  }, [rooms]);
 
   const fetchMessages = useCallback(async () => {
     if (!selectedRoom) return;
@@ -153,8 +176,24 @@ export function ChatRoomView({
   }, [fetchMessages]);
 
   useEffect(() => {
+    if (deepLinkMessageId && !deepLinkHandledRef.current) return;
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, deepLinkMessageId]);
+
+  useEffect(() => {
+    if (!deepLinkMessageId) return;
+    if (deepLinkHandledRef.current) return;
+    if (loading) return;
+
+    const el = document.getElementById(`chat-message-${deepLinkMessageId}`);
+    if (!el) return;
+
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    deepLinkHandledRef.current = true;
+
+    setHighlightMessageId(deepLinkMessageId);
+    window.setTimeout(() => setHighlightMessageId(null), 3500);
+  }, [deepLinkMessageId, loading, messages]);
 
   const handleSendMessage = async () => {
     if ((!messageText.trim() && selectedFiles.length === 0) || !selectedRoom) return;
@@ -345,8 +384,98 @@ export function ChatRoomView({
   );
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] flex-col gap-4 lg:flex-row">
-      <div className="flex flex-col gap-4 lg:w-72">
+    <div className="flex h-[calc(100dvh-8rem)] flex-col gap-4 lg:flex-row">
+      <div className="lg:hidden space-y-3">
+        <div className="flex items-center gap-3">
+          <Link href="/dashboard">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft size={16} />
+            </Button>
+          </Link>
+          <img
+            src="/pratlink-logo.png"
+            alt="PratLink"
+            className="h-10 w-10 rounded-lg object-contain"
+          />
+          <div className="flex-1 min-w-0">
+            <h1 className="font-semibold truncate">{project.name}</h1>
+            <p className="text-xs text-muted-foreground">PratLink</p>
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-11 w-11"
+            onClick={() => setMembersOpen(true)}
+            title="Medlemmer"
+          >
+            <Users size={18} />
+          </Button>
+        </div>
+
+        <div className="flex rounded-lg border border-border bg-muted p-1">
+          <button
+            onClick={() => setActiveTab("chat")}
+            className={cn(
+              "flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              activeTab === "chat"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <MessageSquare size={14} />
+            Chat
+          </button>
+          <button
+            onClick={() => setActiveTab("tasks")}
+            className={cn(
+              "flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              activeTab === "tasks"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <CheckSquare size={14} />
+            Oppgaver
+          </button>
+        </div>
+
+        {activeTab === "chat" && (
+          <div className="flex items-center gap-2">
+            <Select
+              value={selectedRoom?.id || ""}
+              onValueChange={(roomId) => {
+                const room = rooms.find((r) => r.id === roomId);
+                if (room) setSelectedRoom(room);
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Velg rom" />
+              </SelectTrigger>
+              <SelectContent>
+                {rooms.map((room) => (
+                  <SelectItem key={room.id} value={room.id}>
+                    #{room.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {canManageRooms && (
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-11 w-11"
+                onClick={() => setCreateRoomOpen(true)}
+                title="Opprett rom"
+              >
+                <Plus size={18} />
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="hidden lg:flex flex-col gap-4 w-72">
         <div className="flex items-center gap-3">
           <Link href="/dashboard">
             <Button variant="ghost" size="sm">
@@ -396,32 +525,15 @@ export function ChatRoomView({
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm">Rom</CardTitle>
               {canManageRooms && (
-                <Dialog open={createRoomOpen} onOpenChange={setCreateRoomOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7">
-                      <Plus size={14} />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Opprett nytt rom</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 pt-4">
-                      <Input
-                        placeholder="Romnavn (f.eks. Avvik, FDV)"
-                        value={newRoomName}
-                        onChange={(e) => setNewRoomName(e.target.value)}
-                      />
-                      <Button
-                        onClick={handleCreateRoom}
-                        disabled={creatingRoom || !newRoomName.trim()}
-                        className="w-full"
-                      >
-                        {creatingRoom ? "Oppretter..." : "Opprett rom"}
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => setCreateRoomOpen(true)}
+                  title="Opprett rom"
+                >
+                  <Plus size={14} />
+                </Button>
               )}
             </div>
           </CardHeader>
@@ -525,7 +637,15 @@ export function ChatRoomView({
                 ) : (
                   <div className="space-y-4">
                     {messages.map((message) => (
-                      <div key={message.id} className="group flex gap-3">
+                      <div
+                        key={message.id}
+                        id={`chat-message-${message.id}`}
+                        className={cn(
+                          "group flex gap-3 scroll-mt-24",
+                          message.id === highlightMessageId &&
+                            "rounded-lg bg-primary/5 ring-1 ring-primary/30 p-2"
+                        )}
+                      >
                         <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
                           {message.author.firstName[0]}
                           {message.author.lastName[0]}
@@ -604,7 +724,7 @@ export function ChatRoomView({
               <div className="border-t p-4">
                 <div className="relative">
                   {showMentions && filteredMembers.length > 0 && (
-                    <div className="absolute bottom-full left-0 mb-2 w-64 rounded-lg border bg-background p-1 shadow-lg">
+                    <div className="absolute bottom-full left-0 mb-2 w-full max-w-[calc(100vw-2rem)] rounded-lg border bg-background p-1 shadow-lg sm:w-64">
                       {filteredMembers.slice(0, 5).map((member) => (
                         <button
                           key={member.id}
@@ -715,6 +835,63 @@ export function ChatRoomView({
             }}
           />
         </Card>
+      )}
+
+      <Dialog open={membersOpen} onOpenChange={setMembersOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Medlemmer ({members.length})</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[60vh] space-y-1 overflow-auto pr-1">
+            {members.map((member) => (
+              <div
+                key={member.id}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
+                  {member.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .slice(0, 2)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="truncate text-sm font-medium">{member.name}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {member.company || member.email}
+                  </p>
+                </div>
+                <Badge tone="muted" className="text-xs">
+                  {member.role}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {canManageRooms && (
+        <Dialog open={createRoomOpen} onOpenChange={setCreateRoomOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Opprett nytt rom</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <Input
+                placeholder="Romnavn (f.eks. Avvik, FDV)"
+                value={newRoomName}
+                onChange={(e) => setNewRoomName(e.target.value)}
+              />
+              <Button
+                onClick={handleCreateRoom}
+                disabled={creatingRoom || !newRoomName.trim()}
+                className="w-full"
+              >
+                {creatingRoom ? "Oppretter..." : "Opprett rom"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

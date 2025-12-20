@@ -1,0 +1,484 @@
+SysFlyt Funksjonstest-modul: Komplett implementeringsplan
+Oversikt
+Denne planen beskriver implementering av "Funksjonstest"-modulen i SysFlyt, som plasseres under Protokoller MC i prosjektmenyen. Modulen håndterer systematisk testing av systemfunksjoner med predefinerte tester, delansvarlige og full sporbarhet.
+
+DEL 1: Menystruktur og navigasjon
+1.1 Plassering i meny
+Prosjektmeny:
+├── Arbeidstegninger
+├── Systemskjema
+├── Protokoller
+│   ├── Protokoll MC
+│   └── [NY] Funksjonstest    ← Ny undermeny
+└── Modell
+1.2 Funksjonstest-listeside
+Identisk struktur som Protokoll MC-listen:
+
+Liste over alle funksjonstester (én per system)
+Prosentvis fullføring per test
+Sortering og filtrering
+Opprettelse skjer automatisk når system opprettes (likt som Protokoll MC)
+
+
+DEL 2: Datastruktur
+2.1 Ny tabell: function_tests
+FeltBeskrivelseidUnik identifikatorprojectIdKobling til prosjektsystemCodeSystemkode (f.eks. "360.0001")systemOwnerIdSystemeier (bruker-ID)datesJSON med relevante datoeruploadedDocumentsJSON-array med opplastede filercreatedAtOpprettelsestidspunktupdatedAtSist oppdatert
+2.2 Ny tabell: function_test_responsible
+FeltBeskrivelseidUnik identifikatorfunctionTestIdKobling til funksjonstestsystemCodeDelsystemets kode (f.eks. "320.001")disciplineFag (f.eks. "Rørlegger", "Byggautomasjon")userIdEventuell bruker-koblingisAutoDetectedBoolean - hentet automatisk eller manuelt lagt til
+2.3 Ny tabell: function_test_rows
+FeltBeskrivelseidUnik identifikatorfunctionTestIdKobling til funksjonstestsortOrderRekkefølge (for pil opp/ned)status"not_started", "completed", "not_applicable", "deviation"responsibleIdDelansvarlig (kobling til function_test_responsible)category"start_stop", "security", "regulation", "external", "other"systemPartSystemdel (tekst)functionFunksjon (tekst)testExecutionTestutførelse (tekst, redigerbar kopi fra database)acceptanceCriteriaAkseptkriterie (tekst, redigerbar kopi fra database)assignedToIdAnsvarlig (bruker-ID)performedByIdUtførende (bruker-ID)completedDateDato for fullføringcommentsJSON-array med kommentarerpredefinedTestIdKobling til original predefinert test (for sporbarhet)createdAtOpprettelsestidspunktupdatedAtSist oppdatert
+2.4 Ny global tabell: predefined_function_tests
+FeltBeskrivelseidUnik identifikatorcategory"start_stop", "security", "regulation", "external", "other"systemPartSystemdel (tekst)functionFunksjon (tekst)testExecutionTestutførelse (predefinert tekst)acceptanceCriteriaAkseptkriterie (predefinert tekst)isActiveBoolean - kan deaktiveres uten å slettescreatedByIdOpprettet av (admin bruker-ID)createdAtOpprettelsestidspunktupdatedAtSist oppdatert
+
+DEL 3: Toppseksjon i funksjonstest
+3.1 Layout for toppseksjon
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Funksjonstest: 360.0001 - Ventilasjonsanlegg Klatrehall                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│ Datoer              Dokumenter           Systemeier      Delansvarlige      │
+│ ┌─────────────┐     ┌─────────────┐     ┌───────────┐   ┌───────────────┐   │
+│ │ Start:      │     │ 📎 2 filer  │     │ Ola N.    │   │ 3 systemer    │   │
+│ │ 01.12.2025  │     │ [Last opp]  │     │ VVS ▼     │   │ [Administrer] │   │
+│ │             │     └─────────────┘     └───────────┘   └───────────────┘   │
+│ │ Slutt:      │                                                             │
+│ │ 15.01.2026  │                                                             │
+│ └─────────────┘                                                             │
+│                                                                             │
+│ Fullført: ████████████░░░░░░░░░░░░░░░░ 42%                                  │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+3.2 Delansvarlige-modal
+Åpnes ved klikk på "Administrer" under Delansvarlige:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Delansvarlige for 360.0001                                             [X]  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│ Automatisk hentet fra systemskjema:                                         │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 320.001    │ Rørlegger        │ Systemeier: Kari H.    │ [🗑️]          │ │
+│ │ 563.001    │ Byggautomasjon   │ Systemeier: Per S.     │ [🗑️]          │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                             │
+│ Legg til delansvarlig:                                                      │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ System: [433.001          ]  Fag: [Elektro              ]  [+ Legg til] │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                             │
+│                                                      [Avbryt]    [Lagre]    │
+└─────────────────────────────────────────────────────────────────────────────┘
+3.3 Automatisk henting av delansvarlige
+Flyt ved åpning av modal:
+
+Hent systemskjema for primærsystemet (360.0001)
+Parse systemskjema for å finne alle refererte systemer
+For hvert referert system: Slå opp i Protokoll MC for å finne systemeier
+Hvis systemeier finnes: Vis system + fag + systemeier
+Hvis systemeier ikke finnes: Vis system med tomt fag-felt (bruker må velge)
+
+
+DEL 4: Testprotokoll-tabell
+4.1 Kolonnestruktur
+KolonneNavnBeskrivelse-SorteringPil opp/ned for å endre rekkefølgeAStatusDropdown: Ikke startet, Fullført, I/A, AvvikBDelansvarligDropdown med delansvarlige fra modalCKategoriStart og Stopp, Sikkerhet, Regulering, Ekstern, ØvrigDSystemdelFiltrert basert på valgt kategoriEFunksjonFiltrert basert på valgt systemdelFTestutførelsePredefinert tekst (redigerbar)GAkseptkriteriePredefinert tekst (redigerbar)HAnsvarligBrukervelger (likt som Protokoll MC)IUtførendeBrukervelger (likt som Protokoll MC)JDatoDatofelt (aktivt kun når status er Fullført eller I/A)KBehandleHandlingsmeny (likt som Protokoll MC)
+4.2 Tabellvisning
+┌───┬────────┬─────────────┬─────────────┬───────────┬──────────┬─────────────┬──────────────┬──────────┬───────────┬────────┬─────────┐
+│   │ Status │ Delansvarl. │ Kategori    │ Systemdel │ Funksjon │ Testutfør.  │ Akseptkrit.  │ Ansvarl. │ Utførende │ Dato   │ Behandle│
+├───┼────────┼─────────────┼─────────────┼───────────┼──────────┼─────────────┼──────────────┼──────────┼───────────┼────────┼─────────┤
+│▲▼ │ ✓ Full │ 320.001     │ Sikkerhet   │ Brannspj. │ Lukking  │ Aktiver...  │ Spjeld ska...│ Kari H.  │ Per S.    │01.12.25│ ⋮       │
+│▲▼ │ ○ Ikke │ 563.001     │ Sikkerhet   │ Brannspj. │ Signal   │ Verifiser...│ Signal mot...│ -        │ -         │ -      │ ⋮       │
+│▲▼ │ ⊘ I/A  │ -           │ Regulering  │ Temp.reg. │ Settpkt  │ Juster...   │ Temperatur...│ Ola N.   │ Ola N.    │02.12.25│ ⋮       │
+│▲▼ │ ⚠ Avv. │ 320.001     │ Start/Stopp │ Vifte     │ Start    │ Start vi... │ Vifte star...│ Kari H.  │ Lars T.   │03.12.25│ ⋮       │
+├───┴────────┴─────────────┴─────────────┴───────────┴──────────┴─────────────┴──────────────┴──────────┴───────────┴────────┴─────────┤
+│                                                                                              [+ Legg til rad] [+ Egendefinert rad]  │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+4.3 Kategori-rekkefølge og sortering
+Fast rekkefølge for kategorier:
+
+Start og Stopp
+Sikkerhet
+Regulering
+Ekstern
+Øvrig
+
+Innenfor hver kategori: Sortering basert på manuell rekkefølge (pil opp/ned)
+4.4 Filterbar over tabell
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Filter:  [☑ Start/Stopp] [☑ Sikkerhet] [☐ Regulering] [☐ Ekstern] [☑ Øvrig]│
+│          Delansvarlig: [Alle ▼]    Status: [Alle ▼]                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+DEL 5: Legge til testrader
+5.1 Legg til fra predefinert database
+Flyt ved klikk på "+ Legg til rad":
+
+Bruker velger Kategori (dropdown)
+Systemdel-dropdown filtreres til kun alternativer for valgt kategori
+Bruker velger Systemdel
+Funksjon-dropdown filtreres til kun alternativer for valgt systemdel
+Bruker velger Funksjon
+Testutførelse og Akseptkriterie fylles automatisk inn (fra database)
+Bruker kan redigere Testutførelse og Akseptkriterie ved behov
+Rad legges til i tabellen
+
+5.2 Egendefinert rad
+Flyt ved klikk på "+ Egendefinert rad":
+
+Ny rad legges til med tomme felt
+Bruker velger Kategori manuelt
+Bruker skriver inn Systemdel manuelt (fritekst)
+Bruker skriver inn Funksjon manuelt (fritekst)
+Bruker skriver inn Testutførelse manuelt (fritekst)
+Bruker skriver inn Akseptkriterie manuelt (fritekst)
+
+5.3 Sortering med pil opp/ned
+
+Pil opp: Flytt rad én posisjon opp (innenfor samme kategori)
+Pil ned: Flytt rad én posisjon ned (innenfor samme kategori)
+Rader kan ikke flyttes mellom kategorier via piler (kategori må endres i dropdown)
+
+
+DEL 6: Statuslogikk og avvikshåndtering
+6.1 Statusverdier
+StatusIkonBeskrivelseIkke startet○Standard ved opprettelseFullført✓Test gjennomført og godkjentI/A⊘Ikke aktuelt for denne testenAvvik⚠Test feilet, avvik registrert
+6.2 Avvikshåndtering
+Flyt når bruker velger "Avvik":
+
+Dialogboks vises: "Beskriv avvik i kommentarfunksjonen"
+Bruker klikker "OK"
+Kommentarfelt åpnes/highlightes automatisk
+Bruker må legge inn kommentar som beskriver avviket
+Status settes til Avvik
+
+6.3 Dato-felt logikk
+
+Dato-felt er kun aktivt når status er "Fullført" eller "I/A"
+Ved valg av "Fullført" eller "I/A": Dato settes automatisk til dagens dato (kan endres)
+Ved endring tilbake til "Ikke startet": Dato fjernes
+
+
+DEL 7: Behandle-meny (Kolonne K)
+7.1 Menyalternativer
+┌─────────────────┐
+│ ✏️ Rediger      │
+│ 💬 Kommentar    │
+│ 📋 Kopier       │
+│ ───────────     │
+│ 🗑️ Slett        │
+└─────────────────┘
+7.2 Funksjonalitet
+
+Rediger: Åpne rad for redigering (alle felt unntatt status)
+Kommentar: Åpne kommentarfelt (identisk som Protokoll MC)
+Kopier: Kopier rad (ny rad med samme innhold, status settes til "Ikke startet")
+Slett: Slett rad permanent (med bekreftelsesdialog)
+
+
+DEL 8: Send test til annet system
+8.1 Funksjonalitet
+Knapp i toppseksjon eller handlingsmeny: "Send test til..."
+Flyt:
+
+Bruker klikker "Send test til..."
+Modal vises med liste over alle systemer som har Funksjonstest
+Bruker velger ett eller flere målsystemer
+Bruker velger hvilke rader som skal sendes (alle eller utvalgte)
+Bekreftelsesdialog: "Send X testrader til system Y?"
+Ved bekreftelse: Rader kopieres til målsystem(er)
+Kopierte rader får status "Ikke startet" og tom dato
+
+8.2 Modal for "Send test til"
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Send test til andre systemer                                           [X]  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│ Velg rader som skal sendes:                                                 │
+│ ○ Alle rader (24 stk)                                                       │
+│ ● Kun valgte rader (3 stk)                                                  │
+│                                                                             │
+│ Velg målsystem(er):                                                         │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ ☐ 360.0002 - Ventilasjonsanlegg Svømmehall                              │ │
+│ │ ☑ 360.0003 - Ventilasjonsanlegg Garderober                              │ │
+│ │ ☐ 320.0001 - Varmeanlegg                                                │ │
+│ │ ☑ 320.0002 - Kjøleanlegg                                                │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                             │
+│                                                       [Avbryt]    [Send]    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+DEL 9: Admin - Predefinerte tester
+9.1 Tilgang til admin-modal
+Pluss-ikon ved siden av "Systemdel"-kolonneoverskriften (kun synlig for admin):
+│ Systemdel [+] │
+9.2 Admin-modal for predefinerte tester
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Administrer predefinerte tester                                        [X]  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│ Eksisterende tester:                                                        │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ Kategori      │ Systemdel      │ Funksjon       │ Handlinger            │ │
+│ ├───────────────┼────────────────┼────────────────┼───────────────────────┤ │
+│ │ Sikkerhet     │ Brannspjeld    │ Lukking        │ [✏️] [🗑️]             │ │
+│ │ Sikkerhet     │ Brannspjeld    │ Signal til SD  │ [✏️] [🗑️]             │ │
+│ │ Sikkerhet     │ Røykdetektor   │ Deteksjon      │ [✏️] [🗑️]             │ │
+│ │ Regulering    │ Temperatur     │ Settpunkt      │ [✏️] [🗑️]             │ │
+│ │ ...           │ ...            │ ...            │ ...                   │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                             │
+│ ─────────────────────────────────────────────────────────────────────────── │
+│                                                                             │
+│ Legg til ny predefinert test:                                               │
+│                                                                             │
+│ Kategori:        [Sikkerhet              ▼]                                 │
+│                                                                             │
+│ Systemdel:       [                                                    ]     │
+│                                                                             │
+│ Funksjon:        [                                                    ]     │
+│                                                                             │
+│ Testutførelse:   ┌────────────────────────────────────────────────────┐     │
+│                  │                                                    │     │
+│                  │                                                    │     │
+│                  └────────────────────────────────────────────────────┘     │
+│                                                                             │
+│ Akseptkriterie:  ┌────────────────────────────────────────────────────┐     │
+│                  │                                                    │     │
+│                  │                                                    │     │
+│                  └────────────────────────────────────────────────────┘     │
+│                                                                             │
+│                                               [Lagre og ny]    [Lagre]      │
+└─────────────────────────────────────────────────────────────────────────────┘
+9.3 Lagre-flyt
+Ved klikk på "Lagre":
+
+Validering av alle felt (påkrevd)
+Lagre til database
+Dialogboks: "Test lagret! Vil du legge til en ny test?"
+Ja: Tøm feltene, forbli i modal
+Nei: Lukk modal
+
+Ved klikk på "Lagre og ny":
+
+Validering av alle felt (påkrevd)
+Lagre til database
+Tøm feltene automatisk
+Forbli i modal for ny test
+
+9.4 Redigering av eksisterende test
+Ved klikk på ✏️ (rediger):
+
+Feltene fylles med eksisterende verdier
+"Lagre"-knappen endres til "Oppdater"
+Ved lagring: Oppdater databasen
+Eksisterende funksjonstester som bruker denne testen påvirkes IKKE (de beholder sin kopi)
+
+9.5 Sletting av predefinert test
+Ved klikk på 🗑️ (slett):
+
+Bekreftelsesdialog: "Er du sikker? Dette vil ikke påvirke eksisterende funksjonstester."
+Ved bekreftelse: Marker som inaktiv (soft delete)
+Testen vises ikke lenger i dropdown, men data bevares for historikk
+
+
+DEL 10: PDF-eksport
+10.1 Eksport-knapp
+Plassering: Toppseksjon, ved siden av fullføringsprosent
+│ Fullført: ████████████░░░░░░░░░░░░░░░░ 42%    [📄 Eksporter PDF] │
+10.2 Eksportvalidering
+Ved klikk på "Eksporter PDF":
+
+Sjekk alle rader for gyldig status
+Gyldige statuser for eksport: Fullført, I/A, Avvik
+Hvis noen rader har "Ikke startet": Vis feilmelding
+
+Feilmelding:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Kan ikke eksportere                                                    [X]  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│ ⚠️ Funksjonstesten kan ikke eksporteres før alle tester er gjennomført.     │
+│                                                                             │
+│ Følgende rader mangler status:                                              │
+│ • Rad 3: Sikkerhet - Brannspjeld - Signal til SD                           │
+│ • Rad 7: Regulering - Temperatur - Settpunkt                               │
+│                                                                             │
+│ Alle rader må ha status "Fullført", "I/A" eller "Avvik".                    │
+│                                                                             │
+│                                                                   [OK]      │
+└─────────────────────────────────────────────────────────────────────────────┘
+10.3 PDF-innhold
+Side 1: Forside
+
+Prosjektnavn
+Systemnavn og kode
+Systemeier
+Liste over delansvarlige med system og fag
+Datoer (start/slutt)
+Fullføringsstatus (100% ved eksport)
+
+Side 2+: Testprotokoll
+
+Tabell med alle kolonner (unntatt sortering og behandle)
+Gruppert etter kategori
+Fargekoding av status
+Avvikskommentarer inkludert ved Avvik-status
+
+Siste side: Oppsummering
+
+Antall tester per kategori
+Antall Fullført / I/A / Avvik
+Dato for eksport
+Eksportert av (brukernavn)
+
+
+DEL 11: Notifikasjoner
+11.1 Notifikasjon til delansvarlige
+Trigger: Når delansvarlig legges til i funksjonstest
+Melding:
+Du er lagt til som delansvarlig for funksjonstest 360.0001.
+System: 320.001 (Rørlegger)
+Klikk her for å se funksjonstesten.
+11.2 Notifikasjon ved tildeling
+Trigger: Når bruker settes som "Ansvarlig" eller "Utførende" på en rad
+Melding:
+Du har fått tildelt en test i funksjonstest 360.0001.
+Test: Sikkerhet - Brannspjeld - Lukking
+Klikk her for å se testen.
+11.3 Notifikasjon ved avvik
+Trigger: Når status settes til "Avvik"
+Mottakere: Systemeier + relevant delansvarlig
+Melding:
+Avvik registrert i funksjonstest 360.0001.
+Test: Sikkerhet - Brannspjeld - Signal til SD
+Kommentar: [Avvikskommentar her]
+Klikk her for å se detaljer.
+
+DEL 12: Prosentberegning
+12.1 Formel for fullføringsprosent
+Fullført % = (Antall rader med status Fullført, I/A eller Avvik) / (Totalt antall rader) × 100
+12.2 Visning
+
+Vises i toppseksjon som progressbar med prosenttall
+Vises i listeoversikten for hver funksjonstest
+Oppdateres i sanntid ved statusendring
+
+
+DEL 13: Feilhåndtering
+13.1 Valideringsfeil
+ScenarioHåndteringPrøver å lagre rad uten kategoriVis feilmelding, marker feltPrøver å sette Fullført uten AnsvarligTillat, men vis advarselPrøver å eksportere ufullstendig testVis liste over manglende raderPrøver å slette rad med Fullført-statusBekreftelsesdialog med advarsel
+13.2 Datakonflikt
+ScenarioHåndteringTo brukere redigerer samme radSiste lagring vinner, vis notifikasjon til andre brukerDelansvarlig fjernes mens tester er tildeltVis advarsel, behold tildelingerPredefinert test slettes mens i brukEksisterende rader beholder sin kopi
+
+DEL 14: Implementeringsrekkefølge
+Fase 1: Grunnleggende struktur
+
+Database-tabeller og migrasjoner
+Menyintegrasjon under Protokoller
+Listeside for funksjonstester
+Automatisk opprettelse av funksjonstest per system
+
+Fase 2: Toppseksjon
+
+Datoer og dokumentopplasting (gjenbruk fra Protokoll MC)
+Systemeier-felt (gjenbruk fra Protokoll MC)
+Delansvarlige-modal med automatisk henting
+Manuell tillegging av delansvarlige
+
+Fase 3: Admin-funksjonalitet
+
+Global tabell for predefinerte tester
+Admin-modal for å opprette/redigere/slette predefinerte tester
+Kategori → Systemdel → Funksjon hierarki
+
+Fase 4: Testprotokoll-tabell
+
+Tabellstruktur med alle kolonner
+Legg til rad fra predefinert database
+Legg til egendefinert rad
+Sortering med pil opp/ned
+Filtrering på kategori og delansvarlig
+
+Fase 5: Statuslogikk
+
+Statusdropdown med alle verdier
+Avvikshåndtering med dialogboks
+Dato-logikk basert på status
+Prosentberegning og visning
+
+Fase 6: Behandle-funksjonalitet
+
+Behandle-meny (rediger, kommentar, kopier, slett)
+Kommentarfunksjonalitet (gjenbruk fra Protokoll MC)
+Send test til andre systemer
+
+Fase 7: Eksport og notifikasjoner
+
+PDF-eksport med validering
+Notifikasjoner til delansvarlige
+Notifikasjoner ved tildeling og avvik
+
+Fase 8: Polering
+
+Feilhåndtering og edge cases
+Ytelsesoptimalisering
+Testing og QA
+
+
+DEL 15: Testscenarier
+15.1 Oppretting og konfigurasjon
+
+ Funksjonstest opprettes automatisk ved nytt system
+ Delansvarlige hentes automatisk fra systemskjema
+ Systemeier hentes fra Protokoll MC
+ Manuell tillegging av delansvarlig fungerer
+
+15.2 Predefinerte tester (Admin)
+
+ Admin kan opprette ny predefinert test
+ Admin kan redigere eksisterende test
+ Admin kan slette/deaktivere test
+ Kategori-filtrering fungerer for Systemdel
+ Systemdel-filtrering fungerer for Funksjon
+
+15.3 Testprotokoll
+
+ Legge til rad fra predefinert database
+ Legge til egendefinert rad
+ Redigere Testutførelse og Akseptkriterie
+ Sortering med pil opp/ned
+ Filtrering på kategori
+ Filtrering på delansvarlig
+ Filtrering på status
+
+15.4 Status og avvik
+
+ Sette status til Fullført
+ Sette status til I/A
+ Sette status til Avvik → Dialogboks vises
+ Dato settes automatisk ved Fullført/I/A
+ Prosentberegning oppdateres korrekt
+
+15.5 Behandle-funksjoner
+
+ Rediger rad fungerer
+ Kommentar fungerer
+ Kopier rad fungerer
+ Slett rad fungerer med bekreftelse
+
+15.6 Send til andre systemer
+
+ Modal viser alle tilgjengelige systemer
+ Kan velge alle eller utvalgte rader
+ Rader kopieres korrekt til målsystem
+
+15.7 Eksport
+
+ Eksport blokkeres hvis rader mangler status
+ PDF genereres korrekt med alle data
+ Avvikskommentarer inkluderes
+
+15.8 Notifikasjoner
+
+ Delansvarlig mottar notifikasjon ved tillegging
+ Ansvarlig/Utførende mottar notifikasjon ved tildeling
+ Systemeier mottar notifikasjon ved avvik

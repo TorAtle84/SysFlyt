@@ -15,7 +15,36 @@ const MIME_TYPES: Record<string, string> = {
   ".jpeg": "image/jpeg",
   ".gif": "image/gif",
   ".webp": "image/webp",
+  ".json": "application/json",
+  ".glb": "model/gltf-binary",
+  ".gltf": "model/gltf+json",
+  ".bin": "application/octet-stream",
+  ".ifc": "application/octet-stream",
+  ".rvt": "application/octet-stream",
+  ".bim": "application/octet-stream",
 };
+
+function extractModelIdFromModelPath(relativePath: string): string | null {
+  const parts = relativePath.split("/").filter(Boolean);
+  if (parts.length < 3) return null;
+
+  // models/converted/{modelId}/...
+  if (parts[0] === "models" && parts[1] === "converted" && parts[2]) {
+    return parts[2];
+  }
+
+  // models/originals/{modelId}_original.ifc
+  if (parts[0] === "models" && parts[1] === "originals" && parts[2]) {
+    const file = parts[2];
+    const marker = "_original";
+    const idx = file.indexOf(marker);
+    if (idx > 0) {
+      return file.slice(0, idx);
+    }
+  }
+
+  return null;
+}
 
 export async function GET(
   request: NextRequest,
@@ -35,19 +64,33 @@ export async function GET(
       return NextResponse.json({ error: "Ugyldig filsti" }, { status: 400 });
     }
 
-    const document = await prisma.document.findFirst({
-      where: {
-        projectId,
-        OR: [
-          { fileUrl: { contains: fileName } },
-          { fileName: fileName },
-        ],
-      },
-      select: { id: true, projectId: true },
-    });
+    // Ensure the requested file belongs to a known resource in this project.
+    if (fileName.startsWith("models/")) {
+      const modelId = extractModelIdFromModelPath(fileName);
+      if (!modelId) {
+        return NextResponse.json({ error: "Modell ikke funnet" }, { status: 404 });
+      }
 
-    if (!document) {
-      return NextResponse.json({ error: "Dokument ikke funnet" }, { status: 404 });
+      const model = await prisma.bimModel.findFirst({
+        where: { id: modelId, projectId },
+        select: { id: true },
+      });
+
+      if (!model) {
+        return NextResponse.json({ error: "Modell ikke funnet" }, { status: 404 });
+      }
+    } else {
+      const document = await prisma.document.findFirst({
+        where: {
+          projectId,
+          OR: [{ fileUrl: { contains: fileName } }, { fileName: fileName }],
+        },
+        select: { id: true, projectId: true },
+      });
+
+      if (!document) {
+        return NextResponse.json({ error: "Dokument ikke funnet" }, { status: 404 });
+      }
     }
 
     const authResult = await requireProjectAccess(projectId);

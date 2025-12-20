@@ -1,16 +1,24 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default function ResetPage() {
+function ResetPageContent() {
   const search = useSearchParams();
   const token = search.get("token");
   const mode = token ? "confirm" : "request";
 
   return mode === "request" ? <RequestForm /> : <ConfirmForm token={token!} />;
+}
+
+export default function ResetPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPageContent />
+    </Suspense>
+  );
 }
 
 function RequestForm() {

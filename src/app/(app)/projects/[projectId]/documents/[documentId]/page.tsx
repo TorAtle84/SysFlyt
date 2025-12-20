@@ -37,31 +37,18 @@ export default async function DocumentPage({
   }
 
   const document = await prisma.document.findUnique({
-    where: { 
+    where: {
       id: documentId,
       projectId,
     },
     include: {
-      annotations: {
+      systemAnnotations: {
         include: {
-          author: {
+          createdBy: {
             select: {
-              id: true,
               firstName: true,
               lastName: true,
-              email: true,
             },
-          },
-          comments: {
-            include: {
-              author: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                },
-              },
-            },
-            orderBy: { createdAt: "asc" },
           },
         },
         orderBy: { createdAt: "asc" },
@@ -103,36 +90,37 @@ export default async function DocumentPage({
     email: m.user.email,
   }));
 
-  const formattedAnnotations = document.annotations.map((a) => ({
+  const formattedSystemAnnotations = document.systemAnnotations.map((a) => ({
     id: a.id,
-    x: a.x,
-    y: a.y,
-    status: a.status,
-    author: a.author,
-    comments: a.comments.map((c) => ({
-      id: c.id,
-      content: c.content,
-      author: c.author,
-      createdAt: c.createdAt.toISOString(),
-    })),
+    type: a.type as "SYSTEM" | "COMMENT",
+    systemCode: a.systemCode || undefined,
+    content: a.content || undefined,
+    mentions: a.mentions || undefined,
+    points: (a.points as Array<{ x: number; y: number }>) || undefined,
+    x: a.x || undefined,
+    y: a.y || undefined,
+    width: a.width || undefined,
+    height: a.height || undefined,
+    color: a.color,
+    pageNumber: a.pageNumber,
   }));
 
   const resolvedSearchParams = await searchParams;
-  const deepLink: DeepLinkParams = {
-    annotationId: typeof resolvedSearchParams.annotationId === "string" 
-      ? resolvedSearchParams.annotationId 
+  const deepLink = {
+    annotationId: typeof resolvedSearchParams.annotationId === "string"
+      ? resolvedSearchParams.annotationId
       : undefined,
-    component: typeof resolvedSearchParams.component === "string" 
-      ? resolvedSearchParams.component 
+    component: typeof resolvedSearchParams.component === "string"
+      ? resolvedSearchParams.component
       : undefined,
-    x: resolvedSearchParams.x 
-      ? parseFloat(resolvedSearchParams.x as string) 
+    x: resolvedSearchParams.x
+      ? parseFloat(resolvedSearchParams.x as string)
       : undefined,
-    y: resolvedSearchParams.y 
-      ? parseFloat(resolvedSearchParams.y as string) 
+    y: resolvedSearchParams.y
+      ? parseFloat(resolvedSearchParams.y as string)
       : undefined,
-    page: resolvedSearchParams.page 
-      ? parseInt(resolvedSearchParams.page as string, 10) 
+    page: resolvedSearchParams.page
+      ? parseInt(resolvedSearchParams.page as string, 10)
       : undefined,
   };
 
@@ -151,12 +139,14 @@ export default async function DocumentPage({
           url={document.url}
           systemTags={document.systemTags}
           documentId={documentId}
-          initialAnnotations={formattedAnnotations}
-          projectMembers={members}
-          currentUserEmail={session?.user?.email || undefined}
+          projectId={projectId}
+          initialSystemAnnotations={formattedSystemAnnotations}
           canEdit={canEdit}
-          initialAnnotationId={deepLink.annotationId}
           initialPage={deepLink.page}
+          initialAnnotationId={deepLink.annotationId}
+          initialComponent={deepLink.component}
+          initialX={deepLink.x}
+          initialY={deepLink.y}
         />
       </div>
     </div>

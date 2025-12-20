@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -29,12 +30,31 @@ enum DocumentType {
   DRAWING
   SCHEMA
   MASSLIST
+  FUNCTION_DESCRIPTION
   OTHER
 }
 
 enum AnnotationStatus {
   OPEN
   CLOSED
+}
+
+enum ModelFormat {
+  IFC
+  RVT
+  BIM
+}
+
+enum ModelStatus {
+  UPLOADING
+  CONVERTING
+  READY
+  ERROR
+}
+
+enum SystemRole {
+  PRIMARY
+  DELANSVARLIG
 }
 
 model User {
@@ -71,6 +91,16 @@ model User {
   notifications Notification[] @relation("NotificationRecipient")
   systemAnnotations SystemAnnotation[]
   
+  // MC Protocol relations
+  mcResponsibles MCProtocolItem[] @relation("MCResponsible")
+  mcExecutors    MCProtocolItem[] @relation("MCExecutor")
+  mcAssignedProtocols MCProtocol[] @relation("MCAssigned")
+  mcItemComments MCItemComment[]
+
+  // BIM Model relations
+  bimModelsUploaded BimModel[] @relation("BimModelUploader")
+  bimModelSessionsHosted BimModelSession[] @relation("BimModelSessionHost")
+
   // PratLink relations
   chatRoomsCreated    ChatRoom[]       @relation("ChatRoomCreator")
   chatRoomMemberships ChatRoomMember[]
@@ -78,6 +108,13 @@ model User {
   chatMentions        ChatMention[]    @relation("ChatMentionTarget")
   chatTasksResponsible ChatTask[]      @relation("ChatTaskResponsible")
   chatTasksCreated    ChatTask[]       @relation("ChatTaskCreator")
+
+  // Function Test relations
+  functionTestsOwned FunctionTest[] @relation("FunctionTestOwner")
+  functionTestResponsibleEntries FunctionTestResponsible[] @relation("FunctionTestResponsibleUser")
+  functionTestAssignedRows FunctionTestRow[] @relation("FunctionTestAssignedTo")
+  functionTestPerformedRows FunctionTestRow[] @relation("FunctionTestPerformedBy")
+  predefinedFunctionTestsCreated PredefinedFunctionTest[] @relation("PredefinedFunctionTestCreator")
 }
 
 model Project {
@@ -97,6 +134,9 @@ model Project {
   comments  Comment[]
   documents Document[]
   massList  MassList[]
+  mcProtocols MCProtocol[]
+  functionTests FunctionTest[]
+  bimModels BimModel[]
   
   // PratLink relations
   chatRooms ChatRoom[]
@@ -110,7 +150,7 @@ model ProjectMember {
   role      Role     @default(USER)
   createdAt DateTime @default(now())
 
-  project Project @relation(fields: [projectId], references: [id])
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id])
 
   @@unique([projectId, userId])
@@ -126,9 +166,9 @@ model Comment {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  project    Project?    @relation(fields: [projectId], references: [id])
-  annotation Annotation? @relation(fields: [annotationId], references: [id])
-  systemAnnotation SystemAnnotation? @relation(fields: [systemAnnotationId], references: [id])
+  project    Project?    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  annotation Annotation? @relation(fields: [annotationId], references: [id], onDelete: Cascade)
+  systemAnnotation SystemAnnotation? @relation(fields: [systemAnnotationId], references: [id], onDelete: Cascade)
   author     User        @relation(fields: [authorId], references: [id])
   notifications Notification[]
 }
@@ -143,6 +183,7 @@ model Document {
   type        DocumentType      @default(OTHER)
   description String?
   systemTags  String[]
+  primarySystem String?
   revision    Int               @default(1)
   isLatest    Boolean           @default(true)
   approvedDeviations Int        @default(0)
@@ -150,12 +191,78 @@ model Document {
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
-  project     Project           @relation(fields: [projectId], references: [id])
+  project     Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
   uploadedBy  User?             @relation("DocumentUploader", fields: [uploadedById], references: [id])
   annotations Annotation[]
   tags        DocumentSystemTag[]
   components  DocumentComponent[]
   systemAnnotations SystemAnnotation[]
+}
+
+model BimModel {
+  id           String      @id @default(cuid())
+  projectId    String
+  name         String
+  fileName     String
+  fileSize     Int
+  format       ModelFormat
+  originalPath String
+  storagePath  String?
+  status       ModelStatus @default(UPLOADING)
+  errorMessage String?
+  uploadedById String?
+  metadata     Json?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  project    Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  uploadedBy User?   @relation("BimModelUploader", fields: [uploadedById], references: [id])
+  components BimModelComponent[]
+  sessions   BimModelSession[]
+
+  @@index([projectId])
+}
+
+model BimModelComponent {
+  id           String  @id @default(cuid())
+  modelId      String
+  systemCode   String?
+  componentTag String?
+  fullTag      String?
+  ifcGuid      String?
+  ifcType      String?
+  name         String?
+  floor        String?
+  position     Json?
+  boundingBox  Json?
+  properties   Json?
+  createdAt    DateTime @default(now())
+
+  model BimModel @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@unique([modelId, fullTag])
+  @@index([modelId])
+  @@index([fullTag])
+  @@index([systemCode, componentTag])
+}
+
+model BimModelSession {
+  id                  String   @id @default(cuid())
+  modelId              String
+  hostUserId           String
+  cameraPosition       Json?
+  selectedComponentId  String?
+  participants         Json?
+  state                Json?
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  model    BimModel @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  hostUser User     @relation("BimModelSessionHost", fields: [hostUserId], references: [id])
+
+  @@index([modelId])
+  @@index([hostUserId])
 }
 
 model SystemTag {
@@ -171,13 +278,261 @@ model SystemTag {
 }
 
 model DocumentSystemTag {
-  documentId String
+  documentId  String
   systemTagId String
+  order       Int        @default(0)
+  role        SystemRole @default(DELANSVARLIG)
 
-  document Document @relation(fields: [documentId], references: [id])
+  document  Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
   systemTag SystemTag @relation(fields: [systemTagId], references: [id])
 
   @@id([documentId, systemTagId])
+}
+// Global FDV (Leverandør/Produkt database)
+model Supplier {
+  id        String @id @default(cuid())
+  name      String @unique
+  products  Product[]
+}
+
+model Product {
+  id          String @id @default(cuid())
+  name        String
+  supplierId  String
+  supplier    Supplier @relation(fields: [supplierId], references: [id])
+  datasheets  ProductDatasheet[]
+  mcItems     MCProtocolItem[]
+  
+  @@unique([supplierId, name])
+}
+
+model ProductDatasheet {
+  id          String @id @default(cuid())
+  productId   String
+  fileName    String
+  fileUrl     String
+  fileHash    String?  // SHA-256 hash for deduplication
+  type        String   @default("DATASHEET")
+  uploadedAt  DateTime @default(now())
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// MC Protocol
+model MCProtocol {
+  id            String    @id @default(cuid())
+  projectId     String
+  systemCode    String
+  systemName    String?
+  systemOwnerId String?   // Systemeier (fag)
+  assignedUserId String?  // Tilordnet (Forvalter/Leder)
+  
+  startTime     DateTime? // Planlagt start
+  endTime       DateTime? // Planlagt slutt
+
+  status        MCStatus  @default(IN_PROGRESS)
+  completedAt   DateTime?
+  
+  items         MCProtocolItem[]
+  documents     MCSystemDocument[]
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedUser  User?     @relation("MCAssigned", fields: [assignedUserId], references: [id])
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([projectId, systemCode])
+}
+
+model MCSystemDocument {
+  id          String @id @default(cuid())
+  protocolId  String
+  fileName    String
+  fileUrl     String
+  uploadedAt  DateTime @default(now())
+  protocol    MCProtocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+}
+
+model MCProtocolItem {
+  id            String    @id @default(cuid())
+  protocolId    String
+  massListId    String
+
+  @@unique([protocolId, massListId])
+  
+  // A-B-C kolonner
+  columnA       MCItemStatus @default(NOT_STARTED)
+  columnB       MCItemStatus @default(NOT_STARTED)
+  columnC       MCItemStatus @default(NOT_STARTED)
+  
+  // F-G-H kolonner
+  responsibleId String?   // Ansvarlig
+  executorId    String?   // Utførende
+  completedAt   DateTime? // Dato (auto-satt)
+  
+  // FDV kobling
+  productId     String?   // Lenke til global produkt
+  
+  notes         String?
+  photos        MCItemPhoto[]
+  comments      MCItemComment[]
+  
+  protocol      MCProtocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+  massList      MassList   @relation(fields: [massListId], references: [id])
+  responsible   User?      @relation("MCResponsible", fields: [responsibleId], references: [id])
+  executor      User?      @relation("MCExecutor", fields: [executorId], references: [id])
+  product       Product?   @relation(fields: [productId], references: [id])
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model MCItemPhoto {
+  id        String   @id @default(cuid())
+  itemId    String
+  fileUrl   String
+  caption   String?
+  createdAt DateTime @default(now())
+  item      MCProtocolItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
+model MCItemComment {
+  id        String   @id @default(cuid())
+  itemId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+
+  item MCProtocolItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([itemId])
+  @@index([userId])
+}
+
+enum MCStatus {
+  IN_PROGRESS
+  COMPLETED
+  APPROVED
+}
+
+enum MCItemStatus {
+  NOT_STARTED   // Ikke startet
+  IN_PROGRESS   // Under arbeid
+  DEVIATION     // Avvik
+  NA            // I/A
+  COMPLETED     // Utført
+}
+
+// ==========================================
+// Function Tests (Funksjonstest)
+// ==========================================
+
+enum FunctionTestRowStatus {
+  NOT_STARTED
+  COMPLETED
+  NOT_APPLICABLE
+  DEVIATION
+}
+
+enum FunctionTestCategory {
+  START_STOP
+  SECURITY
+  REGULATION
+  EXTERNAL
+  OTHER
+}
+
+model FunctionTest {
+  id                     String   @id @default(cuid())
+  projectId              String
+  systemCode             String
+  systemName             String?
+  systemOwnerId          String?
+  systemOwnerDiscipline  String?
+  softwareResponsible    String?
+  dates                  Json?
+  uploadedDocuments      Json?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  project      Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  systemOwner  User?   @relation("FunctionTestOwner", fields: [systemOwnerId], references: [id])
+  responsibles FunctionTestResponsible[]
+  rows         FunctionTestRow[]
+
+  @@unique([projectId, systemCode])
+  @@index([projectId])
+}
+
+model FunctionTestResponsible {
+  id                    String   @id @default(cuid())
+  functionTestId        String
+  systemCode            String
+  discipline            String
+  systemOwnerDiscipline String?  // Systemeier fag
+  testParticipation     String?  // "Egentest", "Funksjonstest", "Begge"
+  prerequisites         String?  // Forutsetninger - requirements from each discipline
+  userId                String?
+  isAutoDetected        Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  functionTest FunctionTest @relation(fields: [functionTestId], references: [id], onDelete: Cascade)
+  user         User?        @relation("FunctionTestResponsibleUser", fields: [userId], references: [id], onDelete: SetNull)
+  rows         FunctionTestRow[]
+
+  @@index([functionTestId])
+  @@index([userId])
+}
+
+model FunctionTestRow {
+  id                 String                @id @default(cuid())
+  functionTestId     String
+  sortOrder          Int                   @default(0)
+  status             FunctionTestRowStatus @default(NOT_STARTED)
+  responsibleId      String?
+  discipline         String?
+  testParticipation  String?               // "Egentest", "Funksjonstest", "Begge"
+  category           FunctionTestCategory  @default(OTHER)
+  systemPart         String
+  function           String
+  testExecution      String
+  acceptanceCriteria String
+  assignedToId       String?
+  performedById      String?
+  completedDate      DateTime?
+  comments           Json?
+  predefinedTestId   String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  functionTest   FunctionTest              @relation(fields: [functionTestId], references: [id], onDelete: Cascade)
+  responsible    FunctionTestResponsible?  @relation(fields: [responsibleId], references: [id], onDelete: SetNull)
+  assignedTo     User?                     @relation("FunctionTestAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  performedBy    User?                     @relation("FunctionTestPerformedBy", fields: [performedById], references: [id], onDelete: SetNull)
+  predefinedTest PredefinedFunctionTest?   @relation(fields: [predefinedTestId], references: [id], onDelete: SetNull)
+
+  @@unique([functionTestId, predefinedTestId])
+  @@index([functionTestId])
+  @@index([responsibleId])
+  @@index([assignedToId])
+  @@index([performedById])
+}
+
+model PredefinedFunctionTest {
+  id                 String               @id @default(cuid())
+  category           FunctionTestCategory @default(OTHER)
+  systemPart         String
+  function           String
+  testExecution      String
+  acceptanceCriteria String
+  isActive           Boolean              @default(true)
+  createdById        String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  createdBy User? @relation("PredefinedFunctionTestCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  rows      FunctionTestRow[]
 }
 
 model MassList {
@@ -193,6 +548,7 @@ model MassList {
   
   // Additional Info
   productName String?  // Produktnavn (5)
+  supplierName String? // Leverandør (Ny)
   location    String?  // Plassering (6)
   zone        String?  // Sone/Del (7)
   
@@ -201,7 +557,8 @@ model MassList {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  project Project @relation(fields: [projectId], references: [id])
+  project     Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  mcItems     MCProtocolItem[]
 }
 
 model Annotation {
@@ -214,7 +571,7 @@ model Annotation {
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
 
-  document Document @relation(fields: [documentId], references: [id])
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
   author   User     @relation(fields: [authorId], references: [id])
   comments Comment[]
   notifications Notification[]
@@ -232,9 +589,9 @@ model Notification {
   createdAt    DateTime @default(now())
 
   user       User       @relation("NotificationRecipient", fields: [userId], references: [id])
-  comment    Comment?   @relation(fields: [commentId], references: [id])
-  annotation Annotation? @relation(fields: [annotationId], references: [id])
-  systemAnnotation SystemAnnotation? @relation(fields: [systemAnnotationId], references: [id])
+  comment    Comment?   @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  annotation Annotation? @relation(fields: [annotationId], references: [id], onDelete: Cascade)
+  systemAnnotation SystemAnnotation? @relation(fields: [systemAnnotationId], references: [id], onDelete: Cascade)
 }
 
 model DocumentComponent {
@@ -242,15 +599,22 @@ model DocumentComponent {
   documentId String
   code       String
   system     String?
-  
+  order      Int      @default(0)
+
   // Position (percentages 0-100)
   x          Float?
   y          Float?
+  width      Float?
+  height     Float?
   page       Int?
-  
+
+  // Verification
+  verifiedByText Boolean  @default(false)
+  textConfidence Float    @default(0.0)
+
   createdAt  DateTime @default(now())
 
-  document Document @relation(fields: [documentId], references: [id])
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   @@unique([documentId, code])
 }

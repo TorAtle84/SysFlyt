@@ -124,7 +124,7 @@ export async function POST(
       );
     }
 
-    if (accessCheck.message.senderId !== authResult.user.id) {
+    if (accessCheck.message.authorId !== authResult.user.id) {
       return NextResponse.json(
         { error: "Du kan bare legge til lenker til egne meldinger" },
         { status: 403 }
@@ -236,7 +236,7 @@ export async function DELETE(
       );
     }
 
-    if (accessCheck.message.senderId !== authResult.user.id && authResult.user.role !== "ADMIN") {
+    if (accessCheck.message.authorId !== authResult.user.id && authResult.user.role !== "ADMIN") {
       return NextResponse.json(
         { error: "Du kan bare fjerne lenker fra egne meldinger" },
         { status: 403 }

@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: authResult.user.id },
-      select: { 
+      select: {
         passwordHash: true,
         totpEnabled: true,
         totpSecret: true,
@@ -129,8 +129,6 @@ export async function POST(request: NextRequest) {
     });
 
     rateLimitMap.delete(authResult.user.id);
-
-    console.log(`Password changed for user ${authResult.user.id} at ${new Date().toISOString()}`);
 
     return NextResponse.json({ message: "Passord oppdatert" });
   } catch (error) {

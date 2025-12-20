@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
-import { DrawingsContent } from "@/components/pages/project/drawings-content";
+import { DocumentWorkspace } from "@/components/pages/project/document-workspace";
 import { Role } from "@prisma/client";
 
 interface DrawingsPageProps {
@@ -24,11 +24,19 @@ export default async function DrawingsPage({ params }: DrawingsPageProps) {
         where: { type: "DRAWING" },
         orderBy: { createdAt: "desc" },
         include: {
-          annotations: {
+          systemAnnotations: {
+            select: { id: true, systemCode: true },
+          },
+          tags: {
+            orderBy: { order: "asc" },
             include: {
-              author: {
-                select: { firstName: true, lastName: true },
-              },
+              systemTag: true,
+            },
+          },
+          _count: {
+            select: {
+              annotations: true,
+              components: true,
             },
           },
         },
@@ -43,6 +51,11 @@ export default async function DrawingsPage({ params }: DrawingsPageProps) {
     redirect("/dashboard");
   }
 
+  // Fetch all system tags for the filter dropdown
+  const systemTags = await prisma.systemTag.findMany({
+    orderBy: { code: "asc" },
+  });
+
   const isAdmin = session.user.role === Role.ADMIN;
   const isMember = project.members.length > 0;
 
@@ -53,10 +66,29 @@ export default async function DrawingsPage({ params }: DrawingsPageProps) {
   const canUpload =
     isAdmin || project.members.some((m) => m.role !== "READER");
 
+  const formattedDocuments = project.documents.map((doc) => ({
+    id: doc.id,
+    title: doc.title,
+    fileName: doc.fileName,
+    url: doc.url,
+    type: doc.type,
+    revision: doc.revision,
+    isLatest: doc.isLatest,
+    approvedDeviations: doc.approvedDeviations,
+    primarySystem: doc.primarySystem,
+    createdAt: doc.createdAt.toISOString(),
+    updatedAt: doc.updatedAt.toISOString(),
+    tags: doc.tags,
+    systemAnnotations: doc.systemAnnotations,
+    _count: doc._count,
+  }));
+
   return (
-    <DrawingsContent
+    <DocumentWorkspace
       project={project}
-      documents={project.documents}
+      documents={formattedDocuments}
+      systemTags={systemTags}
+      documentType="DRAWING"
       canUpload={canUpload}
     />
   );

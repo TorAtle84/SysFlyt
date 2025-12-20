@@ -25,8 +25,11 @@ export default async function ProjectLayout({ children, params }: ProjectLayoutP
     where: { id: projectId },
     include: {
       members: { select: { userId: true, role: true, user: { select: { firstName: true, lastName: true } } } },
-      documents: { select: { id: true } },
+      documents: { select: { id: true, type: true } },
       massList: { select: { id: true } },
+      mcProtocols: { select: { id: true } },
+      functionTests: { select: { id: true } },
+      bimModels: { select: { id: true } },
     },
   });
 

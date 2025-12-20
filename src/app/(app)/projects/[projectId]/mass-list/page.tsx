@@ -1,20 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { AppShell } from "@/components/layout/app-shell";
-import { ProjectSidebar } from "@/components/pages/project/project-sidebar";
 import { MassListUpload } from "@/components/pages/project/mass-list/mass-list-upload";
 import { MassListTable } from "@/components/pages/project/mass-list/mass-list-table";
 import { Separator } from "@/components/ui/separator";
 import { use } from "react";
+import type { MassListItem } from "@/components/pages/project/mass-list/mass-list-table";
 
 export default function MassListPage({ params }: { params: Promise<{ projectId: string }> }) {
     const { projectId } = use(params);
-    const [data, setData] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState<MassListItem[]>([]);
 
     const loadData = useCallback(async () => {
-        setLoading(true);
         try {
             const res = await fetch(`/api/projects/${projectId}/mass-list`);
             if (res.ok) {
@@ -23,13 +20,12 @@ export default function MassListPage({ params }: { params: Promise<{ projectId: 
             }
         } catch (err) {
             console.error(err);
-        } finally {
-            setLoading(false);
         }
     }, [projectId]);
 
     useEffect(() => {
-        loadData();
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        void loadData();
     }, [loadData]);
 
     const handleDelete = async (id: string) => {
@@ -60,21 +56,19 @@ export default function MassListPage({ params }: { params: Promise<{ projectId: 
     };
 
     return (
-        <AppShell sidebar={<ProjectSidebar projectId={projectId} />}>
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Masseliste</h1>
-                    <p className="text-muted-foreground">
-                        Last opp og administrer masselister for prosjektet.
-                    </p>
-                </div>
-
-                <MassListUpload projectId={projectId} onUploadComplete={loadData} />
-
-                <Separator />
-
-                <MassListTable data={data} onDelete={handleDelete} onDeleteAll={handleDeleteAll} />
+        <div className="space-y-6">
+            <div>
+                <h1 className="text-2xl font-bold tracking-tight">Masseliste</h1>
+                <p className="text-muted-foreground">
+                    Last opp og administrer masselister for prosjektet.
+                </p>
             </div>
-        </AppShell>
+
+            <MassListUpload projectId={projectId} onUploadComplete={loadData} />
+
+            <Separator />
+
+            <MassListTable data={data} onDelete={handleDelete} onDeleteAll={handleDeleteAll} />
+        </div>
     );
 }

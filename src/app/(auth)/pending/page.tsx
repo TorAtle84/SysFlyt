@@ -17,7 +17,7 @@ export default function PendingPage() {
         </p>
       </div>
       <div className="flex gap-3">
-        <Button variant="primary" onClick={() => router.refresh()}>
+        <Button variant="default" onClick={() => router.refresh()}>
           Sjekk status på nytt
         </Button>
         <Button variant="ghost" onClick={() => signOut({ callbackUrl: "/login" })}>

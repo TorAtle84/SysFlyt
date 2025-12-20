@@ -54,20 +54,67 @@ export async function POST(req: NextRequest, context: Context) {
   });
 
   if (Array.isArray(mentions) && mentions.length > 0) {
-    const validMentions = mentions.filter(
-      (userId: unknown) => typeof userId === "string" && userId.length > 0
+    const rawMentionIds = mentions.filter(
+      (userId: unknown): userId is string => typeof userId === "string" && userId.length > 0
     );
 
-    if (validMentions.length > 0) {
-      await prisma.notification.createMany({
-        data: validMentions.map((userId: string) => ({
-          userId,
-          type: "mention",
-          commentId: comment.id,
-          annotationId: annotation.id,
-          metadata: { from: authResult.user.id, annotationId: annotation.id },
-        })),
-      });
+    const uniqueMentionIds = Array.from(new Set(rawMentionIds)).filter(
+      (userId) => userId !== authResult.user.id
+    );
+
+    if (uniqueMentionIds.length > 0) {
+      const [sender, project, eligibleMentionUsers] = await Promise.all([
+        prisma.user.findUnique({
+          where: { id: authResult.user.id },
+          select: { firstName: true, lastName: true },
+        }),
+        prisma.project.findUnique({
+          where: { id: annotation.document.projectId },
+          select: { name: true },
+        }),
+        prisma.user.findMany({
+          where: {
+            id: { in: uniqueMentionIds },
+            status: "ACTIVE",
+            OR: [
+              { role: "ADMIN" },
+              {
+                memberships: {
+                  some: { projectId: annotation.document.projectId },
+                },
+              },
+            ],
+          },
+          select: { id: true },
+        }),
+      ]);
+
+      const eligibleMentionIds = eligibleMentionUsers.map((u) => u.id);
+      if (eligibleMentionIds.length > 0) {
+        const senderName = sender
+          ? `${sender.firstName} ${sender.lastName}`
+          : "Noen";
+
+        const link = `/projects/${annotation.document.projectId}/documents/${annotation.document.id}?annotationId=${encodeURIComponent(annotation.id)}&comment=${encodeURIComponent(comment.id)}`;
+
+        await prisma.notification.createMany({
+          data: eligibleMentionIds.map((userId) => ({
+            userId,
+            type: "mention",
+            commentId: comment.id,
+            annotationId: annotation.id,
+            metadata: {
+              senderName,
+              projectName: project?.name ?? undefined,
+              documentTitle: annotation.document.title,
+              commentId: comment.id,
+              annotationId: annotation.id,
+              messagePreview: comment.content.slice(0, 120),
+              link,
+            },
+          })),
+        });
+      }
     }
   }
 

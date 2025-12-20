@@ -109,7 +109,14 @@ export async function POST(
       );
     }
 
-    const scanResult = await scanDocumentForComponents(documentId);
+    // Parse body for options
+    const body = await request.json().catch(() => ({}));
+    const { enableGeometry, previewPolygon } = body;
+
+    const scanResult = await scanDocumentForComponents(documentId, {
+      enableGeometry,
+      previewPolygon,
+    });
     const savedCount = await saveComponentsToDocument(documentId, scanResult.components);
 
     return NextResponse.json({
@@ -117,6 +124,8 @@ export async function POST(
       scannedCount: scanResult.components.length,
       savedCount,
       systemCodes: scanResult.systemCodes,
+      components: scanResult.components,
+      debugInfo: scanResult.debugInfo,
     });
   } catch (error) {
     console.error("Error scanning components:", error);

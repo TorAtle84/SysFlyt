@@ -202,7 +202,7 @@ export async function POST(
             messageId: message.id,
             projectId: accessCheck.room.projectId,
             projectName: accessCheck.room.project.name,
-            senderName: `${authResult.user.firstName} ${authResult.user.lastName}`,
+            senderName: `${message.author.firstName} ${message.author.lastName}`,
             messagePreview: sanitizedContent.slice(0, 100),
           },
         },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { User, Mail, Building2, Briefcase, Phone, Save, Undo2, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,15 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const initialData = useMemo(() => ({
+    firstName: user.firstName,
+    lastName: user.lastName,
+    phone: user.phone || "",
+    company: user.company || "",
+    title: user.title || "",
+    discipline: user.discipline || "",
+  }), [user]);
+
   const {
     data: formData,
     updateField,
@@ -49,14 +58,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
     resetToServer,
   } = useDraftPersistence<FormData>({
     key: `profile_${user.id}`,
-    initialData: {
-      firstName: user.firstName,
-      lastName: user.lastName,
-      phone: user.phone || "",
-      company: user.company || "",
-      title: user.title || "",
-      discipline: user.discipline || "",
-    },
+    initialData,
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -206,8 +208,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
               <div className="sticky bottom-0 -mx-6 mt-6 border-t border-border bg-card px-6 py-4 sm:relative sm:mx-0 sm:mt-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     loading={loading}
                     disabled={!isDirty && !loading}
                     className="w-full sm:w-auto min-h-[44px] text-base"
@@ -215,7 +217,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     <Save size={18} className="mr-2" />
                     Lagre endringer
                   </Button>
-                  
+
                   {isDirty && !loading && (
                     <Button
                       type="button"
@@ -264,9 +266,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
             <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
               <div
-                className={`h-3 w-3 shrink-0 rounded-full ${
-                  user.status === "ACTIVE" ? "bg-green-500" : "bg-yellow-500"
-                }`}
+                className={`h-3 w-3 shrink-0 rounded-full ${user.status === "ACTIVE" ? "bg-green-500" : "bg-yellow-500"
+                  }`}
               />
               <div>
                 <p className="text-xs text-muted-foreground">Status</p>

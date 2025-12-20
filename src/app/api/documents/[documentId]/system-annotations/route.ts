@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireAuth, canAnnotateDocuments } from "@/lib/auth-helpers";
 import { Point } from "@/lib/geometry-utils";
+import { Prisma } from "@prisma/client";
 
 export async function GET(
   request: NextRequest,
@@ -104,6 +105,14 @@ export async function POST(
       return NextResponse.json({ error: "Sidenummer er påkrevd" }, { status: 400 });
     }
 
+    const parsedPoints: Point[] | null =
+      Array.isArray(points) &&
+      points.every(
+        (p: unknown) => typeof p === "object" && p !== null && "x" in (p as Point) && "y" in (p as Point)
+      )
+        ? (points as Point[])
+        : null;
+
     const annotation = await prisma.systemAnnotation.create({
       data: {
         documentId,
@@ -112,7 +121,7 @@ export async function POST(
         content: content || null,
         pageNumber,
         color: color || "#3B82F6",
-        points: points as Point[] | undefined,
+        points: parsedPoints ? (parsedPoints as unknown as Prisma.JsonArray) : undefined,
         x: x ?? null,
         y: y ?? null,
         width: width ?? null,
@@ -139,7 +148,7 @@ export async function POST(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ documentId: string }> }
+  { params: _params }: { params: Promise<{ documentId: string }> }
 ) {
   try {
     const authResult = await requireAuth();
@@ -182,7 +191,18 @@ export async function PATCH(
     if (systemCode !== undefined) updateData.systemCode = systemCode;
     if (content !== undefined) updateData.content = content;
     if (color !== undefined) updateData.color = color;
-    if (points !== undefined) updateData.points = points;
+    if (points !== undefined) {
+      const parsedPoints: Point[] | null =
+        Array.isArray(points) &&
+        points.every(
+          (p: unknown) => typeof p === "object" && p !== null && "x" in (p as Point) && "y" in (p as Point)
+        )
+          ? (points as Point[])
+          : null;
+      updateData.points = parsedPoints
+        ? (parsedPoints as unknown as Prisma.JsonArray)
+        : null;
+    }
 
     const updated = await prisma.systemAnnotation.update({
       where: { id: annotationId },
@@ -211,7 +231,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ documentId: string }> }
+  { params: _params }: { params: Promise<{ documentId: string }> }
 ) {
   try {
     const authResult = await requireAuth();

@@ -187,7 +187,8 @@ export async function POST(
 
   if (
     task.responsibleUser &&
-    task.responsibleUser.id !== authResult.user.id
+    task.responsibleUser.id !== authResult.user.id &&
+    task.createdBy
   ) {
     const baseUrl =
       process.env.NEXTAUTH_URL || `https://${request.headers.get("host")}`;
@@ -198,7 +199,7 @@ export async function POST(
       task.responsibleUser.firstName,
       task.title,
       task.project.name,
-      `${authResult.user.firstName} ${authResult.user.lastName}`,
+      `${task.createdBy.firstName} ${task.createdBy.lastName}`,
       parsedDueDate
         ? format(parsedDueDate, "d. MMMM yyyy", { locale: nb })
         : null,
@@ -219,7 +220,7 @@ export async function POST(
           taskTitle: task.title,
           projectId,
           projectName: task.project.name,
-          assignerName: `${authResult.user.firstName} ${authResult.user.lastName}`,
+          assignerName: `${task.createdBy.firstName} ${task.createdBy.lastName}`,
         },
       },
     });

@@ -33,8 +33,11 @@ export function useDraftPersistence<T extends object>({
         const parsed = JSON.parse(saved) as T;
         const hasChanges = JSON.stringify(parsed) !== JSON.stringify(initialData);
         if (hasChanges) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setData(parsed);
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setIsDirty(true);
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setHasRecoveredDraft(true);
         } else {
           localStorage.removeItem(storageKey);
@@ -43,7 +46,7 @@ export function useDraftPersistence<T extends object>({
     } catch {
       localStorage.removeItem(storageKey);
     }
-  }, [storageKey]);
+  }, [storageKey, initialData]);
 
   const saveDraft = useCallback(
     (newData: T) => {

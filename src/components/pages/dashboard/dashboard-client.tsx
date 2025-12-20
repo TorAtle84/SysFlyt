@@ -54,12 +54,12 @@ export function DashboardClient({
   return (
     <div className="space-y-6">
       <Card className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 opacity-90" />
-        <CardContent className="relative px-6 py-6 text-white">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900" />
+        <CardContent className="relative px-6 pt-12 pb-6 text-foreground dark:text-white">
           <div className="space-y-4">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-white/70">
+                <p className="text-xs uppercase tracking-[0.35em] text-muted-foreground dark:text-white/70">
                   Kontrollsenter
                 </p>
                 <h1 className="mt-2 flex flex-wrap items-center gap-3 text-2xl font-semibold leading-tight sm:text-3xl lg:text-4xl">

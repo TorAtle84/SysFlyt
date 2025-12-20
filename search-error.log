@@ -1,0 +1,170 @@
+[2025-12-10T19:17:44.724Z] ENTRY: http://0.0.0.0:5000/api/projects/cmix5xzut0001s5uo1tq2lrbx/mc-protocols/items/search?tfmStartsWith=RTA
+[2025-12-10T19:17:44.746Z] CRASH: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].mCProtocolItem.findMany()` invocation in
+C:\Applikasjoner\SysFlyt\.next\dev\server\chunks\[root-of-the-server]__5c8eba02._.js:374:170
+
+  371         ]
+  372     };
+  373 }
+→ 374 const items = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].mCProtocolItem.findMany({
+        where: {
+          protocol: {
+            projectId: "cmix5xzut0001s5uo1tq2lrbx"
+          },
+          massList: {
+            OR: [
+              {
+                tfm: {
+                  contains: "RTA"
+                }
+              },
+              {
+                component: {
+                  startsWith: "RTA"
+                }
+              }
+            ]
+          }
+        },
+        select: {
+          id: true,
+          massList: {
+            select: {
+              tfm: true,
+              typeCode: true,
+              component: true,
+              description: true
+            }
+          },
+          protocol: {
+            select: {
+              title: true,
+              ~~~~~
+      ?       id?: true,
+      ?       projectId?: true,
+      ?       systemCode?: true,
+      ?       systemName?: true,
+      ?       systemOwnerId?: true,
+      ?       status?: true,
+      ?       completedAt?: true,
+      ?       createdAt?: true,
+      ?       updatedAt?: true,
+      ?       items?: true,
+      ?       documents?: true,
+      ?       project?: true,
+      ?       _count?: true
+            }
+          },
+          product: {
+            select: {
+              name: true
+            }
+          }
+        },
+        take: 100
+      })
+
+Unknown field `title` for select statement on model `MCProtocol`. Available options are marked with ?.
+STACK: PrismaClientValidationError: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].mCProtocolItem.findMany()` invocation in
+C:\Applikasjoner\SysFlyt\.next\dev\server\chunks\[root-of-the-server]__5c8eba02._.js:374:170
+
+  371         ]
+  372     };
+  373 }
+→ 374 const items = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].mCProtocolItem.findMany({
+        where: {
+          protocol: {
+            projectId: "cmix5xzut0001s5uo1tq2lrbx"
+          },
+          massList: {
+            OR: [
+              {
+                tfm: {
+                  contains: "RTA"
+                }
+              },
+              {
+                component: {
+                  startsWith: "RTA"
+                }
+              }
+            ]
+          }
+        },
+        select: {
+          id: true,
+          massList: {
+            select: {
+              tfm: true,
+              typeCode: true,
+              component: true,
+              description: true
+            }
+          },
+          protocol: {
+            select: {
+              title: true,
+              ~~~~~
+      ?       id?: true,
+      ?       projectId?: true,
+      ?       systemCode?: true,
+      ?       systemName?: true,
+      ?       systemOwnerId?: true,
+      ?       status?: true,
+      ?       completedAt?: true,
+      ?       createdAt?: true,
+      ?       updatedAt?: true,
+      ?       items?: true,
+      ?       documents?: true,
+      ?       project?: true,
+      ?       _count?: true
+            }
+          },
+          product: {
+            select: {
+              name: true
+            }
+          }
+        },
+        take: 100
+      })
+
+Unknown field `title` for select statement on model `MCProtocol`. Available options are marked with ?.
+    at wn (C:\Applikasjoner\SysFlyt\node_modules\@prisma\client\runtime\library.js:29:1363)
+    at $n.handleRequestError (C:\Applikasjoner\SysFlyt\node_modules\@prisma\client\runtime\library.js:121:6958)
+    at $n.handleAndLogRequestError (C:\Applikasjoner\SysFlyt\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Applikasjoner\SysFlyt\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Applikasjoner\SysFlyt\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async GET (C:\Applikasjoner\SysFlyt\.next\dev\server\chunks\[root-of-the-server]__5c8eba02._.js:374:23)
+    at async AppRouteRouteModule.do (C:\Applikasjoner\SysFlyt\node_modules\next\dist\compiled\next-server\app-route-turbo.runtime.dev.js:5:37789)
+    at async AppRouteRouteModule.handle (C:\Applikasjoner\SysFlyt\node_modules\next\dist\compiled\next-server\app-route-turbo.runtime.dev.js:5:45045)
+    at async responseGenerator (C:\Applikasjoner\SysFlyt\.next\dev\server\chunks\node_modules_next_c4a03e27._.js:15485:38)
+    at async AppRouteRouteModule.handleResponse (C:\Applikasjoner\SysFlyt\node_modules\next\dist\compiled\next-server\app-route-turbo.runtime.dev.js:1:187851)
+    at async handleResponse (C:\Applikasjoner\SysFlyt\.next\dev\server\chunks\node_modules_next_c4a03e27._.js:15547:32)
+    at async handler (C:\Applikasjoner\SysFlyt\.next\dev\server\chunks\node_modules_next_c4a03e27._.js:15600:13)
+    at async DevServer.renderToResponseWithComponentsImpl (C:\Applikasjoner\SysFlyt\node_modules\next\dist\server\base-server.js:1413:9)
+    at async DevServer.renderPageComponent (C:\Applikasjoner\SysFlyt\node_modules\next\dist\server\base-server.js:1465:24)
+    at async DevServer.renderToResponseImpl (C:\Applikasjoner\SysFlyt\node_modules\next\dist\server\base-server.js:1515:32)
+    at async DevServer.pipeImpl (C:\Applikasjoner\SysFlyt\node_modules\next\dist\server\base-server.js:1021:25)
+    at async NextNodeServer.handleCatchallRenderRequest (C:\Applikasjoner\SysFlyt\node_modules\next\dist\server\next-server.js:394:17)
+    at async DevServer.handleRequestImpl (C:\Applikasjoner\SysFlyt\node_modules\next\dist\server\base-server.js:912:17)
+    at async C:\Applikasjoner\SysFlyt\node_modules\next\dist\server\dev\next-dev-server.js:382:20
+    at async Span.traceAsyncFn (C:\Applikasjoner\SysFlyt\node_modules\next\dist\trace\trace.js:157:20)
+    at async DevServer.handleRequest (C:\Applikasjoner\SysFlyt\node_modules\next\dist\server\dev\next-dev-server.js:378:24)
+    at async invokeRender (C:\Applikasjoner\SysFlyt\node_modules\next\dist\server\lib\router-server.js:240:21)
+    at async handleRequest (C:\Applikasjoner\SysFlyt\node_modules\next\dist\server\lib\router-server.js:436:24)
+    at async requestHandlerImpl (C:\Applikasjoner\SysFlyt\node_modules\next\dist\server\lib\router-server.js:484:13)
+    at async Server.requestListener (C:\Applikasjoner\SysFlyt\node_modules\next\dist\server\lib\start-server.js:226:13)
+[2025-12-10T19:18:55.288Z] ENTRY: http://0.0.0.0:5000/api/projects/cmix5xzut0001s5uo1tq2lrbx/mc-protocols/items/search?tfmStartsWith=RTA
+[2025-12-10T19:19:03.448Z] ENTRY: http://0.0.0.0:5000/api/projects/cmix5xzut0001s5uo1tq2lrbx/mc-protocols/items/search?tfmStartsWith=RTA
+[2025-12-10T19:19:29.655Z] ENTRY: http://0.0.0.0:5000/api/projects/cmix5xzut0001s5uo1tq2lrbx/mc-protocols/items/search?tfmStartsWith=RTA
+[2025-12-20T07:04:23.566Z] ENTRY: http://0.0.0.0:5000/api/projects/cmix5xzut0001s5uo1tq2lrbx/mc-protocols/items/search?tfmStartsWith=JPB
+[2025-12-20T07:04:29.662Z] ENTRY: http://0.0.0.0:5000/api/projects/cmix5xzut0001s5uo1tq2lrbx/mc-protocols/items/search?tfmStartsWith=JPA
+[2025-12-20T07:05:10.438Z] ENTRY: http://0.0.0.0:5000/api/projects/cmix5xzut0001s5uo1tq2lrbx/mc-protocols/items/search?tfmStartsWith=JPA
+[2025-12-20T07:08:21.342Z] ENTRY: http://0.0.0.0:5000/api/projects/cmix5xzut0001s5uo1tq2lrbx/mc-protocols/items/search?tfmStartsWith=JPA
+[2025-12-20T07:13:15.652Z] ENTRY: http://0.0.0.0:5000/api/projects/cmix5xzut0001s5uo1tq2lrbx/mc-protocols/items/search?tfmStartsWith=JPA
+[2025-12-20T07:16:10.971Z] ENTRY: http://0.0.0.0:5000/api/projects/cmix5xzut0001s5uo1tq2lrbx/mc-protocols/items/search?tfmStartsWith=RTB
+[2025-12-20T07:20:23.418Z] ENTRY: http://0.0.0.0:5000/api/projects/cmix5xzut0001s5uo1tq2lrbx/mc-protocols/items/search?tfmStartsWith=RTB
+[2025-12-20T07:21:24.611Z] ENTRY: http://0.0.0.0:5000/api/projects/cmix5xzut0001s5uo1tq2lrbx/mc-protocols/items/search?tfmStartsWith=RI
+[2025-12-20T07:53:53.840Z] ENTRY: http://0.0.0.0:5000/api/projects/cmix5xzut0001s5uo1tq2lrbx/mc-protocols/items/search?tfmStartsWith=RIZ

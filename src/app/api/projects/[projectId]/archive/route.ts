@@ -43,3 +43,45 @@ export async function POST(
     );
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ projectId: string }> }
+) {
+  try {
+    const { projectId } = await params;
+
+    const authResult = await requireProjectLeaderAccess(projectId);
+    if (!authResult.success) {
+      return authResult.error;
+    }
+
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: "Prosjekt ikke funnet" }, { status: 404 });
+    }
+
+    if (project.status !== "ARCHIVED") {
+      return NextResponse.json(
+        { error: "Kun arkiverte prosjekter kan slettes" },
+        { status: 400 }
+      );
+    }
+
+    // Delete the project and all related data (cascades)
+    await prisma.project.delete({
+      where: { id: projectId },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting archived project:", error);
+    return NextResponse.json(
+      { error: "Kunne ikke slette prosjekt" },
+      { status: 500 }
+    );
+  }
+}

@@ -7,9 +7,10 @@ import { useEffect, useState } from "react";
 
 export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -21,18 +22,20 @@ export function ThemeToggle() {
     );
   }
 
+  const isDark = resolvedTheme === "dark";
+
   return (
     <Button
       variant="ghost"
       size="sm"
       className="w-9 h-9 p-0"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      title={theme === "dark" ? "Bytt til lys modus" : "Bytt til mørk modus"}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      title={isDark ? "Bytt til lys modus" : "Bytt til mørk modus"}
     >
-      {theme === "dark" ? (
+      {isDark ? (
         <Sun size={18} className="text-yellow-500" />
       ) : (
-        <Moon size={18} className="text-slate-700" />
+        <Moon size={18} className="text-slate-700 dark:text-slate-300" />
       )}
     </Button>
   );

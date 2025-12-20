@@ -1,252 +1,341 @@
 "use client";
 
 import { useState } from "react";
-import { format } from "date-fns";
-import { nb } from "date-fns/locale";
+import { useRouter } from "next/navigation";
 import {
   ClipboardCheck,
-  Plus,
   Search,
-  FileDown,
-  Building2,
-  Cpu,
-  MapPin,
+  Plus,
+  ArrowRight,
+  FileText,
+  AlertCircle,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
-interface MassListItem {
+interface ProtocolWithStats {
   id: string;
-  tfm?: string | null;
-  building?: string | null;
-  system?: string | null;
-  component?: string | null;
-  typeCode?: string | null;
-  productName?: string | null;
-  location?: string | null;
-  zone?: string | null;
-  createdAt: Date;
+  systemCode: string;
+  systemName: string | null;
+  status: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED" | "APPROVED";
+  stats: {
+    totalItems: number;
+    completedItems: number;
+    progress: number;
+  };
 }
 
 interface ProtocolsContentProps {
   project: { id: string; name: string };
-  massListItems: MassListItem[];
+  protocols: ProtocolWithStats[];
   canCreate: boolean;
 }
 
 export function ProtocolsContent({
   project,
-  massListItems,
+  protocols,
   canCreate,
 }: ProtocolsContentProps) {
+  const router = useRouter();
+
+  function getProgressColor(progress: number): string {
+    if (progress <= 50) {
+      // Light Pastel Orange
+      return "hsl(30, 95%, 75%)";
+    } else if (progress <= 75) {
+      // Gradient towards Light Pastel Yellow
+      // 50% = 30 hue, 75% = 60 hue
+      const percentage = (progress - 50) / 25; // 0 to 1
+      const hue = 30 + (percentage * 30); // 30 to 60
+      return `hsl(${hue}, 95%, 75%)`;
+    } else {
+      // Gradient towards Green
+      // 75% = 60 hue, 100% = 142 hue
+      const percentage = (progress - 75) / 25; // 0 to 1
+      const hue = 60 + (percentage * 82); // 60 to 142
+      return `hsl(${hue}, 90%, 75%)`;
+      // Note: Kept lightness high (75%) for pastel look
+    }
+  }
   const [search, setSearch] = useState("");
-  const [systemFilter, setSystemFilter] = useState<string>("all");
-  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [filter, setFilter] = useState<Set<string>>(new Set());
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [protocolToDelete, setProtocolToDelete] = useState<string | null>(null);
+  const [showGenerateConfirm, setShowGenerateConfirm] = useState(false);
 
-  const systems = [...new Set(massListItems.map((item) => item.system).filter(Boolean))];
-
-  const filteredItems = massListItems.filter((item) => {
-    const matchesSearch =
-      !search ||
-      item.tfm?.toLowerCase().includes(search.toLowerCase()) ||
-      item.productName?.toLowerCase().includes(search.toLowerCase()) ||
-      item.location?.toLowerCase().includes(search.toLowerCase());
-
-    const matchesSystem =
-      systemFilter === "all" || item.system === systemFilter;
-
-    return matchesSearch && matchesSystem;
-  });
-
-  function toggleItem(id: string) {
-    const newSelected = new Set(selectedItems);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setSelectedItems(newSelected);
-  }
-
-  function selectAll() {
-    if (selectedItems.size === filteredItems.length) {
-      setSelectedItems(new Set());
-    } else {
-      setSelectedItems(new Set(filteredItems.map((item) => item.id)));
-    }
-  }
-
-  async function generateProtocol() {
-    if (selectedItems.size === 0) return;
-
+  async function handleDelete(protocolId: string) {
     try {
-      const res = await fetch(`/api/projects/${project.id}/protocols`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          massListItemIds: Array.from(selectedItems),
-        }),
+      const res = await fetch(`/api/projects/${project.id}/mc-protocols/${protocolId}`, {
+        method: "DELETE",
       });
 
-      if (res.ok) {
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `protokoll-${format(new Date(), "yyyy-MM-dd")}.pdf`;
-        a.click();
-        URL.revokeObjectURL(url);
-        setSelectedItems(new Set());
+      if (!res.ok) throw new Error("Kunne ikke slette protokoll");
+
+      toast.success("Protokoll slettet");
+      router.refresh();
+    } catch (error) {
+      toast.error("Kunne ikke slette protokoll");
+      console.error(error);
+    } finally {
+      setProtocolToDelete(null);
+    }
+  }
+
+  const filteredProtocols = protocols.filter((p) => {
+    const searchLower = search.toLowerCase();
+    const searchMatch = (
+      p.systemCode.toLowerCase().includes(searchLower) ||
+      p.systemName?.toLowerCase().includes(searchLower)
+    );
+
+    if (filter.size === 0) return searchMatch;
+
+    const statusMatches = [];
+    if (filter.has("NOT_STARTED") && p.status === "NOT_STARTED") statusMatches.push(true);
+    if (filter.has("IN_PROGRESS") && p.status === "IN_PROGRESS") statusMatches.push(true);
+    if (filter.has("COMPLETED") && p.status === "COMPLETED") statusMatches.push(true);
+    if (filter.has("APPROVED") && p.status === "APPROVED") statusMatches.push(true);
+
+    return searchMatch && statusMatches.length > 0;
+  });
+
+  async function handleGenerateProtocols() {
+    setIsGenerating(true);
+    try {
+      const res = await fetch(`/api/projects/${project.id}/mc-protocols`, {
+        method: "POST",
+        body: JSON.stringify({}),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Kunne ikke generere protokoller (ukjent feil)");
       }
-    } catch (err) {
-      console.error(err);
+
+      const data = await res.json();
+      toast.success(data.message || "Protokoller generert");
+      router.refresh();
+    } catch (error: any) {
+      toast.error(error.message || "Noe gikk galt under generering");
+      console.error(error);
+    } finally {
+      setIsGenerating(false);
     }
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Protokoller MC</h1>
           <p className="text-muted-foreground">
-            Generer mekanisk komplettering protokoller fra masselisten
+            Oversikt over mekanisk komplettering per system
           </p>
         </div>
-        {canCreate && selectedItems.size > 0 && (
-          <Button onClick={generateProtocol}>
-            <FileDown size={16} className="mr-2" />
-            Generer protokoll ({selectedItems.size})
+        {canCreate && (
+          <Button
+            onClick={() => setShowGenerateConfirm(true)}
+            disabled={isGenerating}
+          >
+            {isGenerating ? "Genererer..." : "Generer/Oppdater Protokoller"}
           </Button>
         )}
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row">
+      <div className="flex items-center gap-4">
         <div className="relative flex-1">
           <Search
             size={16}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <Input
-            placeholder="Søk etter TFM, produkt eller plassering..."
+            placeholder="Søk etter system..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
+            className="pl-9 w-full sm:w-80"
           />
         </div>
-        <Select value={systemFilter} onValueChange={setSystemFilter}>
-          <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder="Alle systemer" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Alle systemer</SelectItem>
-            {systems.map((sys) => (
-              <SelectItem key={sys} value={sys!}>
-                {sys}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <MultiSelectFilter
+          title="Status"
+          options={[
+            { label: "Ikke startet", value: "NOT_STARTED" },
+            { label: "Pågår", value: "IN_PROGRESS" },
+            { label: "Fullført", value: "COMPLETED" },
+            { label: "Godkjent", value: "APPROVED" },
+          ]}
+          selectedValues={filter}
+          onSelectionChange={setFilter}
+        />
       </div>
 
-      {filteredItems.length === 0 ? (
+      {protocols.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <ClipboardCheck size={48} className="mb-4 text-muted-foreground/50" />
             <h3 className="text-lg font-medium text-foreground">
-              Ingen komponenter
+              Ingen protokoller
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              {search || systemFilter !== "all"
-                ? "Ingen komponenter matcher filteret"
-                : "Importer masseliste for å generere protokoller"}
+              Trykk på "Generer/Oppdater Protokoller" for å opprette protokoller basert på masselisten.
             </p>
           </CardContent>
         </Card>
       ) : (
-        <>
-          <div className="flex items-center justify-between rounded-lg border border-border bg-card p-3">
-            <label className="flex cursor-pointer items-center gap-2">
-              <input
-                type="checkbox"
-                checked={selectedItems.size === filteredItems.length}
-                onChange={selectAll}
-                className="h-4 w-4 rounded border-border"
-              />
-              <span className="text-sm text-muted-foreground">
-                Velg alle ({filteredItems.length})
-              </span>
-            </label>
-            {selectedItems.size > 0 && (
-              <span className="text-sm text-primary">
-                {selectedItems.size} valgt
-              </span>
-            )}
-          </div>
-
-          <div className="grid gap-3">
-            {filteredItems.map((item) => (
-              <Card
-                key={item.id}
-                className={`cursor-pointer transition-colors ${
-                  selectedItems.has(item.id)
-                    ? "border-primary bg-primary/5"
-                    : "hover:border-primary/50"
-                }`}
-                onClick={() => toggleItem(item.id)}
-              >
-                <CardContent className="flex items-center gap-4 p-4">
-                  <input
-                    type="checkbox"
-                    checked={selectedItems.has(item.id)}
-                    onChange={() => toggleItem(item.id)}
-                    onClick={(e) => e.stopPropagation()}
-                    className="h-4 w-4 rounded border-border"
-                  />
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-sm font-medium text-foreground">
-                        {item.tfm || "—"}
-                      </span>
-                      {item.system && (
-                        <Badge variant="outline" className="text-xs">
-                          <Cpu size={10} className="mr-1" />
-                          {item.system}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {item.productName || "Ukjent produkt"}
-                    </p>
-                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                      {item.building && (
-                        <span className="flex items-center gap-1">
-                          <Building2 size={12} />
-                          Bygg {item.building}
-                        </span>
-                      )}
-                      {item.location && (
-                        <span className="flex items-center gap-1">
-                          <MapPin size={12} />
-                          {item.location}
-                        </span>
-                      )}
-                    </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredProtocols.map((protocol) => (
+            <Card
+              key={protocol.id}
+              className="cursor-pointer transition-all hover:border-primary/50 hover:shadow-sm"
+              onClick={() =>
+                router.push(
+                  `/projects/${project.id}/protocols/${protocol.id}`
+                )
+              }
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline" className="font-mono">
+                    {protocol.systemCode}
+                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <StatusBadge status={protocol.status} />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setProtocolToDelete(protocol.id);
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </>
+                </div>
+                <CardTitle className="leading-snug">
+                  {protocol.systemName || `System ${protocol.systemCode}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Fremdrift</span>
+                      <span className="font-medium">
+                        {protocol.stats.progress}%
+                      </span>
+                    </div>
+                    <Progress
+                      value={protocol.stats.progress}
+                      className="h-2"
+                      indicatorColor={getProgressColor(protocol.stats.progress)}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between border-t pt-4 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <FileText size={12} />
+                      {protocol.stats.completedItems} / {protocol.stats.totalItems} punkter
+                    </span>
+                    <ArrowRight size={14} className="opacity-50" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
-    </div>
+
+      <Dialog open={!!protocolToDelete} onOpenChange={(open) => !open && setProtocolToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Slett protokoll</DialogTitle>
+            <DialogDescription>
+              Er du sikker på at du vil slette denne protokollen? Dette vil slette alle registrerte data og koblinger i protokollen. Handlingen kan ikke angres.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setProtocolToDelete(null)}>
+              Avbryt
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => protocolToDelete && handleDelete(protocolToDelete)}
+            >
+              Slett
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showGenerateConfirm} onOpenChange={setShowGenerateConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Generer/Oppdater Protokoller</DialogTitle>
+            <DialogDescription>
+              Dette vil skanne alle dokumenter i prosjektet og opprette eller oppdatere MC-protokoller basert på systemkoder (f.eks. =3601.009). Eksisterende data vil ikke bli overskrevet, men nye linjer kan legges til. Vil du fortsette?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowGenerateConfirm(false)}>
+              Avbryt
+            </Button>
+            <Button
+              onClick={() => {
+                setShowGenerateConfirm(false);
+                handleGenerateProtocols();
+              }}
+            >
+              Oppdater
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div >
   );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  switch (status) {
+    case "COMPLETED":
+      return (
+        <Badge className="bg-green-500/15 text-green-700 hover:bg-green-500/25 border-green-200">
+          Fullført
+        </Badge>
+      );
+    case "IN_PROGRESS":
+      return (
+        <Badge className="bg-blue-500/15 text-blue-700 hover:bg-blue-500/25 border-blue-200">
+          Pågår
+        </Badge>
+      );
+    case "APPROVED":
+      return (
+        <Badge className="bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/25 border-emerald-200">
+          Godkjent
+        </Badge>
+      );
+    default:
+      return (
+        <Badge variant="secondary" className="text-muted-foreground">
+          Ikke startet
+        </Badge>
+      );
+  }
 }

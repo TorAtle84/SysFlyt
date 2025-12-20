@@ -6,17 +6,19 @@ import prisma from "./db";
 export type AuthUser = {
   id: string;
   email: string;
+  firstName: string;
+  lastName: string;
   role: "ADMIN" | "PROJECT_LEADER" | "USER" | "READER";
   status: "PENDING" | "ACTIVE" | "SUSPENDED";
 };
 
-export type AuthResult = 
+export type AuthResult =
   | { success: true; user: AuthUser }
   | { success: false; error: NextResponse };
 
 export async function requireAuth(): Promise<AuthResult> {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user?.id) {
     return {
       success: false,
@@ -26,7 +28,7 @@ export async function requireAuth(): Promise<AuthResult> {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true, email: true, role: true, status: true },
+    select: { id: true, email: true, firstName: true, lastName: true, role: true, status: true, totpEnabled: true, totpDeadline: true },
   });
 
   if (!user) {
@@ -34,6 +36,28 @@ export async function requireAuth(): Promise<AuthResult> {
       success: false,
       error: NextResponse.json({ error: "Bruker ikke funnet" }, { status: 401 }),
     };
+  }
+
+  // Check if TOTP deadline has expired for non-admin users
+  if (user.role !== "ADMIN" && !user.totpEnabled && user.totpDeadline) {
+    const deadline = new Date(user.totpDeadline);
+    const now = new Date();
+
+    if (now >= deadline) {
+      // Automatically deactivate the user
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { status: "PENDING" },
+      });
+
+      return {
+        success: false,
+        error: NextResponse.json(
+          { error: "TOTP-fristen har utløpt. Kontoen er deaktivert. Kontakt administrator for å reaktivere." },
+          { status: 403 }
+        ),
+      };
+    }
   }
 
   if (user.status !== "ACTIVE") {
@@ -51,7 +75,7 @@ export async function requireAuth(): Promise<AuthResult> {
 
 export async function requireAdmin(): Promise<AuthResult> {
   const authResult = await requireAuth();
-  
+
   if (!authResult.success) {
     return authResult;
   }
@@ -68,7 +92,7 @@ export async function requireAdmin(): Promise<AuthResult> {
 
 export async function requireProjectAccess(projectId: string): Promise<AuthResult> {
   const authResult = await requireAuth();
-  
+
   if (!authResult.success) {
     return authResult;
   }
@@ -96,7 +120,7 @@ export async function requireProjectAccess(projectId: string): Promise<AuthResul
 
 export async function requireProjectLeaderAccess(projectId: string): Promise<AuthResult> {
   const authResult = await requireAuth();
-  
+
   if (!authResult.success) {
     return authResult;
   }

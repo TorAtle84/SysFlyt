@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import * as XLSX from "xlsx";
+import { z } from "zod";
 import { requireProjectAccess, requireProjectLeaderAccess, canUploadDocuments } from "@/lib/auth-helpers";
 import { validateFileName, validateFileSize } from "@/lib/file-utils";
+import { parseTFM } from "@/lib/tfm-id";
+
+// Zod schema for column mapping validation
+const MappingSchema = z.object({
+  tfm: z.string().optional(),
+  productName: z.string().nullable().optional(),
+  supplierName: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  zone: z.string().nullable().optional(),
+});
 
 export async function GET(
   request: NextRequest,
@@ -56,11 +67,35 @@ export async function POST(
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
+    const mappingJson = formData.get("mapping") as string;
 
-    if (!file) {
-      return NextResponse.json({ error: "Fil er påkrevd" }, { status: 400 });
+    if (!file || !mappingJson) {
+      return NextResponse.json(
+        { error: "Fil og kolonnemapping er påkrevd" },
+        { status: 400 }
+      );
     }
 
+    // Validate mapping
+    let mapping;
+    try {
+      const parsedMapping = JSON.parse(mappingJson);
+      mapping = MappingSchema.parse(parsedMapping);
+    } catch (err) {
+      return NextResponse.json(
+        { error: "Ugyldig kolonnemapping" },
+        { status: 400 }
+      );
+    }
+
+    if (!mapping.tfm) {
+      return NextResponse.json(
+        { error: "TFM-kolonne er påkrevd" },
+        { status: 400 }
+      );
+    }
+
+    // Validate file
     const fileNameValidation = validateFileName(file.name);
     if (!fileNameValidation.valid) {
       return NextResponse.json({ error: fileNameValidation.error }, { status: 400 });
@@ -89,8 +124,9 @@ export async function POST(
       return NextResponse.json({ error: fileSizeValidation.error }, { status: 400 });
     }
 
+    // Parse Excel file
     const buffer = Buffer.from(await file.arrayBuffer());
-    
+
     let workbook;
     try {
       workbook = XLSX.read(buffer, { type: "buffer" });
@@ -103,39 +139,88 @@ export async function POST(
 
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
-    const data = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as unknown[][];
 
+    // Convert to JSON with column letters as keys
+    const jsonData = XLSX.utils.sheet_to_json(sheet, { header: "A" }) as Record<
+      string,
+      unknown
+    >[];
+
+    // Parse and validate entries
     const entries = [];
-    for (let i = 1; i < data.length; i++) {
-      const row = data[i];
-      if (!row || !row[0]) continue;
+    let skipped = 0;
 
+    for (const row of jsonData) {
+      // Get TFM value from mapped column
+      const tfmRaw = mapping.tfm ? row[mapping.tfm]?.toString() : undefined;
+
+      if (!tfmRaw || !tfmRaw.trim()) {
+        skipped++;
+        continue; // Skip empty TFM rows
+      }
+
+      // Parse TFM code
+      const parsed = parseTFM(tfmRaw);
+
+      if (!parsed) {
+        console.log(`Skipping invalid TFM: ${tfmRaw}`);
+        skipped++;
+        continue; // Skip invalid TFM format
+      }
+
+      // Extract optional fields based on mapping
+      const productName = mapping.productName
+        ? row[mapping.productName]?.toString() || null
+        : null;
+
+      const supplierName = mapping.supplierName
+        ? row[mapping.supplierName]?.toString() || null
+        : null;
+
+      const location = mapping.location
+        ? row[mapping.location]?.toString() || null
+        : null;
+
+      const zone = mapping.zone ? row[mapping.zone]?.toString() || null : null;
+
+      // Create entry
       entries.push({
         projectId,
-        typeCode: String(row[0] || ""),
-        description: String(row[1] || ""),
-        tfm: row[2] ? String(row[2]) : null,
-        building: row[3] ? String(row[3]) : null,
-        system: row[4] ? String(row[4]) : null,
-        component: row[5] ? String(row[5]) : null,
-        productName: row[6] ? String(row[6]) : null,
-        location: row[7] ? String(row[7]) : null,
-        zone: row[8] ? String(row[8]) : null,
+        tfm: tfmRaw.trim(),
+        building: parsed.building,
+        system: parsed.system,
+        component: parsed.component,
+        typeCode: parsed.typeCode,
+        productName,
+        supplierName,
+        location,
+        zone,
+        description: null,
       });
     }
 
     if (entries.length === 0) {
       return NextResponse.json(
-        { error: "Ingen gyldige rader funnet i filen" },
+        {
+          error: `Ingen gyldige rader funnet i filen. ${skipped} rader ble hoppet over.`,
+        },
         { status: 400 }
       );
     }
 
+    // Save to database
     await prisma.massList.createMany({
       data: entries,
     });
 
-    return NextResponse.json({ count: entries.length }, { status: 201 });
+    return NextResponse.json(
+      {
+        count: entries.length,
+        skipped,
+        message: `${entries.length} oppføringer lastet opp. ${skipped} rader hoppet over.`,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error uploading mass list:", error);
     return NextResponse.json(
@@ -165,6 +250,7 @@ export async function DELETE(
       await prisma.massList.deleteMany({
         where: { projectId },
       });
+      return NextResponse.json({ success: true, message: "Alle oppføringer slettet" });
     } else if (id) {
       const entry = await prisma.massList.findFirst({
         where: { id, projectId },
@@ -180,14 +266,14 @@ export async function DELETE(
       await prisma.massList.delete({
         where: { id },
       });
+
+      return NextResponse.json({ success: true, message: "Oppføring slettet" });
     } else {
       return NextResponse.json(
         { error: "ID eller all-parameter er påkrevd" },
         { status: 400 }
       );
     }
-
-    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting mass list:", error);
     return NextResponse.json(
