@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireProjectAccess, requireProjectLeaderAccess } from "@/lib/auth-helpers";
+import { deleteFile } from "@/lib/file-utils";
 
 export async function GET(
   request: NextRequest,
@@ -152,6 +153,15 @@ export async function DELETE(
         { error: "Dokument ikke funnet" },
         { status: 404 }
       );
+    }
+
+    // Delete file from Supabase Storage
+    if (existingDoc.fileUrl) {
+      const deleteResult = await deleteFile(projectId, existingDoc.fileUrl);
+      if (!deleteResult.success) {
+        console.warn("Could not delete storage file:", deleteResult.error);
+        // Continue with DB deletion even if storage deletion fails
+      }
     }
 
     await prisma.document.delete({
