@@ -116,6 +116,7 @@ model User {
   functionTestAssignedRows FunctionTestRow[] @relation("FunctionTestAssignedTo")
   functionTestPerformedRows FunctionTestRow[] @relation("FunctionTestPerformedBy")
   predefinedFunctionTestsCreated PredefinedFunctionTest[] @relation("PredefinedFunctionTestCreator")
+  tfmComparisonsCreated TfmComparison[] @relation("TfmComparisonCreator")
 }
 
 model Project {
@@ -142,6 +143,9 @@ model Project {
   // PratLink relations
   chatRooms ChatRoom[]
   chatTasks ChatTask[]
+  
+  // Quality Assurance
+  tfmComparisons TfmComparison[]
 }
 
 model ProjectMember {
@@ -822,3 +826,20 @@ model ChatTask {
   @@index([projectId])
   @@index([responsibleUserId])
 }
+
+// Quality Assurance - TFM Comparison
+model TfmComparison {
+  id          String   @id @default(cuid())
+  name        String
+  projectId   String
+  fileUrl     String   // Excel file stored in Supabase
+  segmentConfig String // JSON: which TFM segments were used (BYGGNR, SYSTEM, etc)
+  createdAt   DateTime @default(now())
+  createdById String
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User    @relation("TfmComparisonCreator", fields: [createdById], references: [id])
+
+  @@index([projectId])
+}
+

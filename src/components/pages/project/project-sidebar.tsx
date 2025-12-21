@@ -16,6 +16,8 @@ import {
   ClipboardCheck,
   ListChecks,
   TrendingUp,
+  ShieldCheck,
+  GitCompare,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -171,6 +173,20 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
           href: `/projects/${id}/progress/plan`,
           label: "Fremdriftsplan",
           icon: ListChecks,
+          indent: true,
+        },
+      ],
+    },
+    {
+      type: "group",
+      label: "Kvalitetssikring",
+      icon: ShieldCheck,
+      children: [
+        {
+          type: "link",
+          href: `/projects/${id}/quality-assurance/comparison`,
+          label: "Sammenligning",
+          icon: GitCompare,
           indent: true,
         },
       ],

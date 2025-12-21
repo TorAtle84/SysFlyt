@@ -1,0 +1,297 @@
+/**
+ * TFM Extractor - Parse TFM codes from PDF, Word, and Excel files
+ * TFM structure: {Byggnr}{System}{Komponent}{Typekode}
+ */
+
+import mammoth from "mammoth";
+import * as XLSX from "xlsx";
+import { extractPlainTextFromPDF } from "./pdf-text-extractor";
+
+export interface TfmSegmentConfig {
+    byggnr: boolean;
+    system: boolean;
+    komponent: boolean;
+    typekode: boolean;
+}
+
+export interface ExtractedTfm {
+    fullMatch: string;
+    byggnr: string | null;
+    system: string | null;
+    komponent: string | null;
+    typekode: string | null;
+    sourceDocument: string;
+}
+
+export interface TfmExtractionResult {
+    fileName: string;
+    tfmEntries: ExtractedTfm[];
+    error?: string;
+}
+
+// TFM parsing regex based on tfmrules.md
+// Pattern: +{byggnr}={system}-{komponent}%{typekode}
+const TFM_PATTERN = new RegExp(
+    "(?:\\+(?<byggnr>\\d+))?" +              // Optional: +digits for byggnr
+    "(?:=)?(?<system>\\d{3,4}\\.\\d{2,4}(?::\\d{2,4})?)" + // System: 3-4 digits.2-4 digits, optional :2-4 digits
+    "(?:-)?(?<komponent>[A-Za-z]{2,3}[A-Za-z0-9/_\\-]+)?" + // Component: 2-3 letters followed by alphanumeric
+    "(?:%(?<typekode>[A-Za-z]{2,3}))?",      // Optional: %2-3 letters for typekode
+    "gi"
+);
+
+// Alternative simpler pattern for standalone components
+const COMPONENT_PATTERN = /([A-Z]{2,3}\d{1,6}[A-Z0-9/_-]*)/gi;
+
+// System pattern alone
+const SYSTEM_PATTERN = /(\d{3,4}\.\d{2,4}(?::\d{2,4})?)/g;
+
+/**
+ * Extract text content from a Word document (.docx)
+ */
+export async function extractTextFromWord(buffer: Buffer): Promise<string> {
+    try {
+        const result = await mammoth.extractRawText({ buffer });
+        return result.value;
+    } catch (error) {
+        console.error("Error extracting text from Word:", error);
+        throw new Error("Could not read Word document");
+    }
+}
+
+/**
+ * Extract text content from an Excel file (.xlsx)
+ */
+export function extractTextFromExcel(buffer: Buffer): string {
+    try {
+        const workbook = XLSX.read(buffer, { type: "buffer" });
+        const allText: string[] = [];
+
+        for (const sheetName of workbook.SheetNames) {
+            const sheet = workbook.Sheets[sheetName];
+            // Convert to array of arrays and join all cells
+            const data = XLSX.utils.sheet_to_json<string[]>(sheet, {
+                header: 1,
+                defval: ""
+            });
+
+            for (const row of data) {
+                if (Array.isArray(row)) {
+                    const rowText = row.map(cell => String(cell ?? "")).join(" ");
+                    if (rowText.trim()) {
+                        allText.push(rowText);
+                    }
+                }
+            }
+        }
+
+        return allText.join("\n");
+    } catch (error) {
+        console.error("Error extracting text from Excel:", error);
+        throw new Error("Could not read Excel document");
+    }
+}
+
+/**
+ * Extract text from a file buffer based on file type
+ */
+export async function extractTextFromFile(
+    buffer: Buffer,
+    fileName: string
+): Promise<string> {
+    const extension = fileName.toLowerCase().split(".").pop();
+
+    switch (extension) {
+        case "pdf":
+            return extractPlainTextFromPDF(buffer);
+        case "docx":
+        case "doc":
+            return extractTextFromWord(buffer);
+        case "xlsx":
+        case "xls":
+            return extractTextFromExcel(buffer);
+        default:
+            throw new Error(`Unsupported file type: ${extension}`);
+    }
+}
+
+/**
+ * Parse TFM entries from text content based on segment configuration
+ */
+export function parseTfmFromText(
+    text: string,
+    fileName: string,
+    config: TfmSegmentConfig
+): ExtractedTfm[] {
+    const entries: ExtractedTfm[] = [];
+    const seen = new Set<string>();
+
+    // Reset regex lastIndex
+    TFM_PATTERN.lastIndex = 0;
+
+    let match;
+    while ((match = TFM_PATTERN.exec(text)) !== null) {
+        const groups = match.groups || {};
+        const byggnr = groups.byggnr || null;
+        const system = groups.system || null;
+        const komponent = groups.komponent || null;
+        const typekode = groups.typekode || null;
+
+        // Build the key based on selected segments
+        const keyParts: string[] = [];
+        if (config.byggnr && byggnr) keyParts.push(`+${byggnr}`);
+        if (config.system && system) keyParts.push(`=${system}`);
+        if (config.komponent && komponent) keyParts.push(`-${komponent}`);
+        if (config.typekode && typekode) keyParts.push(`%${typekode}`);
+
+        // Skip if no selected segments found
+        if (keyParts.length === 0) continue;
+
+        // Check required segments are present
+        if (config.system && !system) continue;
+        if (config.komponent && !komponent) continue;
+
+        const key = keyParts.join("");
+
+        if (!seen.has(key)) {
+            seen.add(key);
+            entries.push({
+                fullMatch: key,
+                byggnr: config.byggnr ? byggnr : null,
+                system: config.system ? system : null,
+                komponent: config.komponent ? komponent : null,
+                typekode: config.typekode ? typekode : null,
+                sourceDocument: fileName,
+            });
+        }
+    }
+
+    // If no full TFM matches found but we want components/systems, try simpler patterns
+    if (entries.length === 0) {
+        if (config.system && !config.komponent) {
+            // Extract just system codes
+            SYSTEM_PATTERN.lastIndex = 0;
+            while ((match = SYSTEM_PATTERN.exec(text)) !== null) {
+                const system = match[1];
+                const key = `=${system}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    entries.push({
+                        fullMatch: key,
+                        byggnr: null,
+                        system,
+                        komponent: null,
+                        typekode: null,
+                        sourceDocument: fileName,
+                    });
+                }
+            }
+        }
+
+        if (config.komponent) {
+            // Extract just component codes
+            COMPONENT_PATTERN.lastIndex = 0;
+            while ((match = COMPONENT_PATTERN.exec(text)) !== null) {
+                const komponent = match[1];
+                const key = config.system ? `=${komponent}` : `-${komponent}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    entries.push({
+                        fullMatch: key,
+                        byggnr: null,
+                        system: null,
+                        komponent,
+                        typekode: null,
+                        sourceDocument: fileName,
+                    });
+                }
+            }
+        }
+    }
+
+    return entries;
+}
+
+/**
+ * Compare TFM entries across multiple documents
+ */
+export interface ComparisonResult {
+    tfm: string;
+    sourceDocuments: string[]; // List of documents where this TFM was found
+    presence: Map<string, boolean>; // fileName -> present
+}
+
+export interface ComparisonMatrix {
+    tfmEntries: ComparisonResult[];
+    fileNames: string[];
+    mainFileName: string;
+}
+
+export function compareTfmEntries(
+    mainFile: TfmExtractionResult,
+    comparisonFiles: TfmExtractionResult[]
+): ComparisonMatrix {
+    const allFiles = [mainFile, ...comparisonFiles];
+    const fileNames = allFiles.map(f => f.fileName);
+
+    // Collect all unique TFM codes
+    const allTfmCodes = new Map<string, Set<string>>();
+
+    for (const file of allFiles) {
+        for (const entry of file.tfmEntries) {
+            if (!allTfmCodes.has(entry.fullMatch)) {
+                allTfmCodes.set(entry.fullMatch, new Set());
+            }
+            allTfmCodes.get(entry.fullMatch)!.add(file.fileName);
+        }
+    }
+
+    // Build comparison results
+    const results: ComparisonResult[] = [];
+
+    for (const [tfm, sources] of allTfmCodes) {
+        const presence = new Map<string, boolean>();
+        for (const fileName of fileNames) {
+            presence.set(fileName, sources.has(fileName));
+        }
+
+        results.push({
+            tfm,
+            sourceDocuments: Array.from(sources),
+            presence,
+        });
+    }
+
+    // Sort by TFM code
+    results.sort((a, b) => a.tfm.localeCompare(b.tfm));
+
+    return {
+        tfmEntries: results,
+        fileNames,
+        mainFileName: mainFile.fileName,
+    };
+}
+
+/**
+ * Full extraction pipeline for a single file
+ */
+export async function extractTfmFromFile(
+    buffer: Buffer,
+    fileName: string,
+    config: TfmSegmentConfig
+): Promise<TfmExtractionResult> {
+    try {
+        const text = await extractTextFromFile(buffer, fileName);
+        const tfmEntries = parseTfmFromText(text, fileName, config);
+
+        return {
+            fileName,
+            tfmEntries,
+        };
+    } catch (error) {
+        return {
+            fileName,
+            tfmEntries: [],
+            error: error instanceof Error ? error.message : "Unknown error",
+        };
+    }
+}
