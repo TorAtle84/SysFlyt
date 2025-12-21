@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireProjectAccess } from "@/lib/auth-helpers";
 import prisma from "@/lib/db";
-import { readFile, stat } from "fs/promises";
+import { createClient } from "@supabase/supabase-js";
 import path from "path";
 
-const UPLOADS_DIR = path.join(process.cwd(), "uploads");
+// Initialize Supabase Client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const BUCKET_NAME = "documents";
+
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+});
 
 const MIME_TYPES: Record<string, string> = {
   ".pdf": "application/pdf",
@@ -52,7 +62,7 @@ export async function GET(
 ) {
   try {
     const { path: pathSegments } = await params;
-    
+
     if (!pathSegments || pathSegments.length < 2) {
       return NextResponse.json({ error: "Ugyldig filsti" }, { status: 400 });
     }
@@ -98,24 +108,24 @@ export async function GET(
       return authResult.error;
     }
 
-    const filePath = path.join(UPLOADS_DIR, projectId, fileName);
-    const normalizedPath = path.normalize(filePath);
-    
-    if (!normalizedPath.startsWith(UPLOADS_DIR)) {
-      return NextResponse.json({ error: "Ugyldig filsti" }, { status: 400 });
+    // Construct path in Supabase bucket
+    const storagePath = `${projectId}/${fileName}`;
+
+    // Download file from Supabase using Service Role (bypasses RLS)
+    const { data: fileBlob, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .download(storagePath);
+
+    if (error || !fileBlob) {
+      console.error("Supabase download error:", error);
+      return NextResponse.json({ error: "Fil ikke funnet i skyen" }, { status: 404 });
     }
 
-    try {
-      await stat(normalizedPath);
-    } catch {
-      return NextResponse.json({ error: "Fil ikke funnet" }, { status: 404 });
-    }
-
-    const fileBuffer = await readFile(normalizedPath);
     const ext = path.extname(fileName).toLowerCase();
     const contentType = MIME_TYPES[ext] || "application/octet-stream";
+    const buffer = Buffer.from(await fileBlob.arrayBuffer());
 
-    return new NextResponse(fileBuffer, {
+    return new NextResponse(buffer, {
       status: 200,
       headers: {
         "Content-Type": contentType,
