@@ -14,10 +14,9 @@ import {
 import { pointInPolygon, Point, calculatePolygonArea } from "./geometry-utils";
 import { matchesComponentPattern, ParsedComponent } from "./id-pattern";
 import { getTFMVariants } from "./tfm-id";
-import { readFile } from "fs/promises";
-import path from "path";
 import type { MassList } from "@prisma/client";
 import { appendFileSync } from "fs";
+import { createClient } from "@supabase/supabase-js";
 
 function logDebug(msg: string) {
   try {
@@ -27,7 +26,10 @@ function logDebug(msg: string) {
   }
 }
 
-const UPLOADS_DIR = process.env.UPLOAD_DIR || path.join(process.cwd(), "uploads");
+// Initialize Supabase client for file reading
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const BUCKET_NAME = "documents";
 
 async function readDocumentPdf(document: {
   id: string;
@@ -35,43 +37,60 @@ async function readDocumentPdf(document: {
   fileUrl?: string | null;
   projectId: string;
 }): Promise<Buffer> {
-  logDebug(`Reading PDF for doc ${document.id} (${document.url})`);
-  const candidates = new Set<string>();
+  logDebug(`Reading PDF for doc ${document.id} (fileUrl: ${document.fileUrl})`);
 
-  const addFromUrl = (rawUrl?: string | null) => {
-    if (!rawUrl) return;
-    const normalized = rawUrl.startsWith("/") ? rawUrl.slice(1) : rawUrl;
-    const apiPrefix = "api/files/";
+  // Get the file path from fileUrl
+  const fileUrl = document.fileUrl || document.url;
 
-    if (normalized.startsWith(apiPrefix)) {
-      const relativePath = normalized.slice(apiPrefix.length);
-      const candidate = path.join(UPLOADS_DIR, relativePath);
-      candidates.add(candidate);
-    }
-
-    // Also try treating the url as a relative path on disk
-    candidates.add(path.join(process.cwd(), normalized));
-
-    // Fallback: combine projectId with basename
-    const baseName = path.basename(normalized);
-    candidates.add(path.join(UPLOADS_DIR, document.projectId, baseName));
-  };
-
-  addFromUrl(document.fileUrl);
-  addFromUrl(document.url);
-
-  for (const candidate of candidates) {
-    const normalized = path.normalize(candidate);
-    if (!normalized.startsWith(UPLOADS_DIR)) continue;
-
-    try {
-      return await readFile(normalized);
-    } catch {
-      continue;
-    }
+  if (!fileUrl) {
+    throw new Error("No file URL available");
   }
 
-  logDebug("Failed to read PDF file from any candidate path");
+  // Check if this is our proxy URL format: /api/files/{projectId}/{filename}
+  const proxyMatch = fileUrl.match(/^\/api\/files\/([^/]+)\/(.+)$/);
+
+  if (proxyMatch) {
+    const [, projectId, fileName] = proxyMatch;
+    const storagePath = `${projectId}/${fileName}`;
+
+    logDebug(`Fetching from Supabase Storage: ${storagePath}`);
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error("Supabase credentials not configured");
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .download(storagePath);
+
+    if (error) {
+      logDebug(`Supabase download error: ${error.message}`);
+      throw new Error(`Could not download file: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error("No data returned from Supabase");
+    }
+
+    // Convert Blob to Buffer
+    const arrayBuffer = await data.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  }
+
+  // For absolute URLs (legacy Supabase public URLs), try to fetch directly
+  if (fileUrl.startsWith("http")) {
+    logDebug(`Fetching from URL: ${fileUrl}`);
+    const response = await fetch(fileUrl);
+    if (!response.ok) {
+      throw new Error(`HTTP error fetching file: ${response.status}`);
+    }
+    const arrayBuffer = await response.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  }
+
+  logDebug("Could not determine how to read PDF file");
   throw new Error("Could not read PDF file");
 }
 
