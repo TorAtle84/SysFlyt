@@ -65,7 +65,7 @@ export function DashboardClient({
                 <h1 className="mt-2 flex flex-wrap items-center gap-3 text-2xl font-semibold leading-tight sm:text-3xl lg:text-4xl">
                   {mode === "syslink" ? (
                     <>
-                      Byggebransjen møter SysLink
+                      Byggebransjen møter
                       <img
                         src="/SysLinkText.png"
                         alt="SysLink Logo"
