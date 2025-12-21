@@ -135,6 +135,20 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
     },
     {
       type: "group",
+      label: "Kvalitetssikring",
+      icon: ShieldCheck,
+      children: [
+        {
+          type: "link",
+          href: `/projects/${id}/quality-assurance/comparison`,
+          label: "Sammenligning",
+          icon: GitCompare,
+          indent: true,
+        },
+      ],
+    },
+    {
+      type: "group",
       label: "Protokoller",
       icon: ClipboardCheck,
       children: [
@@ -173,20 +187,6 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
           href: `/projects/${id}/progress/plan`,
           label: "Fremdriftsplan",
           icon: ListChecks,
-          indent: true,
-        },
-      ],
-    },
-    {
-      type: "group",
-      label: "Kvalitetssikring",
-      icon: ShieldCheck,
-      children: [
-        {
-          type: "link",
-          href: `/projects/${id}/quality-assurance/comparison`,
-          label: "Sammenligning",
-          icon: GitCompare,
           indent: true,
         },
       ],

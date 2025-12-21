@@ -92,6 +92,44 @@ export default function ComparisonPage() {
     const [showSaveModal, setShowSaveModal] = useState(false);
     const [showHistoryModal, setShowHistoryModal] = useState(false);
 
+    // Project mode state
+    interface ProjectDocument {
+        id: string;
+        title: string;
+        fileName: string | null;
+        type: string;
+        url: string;
+    }
+    const [projectDocuments, setProjectDocuments] = useState<ProjectDocument[]>([]);
+    const [mainDocumentId, setMainDocumentId] = useState<string | null>(null);
+    const [comparisonDocumentIds, setComparisonDocumentIds] = useState<string[]>([]);
+    const [isLoadingDocs, setIsLoadingDocs] = useState(false);
+
+    // Fetch project documents when mode is 'project'
+    const fetchProjectDocuments = useCallback(async () => {
+        setIsLoadingDocs(true);
+        try {
+            const response = await fetch(`/api/projects/${projectId}/documents?types=FUNCTION_DESCRIPTION,DRAWING,SCHEMA`);
+            if (response.ok) {
+                const data = await response.json();
+                setProjectDocuments(data.documents || []);
+            }
+        } catch (error) {
+            console.error("Error fetching project documents:", error);
+        } finally {
+            setIsLoadingDocs(false);
+        }
+    }, [projectId]);
+
+    // Fetch documents when switching to project mode
+    const handleModeChange = (newMode: "upload" | "project") => {
+        setMode(newMode);
+        setComparisonResult(null);
+        if (newMode === "project" && projectDocuments.length === 0) {
+            fetchProjectDocuments();
+        }
+    };
+
     // Toggle segment
     const toggleSegment = (segment: keyof TfmSegmentConfig) => {
         setSegmentConfig((prev) => ({
@@ -154,6 +192,36 @@ export default function ComparisonPage() {
             setComparisonResult(data);
         } catch (error) {
             console.error("Comparison error:", error);
+            alert("Kunne ikke utføre sammenligning");
+        } finally {
+            setIsComparing(false);
+        }
+    };
+
+    // Run project comparison (using project documents)
+    const runProjectComparison = async () => {
+        if (!mainDocumentId || comparisonDocumentIds.length === 0) return;
+
+        setIsComparing(true);
+        try {
+            const response = await fetch(`/api/projects/${projectId}/quality-assurance/compare`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    mainDocumentId,
+                    comparisonDocumentIds,
+                    segmentConfig,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Comparison failed");
+            }
+
+            const data = await response.json();
+            setComparisonResult(data);
+        } catch (error) {
+            console.error("Project comparison error:", error);
             alert("Kunne ikke utføre sammenligning");
         } finally {
             setIsComparing(false);
@@ -251,7 +319,7 @@ export default function ComparisonPage() {
             </div>
 
             {/* Mode Selector */}
-            <Tabs value={mode} onValueChange={(v) => setMode(v as "upload" | "project")}>
+            <Tabs value={mode} onValueChange={(v) => handleModeChange(v as "upload" | "project")}>
                 <TabsList>
                     <TabsTrigger value="upload">Opplasting</TabsTrigger>
                     <TabsTrigger value="project">Prosjekt</TabsTrigger>
@@ -339,14 +407,111 @@ export default function ComparisonPage() {
                     </div>
                 </TabsContent>
 
-                <TabsContent value="project">
-                    <Card>
-                        <CardContent className="pt-6">
-                            <p className="text-muted-foreground text-center py-8">
-                                Velg dokumenter fra prosjektet (kommer snart)
-                            </p>
-                        </CardContent>
-                    </Card>
+                <TabsContent value="project" className="space-y-4">
+                    {isLoadingDocs ? (
+                        <Card>
+                            <CardContent className="pt-6">
+                                <div className="flex items-center justify-center py-8 gap-2">
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <span className="text-muted-foreground">Laster dokumenter...</span>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ) : projectDocuments.length === 0 ? (
+                        <Card>
+                            <CardContent className="pt-6">
+                                <p className="text-muted-foreground text-center py-8">
+                                    Ingen dokumenter funnet i Underlag. Last opp dokumenter under Funksjonsbeskrivelser, Arbeidstegninger eller Systemskjema først.
+                                </p>
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <div className="grid grid-cols-2 gap-4">
+                            {/* Main Document Selection */}
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg">Hovedfil</CardTitle>
+                                    <p className="text-sm text-muted-foreground">Velg ett dokument som hovedfil</p>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                                        {projectDocuments.map((doc) => (
+                                            <label
+                                                key={doc.id}
+                                                className={cn(
+                                                    "flex items-center gap-3 p-3 rounded-md cursor-pointer transition-all",
+                                                    mainDocumentId === doc.id
+                                                        ? "bg-blue-100 border border-blue-400"
+                                                        : "bg-muted hover:bg-muted/80"
+                                                )}
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name="mainDocument"
+                                                    checked={mainDocumentId === doc.id}
+                                                    onChange={() => {
+                                                        setMainDocumentId(doc.id);
+                                                        setComparisonResult(null);
+                                                    }}
+                                                    className="h-4 w-4"
+                                                />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium truncate">{doc.title}</p>
+                                                    <p className="text-xs text-muted-foreground">{doc.type === "FUNCTION_DESCRIPTION" ? "Funksjonsbeskrivelse" : doc.type === "DRAWING" ? "Arbeidstegning" : "Systemskjema"}</p>
+                                                </div>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* Comparison Documents Selection */}
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg">Sammenligningsfiler</CardTitle>
+                                    <p className="text-sm text-muted-foreground">Velg dokumenter å sammenligne med</p>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                                        {projectDocuments.filter(d => d.id !== mainDocumentId).map((doc) => (
+                                            <label
+                                                key={doc.id}
+                                                className={cn(
+                                                    "flex items-center gap-3 p-3 rounded-md cursor-pointer transition-all",
+                                                    comparisonDocumentIds.includes(doc.id)
+                                                        ? "bg-orange-100 border border-orange-400"
+                                                        : "bg-muted hover:bg-muted/80"
+                                                )}
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={comparisonDocumentIds.includes(doc.id)}
+                                                    onChange={(e) => {
+                                                        if (e.target.checked) {
+                                                            setComparisonDocumentIds(prev => [...prev, doc.id]);
+                                                        } else {
+                                                            setComparisonDocumentIds(prev => prev.filter(id => id !== doc.id));
+                                                        }
+                                                        setComparisonResult(null);
+                                                    }}
+                                                    className="h-4 w-4"
+                                                />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium truncate">{doc.title}</p>
+                                                    <p className="text-xs text-muted-foreground">{doc.type === "FUNCTION_DESCRIPTION" ? "Funksjonsbeskrivelse" : doc.type === "DRAWING" ? "Arbeidstegning" : "Systemskjema"}</p>
+                                                </div>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    {comparisonDocumentIds.length > 0 && (
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                            {comparisonDocumentIds.length} dokument(er) valgt
+                                        </p>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </div>
+                    )}
                 </TabsContent>
             </Tabs>
 
@@ -384,24 +549,25 @@ export default function ComparisonPage() {
             </Card>
 
             {/* Run Comparison Button */}
-            {mode === "upload" && mainFile && comparisonFiles.length > 0 && (
-                <div className="flex justify-center">
-                    <Button
-                        size="lg"
-                        onClick={runComparison}
-                        disabled={isComparing || Object.values(segmentConfig).every((v) => !v)}
-                    >
-                        {isComparing ? (
-                            <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                Sammenligner...
-                            </>
-                        ) : (
-                            "Start sammenligning"
-                        )}
-                    </Button>
-                </div>
-            )}
+            {((mode === "upload" && mainFile && comparisonFiles.length > 0) ||
+                (mode === "project" && mainDocumentId && comparisonDocumentIds.length > 0)) && (
+                    <div className="flex justify-center">
+                        <Button
+                            size="lg"
+                            onClick={mode === "upload" ? runComparison : runProjectComparison}
+                            disabled={isComparing || Object.values(segmentConfig).every((v) => !v)}
+                        >
+                            {isComparing ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Sammenligner...
+                                </>
+                            ) : (
+                                "Start sammenligning"
+                            )}
+                        </Button>
+                    </div>
+                )}
 
             {/* Results Table */}
             {comparisonResult && (
