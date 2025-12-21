@@ -1,7 +1,23 @@
 import path from "path";
-import { mkdir, writeFile, unlink, stat } from "fs/promises";
+import { createClient } from "@supabase/supabase-js";
 
-const UPLOADS_DIR = path.join(process.cwd(), "uploads");
+// Initialize Supabase Client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+// Warning if keys are missing (will fail on use but allows build)
+if (!supabaseUrl || !supabaseKey) {
+  console.warn("Missing Supabase env vars for storage");
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+});
+
+const BUCKET_NAME = "documents";
 
 const ALLOWED_FILE_TYPES: Record<string, string[]> = {
   document: [".pdf"],
@@ -15,7 +31,7 @@ const MAX_FILE_SIZES: Record<string, number> = {
   image: 5 * 1024 * 1024, // 5MB for images
 };
 
-export type FileValidationResult = 
+export type FileValidationResult =
   | { valid: true; type: string }
   | { valid: false; error: string };
 
@@ -29,7 +45,7 @@ export function validateFileName(fileName: string): FileValidationResult {
   }
 
   const ext = path.extname(fileName).toLowerCase();
-  
+
   for (const [type, extensions] of Object.entries(ALLOWED_FILE_TYPES)) {
     if (extensions.includes(ext)) {
       return { valid: true, type };
@@ -41,7 +57,7 @@ export function validateFileName(fileName: string): FileValidationResult {
 
 export function validateFileSize(size: number, fileType: string): FileValidationResult {
   const maxSize = MAX_FILE_SIZES[fileType];
-  
+
   if (!maxSize) {
     return { valid: false, error: "Ukjent filtype" };
   }
@@ -81,20 +97,26 @@ export async function saveFile(
     const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
     const timestamp = Date.now();
     const uniqueFileName = `${timestamp}_${sanitizedFileName}`;
-    
-    const projectDir = path.join(UPLOADS_DIR, projectId);
-    await mkdir(projectDir, { recursive: true });
-    
-    const filePath = path.join(projectDir, uniqueFileName);
-    
-    const normalizedPath = path.normalize(filePath);
-    if (!normalizedPath.startsWith(UPLOADS_DIR)) {
-      return { success: false, error: "Ugyldig filsti" };
+    const filePath = `${projectId}/${uniqueFileName}`; // Folder structure in bucket
+
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(filePath, buffer, {
+        contentType: "application/pdf", // TODO: Detect dynamically if needed, but validation ensures mostly PDF
+        upsert: false,
+      });
+
+    if (error) {
+      console.error("Supabase Storage Upload Error:", error);
+      return { success: false, error: "Kunne ikke lagre fil til skyen" };
     }
-    
-    await writeFile(filePath, buffer);
-    
-    return { success: true, path: `/api/files/${projectId}/${uniqueFileName}` };
+
+    // Get public URL
+    const { data: publicData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(filePath);
+
+    return { success: true, path: publicData.publicUrl };
   } catch (error) {
     console.error("Error saving file:", error);
     return { success: false, error: "Kunne ikke lagre fil" };
@@ -103,17 +125,27 @@ export async function saveFile(
 
 export async function deleteFile(
   projectId: string,
-  fileName: string
+  fileUrlOrName: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const filePath = path.join(UPLOADS_DIR, projectId, fileName);
-    
-    const normalizedPath = path.normalize(filePath);
-    if (!normalizedPath.startsWith(UPLOADS_DIR)) {
-      return { success: false, error: "Ugyldig filsti" };
+    // Extract file path from URL if full URL is passed
+    let filePath = fileUrlOrName;
+    if (fileUrlOrName.includes("/storage/v1/object/public/documents/")) {
+      filePath = fileUrlOrName.split("/storage/v1/object/public/documents/")[1];
+    } else if (!fileUrlOrName.includes("/")) {
+      // Assuming just filename passed, construct path
+      filePath = `${projectId}/${fileUrlOrName}`;
     }
-    
-    await unlink(filePath);
+
+    const { error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .remove([filePath]);
+
+    if (error) {
+      console.error("Supabase delete error:", error);
+      return { success: false, error: "Kunne ikke slette fil fra skyen" };
+    }
+
     return { success: true };
   } catch (error) {
     console.error("Error deleting file:", error);
@@ -126,15 +158,20 @@ export async function fileExists(
   fileName: string
 ): Promise<boolean> {
   try {
-    const filePath = path.join(UPLOADS_DIR, projectId, fileName);
-    const normalizedPath = path.normalize(filePath);
-    
-    if (!normalizedPath.startsWith(UPLOADS_DIR)) {
-      return false;
-    }
-    
-    await stat(filePath);
-    return true;
+    // NOTE: Checking file existence efficiently in storage can be done by listing or metadata.
+    // For now, we assume true if it's in DB, or we could implement a list check.
+    // To keep it simple and avoid extra API calls, we'll just return true or implement a head check if critical.
+    // Let's list files in the project folder with the name.
+
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .list(projectId, {
+        search: fileName,
+        limit: 1
+      });
+
+    if (error || !data) return false;
+    return data.length > 0;
   } catch {
     return false;
   }
@@ -147,6 +184,6 @@ export function generateSecureFileName(originalName: string): string {
     .substring(0, 100);
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 8);
-  
+
   return `${timestamp}_${random}_${baseName}${ext}`;
 }
