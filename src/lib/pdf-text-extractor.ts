@@ -179,11 +179,25 @@ function detectPDFOrientation(textContent: any): OrientationAnalysis {
 
 export async function extractPlainTextFromPDF(pdfBuffer: Buffer): Promise<string> {
   try {
-    const pdfParse = (await import("pdf-parse")) as {
-      default: (data: Buffer) => Promise<{ text: string }>;
-    };
-    const res = await pdfParse.default(pdfBuffer);
-    return res?.text || "";
+    // Use pdfjs-dist directly instead of pdf-parse (which has issues)
+    const typedArray = new Uint8Array(pdfBuffer);
+    const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+
+    const textParts: string[] = [];
+
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const textContent = await page.getTextContent();
+
+      const pageText = textContent.items
+        .filter((item: any) => 'str' in item)
+        .map((item: any) => item.str)
+        .join(' ');
+
+      textParts.push(pageText);
+    }
+
+    return textParts.join('\n');
   } catch (error) {
     console.error("Error extracting plain text from PDF:", error);
     return "";
