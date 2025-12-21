@@ -111,12 +111,9 @@ export async function saveFile(
       return { success: false, error: "Kunne ikke lagre fil til skyen" };
     }
 
-    // Get public URL
-    const { data: publicData } = supabase.storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(filePath);
-
-    return { success: true, path: publicData.publicUrl };
+    // Return proxy URL (our API will fetch from Supabase securely)
+    // This works with private buckets since our server uses service_role key
+    return { success: true, path: `/api/files/${projectId}/${uniqueFileName}` };
   } catch (error) {
     console.error("Error saving file:", error);
     return { success: false, error: "Kunne ikke lagre fil" };
