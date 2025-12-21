@@ -67,7 +67,7 @@ export function DashboardClient({
                     <>
                       Byggebransjen møter SysLink
                       <img
-                        src="/syslink-logo.jpg"
+                        src="/SysLinkText.png"
                         alt="SysLink Logo"
                         className="h-[2em] rounded-lg shadow-sm"
                       />
