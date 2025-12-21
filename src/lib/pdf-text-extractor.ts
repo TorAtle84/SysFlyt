@@ -1,39 +1,6 @@
-// Polyfill DOMMatrix for Node.js (required by pdfjs-dist)
-if (typeof globalThis.DOMMatrix === "undefined") {
-  // Minimal DOMMatrix implementation for pdfjs-dist on server
-  class DOMMatrixPolyfill {
-    a = 1; b = 0; c = 0; d = 1; e = 0; f = 0;
-    m11 = 1; m12 = 0; m13 = 0; m14 = 0;
-    m21 = 0; m22 = 1; m23 = 0; m24 = 0;
-    m31 = 0; m32 = 0; m33 = 1; m34 = 0;
-    m41 = 0; m42 = 0; m43 = 0; m44 = 1;
-    is2D = true;
-    isIdentity = true;
-
-    constructor(init?: string | number[]) {
-      if (Array.isArray(init) && init.length >= 6) {
-        this.a = this.m11 = init[0];
-        this.b = this.m12 = init[1];
-        this.c = this.m21 = init[2];
-        this.d = this.m22 = init[3];
-        this.e = this.m41 = init[4];
-        this.f = this.m42 = init[5];
-        this.isIdentity = false;
-      }
-    }
-
-    multiply() { return new DOMMatrixPolyfill(); }
-    inverse() { return new DOMMatrixPolyfill(); }
-    translate() { return new DOMMatrixPolyfill(); }
-    scale() { return new DOMMatrixPolyfill(); }
-    rotate() { return new DOMMatrixPolyfill(); }
-    transformPoint(point: { x: number; y: number }) { return point; }
-    toFloat32Array() { return new Float32Array(16); }
-    toFloat64Array() { return new Float64Array(16); }
-  }
-
-  (globalThis as any).DOMMatrix = DOMMatrixPolyfill;
-}
+// CRITICAL: Import polyfills FIRST, before pdfjs-dist
+// This file sets up DOMMatrix, ImageData, Path2D for Node.js
+import "./canvas-polyfill";
 
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import { parseComponentIds, isLikelyNonComponent } from "./id-pattern";
