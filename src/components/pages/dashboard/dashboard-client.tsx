@@ -69,7 +69,7 @@ export function DashboardClient({
                       <img
                         src="/SysLinkText.png"
                         alt="SysLink Logo"
-                        className="h-[2em] rounded-lg shadow-sm"
+                        className="h-[2.4em] rounded-lg shadow-sm"
                       />
                     </>
                   ) : (
