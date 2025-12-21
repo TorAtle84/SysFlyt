@@ -63,7 +63,7 @@ export async function GET(
 
         const buffer = Buffer.from(await data.arrayBuffer());
 
-        return new NextResponse(buffer, {
+        return new NextResponse(new Uint8Array(buffer), {
             headers: {
                 "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 "Content-Disposition": `attachment; filename="${encodeURIComponent(comparison.name)}.xlsx"`,

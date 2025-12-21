@@ -48,8 +48,8 @@ export async function POST(
         // Generate Excel
         const excelBuffer = generateComparisonExcel(matrix, name || "Sammenligning");
 
-        // Return as downloadable file
-        return new NextResponse(excelBuffer, {
+        // Return as downloadable file (convert Buffer to Uint8Array for NextResponse)
+        return new NextResponse(new Uint8Array(excelBuffer), {
             headers: {
                 "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 "Content-Disposition": `attachment; filename="${encodeURIComponent(name || "sammenligning")}.xlsx"`,

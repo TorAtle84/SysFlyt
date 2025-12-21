@@ -12,12 +12,6 @@ import {
     TfmExtractionResult,
 } from "@/lib/tfm-extractor";
 
-export const config = {
-    api: {
-        bodyParser: false,
-    },
-};
-
 export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ projectId: string }> }
