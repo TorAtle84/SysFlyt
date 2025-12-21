@@ -19,6 +19,7 @@ import {
   CheckSquare,
   ClipboardList,
 } from "lucide-react";
+import { PDFViewerHelp } from "@/components/ui/help-tooltip";
 
 export type Tool = "cursor" | "hand" | "polygon" | "comment";
 
@@ -243,6 +244,9 @@ export default function PDFToolbar({
             </Badge>
           ))}
         </div>
+
+        {/* Help Button */}
+        <PDFViewerHelp />
       </div>
     </div >
   );

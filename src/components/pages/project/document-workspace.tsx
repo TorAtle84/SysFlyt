@@ -60,6 +60,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
+import { DocumentUploadHelp } from "@/components/ui/help-tooltip";
 
 interface DocumentTag {
   role?: "PRIMARY" | "DELANSVARLIG";
@@ -623,7 +624,7 @@ export function DocumentWorkspace({
         </div>
 
         {canUpload && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             <label className="cursor-pointer">
               <input
                 type="file"
@@ -637,6 +638,7 @@ export function DocumentWorkspace({
                 {uploading ? "Laster opp..." : "Last opp"}
               </span>
             </label>
+            <DocumentUploadHelp />
           </div>
         )}
       </div>

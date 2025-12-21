@@ -9,6 +9,7 @@ import {
     MapPin,
     Upload,
     FileText,
+    FileDown,
     Box,
     X,
     Loader2,
@@ -360,6 +361,17 @@ export function ProtocolDetail({ project, protocol, members, userId }: ProtocolD
                     <Badge variant={protocol.status === "COMPLETED" ? "default" : "secondary"}>
                         {protocol.status === "COMPLETED" ? "Fullført" : "Pågår"}
                     </Badge>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                            window.open(`/api/projects/${project.id}/mc-protocols/${protocol.id}/export`, "_blank");
+                        }}
+                        className="gap-2"
+                    >
+                        <FileDown size={16} />
+                        Eksporter PDF
+                    </Button>
                 </div>
 
                 {/* Schedule & Assignment Bar */}
