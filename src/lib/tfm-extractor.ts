@@ -125,37 +125,64 @@ export function parseTfmFromText(
     const entries: ExtractedTfm[] = [];
     const seen = new Set<string>();
 
-    // Reset regex lastIndex
-    TFM_PATTERN.lastIndex = 0;
+    // Helper to add entry if not seen
+    const addEntry = (entry: ExtractedTfm) => {
+        if (!seen.has(entry.fullMatch)) {
+            seen.add(entry.fullMatch);
+            entries.push(entry);
+        }
+    };
 
-    let match;
-    while ((match = TFM_PATTERN.exec(text)) !== null) {
-        const groups = match.groups || {};
-        const byggnr = groups.byggnr || null;
-        const system = groups.system || null;
-        const komponent = groups.komponent || null;
-        const typekode = groups.typekode || null;
+    // If ONLY KOMPONENT is selected (no system), use the simple component pattern
+    if (config.komponent && !config.system && !config.byggnr && !config.typekode) {
+        let match;
+        COMPONENT_PATTERN.lastIndex = 0;
+        while ((match = COMPONENT_PATTERN.exec(text)) !== null) {
+            const komponent = match[1];
+            // Filter out obvious non-components (too short, just letters, etc)
+            if (komponent.length < 4) continue;
+            if (!/\d/.test(komponent)) continue; // Must have at least one digit
+            if (/^\d+$/.test(komponent)) continue; // Must not be only digits
 
-        // Build the key based on selected segments
-        const keyParts: string[] = [];
-        if (config.byggnr && byggnr) keyParts.push(`+${byggnr}`);
-        if (config.system && system) keyParts.push(`=${system}`);
-        if (config.komponent && komponent) keyParts.push(`-${komponent}`);
-        if (config.typekode && typekode) keyParts.push(`%${typekode}`);
+            addEntry({
+                fullMatch: komponent,
+                byggnr: null,
+                system: null,
+                komponent,
+                typekode: null,
+                sourceDocument: fileName,
+            });
+        }
+        return entries;
+    }
 
-        // Skip if no selected segments found
-        if (keyParts.length === 0) continue;
+    // If SYSTEM is included, try full TFM pattern first
+    if (config.system) {
+        TFM_PATTERN.lastIndex = 0;
+        let match;
+        while ((match = TFM_PATTERN.exec(text)) !== null) {
+            const groups = match.groups || {};
+            const byggnr = groups.byggnr || null;
+            const system = groups.system || null;
+            const komponent = groups.komponent || null;
+            const typekode = groups.typekode || null;
 
-        // Check required segments are present
-        if (config.system && !system) continue;
-        if (config.komponent && !komponent) continue;
+            // Skip if system is required but not found
+            if (!system) continue;
 
-        const key = keyParts.join("");
+            // Build the key based on selected segments
+            const keyParts: string[] = [];
+            if (config.byggnr && byggnr) keyParts.push(`+${byggnr}`);
+            if (config.system && system) keyParts.push(`=${system}`);
+            if (config.komponent && komponent) keyParts.push(`-${komponent}`);
+            if (config.typekode && typekode) keyParts.push(`%${typekode}`);
 
-        if (!seen.has(key)) {
-            seen.add(key);
-            entries.push({
-                fullMatch: key,
+            // Skip if required segments missing
+            if (config.komponent && !komponent) continue;
+            if (keyParts.length === 0) continue;
+
+            addEntry({
+                fullMatch: keyParts.join(""),
                 byggnr: config.byggnr ? byggnr : null,
                 system: config.system ? system : null,
                 komponent: config.komponent ? komponent : null,
@@ -163,48 +190,56 @@ export function parseTfmFromText(
                 sourceDocument: fileName,
             });
         }
-    }
 
-    // If no full TFM matches found but we want components/systems, try simpler patterns
-    if (entries.length === 0) {
-        if (config.system && !config.komponent) {
-            // Extract just system codes
+        // If still no matches and system only, try system pattern
+        if (entries.length === 0 && !config.komponent) {
             SYSTEM_PATTERN.lastIndex = 0;
+            let match;
             while ((match = SYSTEM_PATTERN.exec(text)) !== null) {
                 const system = match[1];
-                const key = `=${system}`;
-                if (!seen.has(key)) {
-                    seen.add(key);
-                    entries.push({
-                        fullMatch: key,
-                        byggnr: null,
-                        system,
-                        komponent: null,
-                        typekode: null,
-                        sourceDocument: fileName,
-                    });
-                }
+                addEntry({
+                    fullMatch: `=${system}`,
+                    byggnr: null,
+                    system,
+                    komponent: null,
+                    typekode: null,
+                    sourceDocument: fileName,
+                });
             }
         }
+    }
 
-        if (config.komponent) {
-            // Extract just component codes
-            COMPONENT_PATTERN.lastIndex = 0;
-            while ((match = COMPONENT_PATTERN.exec(text)) !== null) {
-                const komponent = match[1];
-                const key = config.system ? `=${komponent}` : `-${komponent}`;
-                if (!seen.has(key)) {
-                    seen.add(key);
-                    entries.push({
-                        fullMatch: key,
-                        byggnr: null,
-                        system: null,
-                        komponent,
-                        typekode: null,
-                        sourceDocument: fileName,
-                    });
-                }
-            }
+    // If ONLY SYSTEM is selected with KOMPONENT, but TFM pattern found nothing,
+    // try extracting system and components separately
+    if (entries.length === 0 && config.system && config.komponent) {
+        // First find unique systems
+        const systems = new Set<string>();
+        SYSTEM_PATTERN.lastIndex = 0;
+        let match;
+        while ((match = SYSTEM_PATTERN.exec(text)) !== null) {
+            systems.add(match[1]);
+        }
+
+        // Then find components
+        COMPONENT_PATTERN.lastIndex = 0;
+        while ((match = COMPONENT_PATTERN.exec(text)) !== null) {
+            const komponent = match[1];
+            if (komponent.length < 4) continue;
+            if (!/\d/.test(komponent)) continue;
+            if (/^\d+$/.test(komponent)) continue;
+
+            // Associate with first system found (if any)
+            const system = systems.size > 0 ? [...systems][0] : null;
+            const key = system ? `=${system}-${komponent}` : `-${komponent}`;
+
+            addEntry({
+                fullMatch: key,
+                byggnr: null,
+                system,
+                komponent,
+                typekode: null,
+                sourceDocument: fileName,
+            });
         }
     }
 
