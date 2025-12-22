@@ -829,6 +829,7 @@ export interface PatternMatch {
 
 /**
  * Find matches for a custom pattern in text items
+ * Table-aware: handles varying Y-coords and text spanning multiple items
  */
 export function findMatchesInText(items: TextItem[], pattern: string | RegExp): PatternMatch[] {
   const regex = typeof pattern === 'string' ? convertPatternToRegex(pattern) : pattern;
@@ -845,21 +846,24 @@ export function findMatchesInText(items: TextItem[], pattern: string | RegExp): 
   const matches: PatternMatch[] = [];
   const seen = new Set<string>();
 
+  // Table-aware threshold: 8px allows for minor row height variations in tables
+  const Y_THRESHOLD = 8;
+
   for (const [pageNum, pageItems] of pageGroups) {
     // Sort by Y then X
     const sortedItems = [...pageItems].sort((a, b) => {
       const yDiff = a.y - b.y;
-      if (Math.abs(yDiff) > 3) return yDiff;
+      if (Math.abs(yDiff) > Y_THRESHOLD) return yDiff;
       return a.x - b.x;
     });
 
-    // Cluster into lines
+    // Cluster into lines with increased threshold for table tolerance
     const lines: TextItem[][] = [];
     let currentLine: TextItem[] = [];
     let lastY = -999;
 
     for (const item of sortedItems) {
-      if (Math.abs(item.y - lastY) > 3) {
+      if (Math.abs(item.y - lastY) > Y_THRESHOLD) {
         if (currentLine.length > 0) lines.push(currentLine);
         currentLine = [item];
         lastY = item.y;
@@ -880,51 +884,71 @@ export function findMatchesInText(items: TextItem[], pattern: string | RegExp): 
         const fullMatch = match[0];
         if (!fullMatch.trim()) continue;
 
-        // Find which item(s) contain this match
-        // For simplicity and common cases, we look for the item containing the start of the match
-        // Or if it spans, the start item is most important for X coordinate
-
+        // Find ALL items that contain this match (for spanning text)
+        // Build position mapping with item indices
+        const itemPositions: Array<{ item: TextItem; startPos: number; endPos: number }> = [];
         let currentPos = 0;
-        let foundItem: TextItem | null = null;
-        let offsetInItem = 0;
 
-        // Reconstruct position mapping
         for (const item of lineItems) {
-          // Check if match starts in this item
-          // We know lineText = item1 + " " + item2 ...
-          // So we track currentPos in the joined string
-
           const itemLen = item.text.length;
-
-          // Does the match start within this item?
-          if (match.index >= currentPos && match.index < currentPos + itemLen) {
-            foundItem = item;
-            offsetInItem = match.index - currentPos;
-            break;
-          }
-
-          currentPos += itemLen + 1; // +1 for the space we added
+          itemPositions.push({
+            item,
+            startPos: currentPos,
+            endPos: currentPos + itemLen
+          });
+          currentPos += itemLen + 1; // +1 for space
         }
 
-        // Fallback or if not found (shouldn't happen if logic matches)
-        const anchor = foundItem || lineItems[0];
+        const matchStart = match.index;
+        const matchEnd = match.index + fullMatch.length;
 
-        // precise X calculation
-        // Approximate character width
-        const charWidth = anchor.width / anchor.text.length;
-        const preciseX = anchor.x + (offsetInItem * charWidth);
-        const preciseWidth = fullMatch.length * charWidth;
+        // Find items that overlap with the match
+        const overlappingItems = itemPositions.filter(ip =>
+          // Item overlaps if: item starts before match ends AND item ends after match starts
+          ip.startPos < matchEnd && ip.endPos > matchStart
+        );
 
-        const key = `${fullMatch}-${pageNum}-${preciseX.toFixed(1)}-${anchor.y.toFixed(1)}`;
+        if (overlappingItems.length === 0) {
+          // Fallback to first item
+          overlappingItems.push(itemPositions[0]);
+        }
+
+        // Calculate bounding box encompassing all overlapping items
+        const firstItem = overlappingItems[0].item;
+        const lastItem = overlappingItems[overlappingItems.length - 1].item;
+
+        // Calculate precise X start position within first item
+        const offsetInFirstItem = Math.max(0, matchStart - overlappingItems[0].startPos);
+        const firstItemCharWidth = firstItem.text.length > 0 ? firstItem.width / firstItem.text.length : 6;
+        const preciseX = firstItem.x + (offsetInFirstItem * firstItemCharWidth);
+
+        // Calculate width: from preciseX to end of last overlapping item
+        // (Or more precisely, to match end position within last item)
+        let preciseWidth: number;
+        if (overlappingItems.length === 1) {
+          // Single item: use character-based width
+          preciseWidth = fullMatch.length * firstItemCharWidth;
+        } else {
+          // Spanning: from start X to end of last item
+          const lastItemEnd = lastItem.x + lastItem.width;
+          preciseWidth = lastItemEnd - preciseX;
+        }
+
+        // Use average Y if spanning items have different Y
+        const avgY = overlappingItems.reduce((sum, ip) => sum + ip.item.y, 0) / overlappingItems.length;
+        // Use max height of overlapping items
+        const maxHeight = Math.max(...overlappingItems.map(ip => ip.item.height));
+
+        const key = `${fullMatch}-${pageNum}-${preciseX.toFixed(1)}-${avgY.toFixed(1)}`;
         if (!seen.has(key)) {
           seen.add(key);
           matches.push({
             code: fullMatch,
             page: pageNum,
             x: preciseX,
-            y: anchor.y,
-            width: preciseWidth > 0 ? preciseWidth : anchor.width,
-            height: anchor.height,
+            y: avgY,
+            width: preciseWidth > 0 ? preciseWidth : firstItem.width,
+            height: maxHeight,
             context: lineText,
           });
         }
