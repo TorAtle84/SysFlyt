@@ -191,7 +191,7 @@ async function handleProjectComparison(request: NextRequest, projectId: string) 
             if (error || !data) {
                 return {
                     fileName: doc.fileName || doc.title,
-                    entries: [],
+                    tfmEntries: [],
                     error: `Kunne ikke laste ned: ${error?.message || "ukjent feil"}`,
                 };
             }
@@ -201,7 +201,7 @@ async function handleProjectComparison(request: NextRequest, projectId: string) 
         } catch (err) {
             return {
                 fileName: doc.fileName || doc.title,
-                entries: [],
+                tfmEntries: [],
                 error: `Feil ved behandling av dokument: ${err}`,
             };
         }
