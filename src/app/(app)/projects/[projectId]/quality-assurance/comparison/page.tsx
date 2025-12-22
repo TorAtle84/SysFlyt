@@ -141,15 +141,19 @@ export default function ComparisonPage() {
 
     // Fetch saved comparisons when opening history modal
     const fetchSavedComparisons = useCallback(async () => {
+        console.log("[Comparisons] fetchSavedComparisons called");
         setIsLoadingHistory(true);
         try {
-            const response = await fetch(`/api/projects/${projectId}/quality-assurance/comparisons`);
+            const apiUrl = `/api/projects/${projectId}/quality-assurance/comparisons`;
+            console.log("[Comparisons] Fetching:", apiUrl);
+            const response = await fetch(apiUrl);
             console.log("[Comparisons] Fetch response status:", response.status);
             if (response.ok) {
                 const data = await response.json();
                 console.log("[Comparisons] Fetched data:", data);
                 // Handle potential API error response
                 if (Array.isArray(data)) {
+                    console.log("[Comparisons] Setting", data.length, "comparisons");
                     setSavedComparisons(data);
                 } else if (data.error) {
                     console.error("[Comparisons] API error:", data.error);
