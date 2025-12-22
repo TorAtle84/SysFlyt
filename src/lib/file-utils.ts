@@ -88,13 +88,29 @@ export function validateFileMimeType(mimeType: string, fileType: string): FileVa
   return { valid: true, type: fileType };
 }
 
+
+function detectContentType(fileName: string): string {
+  const ext = path.extname(fileName).toLowerCase();
+  const mimeTypes: Record<string, string> = {
+    ".pdf": "application/pdf",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+    ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ".xls": "application/vnd.ms-excel",
+  };
+  return mimeTypes[ext] || "application/octet-stream";
+}
+
 export async function saveFile(
   projectId: string,
   fileName: string,
   buffer: Buffer
 ): Promise<{ success: true; path: string } | { success: false; error: string }> {
   try {
-    const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9._\/-]/g, "_");
     const timestamp = Date.now();
     const uniqueFileName = `${timestamp}_${sanitizedFileName}`;
     const filePath = `${projectId}/${uniqueFileName}`; // Folder structure in bucket
@@ -102,7 +118,7 @@ export async function saveFile(
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
       .upload(filePath, buffer, {
-        contentType: "application/pdf", // TODO: Detect dynamically if needed, but validation ensures mostly PDF
+        contentType: detectContentType(fileName),
         upsert: false,
       });
 

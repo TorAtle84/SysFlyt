@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireProjectAccess } from "@/lib/auth-helpers";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { saveFile, deleteFile as deleteStorageFile, generateSecureFileName } from "@/lib/file-utils";
 
 export async function GET(
     request: NextRequest,
@@ -70,25 +69,27 @@ export async function POST(
             );
         }
 
-        // Generate unique filename
-        const ext = path.extname(file.name);
-        const timestamp = Date.now();
-        const fileName = `${timestamp}_${itemId}${ext}`;
+        // Generate unique filename with mc-photo prefix
+        const secureFileName = generateSecureFileName(file.name);
+        const fileName = `mc-photos/${itemId}_${secureFileName}`;
 
-        // Save to files directory
-        const uploadDir = path.join(process.cwd(), "public", "files", projectId, "mc-photos");
-        await mkdir(uploadDir, { recursive: true });
-
-        const filePath = path.join(uploadDir, fileName);
+        // Upload to Supabase Storage
         const bytes = await file.arrayBuffer();
-        await writeFile(filePath, Buffer.from(bytes));
+        const result = await saveFile(projectId, fileName, Buffer.from(bytes));
 
-        // Create database entry
-        const fileUrl = `/files/${projectId}/mc-photos/${fileName}`;
+        if (!result.success) {
+            console.error("Supabase upload error:", result.error);
+            return NextResponse.json(
+                { error: result.error || "Kunne ikke laste opp bilde" },
+                { status: 500 }
+            );
+        }
+
+        // Create database entry with the storage path
         const photo = await prisma.mCItemPhoto.create({
             data: {
                 itemId,
-                fileUrl,
+                fileUrl: result.path,
                 caption: caption || undefined,
             },
         });
@@ -133,6 +134,17 @@ export async function DELETE(
             );
         }
 
+        // Get photo to find file path for storage deletion
+        const photo = await prisma.mCItemPhoto.findUnique({
+            where: { id: photoId },
+        });
+
+        if (photo?.fileUrl) {
+            // Delete from Supabase Storage
+            await deleteStorageFile(projectId, photo.fileUrl);
+        }
+
+        // Delete from database
         await prisma.mCItemPhoto.delete({
             where: { id: photoId },
         });
