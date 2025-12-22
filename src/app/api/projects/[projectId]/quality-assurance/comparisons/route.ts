@@ -128,8 +128,12 @@ export async function POST(
         return NextResponse.json(savedComparison);
     } catch (error) {
         console.error("Error saving comparison:", error);
+        // Return detailed error in development
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        const errorStack = error instanceof Error ? error.stack : "";
+        console.error("Error details:", { message: errorMessage, stack: errorStack });
         return NextResponse.json(
-            { error: "Kunne ikke lagre sammenligning" },
+            { error: "Kunne ikke lagre sammenligning", details: errorMessage },
             { status: 500 }
         );
     }
