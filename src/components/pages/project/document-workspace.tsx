@@ -611,7 +611,7 @@ export function DocumentWorkspace({
     (c.system?.toLowerCase().includes(componentFilter.toLowerCase()))
   );
 
-  const typeLabel = documentType === "SCHEMA" ? "Systemskjema" : "Arbeidstegning";
+  const typeLabel = documentType === "SCHEMA" ? "Systemskjema" : documentType === "FUNCTION_DESCRIPTION" ? "Funksjonsbeskrivelse" : "Arbeidstegning";
 
   return (
     <div className="space-y-6">
