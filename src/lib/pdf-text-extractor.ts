@@ -189,12 +189,69 @@ export async function extractPlainTextFromPDF(pdfBuffer: Buffer): Promise<string
       const page = await pdf.getPage(pageNum);
       const textContent = await page.getTextContent();
 
-      const pageText = textContent.items
-        .filter((item: any) => 'str' in item)
-        .map((item: any) => item.str)
-        .join(' ');
+      // Extract items with position info for intelligent joining
+      const items = textContent.items
+        .filter((item: any) => 'str' in item && item.str.length > 0)
+        .map((item: any) => ({
+          str: item.str,
+          x: item.transform[4],
+          y: item.transform[5],
+          width: item.width || 0,
+        }));
 
-      textParts.push(pageText);
+      // Sort by Y (group by line) then X (left to right)
+      items.sort((a: any, b: any) => {
+        const yDiff = Math.abs(a.y - b.y);
+        if (yDiff > 5) return b.y - a.y; // Different lines (PDF Y is bottom-up)
+        return a.x - b.x; // Same line, sort by X
+      });
+
+      // Join items intelligently:
+      // - If items are on same line (Y within 5 units) and close together, join WITHOUT space
+      // - This handles cases like "JPA00" + "38" → "JPA0038"
+      const lineTexts: string[] = [];
+      let currentLine: string[] = [];
+      let lastY = -9999;
+      let lastEndX = -9999;
+
+      for (const item of items) {
+        const yDiff = Math.abs(item.y - lastY);
+
+        if (yDiff > 5) {
+          // New line
+          if (currentLine.length > 0) {
+            lineTexts.push(currentLine.join(''));
+          }
+          currentLine = [item.str];
+          lastY = item.y;
+          lastEndX = item.x + item.width;
+        } else {
+          // Same line - check horizontal gap
+          const gap = item.x - lastEndX;
+
+          // If gap is small (<10 units), likely continuation (no space)
+          // If gap is moderate (10-50 units), add single space
+          // If gap is large (>50 units), might be table column
+          if (gap < 10) {
+            // Very close - likely split text, join directly
+            currentLine.push(item.str);
+          } else if (gap < 50) {
+            // Normal word spacing
+            currentLine.push(' ' + item.str);
+          } else {
+            // Large gap - likely table cell boundary
+            currentLine.push('  ' + item.str);
+          }
+          lastEndX = item.x + item.width;
+        }
+      }
+
+      // Don't forget last line
+      if (currentLine.length > 0) {
+        lineTexts.push(currentLine.join(''));
+      }
+
+      textParts.push(lineTexts.join('\n'));
     }
 
     return textParts.join('\n');

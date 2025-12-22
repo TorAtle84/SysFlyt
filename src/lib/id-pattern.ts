@@ -52,8 +52,8 @@ const SYSTEM_RE = new RegExp(
 );
 
 // Standalone Component search
-// Note: Matches strict component structure
-const COMPONENT_RE = /\b(?<komponent>[A-Za-z]{2,3}\d+[A-Za-z0-9\/_\-]*)\b/gi;
+// Note: Matches strict component structure (2-3 letters + 3-4 digits, optional letter suffix, optional /digits)
+const COMPONENT_RE = /\b(?<komponent>[A-Za-z]{2,3}\d{3,4}(?:[A-Za-z])?(?:\/\d{1,3})?)\b/gi;
 
 // Standalone Typecode search
 const TYPECODE_RE = /%(?<typekode>[A-Za-z]{2,3})\b/i;
@@ -241,10 +241,12 @@ export function parseTFMCode(tfmCode: string): TFMComponents | null {
 
 /**
  * Validate if string matches component pattern
- * Per tfmrules.md: 2-3 bokstaver etterfulgt av minst ett siffer
+ * Per tfmrules.md: 2-3 letters followed by 3-4 digits, optional letter suffix, optional /digits
+ * Supports: RT001, RT0001, RTA001, RTA0001, RT001T/01, RTA001T/001
  */
 export function isValidComponentCode(code: string): boolean {
-  const componentPattern = /^[A-Z]{2,3}\d+[0-9A-Z/_\-]*$/i;
+  // Main pattern: 2-3 letters + 3-4 digits + optional letter + optional /digits
+  const componentPattern = /^[A-Z]{2,3}\d{3,4}(?:[A-Z])?(?:\/\d{1,3})?$/i;
   return componentPattern.test(code);
 }
 

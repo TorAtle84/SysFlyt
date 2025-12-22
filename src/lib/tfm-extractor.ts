@@ -6,6 +6,7 @@
 import mammoth from "mammoth";
 import * as XLSX from "xlsx";
 import { extractPlainTextFromPDF } from "./pdf-text-extractor";
+import { extractValidComponents, isValidComponent } from "./component-detector";
 
 export interface TfmSegmentConfig {
     byggnr: boolean;
@@ -31,16 +32,14 @@ export interface TfmExtractionResult {
 
 // TFM parsing regex based on tfmrules.md
 // Pattern: +{byggnr}={system}-{komponent}%{typekode}
+// Note: Component part now uses comprehensive detector from component-detector.ts
 const TFM_PATTERN = new RegExp(
     "(?:\\+(?<byggnr>\\d+))?" +              // Optional: +digits for byggnr
     "(?:=)?(?<system>\\d{3,4}\\.\\d{2,4}(?::\\d{2,4})?)" + // System: 3-4 digits.2-4 digits, optional :2-4 digits
-    "(?:-)?(?<komponent>[A-Za-z]{2,3}[A-Za-z0-9/_\\-]+)?" + // Component: 2-3 letters followed by alphanumeric
+    "(?:-)?(?<komponent>[A-Za-z]{2,3}\\d{3,4}(?:[A-Za-z])?(?:/\\d{1,3})?)?" + // Component: uses comprehensive formats
     "(?:%(?<typekode>[A-Za-z]{2,3}))?",      // Optional: %2-3 letters for typekode
     "gi"
 );
-
-// Alternative simpler pattern for standalone components
-const COMPONENT_PATTERN = /([A-Z]{2,3}\d{1,6}[A-Z0-9/_-]*)/gi;
 
 // System pattern alone
 const SYSTEM_PATTERN = /(\d{3,4}\.\d{2,4}(?::\d{2,4})?)/g;
@@ -133,22 +132,16 @@ export function parseTfmFromText(
         }
     };
 
-    // If ONLY KOMPONENT is selected (no system), use the simple component pattern
+    // If ONLY KOMPONENT is selected (no system), use comprehensive component detector
     if (config.komponent && !config.system && !config.byggnr && !config.typekode) {
-        let match;
-        COMPONENT_PATTERN.lastIndex = 0;
-        while ((match = COMPONENT_PATTERN.exec(text)) !== null) {
-            const komponent = match[1];
-            // Filter out obvious non-components (too short, just letters, etc)
-            if (komponent.length < 4) continue;
-            if (!/\d/.test(komponent)) continue; // Must have at least one digit
-            if (/^\d+$/.test(komponent)) continue; // Must not be only digits
+        const detectedComponents = extractValidComponents(text);
 
+        for (const comp of detectedComponents) {
             addEntry({
-                fullMatch: komponent,
+                fullMatch: comp.code,
                 byggnr: null,
                 system: null,
-                komponent,
+                komponent: comp.code,
                 typekode: null,
                 sourceDocument: fileName,
             });
@@ -220,23 +213,19 @@ export function parseTfmFromText(
             systems.add(match[1]);
         }
 
-        // Then find components
-        COMPONENT_PATTERN.lastIndex = 0;
-        while ((match = COMPONENT_PATTERN.exec(text)) !== null) {
-            const komponent = match[1];
-            if (komponent.length < 4) continue;
-            if (!/\d/.test(komponent)) continue;
-            if (/^\d+$/.test(komponent)) continue;
+        // Then find components using comprehensive detector
+        const detectedComponents = extractValidComponents(text);
 
+        for (const comp of detectedComponents) {
             // Associate with first system found (if any)
             const system = systems.size > 0 ? [...systems][0] : null;
-            const key = system ? `=${system}-${komponent}` : `-${komponent}`;
+            const key = system ? `=${system}-${comp.code}` : `-${comp.code}`;
 
             addEntry({
                 fullMatch: key,
                 byggnr: null,
                 system,
-                komponent,
+                komponent: comp.code,
                 typekode: null,
                 sourceDocument: fileName,
             });
