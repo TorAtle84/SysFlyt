@@ -112,6 +112,7 @@ export default function ComparisonPage() {
     const [mainDocumentId, setMainDocumentId] = useState<string | null>(null);
     const [comparisonDocumentIds, setComparisonDocumentIds] = useState<string[]>([]);
     const [isLoadingDocs, setIsLoadingDocs] = useState(false);
+    const [documentFilter, setDocumentFilter] = useState("");
 
     // Fetch project documents when mode is 'project'
     const fetchProjectDocuments = useCallback(async () => {
@@ -479,91 +480,114 @@ export default function ComparisonPage() {
                             </CardContent>
                         </Card>
                     ) : (
-                        <div className="grid grid-cols-2 gap-4">
-                            {/* Main Document Selection */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-lg">Hovedfil</CardTitle>
-                                    <p className="text-sm text-muted-foreground">Velg ett dokument som hovedfil</p>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-2 max-h-60 overflow-y-auto">
-                                        {projectDocuments.map((doc) => (
-                                            <label
-                                                key={doc.id}
-                                                className={cn(
-                                                    "flex items-center gap-3 p-3 rounded-md cursor-pointer transition-all",
-                                                    mainDocumentId === doc.id
-                                                        ? "bg-blue-100 border border-blue-400"
-                                                        : "bg-muted hover:bg-muted/80"
-                                                )}
-                                            >
-                                                <input
-                                                    type="radio"
-                                                    name="mainDocument"
-                                                    checked={mainDocumentId === doc.id}
-                                                    onChange={() => {
-                                                        setMainDocumentId(doc.id);
-                                                        setComparisonResult(null);
-                                                    }}
-                                                    className="h-4 w-4"
-                                                />
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium truncate">{doc.title}</p>
-                                                    <p className="text-xs text-muted-foreground">{doc.type === "FUNCTION_DESCRIPTION" ? "Funksjonsbeskrivelse" : doc.type === "DRAWING" ? "Arbeidstegning" : "Systemskjema"}</p>
-                                                </div>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                            </Card>
+                        <>
+                            {/* Document Filter */}
+                            <div className="relative">
+                                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Søk i dokumenter..."
+                                    value={documentFilter}
+                                    onChange={(e) => setDocumentFilter(e.target.value)}
+                                    className="pl-10"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                {/* Main Document Selection */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="text-lg">Hovedfil</CardTitle>
+                                        <p className="text-sm text-muted-foreground">Velg ett dokument som hovedfil</p>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                                            {projectDocuments
+                                                .filter(doc =>
+                                                    !documentFilter ||
+                                                    doc.title.toLowerCase().includes(documentFilter.toLowerCase())
+                                                )
+                                                .map((doc) => (
+                                                    <label
+                                                        key={doc.id}
+                                                        className={cn(
+                                                            "flex items-center gap-3 p-3 rounded-md cursor-pointer transition-all",
+                                                            mainDocumentId === doc.id
+                                                                ? "bg-blue-100 border border-blue-400"
+                                                                : "bg-muted hover:bg-muted/80"
+                                                        )}
+                                                    >
+                                                        <input
+                                                            type="radio"
+                                                            name="mainDocument"
+                                                            checked={mainDocumentId === doc.id}
+                                                            onChange={() => {
+                                                                setMainDocumentId(doc.id);
+                                                                setComparisonResult(null);
+                                                            }}
+                                                            className="h-4 w-4"
+                                                        />
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-medium truncate">{doc.title}</p>
+                                                            <p className="text-xs text-muted-foreground">{doc.type === "FUNCTION_DESCRIPTION" ? "Funksjonsbeskrivelse" : doc.type === "DRAWING" ? "Arbeidstegning" : "Systemskjema"}</p>
+                                                        </div>
+                                                    </label>
+                                                ))}
+                                        </div>
+                                    </CardContent>
+                                </Card>
 
-                            {/* Comparison Documents Selection */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-lg">Sammenligningsfiler</CardTitle>
-                                    <p className="text-sm text-muted-foreground">Velg dokumenter å sammenligne med</p>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-2 max-h-60 overflow-y-auto">
-                                        {projectDocuments.filter(d => d.id !== mainDocumentId).map((doc) => (
-                                            <label
-                                                key={doc.id}
-                                                className={cn(
-                                                    "flex items-center gap-3 p-3 rounded-md cursor-pointer transition-all",
-                                                    comparisonDocumentIds.includes(doc.id)
-                                                        ? "bg-orange-100 border border-orange-400"
-                                                        : "bg-muted hover:bg-muted/80"
-                                                )}
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={comparisonDocumentIds.includes(doc.id)}
-                                                    onChange={(e) => {
-                                                        if (e.target.checked) {
-                                                            setComparisonDocumentIds(prev => [...prev, doc.id]);
-                                                        } else {
-                                                            setComparisonDocumentIds(prev => prev.filter(id => id !== doc.id));
-                                                        }
-                                                        setComparisonResult(null);
-                                                    }}
-                                                    className="h-4 w-4"
-                                                />
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium truncate">{doc.title}</p>
-                                                    <p className="text-xs text-muted-foreground">{doc.type === "FUNCTION_DESCRIPTION" ? "Funksjonsbeskrivelse" : doc.type === "DRAWING" ? "Arbeidstegning" : "Systemskjema"}</p>
-                                                </div>
-                                            </label>
-                                        ))}
-                                    </div>
-                                    {comparisonDocumentIds.length > 0 && (
-                                        <p className="mt-2 text-sm text-muted-foreground">
-                                            {comparisonDocumentIds.length} dokument(er) valgt
-                                        </p>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </div>
+                                {/* Comparison Documents Selection */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="text-lg">Sammenligningsfiler</CardTitle>
+                                        <p className="text-sm text-muted-foreground">Velg dokumenter å sammenligne med</p>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                                            {projectDocuments
+                                                .filter(d => d.id !== mainDocumentId)
+                                                .filter(doc =>
+                                                    !documentFilter ||
+                                                    doc.title.toLowerCase().includes(documentFilter.toLowerCase())
+                                                )
+                                                .map((doc) => (
+                                                    <label
+                                                        key={doc.id}
+                                                        className={cn(
+                                                            "flex items-center gap-3 p-3 rounded-md cursor-pointer transition-all",
+                                                            comparisonDocumentIds.includes(doc.id)
+                                                                ? "bg-orange-100 border border-orange-400"
+                                                                : "bg-muted hover:bg-muted/80"
+                                                        )}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={comparisonDocumentIds.includes(doc.id)}
+                                                            onChange={(e) => {
+                                                                if (e.target.checked) {
+                                                                    setComparisonDocumentIds(prev => [...prev, doc.id]);
+                                                                } else {
+                                                                    setComparisonDocumentIds(prev => prev.filter(id => id !== doc.id));
+                                                                }
+                                                                setComparisonResult(null);
+                                                            }}
+                                                            className="h-4 w-4"
+                                                        />
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-medium truncate">{doc.title}</p>
+                                                            <p className="text-xs text-muted-foreground">{doc.type === "FUNCTION_DESCRIPTION" ? "Funksjonsbeskrivelse" : doc.type === "DRAWING" ? "Arbeidstegning" : "Systemskjema"}</p>
+                                                        </div>
+                                                    </label>
+                                                ))}
+                                        </div>
+                                        {comparisonDocumentIds.length > 0 && (
+                                            <p className="mt-2 text-sm text-muted-foreground">
+                                                {comparisonDocumentIds.length} dokument(er) valgt
+                                            </p>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </>
                     )}
                 </TabsContent>
             </Tabs>
