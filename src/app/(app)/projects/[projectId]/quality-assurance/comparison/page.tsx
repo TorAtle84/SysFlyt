@@ -144,9 +144,22 @@ export default function ComparisonPage() {
         setIsLoadingHistory(true);
         try {
             const response = await fetch(`/api/projects/${projectId}/quality-assurance/comparisons`);
+            console.log("[Comparisons] Fetch response status:", response.status);
             if (response.ok) {
                 const data = await response.json();
-                setSavedComparisons(data);
+                console.log("[Comparisons] Fetched data:", data);
+                // Handle potential API error response
+                if (Array.isArray(data)) {
+                    setSavedComparisons(data);
+                } else if (data.error) {
+                    console.error("[Comparisons] API error:", data.error);
+                    setSavedComparisons([]);
+                } else {
+                    console.warn("[Comparisons] Unexpected response format:", data);
+                    setSavedComparisons([]);
+                }
+            } else {
+                console.error("[Comparisons] Response not ok:", await response.text());
             }
         } catch (error) {
             console.error("Error fetching saved comparisons:", error);
@@ -763,7 +776,7 @@ export default function ComparisonPage() {
                                         <div className="flex-1">
                                             <p className="font-medium">{comparison.name}</p>
                                             <p className="text-sm text-muted-foreground">
-                                                {comparison.createdBy.firstName} {comparison.createdBy.lastName} • {formatDate(comparison.createdAt)}
+                                                {comparison.createdBy ? `${comparison.createdBy.firstName} ${comparison.createdBy.lastName}` : "Ukjent"} • {formatDate(comparison.createdAt)}
                                             </p>
                                         </div>
                                         <a

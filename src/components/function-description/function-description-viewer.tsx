@@ -100,17 +100,25 @@ export default function FunctionDescriptionViewer({
     }, [searchQuery, projectId, documentId]);
 
     // Update current page highlights based on search matches
+    // Convert from PDF coordinates to percentage (0-100) for AnnotationLayer viewBox
     useEffect(() => {
         const matchesOnPage = allSearchMatches.filter((m) => m.page === pageNumber);
-        setSearchHighlights(
-            matchesOnPage.map((m) => ({
-                x: m.x,
-                y: m.y,
-                width: m.width,
-                height: m.height,
-            }))
-        );
-    }, [allSearchMatches, pageNumber]);
+
+        // Only convert if we have valid page dimensions
+        if (pageWidth > 0 && pageHeight > 0) {
+            setSearchHighlights(
+                matchesOnPage.map((m) => ({
+                    // Convert from PDF points to percentage
+                    x: (m.x / pageWidth) * 100,
+                    y: (m.y / pageHeight) * 100,
+                    width: (m.width / pageWidth) * 100,
+                    height: (m.height / pageHeight) * 100,
+                }))
+            );
+        } else {
+            setSearchHighlights([]);
+        }
+    }, [allSearchMatches, pageNumber, pageWidth, pageHeight]);
 
     function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
         setNumPages(numPages);
