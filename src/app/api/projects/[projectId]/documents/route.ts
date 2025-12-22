@@ -19,11 +19,18 @@ export async function GET(
 
     const { searchParams } = new URL(request.url);
     const type = searchParams.get("type");
+    const types = searchParams.get("types"); // Comma-separated list
     const latestOnly = searchParams.get("latest") !== "false";
 
     const whereClause: Record<string, unknown> = { projectId };
 
-    if (type) {
+    if (types) {
+      // Support comma-separated types (e.g., "FUNCTION_DESCRIPTION,DRAWING,SCHEMA")
+      const typeList = types.split(",").map(t => t.trim()).filter(Boolean);
+      if (typeList.length > 0) {
+        whereClause.type = { in: typeList };
+      }
+    } else if (type) {
       whereClause.type = type;
     }
 

@@ -120,7 +120,8 @@ export default function ComparisonPage() {
             const response = await fetch(`/api/projects/${projectId}/documents?types=FUNCTION_DESCRIPTION,DRAWING,SCHEMA`);
             if (response.ok) {
                 const data = await response.json();
-                setProjectDocuments(data.documents || []);
+                // API returns documents array directly
+                setProjectDocuments(Array.isArray(data) ? data : data.documents || []);
             }
         } catch (error) {
             console.error("Error fetching project documents:", error);
