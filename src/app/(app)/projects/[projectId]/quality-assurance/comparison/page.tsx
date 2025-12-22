@@ -91,6 +91,14 @@ export default function ComparisonPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [showSaveModal, setShowSaveModal] = useState(false);
     const [showHistoryModal, setShowHistoryModal] = useState(false);
+    const [savedComparisons, setSavedComparisons] = useState<{
+        id: string;
+        name: string;
+        fileUrl: string;
+        createdAt: string;
+        createdBy: { firstName: string; lastName: string };
+    }[]>([]);
+    const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
     // Project mode state
     interface ProjectDocument {
@@ -128,6 +136,33 @@ export default function ComparisonPage() {
         if (newMode === "project" && projectDocuments.length === 0) {
             fetchProjectDocuments();
         }
+    };
+
+    // Fetch saved comparisons when opening history modal
+    const fetchSavedComparisons = useCallback(async () => {
+        setIsLoadingHistory(true);
+        try {
+            const response = await fetch(`/api/projects/${projectId}/quality-assurance/comparisons`);
+            if (response.ok) {
+                const data = await response.json();
+                setSavedComparisons(data);
+            }
+        } catch (error) {
+            console.error("Error fetching saved comparisons:", error);
+        } finally {
+            setIsLoadingHistory(false);
+        }
+    }, [projectId]);
+
+    // Format date helper
+    const formatDate = (dateStr: string) => {
+        return new Date(dateStr).toLocaleDateString("nb-NO", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
     };
 
     // Toggle segment
@@ -694,7 +729,13 @@ export default function ComparisonPage() {
             )}
 
             {/* History Modal */}
-            <Dialog open={showHistoryModal} onOpenChange={setShowHistoryModal}>
+            <Dialog
+                open={showHistoryModal}
+                onOpenChange={(open) => {
+                    setShowHistoryModal(open);
+                    if (open) fetchSavedComparisons();
+                }}
+            >
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>
                         <DialogTitle>Lagrede sammenligninger</DialogTitle>
@@ -703,9 +744,40 @@ export default function ComparisonPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4">
-                        <p className="text-center text-muted-foreground py-8">
-                            Ingen lagrede sammenligninger ennå.
-                        </p>
+                        {isLoadingHistory ? (
+                            <div className="flex items-center justify-center py-8">
+                                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                            </div>
+                        ) : savedComparisons.length === 0 ? (
+                            <p className="text-center text-muted-foreground py-8">
+                                Ingen lagrede sammenligninger ennå.
+                            </p>
+                        ) : (
+                            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                                {savedComparisons.map((comparison) => (
+                                    <div
+                                        key={comparison.id}
+                                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
+                                    >
+                                        <div className="flex-1">
+                                            <p className="font-medium">{comparison.name}</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {comparison.createdBy.firstName} {comparison.createdBy.lastName} • {formatDate(comparison.createdAt)}
+                                            </p>
+                                        </div>
+                                        <a
+                                            href={comparison.fileUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-2 text-sm text-primary hover:underline"
+                                        >
+                                            <Download className="w-4 h-4" />
+                                            Last ned
+                                        </a>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </DialogContent>
             </Dialog>
