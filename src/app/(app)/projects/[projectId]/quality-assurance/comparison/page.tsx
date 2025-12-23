@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -172,6 +172,14 @@ export default function ComparisonPage() {
             setIsLoadingHistory(false);
         }
     }, [projectId]);
+
+    // Trigger fetch when history modal opens
+    useEffect(() => {
+        if (showHistoryModal) {
+            console.log("[Comparisons] Modal opened, fetching...");
+            fetchSavedComparisons();
+        }
+    }, [showHistoryModal, fetchSavedComparisons]);
 
     // Format date helper
     const formatDate = (dateStr: string) => {
@@ -773,10 +781,7 @@ export default function ComparisonPage() {
             {/* History Modal */}
             <Dialog
                 open={showHistoryModal}
-                onOpenChange={(open) => {
-                    setShowHistoryModal(open);
-                    if (open) fetchSavedComparisons();
-                }}
+                onOpenChange={setShowHistoryModal}
             >
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>
