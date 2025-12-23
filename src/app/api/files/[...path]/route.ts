@@ -89,6 +89,18 @@ export async function GET(
       if (!model) {
         return NextResponse.json({ error: "Modell ikke funnet" }, { status: 404 });
       }
+    } else if (fileName.includes("mc-photos")) {
+      // MC Protocol photos - check MCItemPhoto table
+      const photo = await prisma.mCItemPhoto.findFirst({
+        where: {
+          fileUrl: { contains: fileName },
+        },
+        select: { id: true, item: { select: { protocol: { select: { projectId: true } } } } },
+      });
+
+      if (!photo || photo.item.protocol.projectId !== projectId) {
+        return NextResponse.json({ error: "Bilde ikke funnet" }, { status: 404 });
+      }
     } else {
       const document = await prisma.document.findFirst({
         where: {
