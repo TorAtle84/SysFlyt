@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -18,6 +19,8 @@ import {
   TrendingUp,
   ShieldCheck,
   GitCompare,
+  Plus,
+  Minus,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -61,6 +64,35 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
   const pathname = usePathname();
   const { data: session } = useSession();
   const id = project?.id || projectId;
+
+  // Expandable groups state - persisted to localStorage
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    Underlag: true,
+    Kvalitetssikring: true,
+    Protokoller: true,
+    Fremdrift: true,
+  });
+
+  // Load expanded state from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("sidebarExpandedGroups");
+    if (saved) {
+      try {
+        setExpandedGroups(JSON.parse(saved));
+      } catch (e) {
+        // Ignore invalid JSON
+      }
+    }
+  }, []);
+
+  // Toggle group expansion
+  const toggleGroup = (label: string) => {
+    setExpandedGroups((prev) => {
+      const newState = { ...prev, [label]: !prev[label] };
+      localStorage.setItem("sidebarExpandedGroups", JSON.stringify(newState));
+      return newState;
+    });
+  };
 
   if (!id) return null;
 
@@ -218,43 +250,55 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
       <nav className="space-y-1">
         {navItems.map((item) => {
           if (item.type === "group") {
+            const isExpanded = expandedGroups[item.label] ?? true;
             return (
               <div key={item.label} className="pt-2">
-                <div className="flex items-center gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  <item.icon size={14} />
-                  {item.label}
-                </div>
-                <div className="space-y-1">
-                  {item.children.map((child) => {
-                    const isActive = child.exact
-                      ? pathname === child.href
-                      : pathname.startsWith(child.href);
-                    return (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        className={cn(
-                          "flex min-h-[44px] items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors touch-manipulation",
-                          child.indent ? "pl-9" : "",
-                          isActive
-                            ? "bg-primary/10 text-primary"
-                            : "text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted/80"
-                        )}
-                        onClick={() => onNavigate?.()}
-                      >
-                        <div className="flex items-center gap-3">
-                          <child.icon size={18} />
-                          {child.label}
-                        </div>
-                        {child.count !== undefined && child.count > 0 && (
-                          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-muted px-1.5 text-xs font-medium text-foreground">
-                            {child.count}
-                          </span>
-                        )}
-                      </Link>
-                    );
-                  })}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(item.label)}
+                  className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground transition-colors group"
+                >
+                  <div className="flex items-center gap-2">
+                    <item.icon size={14} />
+                    {item.label}
+                  </div>
+                  <div className="flex items-center justify-center w-5 h-5 rounded bg-muted/50 group-hover:bg-muted text-muted-foreground group-hover:text-foreground transition-colors">
+                    {isExpanded ? <Minus size={12} /> : <Plus size={12} />}
+                  </div>
+                </button>
+                {isExpanded && (
+                  <div className="space-y-1">
+                    {item.children.map((child) => {
+                      const isActive = child.exact
+                        ? pathname === child.href
+                        : pathname.startsWith(child.href);
+                      return (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          className={cn(
+                            "flex min-h-[44px] items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors touch-manipulation",
+                            child.indent ? "pl-9" : "",
+                            isActive
+                              ? "bg-primary/10 text-primary"
+                              : "text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted/80"
+                          )}
+                          onClick={() => onNavigate?.()}
+                        >
+                          <div className="flex items-center gap-3">
+                            <child.icon size={18} />
+                            {child.label}
+                          </div>
+                          {child.count !== undefined && child.count > 0 && (
+                            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-muted px-1.5 text-xs font-medium text-foreground">
+                              {child.count}
+                            </span>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           }
