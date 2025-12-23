@@ -101,6 +101,19 @@ export async function GET(
       if (!photo || photo.item.protocol.projectId !== projectId) {
         return NextResponse.json({ error: "Bilde ikke funnet" }, { status: 404 });
       }
+    } else if (fileName.includes("comparisons/")) {
+      // TFM Comparisons - check TfmComparison table
+      const comparison = await prisma.tfmComparison.findFirst({
+        where: {
+          projectId,
+          fileUrl: { contains: fileName },
+        },
+        select: { id: true },
+      });
+
+      if (!comparison) {
+        return NextResponse.json({ error: "Sammenligning ikke funnet" }, { status: 404 });
+      }
     } else {
       const document = await prisma.document.findFirst({
         where: {
