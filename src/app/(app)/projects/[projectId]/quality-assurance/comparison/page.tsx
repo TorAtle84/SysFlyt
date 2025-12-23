@@ -34,6 +34,8 @@ import {
     X,
     CheckCircle,
     XCircle,
+    Trash2,
+    Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -99,6 +101,8 @@ export default function ComparisonPage() {
         createdBy: { firstName: string; lastName: string };
     }[]>([]);
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+    const [historyFilter, setHistoryFilter] = useState("");
+    const [deletingComparisonId, setDeletingComparisonId] = useState<string | null>(null);
 
     // Project mode state
     interface ProjectDocument {
@@ -191,6 +195,38 @@ export default function ComparisonPage() {
             minute: "2-digit",
         });
     };
+
+    // Delete comparison
+    const deleteComparison = async (comparisonId: string) => {
+        setDeletingComparisonId(comparisonId);
+        try {
+            const response = await fetch(
+                `/api/projects/${projectId}/quality-assurance/comparisons?id=${comparisonId}`,
+                { method: "DELETE" }
+            );
+            if (response.ok) {
+                setSavedComparisons((prev) => prev.filter((c) => c.id !== comparisonId));
+            } else {
+                console.error("Failed to delete comparison");
+            }
+        } catch (error) {
+            console.error("Error deleting comparison:", error);
+        } finally {
+            setDeletingComparisonId(null);
+        }
+    };
+
+    // Filter saved comparisons
+    const filteredComparisons = useMemo(() => {
+        if (!historyFilter.trim()) return savedComparisons;
+        const lower = historyFilter.toLowerCase();
+        return savedComparisons.filter((c) =>
+            c.name.toLowerCase().includes(lower) ||
+            (c.createdBy?.firstName?.toLowerCase().includes(lower)) ||
+            (c.createdBy?.lastName?.toLowerCase().includes(lower))
+        );
+    }, [savedComparisons, historyFilter]);
+
 
     // Toggle segment
     const toggleSegment = (segment: keyof TfmSegmentConfig) => {
@@ -790,7 +826,20 @@ export default function ComparisonPage() {
                             Tidligere lagrede sammenligninger for dette prosjektet.
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="py-4">
+                    <div className="py-4 space-y-3">
+                        {/* Filter Input */}
+                        {savedComparisons.length > 0 && (
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Søk i sammenligninger..."
+                                    value={historyFilter}
+                                    onChange={(e) => setHistoryFilter(e.target.value)}
+                                    className="pl-9"
+                                />
+                            </div>
+                        )}
+
                         {isLoadingHistory ? (
                             <div className="flex items-center justify-center py-8">
                                 <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -799,28 +848,46 @@ export default function ComparisonPage() {
                             <p className="text-center text-muted-foreground py-8">
                                 Ingen lagrede sammenligninger ennå.
                             </p>
+                        ) : filteredComparisons.length === 0 ? (
+                            <p className="text-center text-muted-foreground py-8">
+                                Ingen sammenligninger matcher søket.
+                            </p>
                         ) : (
                             <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                                {savedComparisons.map((comparison) => (
+                                {filteredComparisons.map((comparison) => (
                                     <div
                                         key={comparison.id}
                                         className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
                                     >
-                                        <div className="flex-1">
-                                            <p className="font-medium">{comparison.name}</p>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-medium truncate">{comparison.name}</p>
                                             <p className="text-sm text-muted-foreground">
                                                 {comparison.createdBy ? `${comparison.createdBy.firstName} ${comparison.createdBy.lastName}` : "Ukjent"} • {formatDate(comparison.createdAt)}
                                             </p>
                                         </div>
-                                        <a
-                                            href={comparison.fileUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-2 text-sm text-primary hover:underline"
-                                        >
-                                            <Download className="w-4 h-4" />
-                                            Last ned
-                                        </a>
+                                        <div className="flex items-center gap-2 ml-4">
+                                            <a
+                                                href={comparison.fileUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-1 text-sm text-primary hover:underline"
+                                            >
+                                                <Download className="w-4 h-4" />
+                                                Last ned
+                                            </a>
+                                            <button
+                                                onClick={() => deleteComparison(comparison.id)}
+                                                disabled={deletingComparisonId === comparison.id}
+                                                className="p-1.5 rounded hover:bg-red-50 text-red-500 hover:text-red-700 disabled:opacity-50"
+                                                title="Slett sammenligning"
+                                            >
+                                                {deletingComparisonId === comparison.id ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                ) : (
+                                                    <Trash2 className="w-4 h-4" />
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>

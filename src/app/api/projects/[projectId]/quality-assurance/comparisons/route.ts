@@ -138,3 +138,64 @@ export async function POST(
         );
     }
 }
+
+export async function DELETE(
+    request: NextRequest,
+    { params }: { params: Promise<{ projectId: string }> }
+) {
+    try {
+        const { projectId } = await params;
+
+        const authResult = await requireProjectAccess(projectId);
+        if (!authResult.success) {
+            return authResult.error;
+        }
+
+        const { searchParams } = new URL(request.url);
+        const comparisonId = searchParams.get("id");
+
+        if (!comparisonId) {
+            return NextResponse.json(
+                { error: "Mangler comparison ID" },
+                { status: 400 }
+            );
+        }
+
+        // Find the comparison to get file URL
+        const comparison = await prisma.tfmComparison.findUnique({
+            where: { id: comparisonId },
+        });
+
+        if (!comparison || comparison.projectId !== projectId) {
+            return NextResponse.json(
+                { error: "Sammenligning ikke funnet" },
+                { status: 404 }
+            );
+        }
+
+        // Delete from Supabase Storage
+        if (supabaseUrl && supabaseServiceKey) {
+            const supabase = createClient(supabaseUrl, supabaseServiceKey);
+            // Extract path from fileUrl: /api/files/{projectId}/comparisons/{filename}
+            const pathMatch = comparison.fileUrl.match(/\/api\/files\/[^/]+\/(.+)/);
+            if (pathMatch) {
+                const storagePath = `${projectId}/${pathMatch[1]}`;
+                await supabase.storage.from(BUCKET_NAME).remove([storagePath]);
+            }
+        }
+
+        // Delete from database
+        await prisma.tfmComparison.delete({
+            where: { id: comparisonId },
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("Error deleting comparison:", error);
+        return NextResponse.json(
+            { error: "Kunne ikke slette sammenligning" },
+            { status: 500 }
+        );
+    }
+}
+
