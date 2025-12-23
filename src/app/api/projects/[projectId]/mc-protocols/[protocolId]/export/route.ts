@@ -1,6 +1,6 @@
 /**
  * MC Protocol PDF Export API
- * POST: Generate and download protocol as PDF
+ * GET: Generate and download protocol as PDF (printable HTML)
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -9,7 +9,7 @@ import { requireProjectAccess } from "@/lib/auth-helpers";
 import { format } from "date-fns";
 import { nb } from "date-fns/locale";
 
-export async function POST(
+export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ projectId: string; protocolId: string }> }
 ) {
@@ -21,12 +21,27 @@ export async function POST(
             return authResult.error;
         }
 
-        // Fetch protocol with all items
+        // Fetch protocol with all items and relations
         const protocol = await prisma.mCProtocol.findUnique({
             where: { id: protocolId, projectId },
             include: {
                 items: {
                     orderBy: { createdAt: "asc" },
+                    include: {
+                        responsible: {
+                            select: { firstName: true, lastName: true },
+                        },
+                        executor: {
+                            select: { firstName: true, lastName: true },
+                        },
+                        massList: {
+                            select: {
+                                tfm: true,
+                                component: true,
+                                productName: true,
+                            },
+                        },
+                    },
                 },
                 project: {
                     select: { name: true },
@@ -219,30 +234,45 @@ function generateProtocolHTML(protocol: any): string {
     <table>
         <thead>
             <tr>
-                <th style="width: 25%">Komponent</th>
+                <th style="width: 20%">TFM-kode</th>
+                <th style="width: 15%">Komponent</th>
                 <th style="width: 15%">Status</th>
-                <th style="width: 20%">Tildelt</th>
-                <th style="width: 15%">Fullført dato</th>
-                <th style="width: 25%">Notater</th>
+                <th style="width: 15%">Ansvarlig</th>
+                <th style="width: 15%">Utførende</th>
+                <th style="width: 10%">Dato</th>
+                <th style="width: 10%">Notater</th>
             </tr>
         </thead>
         <tbody>
-            ${protocol.items.map((item: any) => `
+            ${protocol.items.map((item: any) => {
+        const colAStatus = item.columnA;
+        const colBStatus = item.columnB;
+        const colCStatus = item.columnC;
+        // Determine overall status
+        const allCompleted = colAStatus === "COMPLETED" && colBStatus === "COMPLETED" && colCStatus === "COMPLETED";
+        const hasDeviation = colAStatus === "DEVIATION" || colBStatus === "DEVIATION" || colCStatus === "DEVIATION";
+        const anyInProgress = colAStatus === "IN_PROGRESS" || colBStatus === "IN_PROGRESS" || colCStatus === "IN_PROGRESS";
+        const displayStatus = hasDeviation ? "DEVIATION" : allCompleted ? "COMPLETED" : anyInProgress ? "IN_PROGRESS" : "NOT_STARTED";
+
+        return `
             <tr>
                 <td>
-                    <strong>${item.componentCode}</strong>
-                    ${item.productName ? `<br/><small style="color: #6b7280">${item.productName}</small>` : ""}
+                    <strong>${item.massList?.tfm || "-"}</strong>
+                    ${item.massList?.productName ? `<br/><small style="color: #6b7280">${item.massList.productName}</small>` : ""}
                 </td>
+                <td>${item.massList?.component || "-"}</td>
                 <td>
-                    <span class="status-badge" style="background: ${getStatusColor(item.status)}">
-                        ${getStatusLabel(item.status)}
+                    <span class="status-badge" style="background: ${getStatusColor(displayStatus)}">
+                        ${getStatusLabel(displayStatus)}
                     </span>
                 </td>
-                <td>${item.assignedTo ? `${item.assignedTo.firstName} ${item.assignedTo.lastName}` : "-"}</td>
+                <td>${item.responsible ? `${item.responsible.firstName} ${item.responsible.lastName}` : "-"}</td>
+                <td>${item.executor ? `${item.executor.firstName} ${item.executor.lastName}` : "-"}</td>
                 <td>${item.completedAt ? format(new Date(item.completedAt), "dd.MM.yyyy", { locale: nb }) : "-"}</td>
                 <td>${item.notes || "-"}</td>
             </tr>
-            `).join("")}
+            `;
+    }).join("")}
         </tbody>
     </table>
 
