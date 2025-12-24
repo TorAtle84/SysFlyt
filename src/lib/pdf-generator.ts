@@ -227,17 +227,17 @@ export async function generateMCProtocolPDF(data: ProtocolPDFData): Promise<Buff
     page.drawText("Systemeier", { x: margin, y, size: 10, font: fontBold });
     y -= 20;
     page.drawText("Dato:", { x: margin, y, size: 8, font });
-    page.drawLine({ start: { x: margin + 30, y - 2 }, end: { x: margin + 100, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
+    page.drawLine({ start: { x: margin + 30, y: y - 2 }, end: { x: margin + 100, y: y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
     page.drawText("Signatur:", { x: margin + 120, y, size: 8, font });
-    page.drawLine({ start: { x: margin + 165, y - 2 }, end: { x: margin + 300, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
+    page.drawLine({ start: { x: margin + 165, y: y - 2 }, end: { x: margin + 300, y: y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
 
     // Kontrollør signature
     const rightCol = width / 2 + 20;
     page.drawText("Kontrollør", { x: rightCol, y: y + 20, size: 10, font: fontBold });
     page.drawText("Dato:", { x: rightCol, y, size: 8, font });
-    page.drawLine({ start: { x: rightCol + 30, y - 2 }, end: { x: rightCol + 100, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
+    page.drawLine({ start: { x: rightCol + 30, y: y - 2 }, end: { x: rightCol + 100, y: y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
     page.drawText("Signatur:", { x: rightCol + 120, y, size: 8, font });
-    page.drawLine({ start: { x: rightCol + 165, y - 2 }, end: { x: width - margin, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
+    page.drawLine({ start: { x: rightCol + 165, y: y - 2 }, end: { x: width - margin, y: y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
 
     // Footer on all pages
     const pages = pdfDoc.getPages();
@@ -374,16 +374,16 @@ export async function generateFunctionTestPDF(data: FunctionTestPDFData): Promis
     page.drawText("Systemeier", { x: margin, y, size: 10, font: fontBold });
     y -= 18;
     page.drawText("Dato:", { x: margin, y, size: 8, font });
-    page.drawLine({ start: { x: margin + 30, y - 2 }, end: { x: margin + 100, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
+    page.drawLine({ start: { x: margin + 30, y: y - 2 }, end: { x: margin + 100, y: y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
     page.drawText("Signatur:", { x: margin + 120, y, size: 8, font });
-    page.drawLine({ start: { x: margin + 165, y - 2 }, end: { x: margin + 300, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
+    page.drawLine({ start: { x: margin + 165, y: y - 2 }, end: { x: margin + 300, y: y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
 
     const rightCol = width / 2 + 20;
     page.drawText("Kontrollør", { x: rightCol, y: y + 18, size: 10, font: fontBold });
     page.drawText("Dato:", { x: rightCol, y, size: 8, font });
-    page.drawLine({ start: { x: rightCol + 30, y - 2 }, end: { x: rightCol + 100, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
+    page.drawLine({ start: { x: rightCol + 30, y: y - 2 }, end: { x: rightCol + 100, y: y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
     page.drawText("Signatur:", { x: rightCol + 120, y, size: 8, font });
-    page.drawLine({ start: { x: rightCol + 165, y - 2 }, end: { x: width - margin, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
+    page.drawLine({ start: { x: rightCol + 165, y: y - 2 }, end: { x: width - margin, y: y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
 
     // Footer
     const pages = pdfDoc.getPages();
