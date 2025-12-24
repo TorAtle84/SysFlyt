@@ -54,7 +54,7 @@ interface FunctionTestPDFData {
     }[];
 }
 
-const STATUS_LABELS: Record<string, string> = {
+    const STATUS_LABELS: Record<string, string> = {
     NOT_STARTED: "Ikke startet",
     IN_PROGRESS: "Pågår",
     COMPLETED: "Fullført",
@@ -228,20 +228,20 @@ export async function generateMCProtocolPDF(data: ProtocolPDFData): Promise<Buff
     y -= 20;
     page.drawText("Dato:", { x: margin, y, size: 8, font });
     page.drawLine({ start: { x: margin + 30, y - 2 }, end: { x: margin + 100, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
-page.drawText("Signatur:", { x: margin + 120, y, size: 8, font });
-page.drawLine({ start: { x: margin + 165, y - 2 }, end: { x: margin + 300, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
+    page.drawText("Signatur:", { x: margin + 120, y, size: 8, font });
+    page.drawLine({ start: { x: margin + 165, y - 2 }, end: { x: margin + 300, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
 
-// Kontrollør signature
-const rightCol = width / 2 + 20;
-page.drawText("Kontrollør", { x: rightCol, y: y + 20, size: 10, font: fontBold });
-page.drawText("Dato:", { x: rightCol, y, size: 8, font });
-page.drawLine({ start: { x: rightCol + 30, y - 2 }, end: { x: rightCol + 100, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
-page.drawText("Signatur:", { x: rightCol + 120, y, size: 8, font });
-page.drawLine({ start: { x: rightCol + 165, y - 2 }, end: { x: width - margin, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
+    // Kontrollør signature
+    const rightCol = width / 2 + 20;
+    page.drawText("Kontrollør", { x: rightCol, y: y + 20, size: 10, font: fontBold });
+    page.drawText("Dato:", { x: rightCol, y, size: 8, font });
+    page.drawLine({ start: { x: rightCol + 30, y - 2 }, end: { x: rightCol + 100, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
+    page.drawText("Signatur:", { x: rightCol + 120, y, size: 8, font });
+    page.drawLine({ start: { x: rightCol + 165, y - 2 }, end: { x: width - margin, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
 
-// Footer on all pages
-const pages = pdfDoc.getPages();
-for (let i = 0; i < pages.length; i++) {
+    // Footer on all pages
+    const pages = pdfDoc.getPages();
+    for (let i = 0; i < pages.length; i++) {
     pages[i].drawText(`Eksportert fra SysFlyt ${format(new Date(), "dd.MM.yyyy HH:mm", { locale: nb })} | Side ${i + 1} av ${pages.length}`, {
         x: margin,
         y: 20,
@@ -251,8 +251,8 @@ for (let i = 0; i < pages.length; i++) {
     });
 }
 
-const pdfBytes = await pdfDoc.save();
-return Buffer.from(pdfBytes);
+    const pdfBytes = await pdfDoc.save();
+    return Buffer.from(pdfBytes);
 }
 
 export async function generateFunctionTestPDF(data: FunctionTestPDFData): Promise<Buffer> {
@@ -375,19 +375,19 @@ export async function generateFunctionTestPDF(data: FunctionTestPDFData): Promis
     y -= 18;
     page.drawText("Dato:", { x: margin, y, size: 8, font });
     page.drawLine({ start: { x: margin + 30, y - 2 }, end: { x: margin + 100, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
-page.drawText("Signatur:", { x: margin + 120, y, size: 8, font });
-page.drawLine({ start: { x: margin + 165, y - 2 }, end: { x: margin + 300, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
+    page.drawText("Signatur:", { x: margin + 120, y, size: 8, font });
+    page.drawLine({ start: { x: margin + 165, y - 2 }, end: { x: margin + 300, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
 
-const rightCol = width / 2 + 20;
-page.drawText("Kontrollør", { x: rightCol, y: y + 18, size: 10, font: fontBold });
-page.drawText("Dato:", { x: rightCol, y, size: 8, font });
-page.drawLine({ start: { x: rightCol + 30, y - 2 }, end: { x: rightCol + 100, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
-page.drawText("Signatur:", { x: rightCol + 120, y, size: 8, font });
-page.drawLine({ start: { x: rightCol + 165, y - 2 }, end: { x: width - margin, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
+    const rightCol = width / 2 + 20;
+    page.drawText("Kontrollør", { x: rightCol, y: y + 18, size: 10, font: fontBold });
+    page.drawText("Dato:", { x: rightCol, y, size: 8, font });
+    page.drawLine({ start: { x: rightCol + 30, y - 2 }, end: { x: rightCol + 100, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
+    page.drawText("Signatur:", { x: rightCol + 120, y, size: 8, font });
+    page.drawLine({ start: { x: rightCol + 165, y - 2 }, end: { x: width - margin, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
 
-// Footer
-const pages = pdfDoc.getPages();
-for (let i = 0; i < pages.length; i++) {
+    // Footer
+    const pages = pdfDoc.getPages();
+    for (let i = 0; i < pages.length; i++) {
     pages[i].drawText(`Eksportert fra SysFlyt ${format(new Date(), "dd.MM.yyyy HH:mm", { locale: nb })} | Side ${i + 1} av ${pages.length}`, {
         x: margin,
         y: 20,
@@ -397,6 +397,6 @@ for (let i = 0; i < pages.length; i++) {
     });
 }
 
-const pdfBytes = await pdfDoc.save();
-return Buffer.from(pdfBytes);
+    const pdfBytes = await pdfDoc.save();
+    return Buffer.from(pdfBytes);
 }
