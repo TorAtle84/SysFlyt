@@ -132,6 +132,8 @@ async function handleProjectComparison(request: NextRequest, projectId: string) 
     const body = await request.json();
     const { mainDocumentId, comparisonDocumentIds, segmentConfig } = body;
 
+    console.log("Project comparison request:", { mainDocumentId, comparisonDocumentIds, segmentConfig, projectId });
+
     if (!mainDocumentId) {
         return NextResponse.json(
             { error: "Hovedfil (dokumentID) er påkrevd" },
@@ -142,6 +144,13 @@ async function handleProjectComparison(request: NextRequest, projectId: string) 
     if (!comparisonDocumentIds || comparisonDocumentIds.length === 0) {
         return NextResponse.json(
             { error: "Minst én sammenligningsfil er påkrevd" },
+            { status: 400 }
+        );
+    }
+
+    if (!segmentConfig) {
+        return NextResponse.json(
+            { error: "Segmentkonfigurasjon er påkrevd" },
             { status: 400 }
         );
     }
@@ -179,16 +188,39 @@ async function handleProjectComparison(request: NextRequest, projectId: string) 
     // Extract TFM from each document
     const extractFromDocument = async (doc: typeof documents[0]): Promise<TfmExtractionResult> => {
         try {
+            console.log("Processing document:", { id: doc.id, title: doc.title, url: doc.url });
+
             // Parse the URL to get bucket and path
             const url = new URL(doc.url);
             const pathParts = url.pathname.split("/").filter(Boolean);
+            console.log("URL path parts:", pathParts);
+
             // Assuming URL format is /storage/v1/object/public/bucket-name/path
             const bucketIndex = pathParts.findIndex(p => p === "public" || p === "sign");
+            if (bucketIndex === -1) {
+                return {
+                    fileName: doc.fileName || doc.title,
+                    tfmEntries: [],
+                    error: `Ugyldig URL-format: kunne ikke finne 'public' eller 'sign' i URL-stien`,
+                };
+            }
+
             const bucket = pathParts[bucketIndex + 1];
             const path = pathParts.slice(bucketIndex + 2).join("/");
 
+            if (!bucket || !path) {
+                return {
+                    fileName: doc.fileName || doc.title,
+                    tfmEntries: [],
+                    error: `Ugyldig URL-format: mangler bucket eller path. bucket=${bucket}, path=${path}`,
+                };
+            }
+
+            console.log("Downloading from Supabase:", { bucket, path });
+
             const { data, error } = await supabase.storage.from(bucket).download(path);
             if (error || !data) {
+                console.error("Supabase download error:", error);
                 return {
                     fileName: doc.fileName || doc.title,
                     tfmEntries: [],
@@ -199,6 +231,7 @@ async function handleProjectComparison(request: NextRequest, projectId: string) 
             const buffer = Buffer.from(await data.arrayBuffer());
             return await extractTfmFromFile(buffer, doc.fileName || doc.title, segmentConfig);
         } catch (err) {
+            console.error("extractFromDocument error:", err);
             return {
                 fileName: doc.fileName || doc.title,
                 tfmEntries: [],
