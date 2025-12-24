@@ -190,8 +190,32 @@ async function handleProjectComparison(request: NextRequest, projectId: string) 
         try {
             console.log("Processing document:", { id: doc.id, title: doc.title, url: doc.url });
 
+            // Check if URL exists
+            if (!doc.url) {
+                return {
+                    fileName: doc.fileName || doc.title,
+                    tfmEntries: [],
+                    error: `Dokument mangler URL. Dokumentet er kanskje ikke lastet opp ennå.`,
+                };
+            }
+
             // Parse the URL to get bucket and path
-            const url = new URL(doc.url);
+            let url: URL;
+            try {
+                // Handle relative URLs by prepending Supabase base URL
+                if (doc.url.startsWith("/")) {
+                    url = new URL(doc.url, process.env.NEXT_PUBLIC_SUPABASE_URL);
+                } else {
+                    url = new URL(doc.url);
+                }
+            } catch (urlError) {
+                return {
+                    fileName: doc.fileName || doc.title,
+                    tfmEntries: [],
+                    error: `Ugyldig dokument-URL: ${doc.url}`,
+                };
+            }
+
             const pathParts = url.pathname.split("/").filter(Boolean);
             console.log("URL path parts:", pathParts);
 
@@ -201,7 +225,7 @@ async function handleProjectComparison(request: NextRequest, projectId: string) 
                 return {
                     fileName: doc.fileName || doc.title,
                     tfmEntries: [],
-                    error: `Ugyldig URL-format: kunne ikke finne 'public' eller 'sign' i URL-stien`,
+                    error: `Ugyldig URL-format: kunne ikke finne 'public' eller 'sign' i URL-stien. URL: ${doc.url}`,
                 };
             }
 
