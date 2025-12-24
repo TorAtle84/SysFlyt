@@ -73,12 +73,18 @@ export async function POST(
                 include: {
                     items: {
                         include: {
-                            assignedUser: true,
-                            executorUser: true,
+                            responsible: {
+                                select: { firstName: true, lastName: true },
+                            },
+                            executor: {
+                                select: { firstName: true, lastName: true },
+                            },
+                            massList: {
+                                select: { tfm: true, component: true },
+                            },
                         },
-                        orderBy: { sortOrder: "asc" },
+                        orderBy: { createdAt: "asc" },
                     },
-                    systemOwner: true,
                 },
             });
 
@@ -89,29 +95,39 @@ export async function POST(
                 );
             }
 
+            // Fetch system owner separately
+            let systemOwnerName: string | null = null;
+            if (protocol.systemOwnerId) {
+                const owner = await prisma.user.findUnique({
+                    where: { id: protocol.systemOwnerId },
+                    select: { firstName: true, lastName: true },
+                });
+                if (owner) {
+                    systemOwnerName = `${owner.firstName} ${owner.lastName}`;
+                }
+            }
+
             itemName = protocol.systemName || protocol.systemCode;
 
             // Generate PDF
             pdfBuffer = await generateMCProtocolPDF({
                 systemCode: protocol.systemCode,
                 systemName: protocol.systemName,
-                systemOwner: protocol.systemOwner
-                    ? `${protocol.systemOwner.firstName} ${protocol.systemOwner.lastName}`
-                    : null,
+                systemOwner: systemOwnerName,
                 startTime: protocol.startTime,
                 endTime: protocol.endTime,
                 status: protocol.status,
                 projectName: project.name,
                 createdAt: protocol.createdAt,
                 items: protocol.items.map((item) => ({
-                    tfmCode: item.tfmCode,
-                    component: item.componentCode,
-                    status: item.columnAStatus,
-                    responsible: item.assignedUser
-                        ? `${item.assignedUser.firstName} ${item.assignedUser.lastName}`
+                    tfmCode: item.massList?.tfm || "",
+                    component: item.massList?.component || "",
+                    status: item.columnA,
+                    responsible: item.responsible
+                        ? `${item.responsible.firstName} ${item.responsible.lastName}`
                         : null,
-                    executor: item.executorUser
-                        ? `${item.executorUser.firstName} ${item.executorUser.lastName}`
+                    executor: item.executor
+                        ? `${item.executor.firstName} ${item.executor.lastName}`
                         : null,
                     notes: item.notes,
                 })),
@@ -120,10 +136,11 @@ export async function POST(
             const functionTest = await prisma.functionTest.findUnique({
                 where: { id: itemId, projectId },
                 include: {
-                    systemOwner: true,
                     rows: {
                         include: {
-                            assignedTo: true,
+                            assignedTo: {
+                                select: { firstName: true, lastName: true },
+                            },
                         },
                         orderBy: { sortOrder: "asc" },
                     },
@@ -137,15 +154,25 @@ export async function POST(
                 );
             }
 
+            // Fetch system owner separately
+            let systemOwnerName: string | null = null;
+            if (functionTest.systemOwnerId) {
+                const owner = await prisma.user.findUnique({
+                    where: { id: functionTest.systemOwnerId },
+                    select: { firstName: true, lastName: true },
+                });
+                if (owner) {
+                    systemOwnerName = `${owner.firstName} ${owner.lastName}`;
+                }
+            }
+
             itemName = functionTest.systemName || functionTest.systemCode;
 
             // Generate PDF
             pdfBuffer = await generateFunctionTestPDF({
                 systemCode: functionTest.systemCode,
                 systemName: functionTest.systemName,
-                systemOwner: functionTest.systemOwner
-                    ? `${functionTest.systemOwner.firstName} ${functionTest.systemOwner.lastName}`
-                    : null,
+                systemOwner: systemOwnerName,
                 projectName: project.name,
                 rows: functionTest.rows.map((row) => ({
                     systemPart: row.systemPart,
