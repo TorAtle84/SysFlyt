@@ -312,15 +312,18 @@ export default function ComparisonPage() {
                 }),
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error("Comparison failed");
+                console.error("API Error:", data);
+                alert(`Feil: ${data.error || "Ukjent feil ved sammenligning"}`);
+                return;
             }
 
-            const data = await response.json();
             setComparisonResult(data);
         } catch (error) {
             console.error("Project comparison error:", error);
-            alert("Kunne ikke utføre sammenligning");
+            alert("Kunne ikke utføre sammenligning - nettverksfeil");
         } finally {
             setIsComparing(false);
         }
