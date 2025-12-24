@@ -80,7 +80,7 @@ export async function POST(
                                 select: { firstName: true, lastName: true },
                             },
                             massList: {
-                                select: { tfm: true, component: true },
+                                select: { tfm: true, component: true, productName: true },
                             },
                         },
                         orderBy: { createdAt: "asc" },
@@ -109,7 +109,7 @@ export async function POST(
 
             itemName = protocol.systemName || protocol.systemCode;
 
-            // Generate PDF
+            // Generate PDF with all required fields
             pdfBuffer = await generateMCProtocolPDF({
                 systemCode: protocol.systemCode,
                 systemName: protocol.systemName,
@@ -122,13 +122,17 @@ export async function POST(
                 items: protocol.items.map((item) => ({
                     tfmCode: item.massList?.tfm || "",
                     component: item.massList?.component || "",
-                    status: item.columnA,
+                    productName: item.massList?.productName || undefined,
+                    columnA: item.columnA,
+                    columnB: item.columnB,
+                    columnC: item.columnC,
                     responsible: item.responsible
                         ? `${item.responsible.firstName} ${item.responsible.lastName}`
                         : null,
                     executor: item.executor
                         ? `${item.executor.firstName} ${item.executor.lastName}`
                         : null,
+                    completedAt: item.completedAt,
                     notes: item.notes,
                 })),
             });
@@ -143,6 +147,13 @@ export async function POST(
                             },
                         },
                         orderBy: { sortOrder: "asc" },
+                    },
+                    responsibles: {
+                        include: {
+                            user: {
+                                select: { firstName: true, lastName: true },
+                            },
+                        },
                     },
                 },
             });
@@ -168,19 +179,40 @@ export async function POST(
 
             itemName = functionTest.systemName || functionTest.systemCode;
 
-            // Generate PDF
+            // Parse dates from functionTest.dates
+            let startDate: Date | null = null;
+            const dates = functionTest.dates as Record<string, unknown> | null;
+            if (dates && typeof dates === "object") {
+                // Try funksjonstest phase first
+                const funksjontestDates = dates["funksjonstest"] as Record<string, unknown> | undefined;
+                if (funksjontestDates && funksjontestDates["start"]) {
+                    startDate = new Date(funksjontestDates["start"] as string);
+                } else if (dates["start"]) {
+                    startDate = new Date(dates["start"] as string);
+                }
+            }
+
+            // Generate PDF with all required fields
             pdfBuffer = await generateFunctionTestPDF({
                 systemCode: functionTest.systemCode,
                 systemName: functionTest.systemName,
                 systemOwner: systemOwnerName,
                 projectName: project.name,
+                startDate,
+                responsibles: functionTest.responsibles.map((r) => ({
+                    systemCode: r.systemCode,
+                    discipline: r.discipline,
+                    userName: r.user
+                        ? `${r.user.firstName} ${r.user.lastName}`
+                        : null,
+                })),
                 rows: functionTest.rows.map((row) => ({
                     systemPart: row.systemPart,
                     function: row.function,
+                    testExecution: row.testExecution || "",
+                    acceptanceCriteria: row.acceptanceCriteria || "",
                     status: row.status,
-                    assignedTo: row.assignedTo
-                        ? `${row.assignedTo.firstName} ${row.assignedTo.lastName}`
-                        : null,
+                    completedDate: row.completedDate,
                     category: row.category,
                 })),
             });

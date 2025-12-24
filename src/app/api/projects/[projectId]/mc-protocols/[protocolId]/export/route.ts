@@ -131,6 +131,17 @@ function generateProtocolHTML(
         ? format(new Date(protocol.endTime), "dd.MM.yyyy", { locale: nb })
         : "-";
 
+    // Column descriptions for header
+    const columnDescriptions = {
+        A: "Montasje",
+        B: "Merket",
+        C: "Koblet",
+        D: "Komponent",
+        F: "Ansvarlig",
+        G: "Utførende",
+        H: "Dato",
+    };
+
     return `
 <!DOCTYPE html>
 <html lang="no">
@@ -191,31 +202,85 @@ function generateProtocolHTML(
             height: 100%;
             background: #22c55e;
         }
+        .column-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 12px;
+            font-size: 9px;
+            color: #6b7280;
+        }
+        .column-legend span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .column-legend strong {
+            color: #1f2937;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 10px;
+            font-size: 9px;
         }
         th {
             background: #f1f5f9;
-            padding: 8px 6px;
-            text-align: left;
+            padding: 6px 4px;
+            text-align: center;
             font-weight: 600;
             border-bottom: 2px solid #cbd5e1;
+            border-right: 1px solid #e5e7eb;
         }
+        th:last-child { border-right: none; }
         td {
-            padding: 8px 6px;
+            padding: 6px 4px;
             border-bottom: 1px solid #e5e7eb;
-            vertical-align: top;
+            border-right: 1px solid #e5e7eb;
+            vertical-align: middle;
+            text-align: center;
         }
+        td:last-child { border-right: none; }
+        td.text-left { text-align: left; }
         tr:nth-child(even) { background: #fafafa; }
-        .status-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 9px;
+        .status-cell {
             font-weight: 600;
-            color: white;
+            font-size: 8px;
+            padding: 2px;
+        }
+        .status-completed { color: #16a34a; }
+        .status-not-started { color: #9ca3af; }
+        .status-in-progress { color: #f59e0b; }
+        .status-deviation { color: #dc2626; }
+        .status-na { color: #6b7280; }
+        .signature-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .signature-grid {
+            display: flex;
+            gap: 40px;
+            margin-top: 30px;
+        }
+        .signature-box {
+            flex: 1;
+        }
+        .signature-box .label {
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .signature-line {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .signature-line span {
+            white-space: nowrap;
+        }
+        .signature-line .underline {
+            flex: 1;
+            border-bottom: 1px solid #333;
+            min-width: 120px;
         }
         .footer {
             margin-top: 30px;
@@ -268,53 +333,96 @@ function generateProtocolHTML(
         <div class="progress-fill" style="width: ${progress}%"></div>
     </div>
 
+    <div class="column-legend">
+        <span><strong>A:</strong> ${columnDescriptions.A}</span>
+        <span><strong>B:</strong> ${columnDescriptions.B}</span>
+        <span><strong>C:</strong> ${columnDescriptions.C}</span>
+        <span><strong>D:</strong> ${columnDescriptions.D}</span>
+        <span><strong>F:</strong> ${columnDescriptions.F}</span>
+        <span><strong>G:</strong> ${columnDescriptions.G}</span>
+        <span><strong>H:</strong> ${columnDescriptions.H}</span>
+    </div>
+
     <table>
         <thead>
             <tr>
-                <th style="width: 20%">TFM-kode</th>
-                <th style="width: 15%">Komponent</th>
-                <th style="width: 15%">Status</th>
-                <th style="width: 15%">Ansvarlig</th>
-                <th style="width: 15%">Utførende</th>
-                <th style="width: 10%">Dato</th>
-                <th style="width: 10%">Notater</th>
+                <th style="width: 18%">TFM-kode</th>
+                <th style="width: 5%">A</th>
+                <th style="width: 5%">B</th>
+                <th style="width: 5%">C</th>
+                <th style="width: 15%">D - Komponent</th>
+                <th style="width: 12%">F - Ansvarlig</th>
+                <th style="width: 12%">G - Utførende</th>
+                <th style="width: 8%">H - Dato</th>
+                <th style="width: 20%">Notater</th>
             </tr>
         </thead>
         <tbody>
             ${protocol.items.map((item: any) => {
-        const colAStatus = item.columnA;
-        const colBStatus = item.columnB;
-        const colCStatus = item.columnC;
-        // Determine overall status
-        const allCompleted = colAStatus === "COMPLETED" && colBStatus === "COMPLETED" && colCStatus === "COMPLETED";
-        const hasDeviation = colAStatus === "DEVIATION" || colBStatus === "DEVIATION" || colCStatus === "DEVIATION";
-        const anyInProgress = colAStatus === "IN_PROGRESS" || colBStatus === "IN_PROGRESS" || colCStatus === "IN_PROGRESS";
-        const displayStatus = hasDeviation ? "DEVIATION" : allCompleted ? "COMPLETED" : anyInProgress ? "IN_PROGRESS" : "NOT_STARTED";
+        const getStatusClass = (status: string) => {
+            switch (status) {
+                case "COMPLETED": return "status-completed";
+                case "IN_PROGRESS": return "status-in-progress";
+                case "DEVIATION": return "status-deviation";
+                case "NA": return "status-na";
+                default: return "status-not-started";
+            }
+        };
+        const getStatusSymbol = (status: string) => {
+            switch (status) {
+                case "COMPLETED": return "✓";
+                case "IN_PROGRESS": return "◐";
+                case "DEVIATION": return "✗";
+                case "NA": return "—";
+                default: return "○";
+            }
+        };
 
         return `
             <tr>
-                <td>
+                <td class="text-left">
                     <strong>${item.massList?.tfm || "-"}</strong>
                     ${item.massList?.productName ? `<br/><small style="color: #6b7280">${item.massList.productName}</small>` : ""}
                 </td>
-                <td>${item.massList?.component || "-"}</td>
-                <td>
-                    <span class="status-badge" style="background: ${getStatusColor(displayStatus)}">
-                        ${getStatusLabel(displayStatus)}
-                    </span>
-                </td>
+                <td class="status-cell ${getStatusClass(item.columnA)}">${getStatusSymbol(item.columnA)}</td>
+                <td class="status-cell ${getStatusClass(item.columnB)}">${getStatusSymbol(item.columnB)}</td>
+                <td class="status-cell ${getStatusClass(item.columnC)}">${getStatusSymbol(item.columnC)}</td>
+                <td class="text-left">${item.massList?.component || "-"}</td>
                 <td>${item.responsible ? `${item.responsible.firstName} ${item.responsible.lastName}` : "-"}</td>
                 <td>${item.executor ? `${item.executor.firstName} ${item.executor.lastName}` : "-"}</td>
-                <td>${item.completedAt ? format(new Date(item.completedAt), "dd.MM.yyyy", { locale: nb }) : "-"}</td>
-                <td>${item.notes || "-"}</td>
+                <td>${item.completedAt ? format(new Date(item.completedAt), "dd.MM.yy", { locale: nb }) : "-"}</td>
+                <td class="text-left" style="font-size: 8px;">${item.notes || "-"}</td>
             </tr>
             `;
     }).join("")}
         </tbody>
     </table>
 
+    <div class="signature-section">
+        <div class="signature-grid">
+            <div class="signature-box">
+                <div class="label">Systemeier</div>
+                <div class="signature-line">
+                    <span>Dato:</span>
+                    <div class="underline"></div>
+                    <span>Signatur:</span>
+                    <div class="underline" style="min-width: 180px;"></div>
+                </div>
+            </div>
+            <div class="signature-box">
+                <div class="label">Kontrollør</div>
+                <div class="signature-line">
+                    <span>Dato:</span>
+                    <div class="underline"></div>
+                    <span>Signatur:</span>
+                    <div class="underline" style="min-width: 180px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="footer">
-        <p>Generert ${format(new Date(), "dd.MM.yyyy HH:mm", { locale: nb })} - SysLink</p>
+        <p>Eksportert fra SysFlyt ${format(new Date(), "dd.MM.yyyy HH:mm", { locale: nb })}</p>
     </div>
 
     <script class="no-print">
