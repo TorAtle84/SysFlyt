@@ -271,12 +271,20 @@ export async function sendProtocolEmail(
   itemType: "MC_PROTOCOL" | "FUNCTION_TEST",
   itemName: string,
   projectName: string,
-  itemUrl: string
+  pdfBuffer?: Buffer
 ) {
   const itemTypeLabel = itemType === "MC_PROTOCOL" ? "MC Protokoll" : "Funksjonstest";
   const greeting = recipientName ? `Hei ${recipientName}` : "Hei";
+  const fileName = `${itemName.replace(/[^a-zA-Z0-9æøåÆØÅ\-_ ]/g, "")}-${itemTypeLabel.toLowerCase().replace(" ", "-")}.pdf`;
 
-  const mailOptions = {
+  const mailOptions: {
+    from: string | undefined;
+    to: string;
+    subject: string;
+    html: string;
+    text: string;
+    attachments?: { filename: string; content: Buffer; contentType: string }[];
+  } = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to,
     subject: `${itemTypeLabel}: ${itemName} - SysLink`,
@@ -301,13 +309,8 @@ export async function sendProtocolEmail(
                 <p style="color: #1f2937; margin: 0 0 8px 0; font-size: 18px; font-weight: 600;">${itemName}</p>
                 <p style="color: #6b7280; margin: 0; font-size: 14px;">Prosjekt: ${projectName}</p>
               </div>
-              <div style="text-align: center; margin: 32px 0;">
-                <a href="${itemUrl}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                  Åpne ${itemTypeLabel.toLowerCase()}
-                </a>
-              </div>
               <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 0;">
-                Du må være logget inn på SysLink for å se ${itemTypeLabel.toLowerCase()}en.
+                ${pdfBuffer ? "Se vedlagt PDF for detaljer." : "Dokumentet er vedlagt denne e-posten."}
               </p>
             </div>
             <div style="background-color: #f9fafb; padding: 20px; text-align: center;">
@@ -327,19 +330,29 @@ ${greeting}, ${senderName} har delt en ${itemTypeLabel.toLowerCase()} med deg.
 ${itemName}
 Prosjekt: ${projectName}
 
-Åpne ${itemTypeLabel.toLowerCase()}: ${itemUrl}
-
-Du må være logget inn på SysLink for å se ${itemTypeLabel.toLowerCase()}en.
+${pdfBuffer ? "Se vedlagt PDF for detaljer." : "Dokumentet er vedlagt denne e-posten."}
 
 © ${new Date().getFullYear()} SysLink
     `,
   };
 
+  // Add PDF attachment if provided
+  if (pdfBuffer) {
+    mailOptions.attachments = [
+      {
+        filename: fileName,
+        content: pdfBuffer,
+        contentType: "application/pdf",
+      },
+    ];
+  }
+
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`Protocol email sent to ${to}`);
+    console.log(`Protocol email sent to ${to} with${pdfBuffer ? "" : "out"} PDF attachment`);
   } catch (error) {
     console.error("Failed to send protocol email:", error);
     throw new Error("Kunne ikke sende e-post");
   }
 }
+

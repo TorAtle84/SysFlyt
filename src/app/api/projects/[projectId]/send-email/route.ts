@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireProjectAccess } from "@/lib/auth-helpers";
 import { sendProtocolEmail } from "@/lib/email";
+import { generateMCProtocolPDF, generateFunctionTestPDF } from "@/lib/pdf-generator";
 
 export async function POST(
     request: NextRequest,
@@ -62,14 +63,23 @@ export async function POST(
             );
         }
 
-        // Get item info based on type
+        // Get item info and generate PDF based on type
         let itemName: string;
-        let itemUrl: string;
+        let pdfBuffer: Buffer;
 
         if (itemType === "MC_PROTOCOL") {
             const protocol = await prisma.mCProtocol.findUnique({
                 where: { id: itemId, projectId },
-                select: { systemCode: true, systemName: true },
+                include: {
+                    items: {
+                        include: {
+                            assignedUser: true,
+                            executorUser: true,
+                        },
+                        orderBy: { sortOrder: "asc" },
+                    },
+                    systemOwner: true,
+                },
             });
 
             if (!protocol) {
@@ -80,11 +90,44 @@ export async function POST(
             }
 
             itemName = protocol.systemName || protocol.systemCode;
-            itemUrl = `${process.env.NEXTAUTH_URL}/projects/${projectId}/protocols/${itemId}`;
+
+            // Generate PDF
+            pdfBuffer = await generateMCProtocolPDF({
+                systemCode: protocol.systemCode,
+                systemName: protocol.systemName,
+                systemOwner: protocol.systemOwner
+                    ? `${protocol.systemOwner.firstName} ${protocol.systemOwner.lastName}`
+                    : null,
+                startTime: protocol.startTime,
+                endTime: protocol.endTime,
+                status: protocol.status,
+                projectName: project.name,
+                createdAt: protocol.createdAt,
+                items: protocol.items.map((item) => ({
+                    tfmCode: item.tfmCode,
+                    component: item.componentCode,
+                    status: item.columnAStatus,
+                    responsible: item.assignedUser
+                        ? `${item.assignedUser.firstName} ${item.assignedUser.lastName}`
+                        : null,
+                    executor: item.executorUser
+                        ? `${item.executorUser.firstName} ${item.executorUser.lastName}`
+                        : null,
+                    notes: item.notes,
+                })),
+            });
         } else {
             const functionTest = await prisma.functionTest.findUnique({
                 where: { id: itemId, projectId },
-                select: { systemCode: true, systemName: true },
+                include: {
+                    systemOwner: true,
+                    rows: {
+                        include: {
+                            assignedTo: true,
+                        },
+                        orderBy: { sortOrder: "asc" },
+                    },
+                },
             });
 
             if (!functionTest) {
@@ -95,10 +138,28 @@ export async function POST(
             }
 
             itemName = functionTest.systemName || functionTest.systemCode;
-            itemUrl = `${process.env.NEXTAUTH_URL}/projects/${projectId}/protocols/function-tests/${itemId}`;
+
+            // Generate PDF
+            pdfBuffer = await generateFunctionTestPDF({
+                systemCode: functionTest.systemCode,
+                systemName: functionTest.systemName,
+                systemOwner: functionTest.systemOwner
+                    ? `${functionTest.systemOwner.firstName} ${functionTest.systemOwner.lastName}`
+                    : null,
+                projectName: project.name,
+                rows: functionTest.rows.map((row) => ({
+                    systemPart: row.systemPart,
+                    function: row.function,
+                    status: row.status,
+                    assignedTo: row.assignedTo
+                        ? `${row.assignedTo.firstName} ${row.assignedTo.lastName}`
+                        : null,
+                    category: row.category,
+                })),
+            });
         }
 
-        // Send email
+        // Send email with PDF attachment
         await sendProtocolEmail(
             recipientEmail,
             recipientName,
@@ -106,10 +167,10 @@ export async function POST(
             itemType,
             itemName,
             project.name,
-            itemUrl
+            pdfBuffer
         );
 
-        return NextResponse.json({ success: true, message: "E-post sendt" });
+        return NextResponse.json({ success: true, message: "E-post sendt med PDF-vedlegg" });
     } catch (error) {
         console.error("Error sending email:", error);
         return NextResponse.json(
