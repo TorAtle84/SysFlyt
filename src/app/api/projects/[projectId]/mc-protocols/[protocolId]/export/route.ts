@@ -46,6 +46,9 @@ export async function GET(
                 project: {
                     select: { name: true },
                 },
+                assignedUser: {
+                    select: { firstName: true, lastName: true },
+                },
             },
         });
 
@@ -56,8 +59,18 @@ export async function GET(
             );
         }
 
+        // Fetch system owner if set
+        let systemOwner: { firstName: string; lastName: string } | null = null;
+        if (protocol.systemOwnerId) {
+            const owner = await prisma.user.findUnique({
+                where: { id: protocol.systemOwnerId },
+                select: { firstName: true, lastName: true },
+            });
+            systemOwner = owner;
+        }
+
         // Generate HTML content for PDF
-        const html = generateProtocolHTML(protocol);
+        const html = generateProtocolHTML(protocol, systemOwner);
 
         // Return HTML that can be printed to PDF by browser
         return new NextResponse(html, {
@@ -97,10 +110,26 @@ function getStatusColor(status: string): string {
     return colors[status] || "#9ca3af";
 }
 
-function generateProtocolHTML(protocol: any): string {
-    const completedCount = protocol.items.filter((i: any) => i.status === "COMPLETED").length;
+function generateProtocolHTML(
+    protocol: any,
+    systemOwner: { firstName: string; lastName: string } | null
+): string {
+    // Calculate progress based on all columns A, B, C being COMPLETED
+    const completedCount = protocol.items.filter((i: any) =>
+        i.columnA === "COMPLETED" && i.columnB === "COMPLETED" && i.columnC === "COMPLETED"
+    ).length;
     const totalCount = protocol.items.length;
     const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+    const systemOwnerName = systemOwner
+        ? `${systemOwner.firstName} ${systemOwner.lastName}`
+        : "-";
+    const periodStart = protocol.startTime
+        ? format(new Date(protocol.startTime), "dd.MM.yyyy", { locale: nb })
+        : "-";
+    const periodEnd = protocol.endTime
+        ? format(new Date(protocol.endTime), "dd.MM.yyyy", { locale: nb })
+        : "-";
 
     return `
 <!DOCTYPE html>
@@ -134,7 +163,7 @@ function generateProtocolHTML(protocol: any): string {
         }
         .info-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 12px;
             margin-bottom: 20px;
             padding: 12px;
@@ -212,6 +241,14 @@ function generateProtocolHTML(protocol: any): string {
         <div class="info-item">
             <label>Systemkode</label>
             <span>${protocol.systemCode}</span>
+        </div>
+        <div class="info-item">
+            <label>Systemeier</label>
+            <span>${systemOwnerName}</span>
+        </div>
+        <div class="info-item">
+            <label>Periode</label>
+            <span>${periodStart} - ${periodEnd}</span>
         </div>
         <div class="info-item">
             <label>Status</label>
