@@ -205,10 +205,13 @@ async function handleProjectComparison(request: NextRequest, projectId: string) 
             if (doc.url.startsWith("/api/")) {
                 console.log("Downloading from internal API:", doc.url);
 
-                // Build absolute URL for internal API
-                const baseUrl = process.env.NEXTAUTH_URL || (process.env.VERCEL_URL
-                    ? `https://${process.env.VERCEL_URL}`
-                    : "http://localhost:3000");
+                // Build absolute URL using the request's origin (so cookies work)
+                const origin = request.headers.get("origin") || request.headers.get("host");
+                const baseUrl = origin
+                    ? (origin.startsWith("http") ? origin : `https://${origin}`)
+                    : process.env.NEXTAUTH_URL || "http://localhost:3000";
+
+                console.log("Using base URL:", baseUrl);
                 const absoluteUrl = new URL(doc.url, baseUrl);
 
                 // Forward cookies from original request for authentication
