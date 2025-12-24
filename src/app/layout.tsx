@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import AuthSessionProvider from "@/components/providers/session-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { InactivityProvider } from "@/components/providers/inactivity-provider";
 
 export const metadata: Metadata = {
   title: "SysLink - Prosjekthåndtering",
@@ -23,7 +24,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthSessionProvider>{children}</AuthSessionProvider>
+          <AuthSessionProvider>
+            <InactivityProvider timeoutMinutes={15}>
+              {children}
+            </InactivityProvider>
+          </AuthSessionProvider>
           <Toaster />
         </ThemeProvider>
       </body>
