@@ -69,7 +69,7 @@ function getStatusLabel(status: string): string {
 
 function getStatusSymbol(status: string): string {
     switch (status) {
-        case "COMPLETED": return "V";  // Checkmark
+        case "COMPLETED": return "V";
         case "IN_PROGRESS": return "~";
         case "DEVIATION": return "X";
         case "NA": return "-";
@@ -87,7 +87,6 @@ function drawText(
     color = rgb(0.12, 0.14, 0.17),
     maxWidth?: number
 ): number {
-    // Truncate text if needed
     let displayText = text;
     if (maxWidth) {
         const charWidth = size * 0.5;
@@ -96,7 +95,6 @@ function drawText(
             displayText = text.substring(0, maxChars - 2) + "..";
         }
     }
-
     page.drawText(displayText, { x, y, size, font, color });
     return size;
 }
@@ -106,7 +104,7 @@ export async function generateMCProtocolPDF(data: ProtocolPDFData): Promise<Buff
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    let page = pdfDoc.addPage([595, 842]); // A4 size
+    let page = pdfDoc.addPage([595, 842]);
     const { width, height } = page.getSize();
     const margin = 40;
     let y = height - margin;
@@ -132,7 +130,6 @@ export async function generateMCProtocolPDF(data: ProtocolPDFData): Promise<Buff
         ["Opprettet", format(data.createdAt, "dd.MM.yyyy", { locale: nb })],
     ];
 
-    // Draw info box background
     page.drawRectangle({ x: margin - 5, y: y - 50, width: width - margin * 2 + 10, height: 55, color: rgb(0.97, 0.98, 0.99) });
 
     const colWidth = (width - margin * 2) / 3;
@@ -141,7 +138,6 @@ export async function generateMCProtocolPDF(data: ProtocolPDFData): Promise<Buff
         const row = Math.floor(i / 3);
         const xPos = margin + col * colWidth;
         const yPos = y - row * 25;
-
         page.drawText(infoItems[i][0].toUpperCase(), { x: xPos, y: yPos, size: 7, font, color: rgb(0.4, 0.4, 0.4) });
         page.drawText(infoItems[i][1], { x: xPos, y: yPos - 10, size: 9, font: fontBold });
     }
@@ -169,9 +165,7 @@ export async function generateMCProtocolPDF(data: ProtocolPDFData): Promise<Buff
         { label: "Notater", x: margin + 460, width: 95 },
     ];
 
-    // Header background
     page.drawRectangle({ x: margin - 2, y: y - 5, width: width - margin * 2 + 4, height: 16, color: rgb(0.94, 0.95, 0.96) });
-
     for (const col of columns) {
         page.drawText(col.label, { x: col.x, y, size: 7, font: fontBold });
     }
@@ -180,11 +174,8 @@ export async function generateMCProtocolPDF(data: ProtocolPDFData): Promise<Buff
     // Draw items
     for (const item of data.items) {
         if (y < 100) {
-            // Add new page
             page = pdfDoc.addPage([595, 842]);
             y = height - margin;
-
-            // Repeat header on new page
             page.drawRectangle({ x: margin - 2, y: y - 5, width: width - margin * 2 + 4, height: 16, color: rgb(0.94, 0.95, 0.96) });
             for (const col of columns) {
                 page.drawText(col.label, { x: col.x, y, size: 7, font: fontBold });
@@ -192,13 +183,11 @@ export async function generateMCProtocolPDF(data: ProtocolPDFData): Promise<Buff
             y -= 18;
         }
 
-        // TFM code
         drawText(page, item.tfmCode, columns[0].x, y, fontBold, 7, undefined, columns[0].width);
         if (item.productName) {
             drawText(page, item.productName, columns[0].x, y - 8, font, 6, rgb(0.4, 0.4, 0.4), columns[0].width);
         }
 
-        // Status columns A, B, C
         const getStatusColor = (status: string) => {
             switch (status) {
                 case "COMPLETED": return rgb(0.09, 0.64, 0.29);
@@ -212,18 +201,13 @@ export async function generateMCProtocolPDF(data: ProtocolPDFData): Promise<Buff
         page.drawText(getStatusSymbol(item.columnB), { x: columns[2].x + 5, y, size: 9, font: fontBold, color: getStatusColor(item.columnB) });
         page.drawText(getStatusSymbol(item.columnC), { x: columns[3].x + 5, y, size: 9, font: fontBold, color: getStatusColor(item.columnC) });
 
-        // Component
         drawText(page, item.component || "-", columns[4].x, y, font, 7, undefined, columns[4].width);
-
-        // Responsible & Executor
         drawText(page, item.responsible || "-", columns[5].x, y, font, 7, undefined, columns[5].width);
         drawText(page, item.executor || "-", columns[6].x, y, font, 7, undefined, columns[6].width);
 
-        // Date
         const dateStr = item.completedAt ? format(item.completedAt, "dd.MM.yy", { locale: nb }) : "-";
         page.drawText(dateStr, { x: columns[7].x, y, size: 7, font });
 
-        // Notes
         drawText(page, item.notes || "-", columns[8].x, y, font, 6, undefined, columns[8].width);
 
         y -= lineHeight + (item.productName ? 6 : 0);
@@ -276,7 +260,7 @@ export async function generateFunctionTestPDF(data: FunctionTestPDFData): Promis
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    let page = pdfDoc.addPage([595, 842]); // A4 size
+    let page = pdfDoc.addPage([595, 842]);
     const { width, height } = page.getSize();
     const margin = 40;
     let y = height - margin;
@@ -311,7 +295,6 @@ export async function generateFunctionTestPDF(data: FunctionTestPDFData): Promis
         page.drawText("Delansvarlige", { x: margin, y, size: 11, font: fontBold });
         y -= 15;
 
-        // Header
         page.drawRectangle({ x: margin - 2, y: y - 5, width: width - margin * 2 + 4, height: 14, color: rgb(0.94, 0.95, 0.96) });
         page.drawText("System", { x: margin, y, size: 8, font: fontBold });
         page.drawText("Disiplin", { x: margin + 150, y, size: 8, font: fontBold });
@@ -331,7 +314,6 @@ export async function generateFunctionTestPDF(data: FunctionTestPDFData): Promis
     page.drawText("Testpunkter", { x: margin, y, size: 11, font: fontBold });
     y -= 15;
 
-    // Table header
     const columns = [
         { label: "#", x: margin, width: 20 },
         { label: "Kategori", x: margin + 25, width: 55 },
@@ -349,15 +331,12 @@ export async function generateFunctionTestPDF(data: FunctionTestPDFData): Promis
     }
     y -= 16;
 
-    // Draw rows
     for (let i = 0; i < data.rows.length; i++) {
         const row = data.rows[i];
 
         if (y < 100) {
             page = pdfDoc.addPage([595, 842]);
             y = height - margin;
-
-            // Repeat header
             page.drawRectangle({ x: margin - 2, y: y - 5, width: width - margin * 2 + 4, height: 14, color: rgb(0.94, 0.95, 0.96) });
             for (const col of columns) {
                 page.drawText(col.label, { x: col.x, y, size: 7, font: fontBold });
@@ -372,12 +351,10 @@ export async function generateFunctionTestPDF(data: FunctionTestPDFData): Promis
         drawText(page, row.testExecution, columns[4].x, y, font, 6, undefined, columns[4].width);
         drawText(page, row.acceptanceCriteria, columns[5].x, y, font, 6, undefined, columns[5].width);
 
-        // Status with color
         const statusColor = row.status === "COMPLETED" ? rgb(0.09, 0.64, 0.29) :
             row.status === "DEVIATION" ? rgb(0.86, 0.14, 0.14) : rgb(0.4, 0.4, 0.4);
         page.drawText(getStatusLabel(row.status), { x: columns[6].x, y, size: 6, font, color: statusColor });
 
-        // Date
         const dateStr = row.completedDate ? format(row.completedDate, "dd.MM.yy", { locale: nb }) : "-";
         page.drawText(dateStr, { x: columns[7].x, y, size: 7, font });
 
@@ -394,7 +371,6 @@ export async function generateFunctionTestPDF(data: FunctionTestPDFData): Promis
     page.drawLine({ start: { x: margin, y }, end: { x: width - margin, y }, thickness: 0.5, color: rgb(0.9, 0.9, 0.9) });
     y -= 25;
 
-    // Systemeier signature
     page.drawText("Systemeier", { x: margin, y, size: 10, font: fontBold });
     y -= 18;
     page.drawText("Dato:", { x: margin, y, size: 8, font });
@@ -402,7 +378,6 @@ export async function generateFunctionTestPDF(data: FunctionTestPDFData): Promis
 page.drawText("Signatur:", { x: margin + 120, y, size: 8, font });
 page.drawLine({ start: { x: margin + 165, y - 2 }, end: { x: margin + 300, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
 
-// Kontrollør signature
 const rightCol = width / 2 + 20;
 page.drawText("Kontrollør", { x: rightCol, y: y + 18, size: 10, font: fontBold });
 page.drawText("Dato:", { x: rightCol, y, size: 8, font });
@@ -410,7 +385,7 @@ page.drawLine({ start: { x: rightCol + 30, y - 2 }, end: { x: rightCol + 100, y 
 page.drawText("Signatur:", { x: rightCol + 120, y, size: 8, font });
 page.drawLine({ start: { x: rightCol + 165, y - 2 }, end: { x: width - margin, y - 2 }, thickness: 0.5, color: rgb(0.2, 0.2, 0.2) });
 
-// Footer on all pages
+// Footer
 const pages = pdfDoc.getPages();
 for (let i = 0; i < pages.length; i++) {
     pages[i].drawText(`Eksportert fra SysFlyt ${format(new Date(), "dd.MM.yyyy HH:mm", { locale: nb })} | Side ${i + 1} av ${pages.length}`, {
