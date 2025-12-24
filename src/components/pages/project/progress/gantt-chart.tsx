@@ -26,7 +26,7 @@ import {
     isSameYear,
 } from "date-fns";
 import { nb } from "date-fns/locale";
-import { Calendar, ChevronLeft, ChevronRight, ClipboardCheck, ListChecks, Loader2 } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, ClipboardCheck, Diamond, ListChecks, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,7 +39,7 @@ import {
 
 interface GanttItem {
     id: string;
-    type: "MC_PROTOCOL" | "FUNCTION_TEST";
+    type: "MC_PROTOCOL" | "FUNCTION_TEST" | "MILESTONE";
     systemCode: string;
     systemName: string | null;
     subType?: string;
@@ -47,6 +47,8 @@ interface GanttItem {
     endDate: string | null;
     status: string;
     href: string;
+    isMilestone?: boolean;
+    milestoneType?: "holiday" | "programansvarlig";
 }
 
 type ZoomLevel = "week" | "month" | "year";
@@ -301,19 +303,35 @@ export function GanttChart({ projectId }: GanttChartProps) {
                         {itemsWithDates.map((item) => (
                             <div
                                 key={item.id}
-                                className="h-12 border-b flex items-center gap-2 px-4 hover:bg-muted/50 cursor-pointer transition-colors"
-                                onClick={() => router.push(item.href)}
+                                className={cn(
+                                    "h-12 border-b flex items-center gap-2 px-4 transition-colors",
+                                    item.isMilestone
+                                        ? "bg-muted/30"
+                                        : "hover:bg-muted/50 cursor-pointer"
+                                )}
+                                onClick={() => !item.isMilestone && item.href !== "#" && router.push(item.href)}
                             >
                                 {item.type === "MC_PROTOCOL" ? (
                                     <ClipboardCheck className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                                ) : item.type === "MILESTONE" ? (
+                                    <Diamond className={cn(
+                                        "h-4 w-4 flex-shrink-0",
+                                        item.milestoneType === "holiday"
+                                            ? "text-red-500"
+                                            : "text-purple-500"
+                                    )} />
                                 ) : (
                                     <ListChecks className="h-4 w-4 text-blue-500 flex-shrink-0" />
                                 )}
                                 <div className="min-w-0 flex-1">
                                     <div className="text-sm font-medium truncate">{item.systemCode}</div>
                                     <div className="text-xs text-muted-foreground truncate">
-                                        {item.type === "MC_PROTOCOL" ? "Protokoll MC" : "Funksjonstest"}
-                                        {item.subType && ` · ${item.subType}`}
+                                        {item.type === "MC_PROTOCOL"
+                                            ? "Protokoll MC"
+                                            : item.type === "MILESTONE"
+                                                ? item.subType
+                                                : "Funksjonstest"}
+                                        {item.type === "FUNCTION_TEST" && item.subType && ` · ${item.subType}`}
                                     </div>
                                 </div>
                             </div>
@@ -376,24 +394,43 @@ export function GanttChart({ projectId }: GanttChartProps) {
                                                 ))}
                                             </div>
 
-                                            {/* Bar */}
+                                            {/* Bar or Milestone */}
                                             {barStyle && (
-                                                <div
-                                                    className={cn(
-                                                        "absolute top-2 h-8 rounded cursor-pointer transition-all hover:opacity-80 flex items-center px-2 text-white text-xs font-medium shadow-sm",
-                                                        getStatusColor(item.status)
-                                                    )}
-                                                    style={{
-                                                        left: barStyle.left,
-                                                        width: Math.max(barStyle.width, 24),
-                                                    }}
-                                                    onClick={() => router.push(item.href)}
-                                                    title={`${item.systemCode} - ${item.type === "MC_PROTOCOL" ? "Protokoll MC" : "Funksjonstest"}`}
-                                                >
-                                                    <span className="truncate">
-                                                        {barStyle.width > 60 ? item.systemCode : ""}
-                                                    </span>
-                                                </div>
+                                                item.isMilestone ? (
+                                                    // Render milestone as diamond
+                                                    <div
+                                                        className={cn(
+                                                            "absolute top-2 flex items-center justify-center",
+                                                            item.milestoneType === "holiday"
+                                                                ? "text-red-500"
+                                                                : "text-purple-500"
+                                                        )}
+                                                        style={{
+                                                            left: barStyle.left - 12,
+                                                        }}
+                                                        title={`${item.systemCode}${item.subType ? ` - ${item.subType}` : ""}`}
+                                                    >
+                                                        <Diamond className="h-6 w-6 fill-current" />
+                                                    </div>
+                                                ) : (
+                                                    // Render regular bar
+                                                    <div
+                                                        className={cn(
+                                                            "absolute top-2 h-8 rounded cursor-pointer transition-all hover:opacity-80 flex items-center px-2 text-white text-xs font-medium shadow-sm",
+                                                            getStatusColor(item.status)
+                                                        )}
+                                                        style={{
+                                                            left: barStyle.left,
+                                                            width: Math.max(barStyle.width, 24),
+                                                        }}
+                                                        onClick={() => router.push(item.href)}
+                                                        title={`${item.systemCode} - ${item.type === "MC_PROTOCOL" ? "Protokoll MC" : "Funksjonstest"}`}
+                                                    >
+                                                        <span className="truncate">
+                                                            {barStyle.width > 60 ? item.systemCode : ""}
+                                                        </span>
+                                                    </div>
+                                                )
                                             )}
                                         </div>
                                     );
@@ -405,7 +442,7 @@ export function GanttChart({ projectId }: GanttChartProps) {
             </div>
 
             {/* Legend */}
-            <div className="flex items-center gap-6 px-4 py-2 border-t bg-card text-sm">
+            <div className="flex items-center gap-6 px-4 py-2 border-t bg-card text-sm flex-wrap">
                 <div className="flex items-center gap-2">
                     <ClipboardCheck className="h-4 w-4 text-orange-500" />
                     <span>Protokoll MC</span>
@@ -413,6 +450,14 @@ export function GanttChart({ projectId }: GanttChartProps) {
                 <div className="flex items-center gap-2">
                     <ListChecks className="h-4 w-4 text-blue-500" />
                     <span>Funksjonstest</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Diamond className="h-4 w-4 text-purple-500 fill-purple-500" />
+                    <span>Programansvarlig</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Diamond className="h-4 w-4 text-red-500 fill-red-500" />
+                    <span>Helligdag</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-4 h-0.5 bg-orange-500" />
