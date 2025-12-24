@@ -18,6 +18,7 @@ import {
     Folder,
     Trash2,
     Calendar as CalendarIcon,
+    Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +43,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { NotesModal } from "@/components/mc/notes-modal";
 import { PhotoCaptureModal } from "@/components/mc/photo-capture-modal";
 import { FDVModal } from "@/components/mc/fdv-modal";
+import { SendEmailModal } from "@/components/email/send-email-modal";
 import {
     Dialog,
     DialogContent,
@@ -106,6 +108,7 @@ export function ProtocolDetail({ project, protocol, members, userId }: ProtocolD
     const [selectedItemForPhotos, setSelectedItemForPhotos] = useState<any>(null);
     const [selectedItemForFDV, setSelectedItemForFDV] = useState<any>(null);
     const [selectedItemForLocation, setSelectedItemForLocation] = useState<any>(null);
+    const [showEmailModal, setShowEmailModal] = useState(false);
     const [viewerData, setViewerData] = useState<{ documentId: string; componentCode: string; page: number } | null>(null);
     const [modelViewerData, setModelViewerData] = useState<{ modelId: string; fullTag: string } | null>(null);
     const [locationMenuOpenFor, setLocationMenuOpenFor] = useState<string | null>(null);
@@ -371,6 +374,15 @@ export function ProtocolDetail({ project, protocol, members, userId }: ProtocolD
                     >
                         <FileDown size={16} />
                         Eksporter PDF
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowEmailModal(true)}
+                        className="gap-2"
+                    >
+                        <Mail size={16} />
+                        Send til e-post
                     </Button>
                 </div>
 
@@ -1178,6 +1190,16 @@ export function ProtocolDetail({ project, protocol, members, userId }: ProtocolD
                     }}
                 />
             )}
+
+            {/* Send Email Modal */}
+            <SendEmailModal
+                open={showEmailModal}
+                onOpenChange={setShowEmailModal}
+                projectId={project.id}
+                itemType="MC_PROTOCOL"
+                itemId={protocol.id}
+                itemName={protocol.systemName || protocol.systemCode}
+            />
 
             {/* Delete Confirmation Dialog */}
             <Dialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>

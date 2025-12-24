@@ -263,3 +263,83 @@ export async function sendAccountActivatedEmail(to: string, firstName: string, l
     console.error("Failed to send account activated email:", error);
   }
 }
+
+export async function sendProtocolEmail(
+  to: string,
+  recipientName: string | null,
+  senderName: string,
+  itemType: "MC_PROTOCOL" | "FUNCTION_TEST",
+  itemName: string,
+  projectName: string,
+  itemUrl: string
+) {
+  const itemTypeLabel = itemType === "MC_PROTOCOL" ? "MC Protokoll" : "Funksjonstest";
+  const greeting = recipientName ? `Hei ${recipientName}` : "Hei";
+
+  const mailOptions = {
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    to,
+    subject: `${itemTypeLabel}: ${itemName} - SysLink`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 32px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">SysLink</h1>
+            </div>
+            <div style="padding: 32px;">
+              <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 20px;">${itemTypeLabel} delt med deg</h2>
+              <p style="color: #4b5563; line-height: 1.6; margin: 0 0 24px 0;">
+                ${greeting}, ${senderName} har delt en ${itemTypeLabel.toLowerCase()} med deg.
+              </p>
+              <div style="background-color: #f3f4f6; border-radius: 8px; padding: 20px; margin: 24px 0;">
+                <p style="color: #1f2937; margin: 0 0 8px 0; font-size: 18px; font-weight: 600;">${itemName}</p>
+                <p style="color: #6b7280; margin: 0; font-size: 14px;">Prosjekt: ${projectName}</p>
+              </div>
+              <div style="text-align: center; margin: 32px 0;">
+                <a href="${itemUrl}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                  Åpne ${itemTypeLabel.toLowerCase()}
+                </a>
+              </div>
+              <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 0;">
+                Du må være logget inn på SysLink for å se ${itemTypeLabel.toLowerCase()}en.
+              </p>
+            </div>
+            <div style="background-color: #f9fafb; padding: 20px; text-align: center;">
+              <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                © ${new Date().getFullYear()} SysLink. Alle rettigheter forbeholdt.
+              </p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+    text: `
+${itemTypeLabel} delt med deg - SysLink
+
+${greeting}, ${senderName} har delt en ${itemTypeLabel.toLowerCase()} med deg.
+
+${itemName}
+Prosjekt: ${projectName}
+
+Åpne ${itemTypeLabel.toLowerCase()}: ${itemUrl}
+
+Du må være logget inn på SysLink for å se ${itemTypeLabel.toLowerCase()}en.
+
+© ${new Date().getFullYear()} SysLink
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Protocol email sent to ${to}`);
+  } catch (error) {
+    console.error("Failed to send protocol email:", error);
+    throw new Error("Kunne ikke sende e-post");
+  }
+}

@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   Copy,
   Download,
+  Mail,
   MoreVertical,
   FileText,
   ListChecks,
@@ -62,6 +63,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { SendEmailModal } from "@/components/email/send-email-modal";
 
 type FunctionTestRowStatus =
   | "NOT_STARTED"
@@ -388,6 +390,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
   const [predefinedCategory, setPredefinedCategory] = useState<"ALL" | FunctionTestCategory>("ALL");
 
   const [responsiblesOpen, setResponsiblesOpen] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState<FunctionTestRow | null>(null);
   const [editExecution, setEditExecution] = useState("");
   const [editAcceptance, setEditAcceptance] = useState("");
@@ -1714,6 +1717,15 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
             >
               <Download className="h-4 w-4" />
               Eksporter PDF
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowEmailModal(true)}
+              className="gap-2"
+            >
+              <Mail className="h-4 w-4" />
+              Send til e-post
             </Button>
           </div>
         </div>
@@ -3520,6 +3532,16 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Send Email Modal */}
+      <SendEmailModal
+        open={showEmailModal}
+        onOpenChange={setShowEmailModal}
+        projectId={project.id}
+        itemType="FUNCTION_TEST"
+        itemId={functionTest.id}
+        itemName={functionTest.systemName || functionTest.systemCode}
+      />
     </div>
   );
 }
