@@ -206,12 +206,17 @@ async function handleProjectComparison(request: NextRequest, projectId: string) 
                 console.log("Downloading from internal API:", doc.url);
 
                 // Build absolute URL for internal API
-                const baseUrl = process.env.NEXTAUTH_URL || process.env.VERCEL_URL
+                const baseUrl = process.env.NEXTAUTH_URL || (process.env.VERCEL_URL
                     ? `https://${process.env.VERCEL_URL}`
-                    : "http://localhost:3000";
+                    : "http://localhost:3000");
                 const absoluteUrl = new URL(doc.url, baseUrl);
 
-                const response = await fetch(absoluteUrl.toString());
+                // Forward cookies from original request for authentication
+                const cookieHeader = request.headers.get("cookie");
+                const response = await fetch(absoluteUrl.toString(), {
+                    headers: cookieHeader ? { cookie: cookieHeader } : {},
+                });
+
                 if (!response.ok) {
                     return {
                         fileName: doc.fileName || doc.title,
