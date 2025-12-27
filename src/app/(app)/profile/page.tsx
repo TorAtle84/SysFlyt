@@ -23,6 +23,8 @@ export default async function ProfilePage() {
       company: true,
       title: true,
       discipline: true,
+      reportsAsProjectLeaderEnabled: true,
+      reportsAsMemberEnabled: true,
       role: true,
       status: true,
       totpEnabled: true,

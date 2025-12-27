@@ -75,6 +75,8 @@ export function validateAndSanitizeProfileInput(data: unknown): {
   company?: string | null;
   title?: string | null;
   discipline?: string | null;
+  reportsAsProjectLeaderEnabled?: boolean;
+  reportsAsMemberEnabled?: boolean;
 } | {
   valid: false;
   error: string;
@@ -83,7 +85,16 @@ export function validateAndSanitizeProfileInput(data: unknown): {
     return { valid: false, error: "Ugyldig input" };
   }
 
-  const { firstName, lastName, phone, company, title, discipline } = data as Record<string, unknown>;
+  const {
+    firstName,
+    lastName,
+    phone,
+    company,
+    title,
+    discipline,
+    reportsAsProjectLeaderEnabled,
+    reportsAsMemberEnabled,
+  } = data as Record<string, unknown>;
 
   const result: {
     valid: true;
@@ -93,6 +104,8 @@ export function validateAndSanitizeProfileInput(data: unknown): {
     company?: string | null;
     title?: string | null;
     discipline?: string | null;
+    reportsAsProjectLeaderEnabled?: boolean;
+    reportsAsMemberEnabled?: boolean;
   } = { valid: true };
 
   if (firstName !== undefined) {
@@ -141,6 +154,20 @@ export function validateAndSanitizeProfileInput(data: unknown): {
     if (result.discipline && result.discipline.length > 100) {
       return { valid: false, error: "Fagområde kan ikke være lengre enn 100 tegn" };
     }
+  }
+
+  if (reportsAsProjectLeaderEnabled !== undefined) {
+    if (typeof reportsAsProjectLeaderEnabled !== "boolean") {
+      return { valid: false, error: "Ugyldig rapportinnstilling" };
+    }
+    result.reportsAsProjectLeaderEnabled = reportsAsProjectLeaderEnabled;
+  }
+
+  if (reportsAsMemberEnabled !== undefined) {
+    if (typeof reportsAsMemberEnabled !== "boolean") {
+      return { valid: false, error: "Ugyldig rapportinnstilling" };
+    }
+    result.reportsAsMemberEnabled = reportsAsMemberEnabled;
   }
 
   return result;

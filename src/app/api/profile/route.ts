@@ -21,6 +21,8 @@ export async function GET() {
         company: true,
         title: true,
         discipline: true,
+        reportsAsProjectLeaderEnabled: true,
+        reportsAsMemberEnabled: true,
         role: true,
         status: true,
       },
@@ -63,6 +65,12 @@ export async function PATCH(request: NextRequest) {
         ...(validation.company !== undefined && { company: validation.company }),
         ...(validation.title !== undefined && { title: validation.title }),
         ...(validation.discipline !== undefined && { discipline: validation.discipline }),
+        ...(validation.reportsAsProjectLeaderEnabled !== undefined && {
+          reportsAsProjectLeaderEnabled: validation.reportsAsProjectLeaderEnabled,
+        }),
+        ...(validation.reportsAsMemberEnabled !== undefined && {
+          reportsAsMemberEnabled: validation.reportsAsMemberEnabled,
+        }),
       },
       select: {
         id: true,
@@ -73,6 +81,8 @@ export async function PATCH(request: NextRequest) {
         company: true,
         title: true,
         discipline: true,
+        reportsAsProjectLeaderEnabled: true,
+        reportsAsMemberEnabled: true,
         role: true,
         status: true,
       },

@@ -27,5 +27,21 @@ services:
       - pgdata-prod:/var/lib/postgresql/data
     restart: unless-stopped
 
+  reports:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - DATABASE_URL=${DATABASE_URL}
+      - REPORTS_ENABLED=${REPORTS_ENABLED:-true}
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: sh -c "sleep 10 && npm run reports:scheduler"
+    restart: unless-stopped
+
 volumes:
   pgdata-prod:

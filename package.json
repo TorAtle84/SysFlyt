@@ -15,7 +15,9 @@
     "db:seed": "tsx prisma/seed.ts",
     "postinstall": "prisma generate",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "reports:run": "tsx scripts/protocol-status-scheduler.ts --once",
+    "reports:scheduler": "tsx scripts/protocol-status-scheduler.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

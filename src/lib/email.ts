@@ -1,4 +1,6 @@
 import nodemailer from "nodemailer";
+import { format } from "date-fns";
+import { nb } from "date-fns/locale";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
@@ -356,3 +358,191 @@ ${pdfBuffer ? "Se vedlagt PDF for detaljer." : "Dokumentet er vedlagt denne e-po
   }
 }
 
+export type ProtocolStatusReportItem = {
+  title: string;
+  progress: number;
+  missingLabels: string[];
+  link?: string | null;
+};
+
+export async function sendProtocolStatusReportEmail(input: {
+  to: string;
+  recipientName?: string | null;
+  projectName: string;
+  generatedAt: Date;
+  protocols: ProtocolStatusReportItem[];
+  functionTests: ProtocolStatusReportItem[];
+  projectUrl?: string | null;
+  profileUrl?: string | null;
+}) {
+  const {
+    to,
+    recipientName,
+    projectName,
+    generatedAt,
+    protocols,
+    functionTests,
+    projectUrl,
+    profileUrl,
+  } = input;
+
+  const greeting = recipientName ? `Hei ${escapeHtml(recipientName)}` : "Hei";
+  const projectNameSafe = escapeHtml(projectName);
+  const dateLabel = format(generatedAt, "dd.MM.yyyy", { locale: nb });
+
+  const missingProtocolCount = protocols.filter((p) => p.missingLabels.length > 0).length;
+  const missingFunctionTestCount = functionTests.filter((t) => t.missingLabels.length > 0).length;
+
+  const summaryText =
+    missingProtocolCount + missingFunctionTestCount === 0
+      ? "Alle protokoller og funksjonstester har komplett informasjon."
+      : `Mangler info i ${missingProtocolCount} MC-protokoller og ${missingFunctionTestCount} funksjonstester.`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px;">
+        <div style="max-width: 720px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          <div style="background: linear-gradient(135deg, #0f172a 0%, #1f2937 100%; padding: 32px; text-align: left;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 600;">Protokollstatus</h1>
+            <p style="color: #d1d5db; margin: 8px 0 0 0; font-size: 14px;">${projectNameSafe} • ${dateLabel}</p>
+          </div>
+          <div style="padding: 28px 32px 8px 32px;">
+            <p style="color: #1f2937; line-height: 1.6; margin: 0 0 12px 0;">
+              ${greeting}, her er dagens statusrapport.
+            </p>
+            <p style="color: #6b7280; line-height: 1.6; margin: 0 0 24px 0;">
+              ${summaryText}
+            </p>
+            ${renderSection("MC Protokoller", protocols)}
+            ${renderSection("Funksjonstester", functionTests)}
+            <div style="margin-top: 24px;">
+              ${
+                projectUrl
+                  ? `<a href="${projectUrl}" style="display: inline-block; background: #0f172a; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 14px;">Åpne prosjekt</a>`
+                  : ""
+              }
+              ${
+                profileUrl
+                  ? `<a href="${profileUrl}" style="display: inline-block; margin-left: 12px; color: #0f172a; text-decoration: none; font-size: 14px;">Rapportinnstillinger</a>`
+                  : ""
+              }
+            </div>
+          </div>
+          <div style="background-color: #f9fafb; padding: 16px 32px; text-align: center;">
+            <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+              © ${new Date().getFullYear()} SysLink. Alle rettigheter forbeholdt.
+            </p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = [
+    `Protokollstatus - ${projectName}`,
+    `Dato: ${dateLabel}`,
+    "",
+    greeting + ", her er dagens statusrapport.",
+    summaryText,
+    "",
+    formatSectionText("MC Protokoller", protocols),
+    "",
+    formatSectionText("Funksjonstester", functionTests),
+    "",
+    projectUrl ? `Prosjekt: ${projectUrl}` : "",
+    profileUrl ? `Rapportinnstillinger: ${profileUrl}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const mailOptions = {
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    to,
+    subject: `Protokollstatus - ${projectName}`,
+    html,
+    text,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Protocol status report sent to ${to}`);
+  } catch (error) {
+    console.error("Failed to send protocol status report:", error);
+    throw new Error("Kunne ikke sende rapport");
+  }
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
+function renderSection(title: string, items: ProtocolStatusReportItem[]): string {
+  const rows = items.length === 0
+    ? `<tr><td style="padding: 12px 0; color: #6b7280;">Ingen funnet.</td></tr>`
+    : items
+      .map((item) => {
+        const missingText = item.missingLabels.length > 0
+          ? escapeHtml(item.missingLabels.join(", "))
+          : "OK";
+        const missingColor = item.missingLabels.length > 0 ? "#b91c1c" : "#16a34a";
+        const link = item.link
+          ? `<a href="${item.link}" style="color: #0f172a; text-decoration: none; font-weight: 600;">Åpne</a>`
+          : "-";
+        return `
+          <tr>
+            <td style="padding: 12px 8px 12px 0; border-bottom: 1px solid #e5e7eb;">
+              <div style="font-weight: 600; color: #111827;">${escapeHtml(item.title)}</div>
+            </td>
+            <td style="padding: 12px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; color: #111827;">
+              ${item.progress}%
+            </td>
+            <td style="padding: 12px 8px; border-bottom: 1px solid #e5e7eb; color: ${missingColor};">
+              ${missingText}
+            </td>
+            <td style="padding: 12px 0 12px 8px; border-bottom: 1px solid #e5e7eb; text-align: right;">
+              ${link}
+            </td>
+          </tr>
+        `;
+      })
+      .join("");
+
+  return `
+    <div style="margin-bottom: 20px;">
+      <h2 style="margin: 0 0 8px 0; font-size: 16px; color: #111827;">${escapeHtml(title)}</h2>
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+        <thead>
+          <tr>
+            <th style="text-align: left; padding: 8px 8px 8px 0; color: #6b7280; font-weight: 500;">Navn</th>
+            <th style="text-align: right; padding: 8px 8px; color: #6b7280; font-weight: 500;">Fremdrift</th>
+            <th style="text-align: left; padding: 8px 8px; color: #6b7280; font-weight: 500;">Mangler</th>
+            <th style="text-align: right; padding: 8px 0 8px 8px; color: #6b7280; font-weight: 500;">Link</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function formatSectionText(title: string, items: ProtocolStatusReportItem[]): string {
+  if (items.length === 0) return `${title}: Ingen funnet.`;
+  const lines = items.map((item) => {
+    const missingText = item.missingLabels.length > 0 ? item.missingLabels.join(", ") : "OK";
+    const link = item.link ? ` | ${item.link}` : "";
+    return `- ${item.title}: ${item.progress}% | Mangler: ${missingText}${link}`;
+  });
+  return `${title}:\n${lines.join("\n")}`;
+}

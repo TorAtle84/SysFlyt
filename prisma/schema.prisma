@@ -72,6 +72,8 @@ model User {
   passwordHash String
   status       UserStatus     @default(PENDING)
   role         Role           @default(READER)
+  reportsAsProjectLeaderEnabled Boolean @default(true)
+  reportsAsMemberEnabled Boolean @default(true)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   
@@ -842,4 +844,3 @@ model TfmComparison {
 
   @@index([projectId])
 }
-

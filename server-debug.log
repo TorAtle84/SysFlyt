@@ -2810,3 +2810,6 @@
 [2025-12-19T18:39:42.755Z] Anchor URL: file://C:\Applikasjoner\SysFlyt\.next\src\lib\pdf-text-extractor.ts
 [2025-12-19T18:39:42.756Z] Resolved worker path via require: C:\Applikasjoner\SysFlyt\node_modules\pdfjs-dist\legacy\build\pdf.worker.mjs
 [2025-12-19T18:39:44.198Z] Extraction success. Items: 1535
+[2025-12-21T18:33:37.459Z] Initializing PDF Worker. CWD: C:\Applikasjoner\SysFlyt
+[2025-12-21T18:33:37.460Z] Anchor URL: file:///C:/Applikasjoner/SysFlyt/src/lib/pdf-text-extractor.ts
+[2025-12-21T18:33:37.460Z] Resolved worker path via require: C:\Applikasjoner\SysFlyt\node_modules\pdfjs-dist\legacy\build\pdf.worker.mjs

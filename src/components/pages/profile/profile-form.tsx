@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDraftPersistence } from "@/hooks/use-draft-persistence";
 import { DISCIPLINES } from "@/lib/constants";
@@ -20,6 +21,8 @@ interface ProfileFormProps {
     company: string | null;
     title: string | null;
     discipline: string | null;
+    reportsAsProjectLeaderEnabled: boolean;
+    reportsAsMemberEnabled: boolean;
     role: string;
     status: string;
   };
@@ -32,6 +35,8 @@ interface FormData {
   company: string;
   title: string;
   discipline: string;
+  reportsAsProjectLeaderEnabled: boolean;
+  reportsAsMemberEnabled: boolean;
 }
 
 export function ProfileForm({ user }: ProfileFormProps) {
@@ -46,6 +51,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
     company: user.company || "",
     title: user.title || "",
     discipline: user.discipline || "",
+    reportsAsProjectLeaderEnabled: user.reportsAsProjectLeaderEnabled ?? true,
+    reportsAsMemberEnabled: user.reportsAsMemberEnabled ?? true,
   }), [user]);
 
   const {
@@ -83,6 +90,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
           company: updated.company || "",
           title: updated.title || "",
           discipline: updated.discipline || "",
+          reportsAsProjectLeaderEnabled: updated.reportsAsProjectLeaderEnabled ?? true,
+          reportsAsMemberEnabled: updated.reportsAsMemberEnabled ?? true,
         });
         setSuccess(true);
         setTimeout(() => setSuccess(false), 3000);
@@ -282,6 +291,49 @@ export function ProfileForm({ user }: ProfileFormProps) {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg">Rapportering</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="reports-as-leader"
+              checked={formData.reportsAsProjectLeaderEnabled}
+              onCheckedChange={(value) =>
+                updateField("reportsAsProjectLeaderEnabled", value === true)
+              }
+            />
+            <div className="space-y-1">
+              <label htmlFor="reports-as-leader" className="text-sm font-medium text-foreground">
+                Motta daglige rapporter som prosjektleder
+              </label>
+              <p className="text-xs text-muted-foreground">
+                Gjelder prosjekter du har opprettet.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="reports-as-member"
+              checked={formData.reportsAsMemberEnabled}
+              onCheckedChange={(value) =>
+                updateField("reportsAsMemberEnabled", value === true)
+              }
+            />
+            <div className="space-y-1">
+              <label htmlFor="reports-as-member" className="text-sm font-medium text-foreground">
+                Motta daglige rapporter som medlem
+              </label>
+              <p className="text-xs text-muted-foreground">
+                Gjelder prosjekter du er invitert i.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
