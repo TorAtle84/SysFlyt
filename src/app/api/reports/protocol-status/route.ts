@@ -39,13 +39,11 @@ function shouldRunNow(request: NextRequest): boolean {
 }
 
 function isAuthorized(request: NextRequest): boolean {
+  const isVercelCron = process.env.VERCEL === "1" && request.headers.get("x-vercel-cron") === "1";
+  if (isVercelCron) return true;
+
   const secret = process.env.REPORTS_CRON_SECRET;
-  if (!secret) {
-    if (process.env.VERCEL === "1") {
-      return request.headers.get("x-vercel-cron") === "1";
-    }
-    return true;
-  }
+  if (!secret) return true;
 
   const auth = request.headers.get("authorization") || "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
