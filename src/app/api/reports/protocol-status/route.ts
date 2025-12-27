@@ -4,6 +4,10 @@ import { sendDailyProtocolStatusReports } from "@/lib/reports/protocol-status";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+function isVercelCronRequest(request: NextRequest): boolean {
+  return process.env.VERCEL === "1" && request.headers.get("x-vercel-cron") === "1";
+}
+
 function parseSendAt(value: string): { hour: number; minute: number } {
   const match = value.match(/^(\d{1,2}):(\d{2})$/);
   if (!match) return { hour: 6, minute: 0 };
@@ -39,8 +43,7 @@ function shouldRunNow(request: NextRequest): boolean {
 }
 
 function isAuthorized(request: NextRequest): boolean {
-  const isVercelCron = process.env.VERCEL === "1" && request.headers.get("x-vercel-cron") === "1";
-  if (isVercelCron) return true;
+  if (isVercelCronRequest(request)) return true;
 
   const secret = process.env.REPORTS_CRON_SECRET;
   if (!secret) return true;
@@ -56,7 +59,7 @@ async function handle(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!shouldRunNow(request)) {
+  if (!isVercelCronRequest(request) && !shouldRunNow(request)) {
     return NextResponse.json({ ok: true, skipped: true, reason: "Outside send window" });
   }
 
