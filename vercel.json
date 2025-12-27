@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/reports/protocol-status",
+      "schedule": "0 * * * *"
+    }
+  ]
+}
