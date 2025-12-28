@@ -19,6 +19,7 @@ import {
   TrendingUp,
   ShieldCheck,
   GitCompare,
+  Archive,
   Plus,
   Minus,
 } from "lucide-react";
@@ -175,6 +176,13 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
           href: `/projects/${id}/quality-assurance/comparison`,
           label: "Sammenligning",
           icon: GitCompare,
+          indent: true,
+        },
+        {
+          type: "link",
+          href: `/projects/${id}/quality-assurance/fdv-collection`,
+          label: "FDV-samling",
+          icon: Archive,
           indent: true,
         },
       ],
