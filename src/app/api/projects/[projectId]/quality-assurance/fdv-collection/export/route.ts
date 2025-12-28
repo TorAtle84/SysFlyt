@@ -279,6 +279,16 @@ export async function POST(
 
     const zip = new JSZip();
     zip.file("manifest.json", JSON.stringify(manifest, null, 2));
+
+    // Add LesMeg.txt with integration instructions
+    try {
+      const readmePath = path.resolve(process.cwd(), "public", "files", "fdv", "LesMeg.txt");
+      const readmeBuffer = await readFile(readmePath);
+      zip.file("LesMeg.txt", readmeBuffer);
+    } catch {
+      // LesMeg.txt is optional, continue without it
+    }
+
     for (const { entry, buffer } of fileEntries.values()) {
       zip.file(entry.path, buffer);
     }
