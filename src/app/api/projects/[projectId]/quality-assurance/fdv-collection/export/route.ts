@@ -288,7 +288,7 @@ export async function POST(
     const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
     const fileName = `fdv-samling_${safeProjectName}_${stamp}.zip`;
 
-    return new NextResponse(zipBuffer, {
+    return new NextResponse(new Uint8Array(zipBuffer), {
       headers: {
         "Content-Type": "application/zip",
         "Content-Disposition": `attachment; filename="${encodeURIComponent(fileName)}"`,
