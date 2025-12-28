@@ -16,7 +16,7 @@ export async function sendResetEmail(to: string, resetUrl: string) {
   const mailOptions = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to,
-    subject: "Tilbakestill passord - SysLink",
+    subject: "Tilbakestill passord - FlytLink",
     html: `
       <!DOCTYPE html>
       <html>
@@ -27,12 +27,12 @@ export async function sendResetEmail(to: string, resetUrl: string) {
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px;">
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
             <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 32px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">SysLink</h1>
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">FlytLink</h1>
             </div>
             <div style="padding: 32px;">
               <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 20px;">Tilbakestill passord</h2>
               <p style="color: #4b5563; line-height: 1.6; margin: 0 0 24px 0;">
-                Vi mottok en forespørsel om å tilbakestille passordet for din SysLink-konto. 
+                Vi mottok en forespørsel om å tilbakestille passordet for din FlytLink-konto. 
                 Klikk på knappen nedenfor for å opprette et nytt passord.
               </p>
               <div style="text-align: center; margin: 32px 0;">
@@ -53,7 +53,7 @@ export async function sendResetEmail(to: string, resetUrl: string) {
             </div>
             <div style="background-color: #f9fafb; padding: 20px; text-align: center;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                © ${new Date().getFullYear()} SysLink. Alle rettigheter forbeholdt.
+                © ${new Date().getFullYear()} FlytLink. Alle rettigheter forbeholdt.
               </p>
             </div>
           </div>
@@ -61,9 +61,9 @@ export async function sendResetEmail(to: string, resetUrl: string) {
       </html>
     `,
     text: `
-Tilbakestill passord - SysLink
+Tilbakestill passord - FlytLink
 
-Vi mottok en forespørsel om å tilbakestille passordet for din SysLink-konto.
+Vi mottok en forespørsel om å tilbakestille passordet for din FlytLink-konto.
 
 Klikk på lenken nedenfor for å opprette et nytt passord:
 ${resetUrl}
@@ -72,7 +72,7 @@ Denne lenken utløper om 1 time.
 
 Hvis du ikke har bedt om å tilbakestille passordet, kan du ignorere denne e-posten.
 
-© ${new Date().getFullYear()} SysLink
+© ${new Date().getFullYear()} FlytLink
     `,
   };
 
@@ -100,12 +100,12 @@ export async function sendWelcomeEmail(to: string, firstName: string) {
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px;">
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
             <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 32px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">SysLink</h1>
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">FlytLink</h1>
             </div>
             <div style="padding: 32px;">
               <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 20px;">Velkommen, ${firstName}!</h2>
               <p style="color: #4b5563; line-height: 1.6; margin: 0 0 24px 0;">
-                Takk for at du registrerte deg på SysLink. Din konto venter på godkjenning fra en administrator.
+                Takk for at du registrerte deg på FlytLink. Din konto venter på godkjenning fra en administrator.
               </p>
               <p style="color: #4b5563; line-height: 1.6; margin: 0 0 24px 0;">
                 Du vil motta en e-post når kontoen din er aktivert og du kan logge inn.
@@ -119,7 +119,7 @@ export async function sendWelcomeEmail(to: string, firstName: string) {
             </div>
             <div style="background-color: #f9fafb; padding: 20px; text-align: center;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                © ${new Date().getFullYear()} SysLink. Alle rettigheter forbeholdt.
+                © ${new Date().getFullYear()} FlytLink. Alle rettigheter forbeholdt.
               </p>
             </div>
           </div>
@@ -152,7 +152,7 @@ export async function sendTaskAssignedEmail(
   const mailOptions = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to,
-    subject: `Ny oppgave tildelt: ${taskTitle} - SysLink`,
+    subject: `Ny oppgave tildelt: ${taskTitle} - FlytLink`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -163,7 +163,7 @@ export async function sendTaskAssignedEmail(
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px;">
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
             <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 32px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">SysLink</h1>
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">FlytLink</h1>
             </div>
             <div style="padding: 32px;">
               <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 20px;">Ny oppgave tildelt</h2>
@@ -183,7 +183,7 @@ export async function sendTaskAssignedEmail(
             </div>
             <div style="background-color: #f9fafb; padding: 20px; text-align: center;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                © ${new Date().getFullYear()} SysLink. Alle rettigheter forbeholdt.
+                © ${new Date().getFullYear()} FlytLink. Alle rettigheter forbeholdt.
               </p>
             </div>
           </div>
@@ -191,7 +191,7 @@ export async function sendTaskAssignedEmail(
       </html>
     `,
     text: `
-Ny oppgave tildelt - SysLink
+Ny oppgave tildelt - FlytLink
 
 Hei ${assigneeName}, ${assignerName} har tildelt deg en ny oppgave.
 
@@ -201,7 +201,7 @@ ${dueDate ? `Frist: ${dueDate}` : ""}
 
 Se oppgaven: ${taskUrl}
 
-© ${new Date().getFullYear()} SysLink
+© ${new Date().getFullYear()} FlytLink
     `,
   };
 
@@ -217,7 +217,7 @@ export async function sendAccountActivatedEmail(to: string, firstName: string, l
   const mailOptions = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to,
-    subject: "Kontoen din er aktivert - SysLink",
+    subject: "Kontoen din er aktivert - FlytLink",
     html: `
       <!DOCTYPE html>
       <html>
@@ -228,12 +228,12 @@ export async function sendAccountActivatedEmail(to: string, firstName: string, l
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px;">
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
             <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 32px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">SysLink</h1>
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">FlytLink</h1>
             </div>
             <div style="padding: 32px;">
               <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 20px;">Kontoen din er aktivert!</h2>
               <p style="color: #4b5563; line-height: 1.6; margin: 0 0 24px 0;">
-                Hei ${firstName}, kontoen din på SysLink er nå godkjent og aktivert.
+                Hei ${firstName}, kontoen din på FlytLink er nå godkjent og aktivert.
               </p>
               <div style="text-align: center; margin: 32px 0;">
                 <a href="${loginUrl}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
@@ -249,7 +249,7 @@ export async function sendAccountActivatedEmail(to: string, firstName: string, l
             </div>
             <div style="background-color: #f9fafb; padding: 20px; text-align: center;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                © ${new Date().getFullYear()} SysLink. Alle rettigheter forbeholdt.
+                © ${new Date().getFullYear()} FlytLink. Alle rettigheter forbeholdt.
               </p>
             </div>
           </div>
@@ -289,7 +289,7 @@ export async function sendProtocolEmail(
   } = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to,
-    subject: `${itemTypeLabel}: ${itemName} - SysLink`,
+    subject: `${itemTypeLabel}: ${itemName} - FlytLink`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -300,7 +300,7 @@ export async function sendProtocolEmail(
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px;">
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
             <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 32px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">SysLink</h1>
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">FlytLink</h1>
             </div>
             <div style="padding: 32px;">
               <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 20px;">${itemTypeLabel} delt med deg</h2>
@@ -317,7 +317,7 @@ export async function sendProtocolEmail(
             </div>
             <div style="background-color: #f9fafb; padding: 20px; text-align: center;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                © ${new Date().getFullYear()} SysLink. Alle rettigheter forbeholdt.
+                © ${new Date().getFullYear()} FlytLink. Alle rettigheter forbeholdt.
               </p>
             </div>
           </div>
@@ -334,7 +334,7 @@ Prosjekt: ${projectName}
 
 ${pdfBuffer ? "Se vedlagt PDF for detaljer." : "Dokumentet er vedlagt denne e-posten."}
 
-© ${new Date().getFullYear()} SysLink
+© ${new Date().getFullYear()} FlytLink
     `,
   };
 
@@ -421,21 +421,19 @@ export async function sendProtocolStatusReportEmail(input: {
             ${renderSection("MC Protokoller", protocols)}
             ${renderSection("Funksjonstester", functionTests)}
             <div style="margin-top: 24px;">
-              ${
-                projectUrl
-                  ? `<a href="${projectUrl}" style="display: inline-block; background: #0f172a; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 14px;">Åpne prosjekt</a>`
-                  : ""
-              }
-              ${
-                profileUrl
-                  ? `<a href="${profileUrl}" style="display: inline-block; margin-left: 12px; color: #0f172a; text-decoration: none; font-size: 14px;">Rapportinnstillinger</a>`
-                  : ""
-              }
+              ${projectUrl
+      ? `<a href="${projectUrl}" style="display: inline-block; background: #0f172a; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 14px;">Åpne prosjekt</a>`
+      : ""
+    }
+              ${profileUrl
+      ? `<a href="${profileUrl}" style="display: inline-block; margin-left: 12px; color: #0f172a; text-decoration: none; font-size: 14px;">Rapportinnstillinger</a>`
+      : ""
+    }
             </div>
           </div>
           <div style="background-color: #f9fafb; padding: 16px 32px; text-align: center;">
             <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-              © ${new Date().getFullYear()} SysLink. Alle rettigheter forbeholdt.
+              © ${new Date().getFullYear()} FlytLink. Alle rettigheter forbeholdt.
             </p>
           </div>
         </div>
@@ -492,7 +490,7 @@ function renderSection(title: string, items: ProtocolStatusReportItem[]): string
     : items
       .map((item) => {
         const missingText = item.missingLabels.length > 0
-          ? escapeHtml(item.missingLabels.join(", "))
+          ? item.missingLabels.map(label => `• ${escapeHtml(label)}`).join("<br>")
           : "OK";
         const missingColor = item.missingLabels.length > 0 ? "#b91c1c" : "#16a34a";
         const link = item.link
@@ -500,16 +498,16 @@ function renderSection(title: string, items: ProtocolStatusReportItem[]): string
           : "-";
         return `
           <tr>
-            <td style="padding: 12px 8px 12px 0; border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 12px 8px 12px 0; border-bottom: 1px solid #e5e7eb; vertical-align: top;">
               <div style="font-weight: 600; color: #111827;">${escapeHtml(item.title)}</div>
             </td>
-            <td style="padding: 12px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; color: #111827;">
+            <td style="padding: 12px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; color: #111827; vertical-align: top;">
               ${item.progress}%
             </td>
-            <td style="padding: 12px 8px; border-bottom: 1px solid #e5e7eb; color: ${missingColor};">
+            <td style="padding: 12px 8px; border-bottom: 1px solid #e5e7eb; color: ${missingColor}; vertical-align: top; line-height: 1.5;">
               ${missingText}
             </td>
-            <td style="padding: 12px 0 12px 8px; border-bottom: 1px solid #e5e7eb; text-align: right;">
+            <td style="padding: 12px 0 12px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; vertical-align: top;">
               ${link}
             </td>
           </tr>

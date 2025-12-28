@@ -71,15 +71,20 @@ function computeFunctionTestProgress(rows: FunctionTestRowLite[]) {
 function formatMissingCountLabel(label: string, missingCount: number, totalCount?: number): string | null {
   if (missingCount <= 0) return null;
   if (totalCount && totalCount > 0) {
-    return `${label} (${missingCount}/${totalCount} mangler)`;
+    // If all are missing, show "ikke valgt" instead of count
+    if (missingCount === totalCount) {
+      return `${label}: ikke valgt`;
+    }
+    return `${label}: ${totalCount - missingCount}/${totalCount} valgt`;
   }
-  return `${label} (${missingCount} mangler)`;
+  return `${label}: ikke valgt`;
 }
 
 function formatResponsiblesLabel(total: number, missing: number): string | null {
-  if (total === 0) return "Delansvarlige (ingen valgt)";
+  if (total === 0) return "Delansvarlige: ingen valgt";
   if (missing <= 0) return null;
-  return `Delansvarlige (${missing}/${total} mangler)`;
+  if (missing === total) return "Delansvarlige: ikke valgt";
+  return `Delansvarlige: ${total - missing}/${total} valgt`;
 }
 
 function buildBaseUrl() {
@@ -105,9 +110,9 @@ function buildMcProtocolItem(protocol: {
   const missingExecutorCount = protocol.items.filter((i) => !i.executorId).length;
 
   const missingLabels: string[] = [];
-  if (!protocol.startTime) missingLabels.push("Startdato");
-  if (!protocol.endTime) missingLabels.push("Sluttdato");
-  if (!protocol.systemOwnerId) missingLabels.push("Systemansvarlig");
+  if (!protocol.startTime) missingLabels.push("Startdato: mangler");
+  if (!protocol.endTime) missingLabels.push("Sluttdato: mangler");
+  if (!protocol.systemOwnerId) missingLabels.push("Systemansvarlig: ikke valgt");
 
   const delansvarligeLabel = formatMissingCountLabel(
     "Delansvarlige",
@@ -122,6 +127,11 @@ function buildMcProtocolItem(protocol: {
     progressStats.totalItems
   );
   if (executorLabel) missingLabels.push(executorLabel);
+
+  // Add component status
+  if (progressStats.totalItems > 0) {
+    missingLabels.push(`Komponenter: ${progressStats.completedItems}/${progressStats.totalItems} ferdig`);
+  }
 
   const link = baseUrl ? `${baseUrl}/projects/${projectId}/protocols/${protocol.id}` : null;
 
@@ -151,9 +161,9 @@ function buildFunctionTestItem(test: {
   const missingExecutorCount = test.rows.filter((r) => !r.performedById).length;
 
   const missingLabels: string[] = [];
-  if (!dateRange.start) missingLabels.push("Startdato");
-  if (!dateRange.end) missingLabels.push("Sluttdato");
-  if (!test.systemOwnerId) missingLabels.push("Systemansvarlig");
+  if (!dateRange.start) missingLabels.push("Startdato: mangler");
+  if (!dateRange.end) missingLabels.push("Sluttdato: mangler");
+  if (!test.systemOwnerId) missingLabels.push("Systemansvarlig: ikke valgt");
 
   const responsiblesLabel = formatResponsiblesLabel(responsiblesTotal, responsiblesMissing);
   if (responsiblesLabel) missingLabels.push(responsiblesLabel);
@@ -164,6 +174,11 @@ function buildFunctionTestItem(test: {
     progressStats.totalRows
   );
   if (executorLabel) missingLabels.push(executorLabel);
+
+  // Add test row status
+  if (progressStats.totalRows > 0) {
+    missingLabels.push(`Tester: ${progressStats.completedRows}/${progressStats.totalRows} ferdig`);
+  }
 
   const link = baseUrl ? `${baseUrl}/projects/${projectId}/protocols/function-tests/${test.id}` : null;
 

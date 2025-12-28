@@ -1,0 +1,124 @@
+================================================================================
+                         FDV-SAMLING EKSPORT - LEIASMEG
+================================================================================
+
+INNHOLD I EKSPORTEN
+-------------------
+FDV-eksporten genererer en ZIP-fil som inneholder:
+
+1. manifest.json    - Metadata og komponentoversikt (maskinlesbar)
+2. datablader/      - Mappe med alle FDV-dokumenter (PDF, DOC, XLSX, etc.)
+
+
+MANIFEST.JSON STRUKTUR
+----------------------
+{
+  "schemaVersion": "1.0",
+  "exportedAt": "2025-12-28T12:00:00.000Z",
+  "project": {
+    "id": "prosjekt-id",
+    "name": "Prosjektnavn"
+  },
+  "summary": {
+    "componentsTotal": 150,          // Totalt antall komponenter
+    "componentsWithFDV": 145,        // Komponenter med FDV
+    "componentsMissingFDV": 5,       // Komponenter som mangler FDV
+    "filesTotal": 120,               // Antall unike filer (deduplisert)
+    "exportedWithMissing": false     // true hvis eksportert med manglende FDV
+  },
+  "systems": [
+    { "code": "360", "name": "Ventilasjon" },
+    { "code": "320", "name": "Varme" }
+  ],
+  "files": [
+    {
+      "id": "sha256-hash",
+      "path": "datablader/abc123.pdf",
+      "name": "Produktdatablad.pdf",
+      "mime": "application/pdf",
+      "size": 245632,
+      "sha256": "abc123..."
+    }
+  ],
+  "components": [
+    {
+      "id": "360.001.A01",
+      "tfm": "360.001.A01",
+      "systemCode": "360",
+      "systemName": "Ventilasjon",
+      "name": "Avtrekksvifte",
+      "productName": "Vifte XYZ",
+      "supplierName": "Leverandør AS",
+      "files": [
+        { "fileId": "sha256-hash", "docType": "datablad" }
+      ]
+    }
+  ],
+  "missingComponents": [
+    { "id": "360.002.B01", "systemCode": "360", "name": "Spjeld" }
+  ]
+}
+
+
+INTEGRERING I EGET FDV-SYSTEM
+-----------------------------
+
+1. PARSING AV MANIFEST
+   - Les manifest.json for å få oversikt over alle komponenter
+   - Bruk "id" eller "tfm" som unik identifikator per komponent
+   - Koble "files[].fileId" mot filene i datablader-mappen
+
+2. FILHÅNDTERING
+   - Filer lagres med SHA256-hash som filnavn for deduplisering
+   - Samme fil brukt av flere komponenter har samme hash
+   - Original filnavn finnes i "files[].name"
+
+3. SYSTEMKOBLING
+   - Bruk "systemCode" for å koble mot deres systemstruktur
+   - "systemName" gir lesbar beskrivelse
+
+4. EKSEMPEL PÅ IMPORT (PSEUDOKODE)
+
+   manifest = parseJSON("manifest.json")
+   
+   for component in manifest.components:
+       existingComponent = findByTFM(component.tfm)
+       
+       for fileRef in component.files:
+           file = manifest.files.find(f => f.id == fileRef.fileId)
+           copyFile("datablader/" + file.path, fdvSystem.storage)
+           linkToComponent(existingComponent, file, fileRef.docType)
+
+
+FELTBESKRIVELSER
+----------------
+
+KOMPONENT-FELTER:
+- id          : Unik ID (vanligvis TFM-kode)
+- tfm         : Tverrfaglig merkesystem-kode (f.eks. "360.001.A01")
+- systemCode  : Systemkode (f.eks. "360" for ventilasjon)
+- systemName  : Systemnavn (f.eks. "Ventilasjon")
+- name        : Komponentnavn
+- productName : Produktnavn fra leverandør
+- supplierName: Leverandørnavn
+
+FIL-FELTER:
+- id          : SHA256-hash av filen (unik identifikator)
+- path        : Relativ sti i ZIP-filen
+- name        : Originalt filnavn
+- mime        : MIME-type (f.eks. "application/pdf")
+- size        : Filstørrelse i bytes
+- sha256      : SHA256-hash for verifisering
+
+DOC-TYPER:
+- "datablad"  : Teknisk datablad
+- "montasje"  : Montasjeanvisning
+
+
+KONTAKT
+-------
+Ved spørsmål om integrasjon, kontakt FlytLink support.
+
+================================================================================
+                          © 2025 FlytLink
+================================================================================
