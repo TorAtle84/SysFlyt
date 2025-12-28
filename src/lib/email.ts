@@ -85,6 +85,151 @@ Hvis du ikke har bedt om å tilbakestille passordet, kan du ignorere denne e-pos
   }
 }
 
+export async function sendEmailVerificationEmail(to: string, firstName: string, verifyUrl: string) {
+  const mailOptions = {
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    to,
+    subject: "Verifiser din e-post - FlytLink",
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 32px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">FlytLink</h1>
+            </div>
+            <div style="padding: 32px;">
+              <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 20px;">Verifiser din e-post</h2>
+              <p style="color: #4b5563; line-height: 1.6; margin: 0 0 24px 0;">
+                Hei ${firstName}! Takk for at du registrerte deg på FlytLink. 
+                Klikk på knappen nedenfor for å verifisere din e-postadresse.
+              </p>
+              <div style="text-align: center; margin: 32px 0;">
+                <a href="${verifyUrl}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                  Verifiser e-post
+                </a>
+              </div>
+              <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 0 0 16px 0;">
+                Denne lenken utløper om 24 timer. Etter verifisering vil en administrator 
+                gjennomgå og aktivere kontoen din.
+              </p>
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;">
+              <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                Hvis knappen ikke fungerer, kopier og lim inn denne lenken i nettleseren din:
+                <br>
+                <a href="${verifyUrl}" style="color: #6366f1; word-break: break-all;">${verifyUrl}</a>
+              </p>
+            </div>
+            <div style="background-color: #f9fafb; padding: 20px; text-align: center;">
+              <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                © ${new Date().getFullYear()} FlytLink. Alle rettigheter forbeholdt.
+              </p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+    text: `
+Verifiser din e-post - FlytLink
+
+Hei ${firstName}! Takk for at du registrerte deg på FlytLink.
+
+Klikk på lenken nedenfor for å verifisere din e-postadresse:
+${verifyUrl}
+
+Denne lenken utløper om 24 timer. Etter verifisering vil en administrator gjennomgå og aktivere kontoen din.
+
+© ${new Date().getFullYear()} FlytLink
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Email verification sent to ${to}`);
+  } catch (error) {
+    console.error("Failed to send email verification:", error);
+    throw new Error("Kunne ikke sende verifiserings-e-post");
+  }
+}
+
+export async function sendAdminNewUserNotification(
+  adminEmails: string[],
+  newUser: { firstName: string; lastName: string; email: string; company?: string | null },
+  adminUrl: string
+) {
+  const userName = `${newUser.firstName} ${newUser.lastName}`.trim();
+  const companyText = newUser.company ? ` fra ${newUser.company}` : "";
+
+  const mailOptions = {
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    to: adminEmails.join(", "),
+    subject: `Ny bruker venter på godkjenning - FlytLink`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <div style="background: linear-gradient(135deg, #0f172a 0%, #1f2937 100%); padding: 32px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">FlytLink Admin</h1>
+            </div>
+            <div style="padding: 32px;">
+              <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 20px;">Ny bruker venter på godkjenning</h2>
+              <p style="color: #4b5563; line-height: 1.6; margin: 0 0 24px 0;">
+                <strong>${userName}</strong>${companyText} har verifisert sin e-postadresse og venter nå på 
+                at kontoen skal aktiveres.
+              </p>
+              <div style="background-color: #f3f4f6; border-radius: 8px; padding: 20px; margin: 24px 0;">
+                <p style="color: #1f2937; margin: 0 0 8px 0;"><strong>Navn:</strong> ${userName}</p>
+                <p style="color: #1f2937; margin: 0 0 8px 0;"><strong>E-post:</strong> ${newUser.email}</p>
+                ${newUser.company ? `<p style="color: #1f2937; margin: 0;"><strong>Firma:</strong> ${newUser.company}</p>` : ""}
+              </div>
+              <div style="text-align: center; margin: 32px 0;">
+                <a href="${adminUrl}" style="display: inline-block; background: #0f172a; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                  Gå til brukeradministrasjon
+                </a>
+              </div>
+            </div>
+            <div style="background-color: #f9fafb; padding: 20px; text-align: center;">
+              <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                © ${new Date().getFullYear()} FlytLink. Alle rettigheter forbeholdt.
+              </p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+    text: `
+Ny bruker venter på godkjenning - FlytLink
+
+${userName}${companyText} har verifisert sin e-postadresse og venter nå på at kontoen skal aktiveres.
+
+Navn: ${userName}
+E-post: ${newUser.email}
+${newUser.company ? `Firma: ${newUser.company}` : ""}
+
+Gå til brukeradministrasjon: ${adminUrl}
+
+© ${new Date().getFullYear()} FlytLink
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Admin notification sent to ${adminEmails.length} admins`);
+  } catch (error) {
+    console.error("Failed to send admin notification:", error);
+    // Don't throw - admin notification is not critical
+  }
+}
+
 export async function sendWelcomeEmail(to: string, firstName: string) {
   const mailOptions = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
