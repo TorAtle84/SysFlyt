@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, ArrowDownToLine, Pencil, CheckCircle2, XCircle, FileDown, Plus, Palette } from "lucide-react";
+import { Loader2, ArrowDownToLine, Pencil, CheckCircle2, XCircle, FileDown, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -129,7 +129,7 @@ export function InterfaceMatrixView() {
         if (!data) return;
         const hasErrors = data.rows.some(r => !isRowComplete(r));
         if (hasErrors) {
-            if (!confirm("Noen systemer mangler påkrevde grensesnitt (Rødt Kryss). Vil du likeve eksportere til PDF?")) {
+            if (!confirm("Noen systemer mangler påkrevde grensesnitt (Rødt Kryss). Vil du likevel eksportere til PDF?")) {
                 return;
             }
         }
@@ -158,15 +158,25 @@ export function InterfaceMatrixView() {
         }
     }
 
+    async function handleDeleteRow(rowId: string) {
+        if (!confirm("Er du sikker på at du vil slette denne raden?")) return;
+        try {
+            // TODO: Add proper delete endpoint. For now we'll just refetch.
+            toast.info("Sletting er ikke implementert ennå");
+        } catch (e) {
+            toast.error("Kunne ikke slette rad");
+        }
+    }
+
     if (isLoading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin h-8 w-8" /></div>;
-    if (!data) return <div className="p-8">Ingen data funnet.</div>;
+    if (!data) return <div className="p-8 text-black">Ingen data funnet.</div>;
 
     return (
         <div className="space-y-4 h-full flex flex-col">
             <div className="flex justify-between items-center p-4 bg-white border-b sticky top-0 z-30">
                 <div>
-                    <h1 className="text-2xl font-bold">Grensesnittmatrise</h1>
-                    <p className="text-muted-foreground text-sm">Oversikt over ansvarsfordeling per system og fag.</p>
+                    <h1 className="text-2xl font-bold text-black">Grensesnittmatrise</h1>
+                    <p className="text-gray-600 text-sm">Oversikt over ansvarsfordeling per system og fag.</p>
                 </div>
                 <div className="flex gap-2">
                     <Popover open={isAddingCol} onOpenChange={setIsAddingCol}>
@@ -179,12 +189,12 @@ export function InterfaceMatrixView() {
                         <PopoverContent className="w-80">
                             <div className="grid gap-4">
                                 <div className="space-y-2">
-                                    <h4 className="font-medium leading-none">Nytt Fag / Motpart</h4>
-                                    <p className="text-sm text-muted-foreground">Legg til en ny kolonne i matrisen.</p>
+                                    <h4 className="font-medium leading-none text-black">Nytt Fag / Motpart</h4>
+                                    <p className="text-sm text-gray-500">Legg til en ny kolonne i matrisen.</p>
                                 </div>
                                 <div className="grid gap-2">
                                     <div className="grid grid-cols-3 items-center gap-4">
-                                        <Label htmlFor="name">Navn</Label>
+                                        <Label htmlFor="name" className="text-black">Navn</Label>
                                         <Input
                                             id="name"
                                             value={newColName}
@@ -193,12 +203,12 @@ export function InterfaceMatrixView() {
                                         />
                                     </div>
                                     <div className="grid grid-cols-3 items-center gap-4">
-                                        <Label>Farge</Label>
+                                        <Label className="text-black">Farge</Label>
                                         <div className="col-span-2 flex flex-wrap gap-1">
                                             {PASTEL_COLORS.map(c => (
                                                 <div
                                                     key={c}
-                                                    className={`w-6 h-6 rounded-full cursor-pointer border ${newColColor === c ? 'ring-2 ring-black' : ''}`}
+                                                    className={`w-6 h-6 rounded-full cursor-pointer border-2 ${newColColor === c ? 'border-black' : 'border-transparent'}`}
                                                     style={{ backgroundColor: c }}
                                                     onClick={() => setNewColColor(c)}
                                                 />
@@ -224,23 +234,34 @@ export function InterfaceMatrixView() {
 
             <div className="flex-1 overflow-auto border rounded-md bg-white m-4 relative">
                 <Table>
-                    <TableHeader className="sticky top-0 z-20 bg-white">
+                    <TableHeader className="sticky top-0 z-20">
                         <TableRow>
-                            <TableHead className="w-[300px] sticky left-0 z-20 bg-white border-r shadow-[4px_0_5px_-2px_rgba(0,0,0,0.1)]">System</TableHead>
+                            <TableHead className="w-[280px] sticky left-0 z-20 bg-gray-100 border-r text-black font-bold">
+                                System
+                            </TableHead>
                             {data.columns.map((col) => (
                                 <TableHead
                                     key={col.id}
-                                    className="text-center min-w-[150px] border-r border-b font-bold text-black"
+                                    className="text-center min-w-[140px] border-r font-bold text-black"
                                     style={{ backgroundColor: col.color }}
                                 >
                                     {col.discipline || col.customLabel}
                                 </TableHead>
                             ))}
+                            <TableHead className="w-[80px] bg-gray-100 text-center text-black font-bold">
+                                Handling
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {data.rows.map((row) => (
-                            <MatrixRowItem key={row.id} row={row} columns={data.columns} projectId={projectId} />
+                            <MatrixRowItem
+                                key={row.id}
+                                row={row}
+                                columns={data.columns}
+                                projectId={projectId}
+                                onDelete={() => handleDeleteRow(row.id)}
+                            />
                         ))}
                     </TableBody>
                 </Table>
@@ -249,7 +270,7 @@ export function InterfaceMatrixView() {
     );
 }
 
-function MatrixRowItem({ row, columns, projectId }: { row: MatrixRow; columns: MatrixColumn[], projectId: string }) {
+function MatrixRowItem({ row, columns, projectId, onDelete }: { row: MatrixRow; columns: MatrixColumn[], projectId: string, onDelete: () => void }) {
     const [description, setDescription] = useState(row.description || "");
     const [isEditing, setIsEditing] = useState(false);
     const isComplete = isRowComplete(row);
@@ -271,12 +292,12 @@ function MatrixRowItem({ row, columns, projectId }: { row: MatrixRow; columns: M
     }
 
     return (
-        <TableRow>
-            <TableCell className="sticky left-0 z-10 bg-white border-r w-[300px] shadow-[4px_0_5px_-2px_rgba(0,0,0,0.1)] align-top">
-                <div className="flex items-start justify-between group h-full min-h-[40px]">
+        <TableRow className="hover:bg-gray-50">
+            <TableCell className="sticky left-0 z-10 bg-white border-r w-[280px] align-top">
+                <div className="flex items-start justify-between group h-full min-h-[50px] p-1">
                     <div className="flex flex-col gap-1 w-full mr-2">
-                        <span className="font-semibold text-sm">{row.systemCode}</span>
-                        <div className="flex items-center text-xs text-muted-foreground min-h-[20px]">
+                        <span className="font-bold text-black text-sm">{row.systemCode}</span>
+                        <div className="flex items-center text-xs text-gray-600 min-h-[20px]">
                             {isEditing ? (
                                 <Input
                                     value={description}
@@ -289,10 +310,10 @@ function MatrixRowItem({ row, columns, projectId }: { row: MatrixRow; columns: M
                             ) : (
                                 <>
                                     <span
-                                        className="truncate cursor-pointer hover:text-foreground"
+                                        className="truncate cursor-pointer hover:text-black"
                                         onClick={() => setIsEditing(true)}
                                     >
-                                        {description || "Ingen beskrivelse"}
+                                        {description || "Klikk for å legge til beskrivelse"}
                                     </span>
                                     <Button
                                         variant="ghost"
@@ -308,9 +329,9 @@ function MatrixRowItem({ row, columns, projectId }: { row: MatrixRow; columns: M
                     </div>
                     <div title={isComplete ? "Komplett" : "Mangler påkrevde grensesnitt"}>
                         {isComplete ? (
-                            <CheckCircle2 className="h-5 w-5 text-green-500 mt-1" />
+                            <CheckCircle2 className="h-5 w-5 text-green-600 mt-1" />
                         ) : (
-                            <XCircle className="h-5 w-5 text-red-500 mt-1" />
+                            <XCircle className="h-5 w-5 text-red-600 mt-1" />
                         )}
                     </div>
                 </div>
@@ -328,6 +349,16 @@ function MatrixRowItem({ row, columns, projectId }: { row: MatrixRow; columns: M
                     />
                 );
             })}
+            <TableCell className="text-center align-middle bg-white">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                    onClick={onDelete}
+                >
+                    <Trash2 className="h-4 w-4" />
+                </Button>
+            </TableCell>
         </TableRow>
     );
 }
@@ -356,39 +387,35 @@ function MatrixCellItem({ rowId, columnId, initialValues, color, projectId }: { 
         }
     }
 
-    // Display text for the trigger: show selected count or "Velg..."
-    const displayText = values.length > 0
-        ? `${values.length} valgt`
-        : "Velg...";
-
     return (
-        <TableCell
-            className="p-1 border-r text-center align-middle"
-            style={{ backgroundColor: color }}
-        >
+        <TableCell className="p-2 border-r text-center align-middle bg-white">
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <button
-                        className="w-full min-h-[36px] px-2 py-1 flex flex-col items-center justify-center gap-1 rounded-md bg-white/60 hover:bg-white/90 border border-black/10 transition-colors cursor-pointer text-left"
+                        className="w-full min-h-[40px] px-2 py-1 flex flex-col items-center justify-center gap-1 rounded-md bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-colors cursor-pointer"
                         type="button"
                     >
                         {values.length > 0 ? (
                             <div className="flex flex-wrap gap-1 justify-center">
                                 {values.map(v => (
-                                    <span key={v} className="text-[10px] bg-white px-1.5 py-0.5 rounded border shadow-sm font-medium">
+                                    <span
+                                        key={v}
+                                        className="text-[11px] px-2 py-0.5 rounded-full border font-medium text-black"
+                                        style={{ backgroundColor: color, borderColor: color }}
+                                    >
                                         {v}
                                     </span>
                                 ))}
                             </div>
                         ) : (
-                            <span className="text-xs text-muted-foreground">Velg...</span>
+                            <span className="text-xs text-gray-400">Velg...</span>
                         )}
                     </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-64 p-0" align="start">
-                    <div className="p-2 border-b bg-muted/50">
-                        <h4 className="font-semibold text-sm">Velg ansvar</h4>
-                        <p className="text-xs text-muted-foreground">Klikk på verdiene for å velge/fjerne</p>
+                    <div className="p-3 border-b" style={{ backgroundColor: color }}>
+                        <h4 className="font-semibold text-sm text-black">Velg ansvar</h4>
+                        <p className="text-xs text-gray-700">Klikk på verdiene for å velge/fjerne</p>
                     </div>
                     <div className="max-h-[300px] overflow-y-auto p-2 space-y-1">
                         {AVAILABLE_TAGS.map(tag => {
@@ -397,7 +424,7 @@ function MatrixCellItem({ rowId, columnId, initialValues, color, projectId }: { 
                             return (
                                 <div
                                     key={tag}
-                                    className={`flex items-center space-x-2 p-2 rounded-md cursor-pointer transition-colors ${isSelected ? 'bg-primary/10' : 'hover:bg-muted'}`}
+                                    className={`flex items-center space-x-2 p-2 rounded-md cursor-pointer transition-colors ${isSelected ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
                                     onClick={() => handleValueChange(tag, !isSelected)}
                                 >
                                     <Checkbox
@@ -407,7 +434,7 @@ function MatrixCellItem({ rowId, columnId, initialValues, color, projectId }: { 
                                     />
                                     <Label
                                         htmlFor={`c-${rowId}-${columnId}-${tag}`}
-                                        className="text-sm cursor-pointer flex-1 flex items-center justify-between"
+                                        className="text-sm cursor-pointer flex-1 flex items-center justify-between text-black"
                                     >
                                         <span>{tag}</span>
                                         {isMandatory && <span className="text-red-500 text-xs font-bold">*</span>}
