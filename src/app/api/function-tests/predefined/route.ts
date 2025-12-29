@@ -100,6 +100,7 @@ export async function GET(request: NextRequest) {
         prisma.predefinedFunctionTest.groupBy({
           by: ["systemGroup", "systemType", "function"],
           where,
+          orderBy: groupOrderBy,
         }),
         prisma.predefinedFunctionTest.groupBy({
           by: ["systemGroup", "systemType", "function"],
