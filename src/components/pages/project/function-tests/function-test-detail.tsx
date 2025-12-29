@@ -1689,6 +1689,52 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
     }
   }
 
+  async function adminDeleteFunctionGroup(group: PredefinedFunctionGroup) {
+    const busyKey = `admin:delete_group:${group.systemGroup ?? ""}:${group.systemType ?? ""}:${group.function}`;
+    markBusy(busyKey, true);
+    try {
+      // Find all tests matching this group
+      const testsToDelete = adminPredefinedTests.filter((t) => {
+        const groupMatch = normalizeTemplateSystemGroup(t) === (group.systemGroup ?? "Generelt");
+        const typeMatch = normalizeTemplateSystemType(t) === (group.systemType ?? "Ukjent type");
+        const functionMatch = t.function.trim() === group.function.trim();
+        return groupMatch && typeMatch && functionMatch;
+      });
+
+      if (testsToDelete.length === 0) {
+        toast.info("Ingen tester å slette");
+        return;
+      }
+
+      // Delete all matching tests
+      const results = await Promise.allSettled(
+        testsToDelete.map((t) =>
+          fetch(`/api/function-tests/predefined?id=${encodeURIComponent(t.id)}`, {
+            method: "DELETE",
+          })
+        )
+      );
+
+      const deletedIds = testsToDelete
+        .filter((_, idx) => results[idx].status === "fulfilled")
+        .map((t) => t.id);
+      const failedCount = results.filter((r) => r.status === "rejected").length;
+
+      if (deletedIds.length > 0) {
+        setAdminPredefinedTests((prev) => prev.filter((t) => !deletedIds.includes(t.id)));
+        setPredefinedTests((prev) => prev.filter((t) => !deletedIds.includes(t.id)));
+        toast.success(`Slettet ${deletedIds.length} testmaler`);
+      }
+      if (failedCount > 0) {
+        toast.error(`Kunne ikke slette ${failedCount} testmaler`);
+      }
+    } catch (e: unknown) {
+      toast.error(errorMessage(e, "Kunne ikke slette testmaler"));
+    } finally {
+      markBusy(busyKey, false);
+    }
+  }
+
   function openAdminForFunction(
     systemGroup: string,
     systemType: string,
@@ -4074,7 +4120,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
 
       {/* Modal for predefined tests - visible to all users */}
       <Dialog open={adminModalOpen} onOpenChange={setAdminModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Predefinerte tester</DialogTitle>
             <DialogDescription>
@@ -4148,6 +4194,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                         <TableHead className="w-[180px]">Type</TableHead>
                         <TableHead>Funksjon</TableHead>
                         <TableHead className="w-[80px] text-right">Tester</TableHead>
+                        {isAdmin && <TableHead className="w-[80px]">Behandle</TableHead>}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -4178,6 +4225,23 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                             <TableCell className="text-sm text-right text-muted-foreground">
                               {group.testCount}
                             </TableCell>
+                            {isAdmin && (
+                              <TableCell>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-muted-foreground hover:text-red-600"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    adminDeleteFunctionGroup(group);
+                                  }}
+                                  disabled={busy[`admin:delete_group:${group.systemGroup ?? ""}:${group.systemType ?? ""}:${group.function}`]}
+                                  title="Slett alle testmaler for denne funksjonen"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                            )}
                           </TableRow>
                         );
                       })}
