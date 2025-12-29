@@ -117,12 +117,16 @@ export async function GET(request: NextRequest) {
       ]);
 
       return NextResponse.json({
-        functions: grouped.map((group) => ({
-          systemGroup: group.systemGroup,
-          systemType: group.systemType,
-          function: group.function,
-          testCount: group._count?._all ?? 0,
-        })),
+        functions: grouped.map((group) => {
+          const countValue =
+            (group._count as { _all?: number } | null | undefined)?._all ?? 0;
+          return {
+            systemGroup: group.systemGroup,
+            systemType: group.systemType,
+            function: group.function,
+            testCount: countValue,
+          };
+        }),
         total: totalGroups.length,
         page: hasPaging ? page : 1,
         pageSize: hasPaging ? pageSize : totalGroups.length,
