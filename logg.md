@@ -2,6 +2,17 @@ docker-compose -f docker-compose.dev.yml up --build
 
 # Endringslogg (SysFlyt)
 
+## 2025-12-29 - Viktig: Database-migreringer ved deploy
+
+### Bakgrunn
+- Vercel build kjører nå uten `prisma migrate deploy` som standard.
+- Årsak: build-miljøet har ikke DB-tilgang og feiler ved migrering.
+
+### Tiltak / Rutine
+- Når schema endres må vi alltid sende med et SQL-script (Supabase SQL editor) eller kjøre `prisma migrate deploy` fra et miljø med DB-tilgang.
+- Husk å legge dette i logg/leveransebeskrivelse sammen med endringen.
+- Valgfritt: sett `RUN_MIGRATIONS=1` i Vercel dersom build-miljøet kan nå databasen.
+
 ## 2025-12-13 – Modul: Modell (BIM/IFC) – Fase 1
 
 ### Database (Prisma)
