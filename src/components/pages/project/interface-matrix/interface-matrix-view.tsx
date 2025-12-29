@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 type MatrixData = {
     id: string;
@@ -176,16 +177,16 @@ export function InterfaceMatrixView() {
     if (!data) return <div className="p-8 text-black">Ingen data funnet.</div>;
 
     return (
-        <div className="space-y-4 h-full flex flex-col">
-            <div className="flex justify-between items-center p-4 bg-white border-b sticky top-0 z-30">
+        <div className="space-y-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-black">Grensesnittmatrise</h1>
-                    <p className="text-gray-600 text-sm">Oversikt over ansvarsfordeling per system og fag.</p>
+                    <h1 className="text-2xl font-bold">Grensesnittmatrise</h1>
+                    <p className="text-muted-foreground">Oversikt over ansvarsfordeling per system og fag.</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
                     <Popover open={isAddingCol} onOpenChange={setIsAddingCol}>
                         <PopoverTrigger asChild>
-                            <Button variant="outline">
+                            <Button variant="outline" size="sm">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Legg til fag
                             </Button>
@@ -212,7 +213,7 @@ export function InterfaceMatrixView() {
                                             {PASTEL_COLORS.map(c => (
                                                 <div
                                                     key={c}
-                                                    className={`w-6 h-6 rounded-full cursor-pointer border-2 ${newColColor === c ? 'border-black' : 'border-transparent'}`}
+                                                    className={`w-6 h-6 rounded-full cursor-pointer border-2 ${newColColor === c ? 'border-primary' : 'border-transparent'}`}
                                                     style={{ backgroundColor: c }}
                                                     onClick={() => setNewColColor(c)}
                                                 />
@@ -220,40 +221,40 @@ export function InterfaceMatrixView() {
                                         </div>
                                     </div>
                                 </div>
-                                <Button onClick={handleAddColumn}>Lagre</Button>
+                                <Button onClick={handleAddColumn} size="sm">Lagre</Button>
                             </div>
                         </PopoverContent>
                     </Popover>
 
-                    <Button variant="outline" onClick={handleExport}>
+                    <Button variant="outline" size="sm" onClick={handleExport}>
                         <FileDown className="mr-2 h-4 w-4" />
                         Eksporter PDF
                     </Button>
-                    <Button onClick={handleImport} disabled={isImporting}>
+                    <Button onClick={handleImport} disabled={isImporting} size="sm">
                         {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowDownToLine className="mr-2 h-4 w-4" />}
                         Importer systemer
                     </Button>
                 </div>
             </div>
 
-            <div className="flex-1 overflow-auto border rounded-md bg-white m-4 relative">
+            <div className="border rounded-lg overflow-x-auto bg-card shadow-sm">
                 <Table>
-                    <TableHeader className="sticky top-0 z-20">
-                        <TableRow>
-                            <TableHead className="w-[280px] sticky left-0 z-20 bg-gray-100 border-r text-black font-bold">
+                    <TableHeader className="bg-muted/50">
+                        <TableRow className="hover:bg-transparent">
+                            <TableHead className="w-[300px] min-w-[200px] font-semibold text-foreground border-r sticky left-0 z-20 bg-muted/50">
                                 System
                             </TableHead>
                             {data.columns.map((col) => (
                                 <TableHead
                                     key={col.id}
-                                    className="text-center min-w-[140px] border-r font-bold text-black"
+                                    className="text-center min-w-[200px] border-r font-semibold text-foreground px-2"
                                     style={{ backgroundColor: col.color }}
                                 >
                                     {col.discipline || col.customLabel}
                                 </TableHead>
                             ))}
-                            <TableHead className="w-[80px] bg-gray-100 text-center text-black font-bold">
-                                Handling
+                            <TableHead className="w-[60px] min-w-[60px] text-center font-semibold text-foreground sticky right-0 z-20 bg-muted/50">
+                                Slett
                             </TableHead>
                         </TableRow>
                     </TableHeader>
@@ -296,12 +297,12 @@ function MatrixRowItem({ row, columns, projectId, onDelete }: { row: MatrixRow; 
     }
 
     return (
-        <TableRow className="hover:bg-gray-50">
-            <TableCell className="sticky left-0 z-10 bg-white border-r w-[280px] align-top">
-                <div className="flex items-start justify-between group h-full min-h-[50px] p-1">
-                    <div className="flex flex-col gap-1 w-full mr-2">
-                        <span className="font-bold text-black text-sm">{row.systemCode}</span>
-                        <div className="flex items-center text-xs text-gray-600 min-h-[20px]">
+        <TableRow className="group">
+            <TableCell className="sticky left-0 z-10 bg-background border-r align-top p-3 font-medium">
+                <div className="flex items-start justify-between h-full min-h-[44px]">
+                    <div className="flex flex-col gap-1 w-full mr-3">
+                        <span className="text-sm font-semibold">{row.systemCode}</span>
+                        <div className="flex items-center text-xs text-muted-foreground min-h-[20px]">
                             {isEditing ? (
                                 <Input
                                     value={description}
@@ -309,33 +310,26 @@ function MatrixRowItem({ row, columns, projectId, onDelete }: { row: MatrixRow; 
                                     onBlur={saveDescription}
                                     onKeyDown={(e) => e.key === 'Enter' && saveDescription()}
                                     autoFocus
-                                    className="h-6 text-xs"
+                                    className="h-6 text-xs px-1 border-input"
                                 />
                             ) : (
-                                <>
-                                    <span
-                                        className="truncate cursor-pointer hover:text-black"
-                                        onClick={() => setIsEditing(true)}
-                                    >
-                                        {description || "Klikk for å legge til beskrivelse"}
+                                <div
+                                    className="group/desc flex items-center gap-1 cursor-pointer hover:bg-muted/50 rounded -ml-1 pl-1 pr-2 py-0.5 transition-colors"
+                                    onClick={() => setIsEditing(true)}
+                                >
+                                    <span className="truncate max-w-[200px]" title={description || ""}>
+                                        {description || "Legg til beskrivelse"}
                                     </span>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-4 w-4 ml-1 opacity-0 group-hover:opacity-100"
-                                        onClick={() => setIsEditing(true)}
-                                    >
-                                        <Pencil className="h-3 w-3" />
-                                    </Button>
-                                </>
+                                    <Pencil className="h-3 w-3 opacity-0 group-hover/desc:opacity-100 transition-opacity" />
+                                </div>
                             )}
                         </div>
                     </div>
                     <div title={isComplete ? "Komplett" : "Mangler påkrevde grensesnitt"}>
                         {isComplete ? (
-                            <CheckCircle2 className="h-5 w-5 text-green-600 mt-1" />
+                            <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-1" />
                         ) : (
-                            <XCircle className="h-5 w-5 text-red-600 mt-1" />
+                            <XCircle className="h-5 w-5 text-red-500 mt-1" />
                         )}
                     </div>
                 </div>
@@ -353,12 +347,13 @@ function MatrixRowItem({ row, columns, projectId, onDelete }: { row: MatrixRow; 
                     />
                 );
             })}
-            <TableCell className="text-center align-middle bg-white">
+            <TableCell className="sticky right-0 z-10 bg-background text-center align-middle p-2">
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all"
                     onClick={onDelete}
+                    title="Slett rad"
                 >
                     <Trash2 className="h-4 w-4" />
                 </Button>
@@ -392,19 +387,24 @@ function MatrixCellItem({ rowId, columnId, initialValues, color, projectId }: { 
     }
 
     return (
-        <TableCell className="p-2 border-r text-center align-middle bg-white">
+        <TableCell className="p-2 border-r align-top text-center">
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <button
-                        className="w-full min-h-[40px] px-2 py-1 flex flex-col items-center justify-center gap-1 rounded-md bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-colors cursor-pointer"
+                        className={cn(
+                            "w-full min-h-[44px] px-2 py-1.5 flex flex-col items-center justify-center gap-1.5 rounded-md transition-all border",
+                            values.length > 0
+                                ? "bg-background border-transparent hover:border-input shadow-sm"
+                                : "bg-transparent border-transparent hover:bg-muted/50 hover:border-border/50 text-muted-foreground"
+                        )}
                         type="button"
                     >
                         {values.length > 0 ? (
-                            <div className="flex flex-wrap gap-1 justify-center">
+                            <div className="flex flex-wrap gap-1 justify-center w-full">
                                 {values.map(v => (
                                     <span
                                         key={v}
-                                        className="text-[11px] px-2 py-0.5 rounded-full border font-medium text-black"
+                                        className="text-[10px] px-2 py-0.5 rounded-full border font-medium text-foreground bg-background shadow-sm whitespace-nowrap"
                                         style={{ backgroundColor: color, borderColor: color }}
                                     >
                                         {v}
@@ -412,36 +412,45 @@ function MatrixCellItem({ rowId, columnId, initialValues, color, projectId }: { 
                                 ))}
                             </div>
                         ) : (
-                            <span className="text-xs text-gray-400">Velg...</span>
+                            <span className="text-xs opacity-50 font-normal">Velg...</span>
                         )}
                     </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 p-0" align="start">
-                    <div className="p-3 border-b" style={{ backgroundColor: color }}>
-                        <h4 className="font-semibold text-sm text-black">Velg ansvar</h4>
-                        <p className="text-xs text-gray-700">Klikk på verdiene for å velge/fjerne</p>
+                <PopoverContent className="w-64 p-0" align="center">
+                    <div
+                        className="p-3 border-b flex items-center justify-between"
+                        style={{ backgroundColor: color }}
+                    >
+                        <div>
+                            <h4 className="font-semibold text-sm text-foreground">Velg ansvar</h4>
+                            <p className="text-[10px] text-foreground/70">Klikk for å endre</p>
+                        </div>
                     </div>
-                    <div className="max-h-[300px] overflow-y-auto p-2 space-y-1">
+                    <div className="max-h-[300px] overflow-y-auto p-1.5 space-y-0.5">
                         {AVAILABLE_TAGS.map(tag => {
                             const isSelected = values.includes(tag);
                             const isMandatory = MANDATORY_TAGS.includes(tag);
                             return (
                                 <div
                                     key={tag}
-                                    className={`flex items-center space-x-2 p-2 rounded-md cursor-pointer transition-colors ${isSelected ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+                                    className={cn(
+                                        "flex items-center space-x-2 p-2 rounded-md cursor-pointer transition-colors text-sm",
+                                        isSelected ? "bg-accent text-accent-foreground" : "hover:bg-muted"
+                                    )}
                                     onClick={() => handleValueChange(tag, !isSelected)}
                                 >
                                     <Checkbox
                                         id={`c-${rowId}-${columnId}-${tag}`}
                                         checked={isSelected}
                                         onCheckedChange={(c) => handleValueChange(tag, c as boolean)}
+                                        className="border-muted-foreground/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary" // Better contrast
                                     />
                                     <Label
                                         htmlFor={`c-${rowId}-${columnId}-${tag}`}
-                                        className="text-sm cursor-pointer flex-1 flex items-center justify-between text-black"
+                                        className="pointer-events-none flex-1 flex items-center justify-between"
                                     >
                                         <span>{tag}</span>
-                                        {isMandatory && <span className="text-red-500 text-xs font-bold">*</span>}
+                                        {isMandatory && <span className="text-red-500 text-xs font-bold" title="Påkrevd">*</span>}
                                     </Label>
                                 </div>
                             );
