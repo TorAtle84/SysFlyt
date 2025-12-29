@@ -617,6 +617,8 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
     functionName: string;
   } | null>(null);
   const [adminImportRows, setAdminImportRows] = useState<ImportedFunctionTestRow[]>([]);
+  const [adminSearchQuery, setAdminSearchQuery] = useState("");
+  const [adminSelectedFunction, setAdminSelectedFunction] = useState<PredefinedFunctionGroup | null>(null);
   const adminModalInitializedRef = useRef(false);
 
   const filteredAdminPredefinedTests = useMemo(() => {
@@ -634,6 +636,47 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
       })
       .sort(sortPredefinedTests);
   }, [adminContextFilter, adminPredefinedTests]);
+
+  // Grouped functions for deduplicated display (ignores category)
+  const groupedAdminFunctions = useMemo(() => {
+    const query = adminSearchQuery.trim().toLowerCase();
+    const groupMap = new Map<string, PredefinedFunctionGroup>();
+
+    for (const test of adminPredefinedTests) {
+      const systemGroup = normalizeTemplateSystemGroup(test);
+      const systemType = normalizeTemplateSystemType(test);
+      const functionName = test.function.trim();
+      const key = `${systemGroup}||${systemType}||${functionName}`;
+
+      // Apply search filter
+      if (query) {
+        const matchesSearch =
+          systemGroup.toLowerCase().includes(query) ||
+          systemType.toLowerCase().includes(query) ||
+          functionName.toLowerCase().includes(query);
+        if (!matchesSearch) continue;
+      }
+
+      if (!groupMap.has(key)) {
+        groupMap.set(key, {
+          systemGroup,
+          systemType,
+          function: functionName,
+          testCount: 0,
+        });
+      }
+      const group = groupMap.get(key)!;
+      group.testCount++;
+    }
+
+    return Array.from(groupMap.values()).sort((a, b) => {
+      const groupCmp = (a.systemGroup ?? "").localeCompare(b.systemGroup ?? "", "nb");
+      if (groupCmp !== 0) return groupCmp;
+      const typeCmp = (a.systemType ?? "").localeCompare(b.systemType ?? "", "nb");
+      if (typeCmp !== 0) return typeCmp;
+      return a.function.localeCompare(b.function, "nb");
+    });
+  }, [adminPredefinedTests, adminSearchQuery]);
 
   const stats = useMemo(() => {
     const totalRows = rows.length;
@@ -1379,13 +1422,13 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
       const columnMap = hasHeader
         ? headerIndexes
         : {
-            systemGroup: 0,
-            systemType: 1,
-            functionName: 2,
-            category: 3,
-            testExecution: 4,
-            acceptanceCriteria: 5,
-          };
+          systemGroup: 0,
+          systemType: 1,
+          functionName: 2,
+          category: 3,
+          testExecution: 4,
+          acceptanceCriteria: 5,
+        };
 
       if (
         hasHeader &&
@@ -2728,17 +2771,15 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                   <TableHead className="w-[220px]">
                     <span className="flex items-center gap-1">
                       Systemdel
-                      {isAdmin && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-5 w-5"
-                          onClick={() => setAdminModalOpen(true)}
-                          title="Administrer predefinerte tester"
-                        >
-                          <Settings className="h-3.5 w-3.5" />
-                        </Button>
-                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5"
+                        onClick={() => setAdminModalOpen(true)}
+                        title="Velg fra predefinerte tester"
+                      >
+                        <Settings className="h-3.5 w-3.5" />
+                      </Button>
                     </span>
                   </TableHead>
                   <TableHead className="w-[260px]">Funksjon</TableHead>
@@ -3129,10 +3170,10 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
       <Dialog open={addRowOpen} onOpenChange={setAddRowOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-          <DialogTitle>Legg til funksjon</DialogTitle>
-          <DialogDescription>
-            Velg en funksjon for å legge inn alle tilhørende testpunkter i funksjonstesten.
-          </DialogDescription>
+            <DialogTitle>Legg til funksjon</DialogTitle>
+            <DialogDescription>
+              Velg en funksjon for å legge inn alle tilhørende testpunkter i funksjonstesten.
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -3143,10 +3184,10 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                     <TableHead className="w-[160px]">System</TableHead>
                     <TableHead className="w-[160px]">Type</TableHead>
                     <TableHead>Funksjon</TableHead>
-                  <TableHead className="w-[110px]">Punkter</TableHead>
-                  <TableHead className="w-[110px] text-right">Handling</TableHead>
-                </TableRow>
-                <TableRow className="bg-muted/40">
+                    <TableHead className="w-[110px]">Punkter</TableHead>
+                    <TableHead className="w-[110px] text-right">Handling</TableHead>
+                  </TableRow>
+                  <TableRow className="bg-muted/40">
                     <TableHead>
                       <Input
                         value={predefinedListFilters.systemGroup}
@@ -3202,26 +3243,26 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                       const busyKey = `row:add_group:${t.systemGroup ?? ""}:${t.systemType ?? ""}:${t.function}`;
                       return (
                         <TableRow key={busyKey}>
-                        <TableCell className="text-sm">
-                          {normalizeGroupSystemGroup(t)}
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          {normalizeGroupSystemType(t)}
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          <div className="font-medium">{t.function}</div>
-                        </TableCell>
-                        <TableCell className="text-sm">{t.testCount}</TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="outline"
-                            onClick={() => createRowsFromFunctionGroup(t)}
-                            disabled={busy[busyKey]}
-                          >
-                            + Legg til
-                          </Button>
-                        </TableCell>
-                      </TableRow>
+                          <TableCell className="text-sm">
+                            {normalizeGroupSystemGroup(t)}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {normalizeGroupSystemType(t)}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            <div className="font-medium">{t.function}</div>
+                          </TableCell>
+                          <TableCell className="text-sm">{t.testCount}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="outline"
+                              onClick={() => createRowsFromFunctionGroup(t)}
+                              disabled={busy[busyKey]}
+                            >
+                              + Legg til
+                            </Button>
+                          </TableCell>
+                        </TableRow>
                       );
                     })
                   )}
@@ -4033,384 +4074,400 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
         </DialogContent>
       </Dialog>
 
-      {/* Admin modal for predefined tests */}
-      {isAdmin && (
-        <Dialog open={adminModalOpen} onOpenChange={setAdminModalOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-            <DialogHeader>
-              <DialogTitle>Administrer predefinerte tester</DialogTitle>
-              <DialogDescription>
-                Opprett, rediger og slett predefinerte testmaler som kan brukes i funksjonstester.
-              </DialogDescription>
-            </DialogHeader>
+      {/* Modal for predefined tests - visible to all users */}
+      <Dialog open={adminModalOpen} onOpenChange={setAdminModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Predefinerte tester</DialogTitle>
+            <DialogDescription>
+              Velg funksjoner fra biblioteket for å legge til i protokollen.
+            </DialogDescription>
+          </DialogHeader>
 
-            <div className="flex-1 overflow-y-auto space-y-6 pr-2">
-              {/* Existing tests list */}
-              <div className="space-y-3">
+          <div className="flex-1 overflow-y-auto space-y-6 pr-2">
+            {/* Existing tests list */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
                 <div className="text-sm font-medium">Eksisterende tester</div>
-                {adminContextFilter && (
-                  <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs">
-                    <span>
-                      Filtrert: {adminContextFilter.systemGroup} · {adminContextFilter.systemType} ·{" "}
-                      {adminContextFilter.functionName}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setAdminContextFilter(null)}
-                    >
-                      Vis alle
-                    </Button>
-                  </div>
+                {adminSelectedFunction && (
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      createRowsFromFunctionGroup(adminSelectedFunction);
+                      setAdminSelectedFunction(null);
+                    }}
+                    disabled={busy[`row:add_group:${adminSelectedFunction.systemGroup ?? ""}:${adminSelectedFunction.systemType ?? ""}:${adminSelectedFunction.function}`]}
+                  >
+                    Importer til protokoll
+                  </Button>
                 )}
-                <div className="rounded-lg border border-border">
-                  {adminPredefinedTestsLoading ? (
-                    <div className="p-6 text-center text-sm text-muted-foreground">
-                      Henter testmaler...
-                    </div>
-                  ) : filteredAdminPredefinedTests.length === 0 ? (
-                    <div className="p-6 text-center text-sm text-muted-foreground">
-                      {adminContextFilter
-                        ? "Ingen testmaler matcher filteret."
-                        : "Ingen predefinerte tester finnes ennå."}
-                    </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[140px]">System</TableHead>
-                          <TableHead className="w-[160px]">Type</TableHead>
-                          <TableHead className="w-[200px]">Funksjon</TableHead>
-                          <TableHead className="w-[120px]">Kategori</TableHead>
-                          <TableHead className="w-[80px]">Handlinger</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredAdminPredefinedTests.map((test) => (
-                          <TableRow key={test.id}>
-                            <TableCell className="text-sm">
-                              {normalizeTemplateSystemGroup(test)}
-                            </TableCell>
-                            <TableCell className="text-sm">
-                              {normalizeTemplateSystemType(test)}
-                            </TableCell>
-                            <TableCell className="text-sm">{test.function}</TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="text-xs">
-                                {formatCategory(test.category)}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8"
-                                  onClick={() => setAdminEditingTest({ ...test })}
-                                  title="Rediger"
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-muted-foreground hover:text-red-600"
-                                  onClick={() => adminDeletePredefinedTest(test.id)}
-                                  disabled={busy[`admin:delete:${test.id}`]}
-                                  title="Slett"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </div>
               </div>
 
-              {/* Edit form - shown when editing */}
-              {adminEditingTest && (
-                <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium">Rediger testmal</div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setAdminEditingTest(null)}
-                    >
-                      Avbryt
-                    </Button>
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <label className="text-sm text-muted-foreground">Kategori</label>
-                      <Select
-                        value={adminEditingTest.category}
-                        onValueChange={(v) => {
-                          if (isFunctionTestCategory(v)) {
-                            setAdminEditingTest((prev) => prev ? { ...prev, category: v } : prev);
-                          }
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="START_STOP">Start/Stopp</SelectItem>
-                          <SelectItem value="SECURITY">Sikkerhet</SelectItem>
-                          <SelectItem value="REGULATION">Regulering</SelectItem>
-                          <SelectItem value="EXTERNAL">Ekstern</SelectItem>
-                          <SelectItem value="OTHER">Øvrig</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm text-muted-foreground">System</label>
-                      <Input
-                        value={adminEditingTest.systemGroup ?? ""}
-                        onChange={(e) =>
-                          setAdminEditingTest((prev) =>
-                            prev ? { ...prev, systemGroup: e.target.value } : prev
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm text-muted-foreground">Type</label>
-                      <Input
-                        value={adminEditingTest.systemType ?? adminEditingTest.systemPart}
-                        onChange={(e) =>
-                          setAdminEditingTest((prev) =>
-                            prev ? { ...prev, systemType: e.target.value } : prev
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm text-muted-foreground">Funksjon</label>
-                      <Input
-                        value={adminEditingTest.function}
-                        onChange={(e) =>
-                          setAdminEditingTest((prev) =>
-                            prev ? { ...prev, function: e.target.value } : prev
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm text-muted-foreground">Testutførelse</label>
-                    <Textarea
-                      value={adminEditingTest.testExecution}
-                      onChange={(e) =>
-                        setAdminEditingTest((prev) => prev ? { ...prev, testExecution: e.target.value } : prev)
-                      }
-                      className="min-h-[80px]"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm text-muted-foreground">Akseptkriterie</label>
-                    <Textarea
-                      value={adminEditingTest.acceptanceCriteria}
-                      onChange={(e) =>
-                        setAdminEditingTest((prev) => prev ? { ...prev, acceptanceCriteria: e.target.value } : prev)
-                      }
-                      className="min-h-[80px]"
-                    />
-                  </div>
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={adminUpdatePredefinedTest}
-                      disabled={busy[`admin:update:${adminEditingTest.id}`]}
-                    >
-                      Oppdater
-                    </Button>
-                  </div>
+              {/* Search input */}
+              <Input
+                placeholder="Søk i System, Type eller Funksjon..."
+                value={adminSearchQuery}
+                onChange={(e) => {
+                  setAdminSearchQuery(e.target.value);
+                  setAdminSelectedFunction(null);
+                }}
+                className="h-9"
+              />
+
+              {adminContextFilter && (
+                <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs">
+                  <span>
+                    Filtrert: {adminContextFilter.systemGroup} · {adminContextFilter.systemType} ·{" "}
+                    {adminContextFilter.functionName}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setAdminContextFilter(null)}
+                  >
+                    Vis alle
+                  </Button>
                 </div>
               )}
-
-              {/* Create new form */}
-              {!adminEditingTest && (
-                <div className="space-y-4 rounded-lg border border-border p-4">
-                  <div className="text-sm font-medium">Legg til ny predefinert test</div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <label className="text-sm text-muted-foreground">Kategori</label>
-                      <Select
-                        value={adminNewTest.category}
-                        onValueChange={(v) => {
-                          if (isFunctionTestCategory(v)) {
-                            setAdminNewTest((prev) => ({ ...prev, category: v }));
-                          }
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="START_STOP">Start/Stopp</SelectItem>
-                          <SelectItem value="SECURITY">Sikkerhet</SelectItem>
-                          <SelectItem value="REGULATION">Regulering</SelectItem>
-                          <SelectItem value="EXTERNAL">Ekstern</SelectItem>
-                          <SelectItem value="OTHER">Øvrig</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm text-muted-foreground">System</label>
-                      <Input
-                        placeholder="f.eks. Ventilasjon"
-                        value={adminNewTest.systemGroup}
-                        onChange={(e) =>
-                          setAdminNewTest((prev) => ({ ...prev, systemGroup: e.target.value }))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm text-muted-foreground">Type</label>
-                      <Input
-                        placeholder="f.eks. Avkastsystemer"
-                        value={adminNewTest.systemType}
-                        onChange={(e) =>
-                          setAdminNewTest((prev) => ({ ...prev, systemType: e.target.value }))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm text-muted-foreground">Funksjon</label>
-                      <Input
-                        placeholder="f.eks. Avkastvifte, drift og feil"
-                        value={adminNewTest.function}
-                        onChange={(e) =>
-                          setAdminNewTest((prev) => ({ ...prev, function: e.target.value }))
-                        }
-                      />
-                    </div>
+              <div className="rounded-lg border border-border">
+                {adminPredefinedTestsLoading ? (
+                  <div className="p-6 text-center text-sm text-muted-foreground">
+                    Henter testmaler...
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm text-muted-foreground">Testutførelse</label>
-                    <Textarea
-                      placeholder="Beskriv hvordan testen skal utføres..."
-                      value={adminNewTest.testExecution}
-                      onChange={(e) => setAdminNewTest((prev) => ({ ...prev, testExecution: e.target.value }))}
-                      className="min-h-[80px]"
-                    />
+                ) : groupedAdminFunctions.length === 0 ? (
+                  <div className="p-6 text-center text-sm text-muted-foreground">
+                    {adminSearchQuery
+                      ? "Ingen testmaler matcher søket."
+                      : adminContextFilter
+                        ? "Ingen testmaler matcher filteret."
+                        : "Ingen predefinerte tester finnes ennå."}
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm text-muted-foreground">Akseptkriterie</label>
-                    <Textarea
-                      placeholder="Beskriv hva som utgjør et godkjent testresultat..."
-                      value={adminNewTest.acceptanceCriteria}
-                      onChange={(e) => setAdminNewTest((prev) => ({ ...prev, acceptanceCriteria: e.target.value }))}
-                      className="min-h-[80px]"
-                    />
-                  </div>
-                  <div className="space-y-3 rounded-lg border border-dashed border-border p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm font-medium">Importer testprosedyre (Excel)</div>
-                      {adminImportRows.length > 0 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setAdminImportRows([])}
-                        >
-                          Tøm
-                        </Button>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Mal: TestutførelsesMal.xlsx (System, Type, Funksjon, Kategori, Testutførelse,
-                      Akseptkriterier).
-                    </p>
-                    <div className="text-xs text-muted-foreground">
-                      System, Type og Funksjon leses fra filen.
-                    </div>
-                    <Input
-                      ref={adminImportInputRef}
-                      type="file"
-                      accept=".xlsx,.xls"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleAdminImportFile(file);
-                      }}
-                    />
-                    {adminImportRows.length > 0 && (
-                      <div className="space-y-3">
-                        <div className="max-h-48 overflow-y-auto rounded-lg border border-border">
-                          <div className="divide-y divide-border">
-                            {adminImportRows.map((row, idx) => {
-                              const systemGroupLabel = row.systemGroup.trim() || "Generelt";
-                              const systemTypeLabel = row.systemType.trim() || "Ukjent type";
-
-                              return (
-                                <div
-                                  key={`${systemGroupLabel}-${systemTypeLabel}-${row.functionName}-${idx}`}
-                                  className="space-y-1 p-3"
-                                >
-                                  <div className="text-xs text-muted-foreground">
-                                    {systemGroupLabel} · {systemTypeLabel}
-                                  </div>
-                                  <div className="flex items-center justify-between gap-2">
-                                    <div className="text-sm font-medium">{row.functionName}</div>
-                                    <Badge variant="outline" className="text-xs">
-                                      {formatCategory(row.category)}
-                                    </Badge>
-                                  </div>
-                                  <div className="text-xs text-muted-foreground line-clamp-2">
-                                    {row.testExecution}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground line-clamp-2">
-                                    {row.acceptanceCriteria}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                        <div className="flex justify-end">
-                          <Button onClick={handleAdminImportSubmit} disabled={busy["admin:import"]}>
-                            {busy["admin:import"] ? "Importerer..." : `Importer ${adminImportRows.length}`}
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        adminCreatePredefinedTest();
-                      }}
-                      disabled={busy["admin:create"]}
-                    >
-                      Lagre og ny
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        adminCreatePredefinedTest().then(() => {
-                          // Keep modal open for adding more
-                        });
-                      }}
-                      disabled={busy["admin:create"]}
-                    >
-                      Lagre
-                    </Button>
-                  </div>
-                </div>
-              )}
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[160px]">System</TableHead>
+                        <TableHead className="w-[180px]">Type</TableHead>
+                        <TableHead>Funksjon</TableHead>
+                        <TableHead className="w-[80px] text-right">Tester</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {groupedAdminFunctions.map((group) => {
+                        const key = `${group.systemGroup ?? ""}||${group.systemType ?? ""}||${group.function}`;
+                        const isSelected =
+                          adminSelectedFunction?.systemGroup === group.systemGroup &&
+                          adminSelectedFunction?.systemType === group.systemType &&
+                          adminSelectedFunction?.function === group.function;
+                        return (
+                          <TableRow
+                            key={key}
+                            className={cn(
+                              "cursor-pointer transition-colors",
+                              isSelected
+                                ? "bg-primary/10 hover:bg-primary/15"
+                                : "hover:bg-muted/50"
+                            )}
+                            onClick={() => setAdminSelectedFunction(isSelected ? null : group)}
+                          >
+                            <TableCell className="text-sm font-medium">
+                              {group.systemGroup ?? "Generelt"}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {group.systemType ?? "Ukjent type"}
+                            </TableCell>
+                            <TableCell className="text-sm">{group.function}</TableCell>
+                            <TableCell className="text-sm text-right text-muted-foreground">
+                              {group.testCount}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
+              </div>
             </div>
 
-            <DialogFooter className="mt-4">
-              <Button variant="outline" onClick={() => setAdminModalOpen(false)}>
-                Lukk
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+            {/* Edit form - shown when editing (Admin only) */}
+            {isAdmin && adminEditingTest && (
+              <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-medium">Rediger testmal</div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setAdminEditingTest(null)}
+                  >
+                    Avbryt
+                  </Button>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-sm text-muted-foreground">Kategori</label>
+                    <Select
+                      value={adminEditingTest.category}
+                      onValueChange={(v) => {
+                        if (isFunctionTestCategory(v)) {
+                          setAdminEditingTest((prev) => prev ? { ...prev, category: v } : prev);
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="START_STOP">Start/Stopp</SelectItem>
+                        <SelectItem value="SECURITY">Sikkerhet</SelectItem>
+                        <SelectItem value="REGULATION">Regulering</SelectItem>
+                        <SelectItem value="EXTERNAL">Ekstern</SelectItem>
+                        <SelectItem value="OTHER">Øvrig</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-muted-foreground">System</label>
+                    <Input
+                      value={adminEditingTest.systemGroup ?? ""}
+                      onChange={(e) =>
+                        setAdminEditingTest((prev) =>
+                          prev ? { ...prev, systemGroup: e.target.value } : prev
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-muted-foreground">Type</label>
+                    <Input
+                      value={adminEditingTest.systemType ?? adminEditingTest.systemPart}
+                      onChange={(e) =>
+                        setAdminEditingTest((prev) =>
+                          prev ? { ...prev, systemType: e.target.value } : prev
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-muted-foreground">Funksjon</label>
+                    <Input
+                      value={adminEditingTest.function}
+                      onChange={(e) =>
+                        setAdminEditingTest((prev) =>
+                          prev ? { ...prev, function: e.target.value } : prev
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-muted-foreground">Testutførelse</label>
+                  <Textarea
+                    value={adminEditingTest.testExecution}
+                    onChange={(e) =>
+                      setAdminEditingTest((prev) => prev ? { ...prev, testExecution: e.target.value } : prev)
+                    }
+                    className="min-h-[80px]"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-muted-foreground">Akseptkriterie</label>
+                  <Textarea
+                    value={adminEditingTest.acceptanceCriteria}
+                    onChange={(e) =>
+                      setAdminEditingTest((prev) => prev ? { ...prev, acceptanceCriteria: e.target.value } : prev)
+                    }
+                    className="min-h-[80px]"
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    onClick={adminUpdatePredefinedTest}
+                    disabled={busy[`admin:update:${adminEditingTest.id}`]}
+                  >
+                    Oppdater
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Create new form (Admin only) */}
+            {isAdmin && !adminEditingTest && (
+              <div className="space-y-4 rounded-lg border border-border p-4">
+                <div className="text-sm font-medium">Legg til ny predefinert test</div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-sm text-muted-foreground">Kategori</label>
+                    <Select
+                      value={adminNewTest.category}
+                      onValueChange={(v) => {
+                        if (isFunctionTestCategory(v)) {
+                          setAdminNewTest((prev) => ({ ...prev, category: v }));
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="START_STOP">Start/Stopp</SelectItem>
+                        <SelectItem value="SECURITY">Sikkerhet</SelectItem>
+                        <SelectItem value="REGULATION">Regulering</SelectItem>
+                        <SelectItem value="EXTERNAL">Ekstern</SelectItem>
+                        <SelectItem value="OTHER">Øvrig</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-muted-foreground">System</label>
+                    <Input
+                      placeholder="f.eks. Ventilasjon"
+                      value={adminNewTest.systemGroup}
+                      onChange={(e) =>
+                        setAdminNewTest((prev) => ({ ...prev, systemGroup: e.target.value }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-muted-foreground">Type</label>
+                    <Input
+                      placeholder="f.eks. Avkastsystemer"
+                      value={adminNewTest.systemType}
+                      onChange={(e) =>
+                        setAdminNewTest((prev) => ({ ...prev, systemType: e.target.value }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-muted-foreground">Funksjon</label>
+                    <Input
+                      placeholder="f.eks. Avkastvifte, drift og feil"
+                      value={adminNewTest.function}
+                      onChange={(e) =>
+                        setAdminNewTest((prev) => ({ ...prev, function: e.target.value }))
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-muted-foreground">Testutførelse</label>
+                  <Textarea
+                    placeholder="Beskriv hvordan testen skal utføres..."
+                    value={adminNewTest.testExecution}
+                    onChange={(e) => setAdminNewTest((prev) => ({ ...prev, testExecution: e.target.value }))}
+                    className="min-h-[80px]"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-muted-foreground">Akseptkriterie</label>
+                  <Textarea
+                    placeholder="Beskriv hva som utgjør et godkjent testresultat..."
+                    value={adminNewTest.acceptanceCriteria}
+                    onChange={(e) => setAdminNewTest((prev) => ({ ...prev, acceptanceCriteria: e.target.value }))}
+                    className="min-h-[80px]"
+                  />
+                </div>
+                <div className="space-y-3 rounded-lg border border-dashed border-border p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-medium">Importer testprosedyre (Excel)</div>
+                    {adminImportRows.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setAdminImportRows([])}
+                      >
+                        Tøm
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Mal: TestutførelsesMal.xlsx (System, Type, Funksjon, Kategori, Testutførelse,
+                    Akseptkriterier).
+                  </p>
+                  <div className="text-xs text-muted-foreground">
+                    System, Type og Funksjon leses fra filen.
+                  </div>
+                  <Input
+                    ref={adminImportInputRef}
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleAdminImportFile(file);
+                    }}
+                  />
+                  {adminImportRows.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="max-h-48 overflow-y-auto rounded-lg border border-border">
+                        <div className="divide-y divide-border">
+                          {adminImportRows.map((row, idx) => {
+                            const systemGroupLabel = row.systemGroup.trim() || "Generelt";
+                            const systemTypeLabel = row.systemType.trim() || "Ukjent type";
+
+                            return (
+                              <div
+                                key={`${systemGroupLabel}-${systemTypeLabel}-${row.functionName}-${idx}`}
+                                className="space-y-1 p-3"
+                              >
+                                <div className="text-xs text-muted-foreground">
+                                  {systemGroupLabel} · {systemTypeLabel}
+                                </div>
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="text-sm font-medium">{row.functionName}</div>
+                                  <Badge variant="outline" className="text-xs">
+                                    {formatCategory(row.category)}
+                                  </Badge>
+                                </div>
+                                <div className="text-xs text-muted-foreground line-clamp-2">
+                                  {row.testExecution}
+                                </div>
+                                <div className="text-xs text-muted-foreground line-clamp-2">
+                                  {row.acceptanceCriteria}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button onClick={handleAdminImportSubmit} disabled={busy["admin:import"]}>
+                          {busy["admin:import"] ? "Importerer..." : `Importer ${adminImportRows.length}`}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      adminCreatePredefinedTest();
+                    }}
+                    disabled={busy["admin:create"]}
+                  >
+                    Lagre og ny
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      adminCreatePredefinedTest().then(() => {
+                        // Keep modal open for adding more
+                      });
+                    }}
+                    disabled={busy["admin:create"]}
+                  >
+                    Lagre
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setAdminModalOpen(false)}>
+              Lukk
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Send rows to other systems modal */}
       <Dialog open={sendModalOpen} onOpenChange={setSendModalOpen}>
