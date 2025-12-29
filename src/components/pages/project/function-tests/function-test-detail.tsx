@@ -2952,25 +2952,23 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                       </TableCell>
 
                       <TableCell>
-                        <button
-                          type="button"
-                          className="text-left text-sm text-muted-foreground hover:text-foreground line-clamp-1"
+                        <div
+                          className="text-left text-sm text-muted-foreground whitespace-pre-line cursor-pointer hover:text-foreground"
                           onClick={() => openRowDialog(row)}
                           title="Åpne detaljer"
                         >
                           {row.testExecution || "—"}
-                        </button>
+                        </div>
                       </TableCell>
 
                       <TableCell>
-                        <button
-                          type="button"
-                          className="text-left text-sm text-muted-foreground hover:text-foreground line-clamp-1"
+                        <div
+                          className="text-left text-sm text-muted-foreground whitespace-pre-line cursor-pointer hover:text-foreground"
                           onClick={() => openRowDialog(row)}
                           title="Åpne detaljer"
                         >
                           {row.acceptanceCriteria || "—"}
-                        </button>
+                        </div>
                       </TableCell>
 
                       <TableCell>
