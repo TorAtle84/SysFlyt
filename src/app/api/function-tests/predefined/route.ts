@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import prisma from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 
@@ -18,32 +19,110 @@ function isValidCategory(
   );
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const authResult = await requireAuth();
     if (!authResult.success) return authResult.error;
 
-    const tests = await prisma.predefinedFunctionTest.findMany({
-      where: { isActive: true },
-      orderBy: [
-        { systemGroup: "asc" },
-        { systemType: "asc" },
-        { function: "asc" },
-        { category: "asc" },
-      ],
-      select: {
-        id: true,
-        category: true,
-        systemGroup: true,
-        systemType: true,
-        systemPart: true,
-        function: true,
-        testExecution: true,
-        acceptanceCriteria: true,
-      },
-    });
+    const { searchParams } = new URL(request.url);
+    const pageParam = searchParams.get("page");
+    const pageSizeParam = searchParams.get("pageSize");
+    const hasPaging = pageParam !== null || pageSizeParam !== null;
+    const page = Math.max(1, Number.parseInt(pageParam || "1", 10));
+    const pageSizeRaw = Number.parseInt(pageSizeParam || "10", 10);
+    const pageSize = hasPaging
+      ? Math.min(50, Math.max(1, Number.isNaN(pageSizeRaw) ? 10 : pageSizeRaw))
+      : 0;
 
-    return NextResponse.json({ tests });
+    const systemGroup = (searchParams.get("systemGroup") || "").trim();
+    const systemType = (searchParams.get("systemType") || "").trim();
+    const functionName = (searchParams.get("function") || "").trim();
+    const category = (searchParams.get("category") || "").trim();
+    const query = (searchParams.get("q") || "").trim();
+
+    const where: Prisma.PredefinedFunctionTestWhereInput = {
+      isActive: true,
+    };
+
+    const andFilters: Prisma.PredefinedFunctionTestWhereInput[] = [];
+
+    if (systemGroup) {
+      andFilters.push({
+        systemGroup: { contains: systemGroup, mode: "insensitive" },
+      });
+    }
+
+    if (systemType) {
+      andFilters.push({
+        OR: [
+          { systemType: { contains: systemType, mode: "insensitive" } },
+          { systemPart: { contains: systemType, mode: "insensitive" } },
+        ],
+      });
+    }
+
+    if (functionName) {
+      andFilters.push({
+        function: { contains: functionName, mode: "insensitive" },
+      });
+    }
+
+    if (category && isValidCategory(category)) {
+      andFilters.push({ category });
+    }
+
+    if (query) {
+      andFilters.push({
+        OR: [
+          { systemGroup: { contains: query, mode: "insensitive" } },
+          { systemType: { contains: query, mode: "insensitive" } },
+          { systemPart: { contains: query, mode: "insensitive" } },
+          { function: { contains: query, mode: "insensitive" } },
+          { testExecution: { contains: query, mode: "insensitive" } },
+          { acceptanceCriteria: { contains: query, mode: "insensitive" } },
+        ],
+      });
+    }
+
+    if (andFilters.length > 0) {
+      where.AND = andFilters;
+    }
+
+    const [total, tests] = await prisma.$transaction([
+      prisma.predefinedFunctionTest.count({ where }),
+      prisma.predefinedFunctionTest.findMany({
+        where,
+        orderBy: [
+          { systemGroup: "asc" },
+          { systemType: "asc" },
+          { function: "asc" },
+          { category: "asc" },
+        ],
+        ...(hasPaging
+          ? {
+              skip: (page - 1) * pageSize,
+              take: pageSize,
+            }
+          : {}),
+        select: {
+          id: true,
+          category: true,
+          systemGroup: true,
+          systemType: true,
+          systemPart: true,
+          function: true,
+          testExecution: true,
+          acceptanceCriteria: true,
+        },
+      }),
+    ]);
+
+    return NextResponse.json({
+      tests,
+      total,
+      page: hasPaging ? page : 1,
+      pageSize: hasPaging ? pageSize : total,
+    });
   } catch (error) {
     console.error("Error fetching predefined function tests:", error);
     return NextResponse.json({ error: "Kunne ikke hente testmaler" }, { status: 500 });

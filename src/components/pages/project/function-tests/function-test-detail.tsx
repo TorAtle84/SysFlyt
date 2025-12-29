@@ -335,6 +335,22 @@ function isFunctionTestCategory(value: string): value is FunctionTestCategory {
   return (FUNCTION_TEST_CATEGORIES as readonly string[]).includes(value);
 }
 
+function parsePredefinedTest(input: Record<string, unknown>): PredefinedFunctionTestTemplate {
+  const categoryRaw = String(input["category"] ?? "OTHER");
+  const category = isFunctionTestCategory(categoryRaw) ? categoryRaw : "OTHER";
+
+  return {
+    id: String(input["id"]),
+    category,
+    systemGroup: input["systemGroup"] ? String(input["systemGroup"]) : null,
+    systemType: input["systemType"] ? String(input["systemType"]) : null,
+    systemPart: String(input["systemPart"] ?? ""),
+    function: String(input["function"] ?? ""),
+    testExecution: String(input["testExecution"] ?? ""),
+    acceptanceCriteria: String(input["acceptanceCriteria"] ?? ""),
+  };
+}
+
 const CATEGORY_ORDER: Record<FunctionTestCategory, number> = {
   START_STOP: 0,
   SECURITY: 1,
@@ -470,8 +486,17 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
   const [addRowOpen, setAddRowOpen] = useState(false);
   const [predefinedTestsLoading, setPredefinedTestsLoading] = useState(false);
   const [predefinedTests, setPredefinedTests] = useState<PredefinedFunctionTestTemplate[]>([]);
-  const [predefinedSearch, setPredefinedSearch] = useState("");
-  const [predefinedCategory, setPredefinedCategory] = useState<"ALL" | FunctionTestCategory>("ALL");
+  const [predefinedListLoading, setPredefinedListLoading] = useState(false);
+  const [predefinedList, setPredefinedList] = useState<PredefinedFunctionTestTemplate[]>([]);
+  const [predefinedListTotal, setPredefinedListTotal] = useState(0);
+  const [predefinedListPage, setPredefinedListPage] = useState(1);
+  const predefinedListPageSize = 10;
+  const [predefinedListFilters, setPredefinedListFilters] = useState({
+    systemGroup: "",
+    systemType: "",
+    functionName: "",
+    category: "ALL" as "ALL" | FunctionTestCategory,
+  });
   const [templatePickerRow, setTemplatePickerRow] = useState<FunctionTestRow | null>(null);
   const [templatePickerSystem, setTemplatePickerSystem] = useState("");
   const [templatePickerType, setTemplatePickerType] = useState("");
@@ -604,6 +629,17 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
     return { totalRows, completedRows, deviationRows, progress };
   }, [rows]);
 
+  const predefinedListTotalPages = Math.max(
+    1,
+    Math.ceil(predefinedListTotal / predefinedListPageSize)
+  );
+  const predefinedListStart =
+    predefinedListTotal === 0 ? 0 : (predefinedListPage - 1) * predefinedListPageSize + 1;
+  const predefinedListEnd =
+    predefinedListTotal === 0
+      ? 0
+      : Math.min(predefinedListTotal, predefinedListPage * predefinedListPageSize);
+
   const filteredRows = useMemo(() => {
     const responsibleIdFilter =
       rowResponsibleFilter.startsWith("ID:") ? rowResponsibleFilter.slice(3) : null;
@@ -626,6 +662,27 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
 
   function markBusy(key: string, value: boolean) {
     setBusy((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function updatePredefinedListFilter(
+    key: "systemGroup" | "systemType" | "functionName" | "category",
+    value: string
+  ) {
+    setPredefinedListFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+    setPredefinedListPage(1);
+  }
+
+  function resetPredefinedListFilters() {
+    setPredefinedListFilters({
+      systemGroup: "",
+      systemType: "",
+      functionName: "",
+      category: "ALL",
+    });
+    setPredefinedListPage(1);
   }
 
   useEffect(() => {
@@ -707,7 +764,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
   }, [functionTest.id, members, project.id, responsibles, responsiblesOpen]);
 
   useEffect(() => {
-    if (!addRowOpen && !templatePickerRow) return;
+    if (!templatePickerRow) return;
     if (predefinedTestsInitializedRef.current) return;
     predefinedTestsInitializedRef.current = true;
 
@@ -723,23 +780,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
         setPredefinedTests(
           tests
             .filter((t): t is Record<string, unknown> => isRecord(t))
-            .map((t) => {
-              const categoryRaw = String(t["category"] ?? "OTHER");
-              const category = isFunctionTestCategory(categoryRaw)
-                ? categoryRaw
-                : "OTHER";
-
-              return {
-                id: String(t["id"]),
-                category,
-                systemGroup: t["systemGroup"] ? String(t["systemGroup"]) : null,
-                systemType: t["systemType"] ? String(t["systemType"]) : null,
-                systemPart: String(t["systemPart"] ?? ""),
-                function: String(t["function"] ?? ""),
-                testExecution: String(t["testExecution"] ?? ""),
-                acceptanceCriteria: String(t["acceptanceCriteria"] ?? ""),
-              } satisfies PredefinedFunctionTestTemplate;
-            })
+            .map((t) => parsePredefinedTest(t))
         );
       } catch (e: unknown) {
         toast.error(errorMessage(e, "Kunne ikke hente testmaler"));
@@ -747,7 +788,63 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
         setPredefinedTestsLoading(false);
       }
     })();
-  }, [addRowOpen, templatePickerRow]);
+  }, [templatePickerRow]);
+
+  useEffect(() => {
+    if (!addRowOpen) return;
+
+    const controller = new AbortController();
+
+    (async () => {
+      setPredefinedListLoading(true);
+      try {
+        const params = new URLSearchParams({
+          page: String(predefinedListPage),
+          pageSize: String(predefinedListPageSize),
+        });
+
+        const systemGroup = predefinedListFilters.systemGroup.trim();
+        const systemType = predefinedListFilters.systemType.trim();
+        const functionName = predefinedListFilters.functionName.trim();
+        const category = predefinedListFilters.category;
+
+        if (systemGroup) params.set("systemGroup", systemGroup);
+        if (systemType) params.set("systemType", systemType);
+        if (functionName) params.set("function", functionName);
+        if (category !== "ALL") params.set("category", category);
+
+        const res = await fetch(`/api/function-tests/predefined?${params.toString()}`, {
+          signal: controller.signal,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.error || "Kunne ikke hente testmaler");
+        }
+        const tests: unknown[] = Array.isArray(data.tests) ? data.tests : [];
+        setPredefinedList(
+          tests
+            .filter((t): t is Record<string, unknown> => isRecord(t))
+            .map((t) => parsePredefinedTest(t))
+        );
+        const total = Number.isFinite(Number(data.total)) ? Number(data.total) : tests.length;
+        setPredefinedListTotal(total);
+      } catch (e: unknown) {
+        if ((e as { name?: string }).name === "AbortError") return;
+        toast.error(errorMessage(e, "Kunne ikke hente testmaler"));
+      } finally {
+        setPredefinedListLoading(false);
+      }
+    })();
+
+    return () => controller.abort();
+  }, [addRowOpen, predefinedListFilters, predefinedListPage, predefinedListPageSize]);
+
+  useEffect(() => {
+    if (!addRowOpen) return;
+    if (predefinedListPage > predefinedListTotalPages) {
+      setPredefinedListPage(predefinedListTotalPages);
+    }
+  }, [addRowOpen, predefinedListPage, predefinedListTotalPages]);
 
   useEffect(() => {
     if (!templatePickerRow || predefinedTests.length === 0) return;
@@ -825,20 +922,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
         setAdminPredefinedTests(
           tests
             .filter((t): t is Record<string, unknown> => isRecord(t))
-            .map((t) => {
-              const categoryRaw = String(t["category"] ?? "OTHER");
-              const category = isFunctionTestCategory(categoryRaw) ? categoryRaw : "OTHER";
-              return {
-                id: String(t["id"]),
-                category,
-                systemGroup: t["systemGroup"] ? String(t["systemGroup"]) : null,
-                systemType: t["systemType"] ? String(t["systemType"]) : null,
-                systemPart: String(t["systemPart"] ?? ""),
-                function: String(t["function"] ?? ""),
-                testExecution: String(t["testExecution"] ?? ""),
-                acceptanceCriteria: String(t["acceptanceCriteria"] ?? ""),
-              } satisfies PredefinedFunctionTestTemplate;
-            })
+            .map((t) => parsePredefinedTest(t))
         );
       } catch (e: unknown) {
         toast.error(errorMessage(e, "Kunne ikke hente testmaler"));
@@ -3005,96 +3089,156 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <Input
-                placeholder="Søk i testmaler..."
-                value={predefinedSearch}
-                onChange={(e) => setPredefinedSearch(e.target.value)}
-                className="sm:max-w-sm"
-              />
-              <Select
-                value={predefinedCategory}
-                onValueChange={(value) => {
-                  if (value === "ALL" || isFunctionTestCategory(value)) {
-                    setPredefinedCategory(value as "ALL" | FunctionTestCategory);
-                  }
-                }}
-              >
-                <SelectTrigger className="w-full sm:w-56">
-                  <SelectValue placeholder="Kategori" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">Alle</SelectItem>
-                  <SelectItem value="START_STOP">Start/Stopp</SelectItem>
-                  <SelectItem value="SECURITY">Sikkerhet</SelectItem>
-                  <SelectItem value="REGULATION">Regulering</SelectItem>
-                  <SelectItem value="EXTERNAL">Ekstern</SelectItem>
-                  <SelectItem value="OTHER">Øvrig</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
             <div className="max-h-[60dvh] overflow-y-auto rounded-lg border border-border">
-              {predefinedTestsLoading ? (
-                <div className="p-6 text-sm text-muted-foreground">Henter testmaler...</div>
-              ) : (() => {
-                const q = predefinedSearch.trim().toLowerCase();
-                const filtered = predefinedTests
-                  .filter((t) => (predefinedCategory === "ALL" ? true : t.category === predefinedCategory))
-                  .filter((t) => {
-                    if (!q) return true;
-                    return (
-                      normalizeTemplateSystemGroup(t).toLowerCase().includes(q) ||
-                      normalizeTemplateSystemType(t).toLowerCase().includes(q) ||
-                      t.systemPart.toLowerCase().includes(q) ||
-                      t.function.toLowerCase().includes(q) ||
-                      t.testExecution.toLowerCase().includes(q) ||
-                      t.acceptanceCriteria.toLowerCase().includes(q)
-                    );
-                  })
-                  .sort(sortPredefinedTests);
-
-                if (filtered.length === 0) {
-                  return (
-                    <div className="p-6 text-sm text-muted-foreground">
-                      Ingen testmaler matcher søket.
-                    </div>
-                  );
-                }
-
-                return (
-                  <div className="divide-y divide-border">
-                    {filtered.map((t) => (
-                      <div key={t.id} className="flex items-start justify-between gap-4 p-4">
-                        <div className="min-w-0 space-y-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <Badge variant="outline" className="text-xs">
-                              {formatCategory(t.category)}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {normalizeTemplateSystemGroup(t)} · {normalizeTemplateSystemType(t)}
-                            </span>
-                          </div>
-                          <div className="font-medium leading-snug">{t.function}</div>
-                          <div className="text-sm text-muted-foreground line-clamp-2">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[160px]">System</TableHead>
+                    <TableHead className="w-[160px]">Type</TableHead>
+                    <TableHead>Funksjon</TableHead>
+                    <TableHead className="w-[140px]">Kategori</TableHead>
+                    <TableHead className="w-[110px] text-right">Handling</TableHead>
+                  </TableRow>
+                  <TableRow className="bg-muted/40">
+                    <TableHead>
+                      <Input
+                        value={predefinedListFilters.systemGroup}
+                        onChange={(e) => updatePredefinedListFilter("systemGroup", e.target.value)}
+                        placeholder="Filter"
+                        className="h-8"
+                      />
+                    </TableHead>
+                    <TableHead>
+                      <Input
+                        value={predefinedListFilters.systemType}
+                        onChange={(e) => updatePredefinedListFilter("systemType", e.target.value)}
+                        placeholder="Filter"
+                        className="h-8"
+                      />
+                    </TableHead>
+                    <TableHead>
+                      <Input
+                        value={predefinedListFilters.functionName}
+                        onChange={(e) => updatePredefinedListFilter("functionName", e.target.value)}
+                        placeholder="Filter"
+                        className="h-8"
+                      />
+                    </TableHead>
+                    <TableHead>
+                      <Select
+                        value={predefinedListFilters.category}
+                        onValueChange={(value) => {
+                          if (value === "ALL" || isFunctionTestCategory(value)) {
+                            updatePredefinedListFilter(
+                              "category",
+                              value as "ALL" | FunctionTestCategory
+                            );
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="h-8">
+                          <SelectValue placeholder="Kategori" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="ALL">Alle</SelectItem>
+                          <SelectItem value="START_STOP">Start/Stopp</SelectItem>
+                          <SelectItem value="SECURITY">Sikkerhet</SelectItem>
+                          <SelectItem value="REGULATION">Regulering</SelectItem>
+                          <SelectItem value="EXTERNAL">Ekstern</SelectItem>
+                          <SelectItem value="OTHER">Ovrig</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableHead>
+                    <TableHead className="text-right">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={resetPredefinedListFilters}
+                      >
+                        Nullstill
+                      </Button>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {predefinedListLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="py-6 text-sm text-muted-foreground">
+                        Henter testmaler...
+                      </TableCell>
+                    </TableRow>
+                  ) : predefinedList.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="py-6 text-sm text-muted-foreground">
+                        Ingen testmaler matcher filteret.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    predefinedList.map((t) => (
+                      <TableRow key={t.id}>
+                        <TableCell className="text-sm">
+                          {normalizeTemplateSystemGroup(t)}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {normalizeTemplateSystemType(t)}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          <div className="font-medium">{t.function}</div>
+                          <div className="text-xs text-muted-foreground line-clamp-1">
                             {t.testExecution}
                           </div>
-                          <div className="text-xs text-muted-foreground line-clamp-2">
-                            {t.acceptanceCriteria}
-                          </div>
-                        </div>
-                        <Button
-                          variant="outline"
-                          onClick={() => createRowFromTemplate(t.id)}
-                          disabled={busy[`row:add:${t.id}`]}
-                        >
-                          + Legg til
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs">
+                            {formatCategory(t.category)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="outline"
+                            onClick={() => createRowFromTemplate(t.id)}
+                            disabled={busy[`row:add:${t.id}`]}
+                          >
+                            + Legg til
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+
+            <div className="flex flex-col gap-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+              <span>
+                Viser {predefinedListStart}-{predefinedListEnd} av {predefinedListTotal}
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPredefinedListPage((prev) => Math.max(1, prev - 1))}
+                  disabled={predefinedListPage === 1 || predefinedListLoading}
+                >
+                  Forrige
+                </Button>
+                <span>
+                  Side {predefinedListPage} av {predefinedListTotalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setPredefinedListPage((prev) =>
+                      Math.min(predefinedListTotalPages, prev + 1)
+                    )
+                  }
+                  disabled={predefinedListPage >= predefinedListTotalPages || predefinedListLoading}
+                >
+                  Neste
+                </Button>
+              </div>
             </div>
           </div>
 
