@@ -69,6 +69,141 @@ export async function POST(
       return NextResponse.json({ error: "Ugyldig request body" }, { status: 400 });
     }
 
+    const groupValue = body["predefinedFunctionGroup"];
+    if (isRecord(groupValue)) {
+      const systemGroupRaw = String(groupValue["systemGroup"] ?? "").trim();
+      const systemType = String(
+        groupValue["systemType"] ?? groupValue["systemPart"] ?? ""
+      ).trim();
+      const functionName = String(
+        groupValue["functionName"] ?? groupValue["function"] ?? ""
+      ).trim();
+
+      if (!systemType || !functionName) {
+        return NextResponse.json(
+          { error: "Systemtype og funksjon er påkrevd" },
+          { status: 400 }
+        );
+      }
+
+      const andFilters: Prisma.PredefinedFunctionTestWhereInput[] = [
+        {
+          OR: [
+            { systemType: { equals: systemType, mode: "insensitive" } },
+            { systemPart: { equals: systemType, mode: "insensitive" } },
+          ],
+        },
+        { function: { equals: functionName, mode: "insensitive" } },
+      ];
+
+      if (systemGroupRaw) {
+        andFilters.push({ systemGroup: systemGroupRaw });
+      } else {
+        andFilters.push({
+          OR: [{ systemGroup: null }, { systemGroup: "" }],
+        });
+      }
+
+      const templates = await prisma.predefinedFunctionTest.findMany({
+        where: {
+          isActive: true,
+          AND: andFilters,
+        },
+        orderBy: [{ category: "asc" }, { id: "asc" }],
+        select: {
+          id: true,
+          category: true,
+          systemPart: true,
+          function: true,
+          testExecution: true,
+          acceptanceCriteria: true,
+        },
+      });
+
+      if (templates.length === 0) {
+        return NextResponse.json({ error: "Testmaler ikke funnet" }, { status: 404 });
+      }
+
+      const templateIds = templates.map((t) => t.id);
+
+      const existingTemplates = await prisma.functionTestRow.findMany({
+        where: {
+          functionTestId,
+          predefinedTestId: { in: templateIds },
+        },
+        select: { predefinedTestId: true },
+      });
+
+      const existingTemplateIds = new Set(
+        existingTemplates.map((row) => row.predefinedTestId).filter((v): v is string => !!v)
+      );
+
+      const maxSortOrders = await prisma.functionTestRow.groupBy({
+        by: ["category"],
+        where: { functionTestId },
+        _max: { sortOrder: true },
+      });
+
+      const nextSortOrderByCategory = new Map(
+        maxSortOrders.map((entry) => [entry.category, entry._max.sortOrder ?? -1])
+      );
+
+      const rowsToCreate: Prisma.FunctionTestRowCreateManyInput[] = [];
+
+      for (const template of templates) {
+        if (existingTemplateIds.has(template.id)) continue;
+        const currentOrder = nextSortOrderByCategory.get(template.category) ?? -1;
+        const nextOrder = currentOrder + 1;
+        nextSortOrderByCategory.set(template.category, nextOrder);
+
+        rowsToCreate.push({
+          functionTestId,
+          sortOrder: nextOrder,
+          status: "NOT_STARTED",
+          category: template.category,
+          systemPart: template.systemPart,
+          function: template.function,
+          testExecution: template.testExecution,
+          acceptanceCriteria: template.acceptanceCriteria,
+          predefinedTestId: template.id,
+        });
+      }
+
+      if (rowsToCreate.length === 0) {
+        return NextResponse.json({
+          rows: [],
+          createdCount: 0,
+          skippedCount: templates.length,
+        });
+      }
+
+      const result = await prisma.functionTestRow.createMany({
+        data: rowsToCreate,
+        skipDuplicates: true,
+      });
+
+      const createdRows = await prisma.functionTestRow.findMany({
+        where: {
+          functionTestId,
+          predefinedTestId: { in: rowsToCreate.map((row) => row.predefinedTestId!).filter(Boolean) },
+        },
+        include: {
+          responsible: true,
+          assignedTo: { select: { id: true, firstName: true, lastName: true } },
+          performedBy: { select: { id: true, firstName: true, lastName: true } },
+        },
+      });
+
+      return NextResponse.json(
+        {
+          rows: createdRows,
+          createdCount: result.count,
+          skippedCount: templates.length - result.count,
+        },
+        { status: 201 }
+      );
+    }
+
     const predefinedTestIdValue = body["predefinedTestId"];
     const predefinedTestId =
       typeof predefinedTestIdValue === "string" && predefinedTestIdValue.trim()

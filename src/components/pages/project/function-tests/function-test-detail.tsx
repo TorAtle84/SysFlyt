@@ -192,6 +192,13 @@ type PredefinedFunctionTestInput = {
   acceptanceCriteria: string;
 };
 
+type PredefinedFunctionGroup = {
+  systemGroup: string | null;
+  systemType: string | null;
+  function: string;
+  testCount: number;
+};
+
 type ImportedFunctionTestRow = {
   systemGroup: string;
   systemType: string;
@@ -260,6 +267,16 @@ function normalizeTemplateSystemType(template: PredefinedFunctionTestTemplate) {
   if (value) return value;
   const legacy = (template.systemPart || "").trim();
   return legacy || "Ukjent type";
+}
+
+function normalizeGroupSystemGroup(group: PredefinedFunctionGroup) {
+  const value = (group.systemGroup || "").trim();
+  return value || "Generelt";
+}
+
+function normalizeGroupSystemType(group: PredefinedFunctionGroup) {
+  const value = (group.systemType || "").trim();
+  return value || "Ukjent type";
 }
 
 function formatTemplateSystemPart(template: PredefinedFunctionTestTemplate) {
@@ -487,7 +504,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
   const [predefinedTestsLoading, setPredefinedTestsLoading] = useState(false);
   const [predefinedTests, setPredefinedTests] = useState<PredefinedFunctionTestTemplate[]>([]);
   const [predefinedListLoading, setPredefinedListLoading] = useState(false);
-  const [predefinedList, setPredefinedList] = useState<PredefinedFunctionTestTemplate[]>([]);
+  const [predefinedList, setPredefinedList] = useState<PredefinedFunctionGroup[]>([]);
   const [predefinedListTotal, setPredefinedListTotal] = useState(0);
   const [predefinedListPage, setPredefinedListPage] = useState(1);
   const predefinedListPageSize = 10;
@@ -495,7 +512,6 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
     systemGroup: "",
     systemType: "",
     functionName: "",
-    category: "ALL" as "ALL" | FunctionTestCategory,
   });
   const [templatePickerRow, setTemplatePickerRow] = useState<FunctionTestRow | null>(null);
   const [templatePickerSystem, setTemplatePickerSystem] = useState("");
@@ -665,7 +681,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
   }
 
   function updatePredefinedListFilter(
-    key: "systemGroup" | "systemType" | "functionName" | "category",
+    key: "systemGroup" | "systemType" | "functionName",
     value: string
   ) {
     setPredefinedListFilters((prev) => ({
@@ -680,7 +696,6 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
       systemGroup: "",
       systemType: "",
       functionName: "",
-      category: "ALL",
     });
     setPredefinedListPage(1);
   }
@@ -806,12 +821,11 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
         const systemGroup = predefinedListFilters.systemGroup.trim();
         const systemType = predefinedListFilters.systemType.trim();
         const functionName = predefinedListFilters.functionName.trim();
-        const category = predefinedListFilters.category;
 
+        params.set("groupBy", "function");
         if (systemGroup) params.set("systemGroup", systemGroup);
         if (systemType) params.set("systemType", systemType);
         if (functionName) params.set("function", functionName);
-        if (category !== "ALL") params.set("category", category);
 
         const res = await fetch(`/api/function-tests/predefined?${params.toString()}`, {
           signal: controller.signal,
@@ -820,11 +834,16 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
         if (!res.ok) {
           throw new Error(data.error || "Kunne ikke hente testmaler");
         }
-        const tests: unknown[] = Array.isArray(data.tests) ? data.tests : [];
+        const tests: unknown[] = Array.isArray(data.functions) ? data.functions : [];
         setPredefinedList(
           tests
             .filter((t): t is Record<string, unknown> => isRecord(t))
-            .map((t) => parsePredefinedTest(t))
+            .map((t) => ({
+              systemGroup: t["systemGroup"] ? String(t["systemGroup"]) : null,
+              systemType: t["systemType"] ? String(t["systemType"]) : null,
+              function: String(t["function"] ?? ""),
+              testCount: Number(t["testCount"] ?? 0),
+            }))
         );
         const total = Number.isFinite(Number(data.total)) ? Number(data.total) : tests.length;
         setPredefinedListTotal(total);
@@ -1956,28 +1975,54 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
     }
   }
 
-  async function createRowFromTemplate(predefinedTestId: string) {
-    markBusy(`row:add:${predefinedTestId}`, true);
+  async function createRowsFromFunctionGroup(group: PredefinedFunctionGroup) {
+    if (!group.systemType) {
+      toast.error("Mangler type for funksjonen");
+      return;
+    }
+    const busyKey = `row:add_group:${group.systemGroup ?? ""}:${group.systemType ?? ""}:${group.function}`;
+    markBusy(busyKey, true);
     try {
       const res = await fetch(
         `/api/projects/${project.id}/function-tests/${functionTest.id}/rows`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ predefinedTestId }),
+          body: JSON.stringify({
+            predefinedFunctionGroup: {
+              systemGroup: group.systemGroup ?? "",
+              systemType: group.systemType ?? "",
+              functionName: group.function,
+            },
+          }),
         }
       );
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Kunne ikke opprette testpunkt");
-      const created = data.row as FunctionTestRow;
-      setRows((prev) => [...prev, created]);
-      setAddRowOpen(false);
-      toast.success("Testpunkt lagt til");
-      openRowDialog(created);
+      if (!res.ok) throw new Error(data.error || "Kunne ikke legge til testpunkter");
+      const createdRows = Array.isArray(data.rows) ? (data.rows as FunctionTestRow[]) : [];
+      if (createdRows.length > 0) {
+        setRows((prev) => [...prev, ...createdRows]);
+      }
+      const createdCount = Number.isFinite(Number(data.createdCount))
+        ? Number(data.createdCount)
+        : createdRows.length;
+      const skippedCount = Number.isFinite(Number(data.skippedCount))
+        ? Number(data.skippedCount)
+        : 0;
+
+      if (createdCount === 0) {
+        toast.info("Ingen nye testpunkter å legge til");
+      } else {
+        toast.success(`La til ${createdCount} testpunkter`);
+        setAddRowOpen(false);
+      }
+      if (skippedCount > 0) {
+        toast.info(`Hoppet over ${skippedCount} eksisterende testpunkter`);
+      }
     } catch (e: unknown) {
-      toast.error(errorMessage(e, "Kunne ikke legge til testpunkt"));
+      toast.error(errorMessage(e, "Kunne ikke legge til testpunkter"));
     } finally {
-      markBusy(`row:add:${predefinedTestId}`, false);
+      markBusy(busyKey, false);
     }
   }
 
@@ -3084,8 +3129,10 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
       <Dialog open={addRowOpen} onOpenChange={setAddRowOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Legg til rad</DialogTitle>
-            <DialogDescription>Velg en predefinert test og legg den til i funksjonstesten.</DialogDescription>
+          <DialogTitle>Legg til funksjon</DialogTitle>
+          <DialogDescription>
+            Velg en funksjon for å legge inn alle tilhørende testpunkter i funksjonstesten.
+          </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -3096,10 +3143,10 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                     <TableHead className="w-[160px]">System</TableHead>
                     <TableHead className="w-[160px]">Type</TableHead>
                     <TableHead>Funksjon</TableHead>
-                    <TableHead className="w-[140px]">Kategori</TableHead>
-                    <TableHead className="w-[110px] text-right">Handling</TableHead>
-                  </TableRow>
-                  <TableRow className="bg-muted/40">
+                  <TableHead className="w-[110px]">Punkter</TableHead>
+                  <TableHead className="w-[110px] text-right">Handling</TableHead>
+                </TableRow>
+                <TableRow className="bg-muted/40">
                     <TableHead>
                       <Input
                         value={predefinedListFilters.systemGroup}
@@ -3124,31 +3171,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                         className="h-8"
                       />
                     </TableHead>
-                    <TableHead>
-                      <Select
-                        value={predefinedListFilters.category}
-                        onValueChange={(value) => {
-                          if (value === "ALL" || isFunctionTestCategory(value)) {
-                            updatePredefinedListFilter(
-                              "category",
-                              value as "ALL" | FunctionTestCategory
-                            );
-                          }
-                        }}
-                      >
-                        <SelectTrigger className="h-8">
-                          <SelectValue placeholder="Kategori" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="ALL">Alle</SelectItem>
-                          <SelectItem value="START_STOP">Start/Stopp</SelectItem>
-                          <SelectItem value="SECURITY">Sikkerhet</SelectItem>
-                          <SelectItem value="REGULATION">Regulering</SelectItem>
-                          <SelectItem value="EXTERNAL">Ekstern</SelectItem>
-                          <SelectItem value="OTHER">Ovrig</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableHead>
+                    <TableHead />
                     <TableHead className="text-right">
                       <Button
                         type="button"
@@ -3165,46 +3188,42 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                   {predefinedListLoading ? (
                     <TableRow>
                       <TableCell colSpan={5} className="py-6 text-sm text-muted-foreground">
-                        Henter testmaler...
+                        Henter funksjoner...
                       </TableCell>
                     </TableRow>
                   ) : predefinedList.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={5} className="py-6 text-sm text-muted-foreground">
-                        Ingen testmaler matcher filteret.
+                        Ingen funksjoner matcher filteret.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    predefinedList.map((t) => (
-                      <TableRow key={t.id}>
+                    predefinedList.map((t) => {
+                      const busyKey = `row:add_group:${t.systemGroup ?? ""}:${t.systemType ?? ""}:${t.function}`;
+                      return (
+                        <TableRow key={busyKey}>
                         <TableCell className="text-sm">
-                          {normalizeTemplateSystemGroup(t)}
+                          {normalizeGroupSystemGroup(t)}
                         </TableCell>
                         <TableCell className="text-sm">
-                          {normalizeTemplateSystemType(t)}
+                          {normalizeGroupSystemType(t)}
                         </TableCell>
                         <TableCell className="text-sm">
                           <div className="font-medium">{t.function}</div>
-                          <div className="text-xs text-muted-foreground line-clamp-1">
-                            {t.testExecution}
-                          </div>
                         </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-xs">
-                            {formatCategory(t.category)}
-                          </Badge>
-                        </TableCell>
+                        <TableCell className="text-sm">{t.testCount}</TableCell>
                         <TableCell className="text-right">
                           <Button
                             variant="outline"
-                            onClick={() => createRowFromTemplate(t.id)}
-                            disabled={busy[`row:add:${t.id}`]}
+                            onClick={() => createRowsFromFunctionGroup(t)}
+                            disabled={busy[busyKey]}
                           >
                             + Legg til
                           </Button>
                         </TableCell>
                       </TableRow>
-                    ))
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>

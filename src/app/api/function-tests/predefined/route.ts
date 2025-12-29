@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
     const functionName = (searchParams.get("function") || "").trim();
     const category = (searchParams.get("category") || "").trim();
     const query = (searchParams.get("q") || "").trim();
+    const groupBy = (searchParams.get("groupBy") || "").trim();
 
     const where: Prisma.PredefinedFunctionTestWhereInput = {
       isActive: true,
@@ -86,6 +87,45 @@ export async function GET(request: NextRequest) {
 
     if (andFilters.length > 0) {
       where.AND = andFilters;
+    }
+
+    if (groupBy === "function") {
+      const groupOrderBy: Prisma.PredefinedFunctionTestOrderByWithAggregationInput[] = [
+        { systemGroup: "asc" },
+        { systemType: "asc" },
+        { function: "asc" },
+      ];
+
+      const [totalGroups, grouped] = await prisma.$transaction([
+        prisma.predefinedFunctionTest.groupBy({
+          by: ["systemGroup", "systemType", "function"],
+          where,
+        }),
+        prisma.predefinedFunctionTest.groupBy({
+          by: ["systemGroup", "systemType", "function"],
+          where,
+          _count: { _all: true },
+          orderBy: groupOrderBy,
+          ...(hasPaging
+            ? {
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+              }
+            : {}),
+        }),
+      ]);
+
+      return NextResponse.json({
+        functions: grouped.map((group) => ({
+          systemGroup: group.systemGroup,
+          systemType: group.systemType,
+          function: group.function,
+          testCount: group._count?._all ?? 0,
+        })),
+        total: totalGroups.length,
+        page: hasPaging ? page : 1,
+        pageSize: hasPaging ? pageSize : totalGroups.length,
+      });
     }
 
     const [total, tests] = await prisma.$transaction([
