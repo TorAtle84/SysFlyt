@@ -4125,7 +4125,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
 
       {/* Modal for predefined tests - visible to all users */}
       <Dialog open={adminModalOpen} onOpenChange={setAdminModalOpen}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Predefinerte tester</DialogTitle>
             <DialogDescription>
@@ -4192,66 +4192,68 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                         : "Ingen predefinerte tester finnes ennå."}
                   </div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[160px]">System</TableHead>
-                        <TableHead className="w-[180px]">Type</TableHead>
-                        <TableHead>Funksjon</TableHead>
-                        <TableHead className="w-[80px] text-right">Tester</TableHead>
-                        {isAdmin && <TableHead className="w-[80px]">Behandle</TableHead>}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {groupedAdminFunctions.map((group) => {
-                        const key = `${group.systemGroup ?? ""}||${group.systemType ?? ""}||${group.function}`;
-                        const isSelected =
-                          adminSelectedFunction?.systemGroup === group.systemGroup &&
-                          adminSelectedFunction?.systemType === group.systemType &&
-                          adminSelectedFunction?.function === group.function;
-                        return (
-                          <TableRow
-                            key={key}
-                            className={cn(
-                              "cursor-pointer transition-colors",
-                              isSelected
-                                ? "bg-primary/10 hover:bg-primary/15"
-                                : "hover:bg-muted/50"
-                            )}
-                            onClick={() => setAdminSelectedFunction(isSelected ? null : group)}
-                          >
-                            <TableCell className="text-sm font-medium">
-                              {group.systemGroup ?? "Generelt"}
-                            </TableCell>
-                            <TableCell className="text-sm">
-                              {group.systemType ?? "Ukjent type"}
-                            </TableCell>
-                            <TableCell className="text-sm">{group.function}</TableCell>
-                            <TableCell className="text-sm text-right text-muted-foreground">
-                              {group.testCount}
-                            </TableCell>
-                            {isAdmin && (
-                              <TableCell>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-muted-foreground hover:text-red-600"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    adminDeleteFunctionGroup(group);
-                                  }}
-                                  disabled={busy[`admin:delete_group:${group.systemGroup ?? ""}:${group.systemType ?? ""}:${group.function}`]}
-                                  title="Slett alle testmaler for denne funksjonen"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[160px]">System</TableHead>
+                          <TableHead className="w-[180px]">Type</TableHead>
+                          <TableHead>Funksjon</TableHead>
+                          <TableHead className="w-[80px] text-right">Tester</TableHead>
+                          {isAdmin && <TableHead className="w-[80px]">Behandle</TableHead>}
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {groupedAdminFunctions.map((group) => {
+                          const key = `${group.systemGroup ?? ""}||${group.systemType ?? ""}||${group.function}`;
+                          const isSelected =
+                            adminSelectedFunction?.systemGroup === group.systemGroup &&
+                            adminSelectedFunction?.systemType === group.systemType &&
+                            adminSelectedFunction?.function === group.function;
+                          return (
+                            <TableRow
+                              key={key}
+                              className={cn(
+                                "cursor-pointer transition-colors",
+                                isSelected
+                                  ? "bg-primary/10 hover:bg-primary/15"
+                                  : "hover:bg-muted/50"
+                              )}
+                              onClick={() => setAdminSelectedFunction(isSelected ? null : group)}
+                            >
+                              <TableCell className="text-sm font-medium">
+                                {group.systemGroup ?? "Generelt"}
                               </TableCell>
-                            )}
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
+                              <TableCell className="text-sm">
+                                {group.systemType ?? "Ukjent type"}
+                              </TableCell>
+                              <TableCell className="text-sm">{group.function}</TableCell>
+                              <TableCell className="text-sm text-right text-muted-foreground">
+                                {group.testCount}
+                              </TableCell>
+                              {isAdmin && (
+                                <TableCell>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-muted-foreground hover:text-red-600"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      adminDeleteFunctionGroup(group);
+                                    }}
+                                    disabled={busy[`admin:delete_group:${group.systemGroup ?? ""}:${group.systemType ?? ""}:${group.function}`]}
+                                    title="Slett alle testmaler for denne funksjonen"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TableCell>
+                              )}
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
                 )}
               </div>
             </div>
