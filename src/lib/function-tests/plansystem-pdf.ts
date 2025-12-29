@@ -51,6 +51,7 @@ type PlanItem = {
   ownerText: string;
   responsibles: PlansystemPdfResponsible[];
   prerequisites: Array<{ discipline: string; systemCode: string; text: string }>;
+  isFirstForSystem: boolean; // True if this is the first phase entry for this system (to show delansvarlige only once)
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -170,11 +171,26 @@ function buildPlanItems(tests: PlansystemPdfFunctionTest[]): PlanItem[] {
   const items: PlanItem[] = [];
 
   for (const test of tests) {
+    // Get ALL responsibles for the function test (for delansvarlige display - not filtered by phase)
+    const allResponsibles = (test.responsibles || []).slice().sort((a, b) => {
+      const discipline = (a.discipline || "").localeCompare(b.discipline || "", "nb");
+      if (discipline !== 0) return discipline;
+      const system = (a.systemCode || "").localeCompare(b.systemCode || "", "nb");
+      if (system !== 0) return system;
+      const userA = formatUserName(a.user || null);
+      const userB = formatUserName(b.user || null);
+      return userA.localeCompare(userB, "nb");
+    });
+    const allPrerequisites = buildPrerequisites(allResponsibles);
+
+    let isFirstPhaseForThisTest = true;
+
     for (const phaseMeta of PHASES) {
       const range = normalizeDateRange(getPhaseDates(test.dates, phaseMeta.key));
       if (!range) continue;
 
-      const responsibles = getResponsiblesForPhase(phaseMeta.key, test).slice().sort((a, b) => {
+      // Get phase-specific responsibles for the owner text only
+      const phaseResponsibles = getResponsiblesForPhase(phaseMeta.key, test).slice().sort((a, b) => {
         const discipline = (a.discipline || "").localeCompare(b.discipline || "", "nb");
         if (discipline !== 0) return discipline;
         const system = (a.systemCode || "").localeCompare(b.systemCode || "", "nb");
@@ -193,10 +209,14 @@ function buildPlanItems(tests: PlansystemPdfFunctionTest[]): PlanItem[] {
         systemCode: test.systemCode,
         systemName: test.systemName,
         systemOwnerText: formatSystemOwner(test),
-        ownerText: buildOwnerText(phaseMeta.key, test, responsibles),
-        responsibles,
-        prerequisites: buildPrerequisites(responsibles),
+        ownerText: buildOwnerText(phaseMeta.key, test, phaseResponsibles),
+        // Use ALL responsibles for delansvarlige, but only show on first phase
+        responsibles: allResponsibles,
+        prerequisites: allPrerequisites,
+        isFirstForSystem: isFirstPhaseForThisTest,
       });
+
+      isFirstPhaseForThisTest = false;
     }
   }
 
@@ -371,38 +391,41 @@ export async function generatePlansystemPdf({ projectName, tests, generatedAt }:
         maxWidth: page.getWidth() - margin * 2 - 14,
       });
 
-      const participants = item.responsibles.map((r) => {
-        const user = r.user ? ` (${formatUserName(r.user)})` : "";
-        return `${r.systemCode} - ${r.discipline}${user}`;
-      });
-
-      drawWrapped(`- Delansvarlige: ${participants.length > 0 ? participants.join(", ") : "-"}`, {
-        x: margin + 14,
-        font: fontRegular,
-        size: 10,
-        color: colorText,
-        maxWidth: page.getWidth() - margin * 2 - 14,
-      });
-
-      if (item.prerequisites.length > 0) {
-        ensureSpace(lineHeight(10));
-        page.drawText("Forutsetninger", {
-          x: margin + 28,
-          y: cursorY,
-          font: fontBold,
-          size: 10,
-          color: colorAccent,
+      // Only show delansvarlige and forutsetninger once per function test (on first phase)
+      if (item.isFirstForSystem) {
+        const participants = item.responsibles.map((r) => {
+          const user = r.user ? ` (${formatUserName(r.user)})` : "";
+          return `${r.systemCode} - ${r.discipline}${user}`;
         });
-        cursorY -= lineHeight(10);
 
-        for (const p of item.prerequisites) {
-          drawWrapped(`- ${p.discipline} - ${p.systemCode}: ${p.text}`, {
+        drawWrapped(`- Delansvarlige: ${participants.length > 0 ? participants.join(", ") : "-"}`, {
+          x: margin + 14,
+          font: fontRegular,
+          size: 10,
+          color: colorText,
+          maxWidth: page.getWidth() - margin * 2 - 14,
+        });
+
+        if (item.prerequisites.length > 0) {
+          ensureSpace(lineHeight(10));
+          page.drawText("Forutsetninger", {
             x: margin + 28,
-            font: fontRegular,
-            size: 9.5,
-            color: colorMuted,
-            maxWidth: page.getWidth() - margin * 2 - 28,
+            y: cursorY,
+            font: fontBold,
+            size: 10,
+            color: colorAccent,
           });
+          cursorY -= lineHeight(10);
+
+          for (const p of item.prerequisites) {
+            drawWrapped(`- ${p.discipline} - ${p.systemCode}: ${p.text}`, {
+              x: margin + 28,
+              font: fontRegular,
+              size: 9.5,
+              color: colorMuted,
+              maxWidth: page.getWidth() - margin * 2 - 28,
+            });
+          }
         }
       }
 
