@@ -555,22 +555,6 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
     return map?.get(templatePickerFunction) ?? [];
   }, [templateTree, templatePickerSystem, templatePickerType, templatePickerFunction]);
 
-  const filteredAdminPredefinedTests = useMemo(() => {
-    if (!adminContextFilter) return adminPredefinedTests.slice().sort(sortPredefinedTests);
-    const targetFunction = adminContextFilter.functionName.trim().toLowerCase();
-    return adminPredefinedTests
-      .filter((t) => {
-        const groupMatch =
-          normalizeTemplateSystemGroup(t) === adminContextFilter.systemGroup;
-        const typeMatch =
-          normalizeTemplateSystemType(t) === adminContextFilter.systemType;
-        const functionMatch =
-          t.function.trim().toLowerCase() === targetFunction;
-        return groupMatch && typeMatch && functionMatch;
-      })
-      .sort(sortPredefinedTests);
-  }, [adminContextFilter, adminPredefinedTests]);
-
   // Admin modal state
   const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [adminPredefinedTests, setAdminPredefinedTests] = useState<PredefinedFunctionTestTemplate[]>([]);
@@ -596,6 +580,22 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
     functionName: string;
   } | null>(null);
   const adminModalInitializedRef = useRef(false);
+
+  const filteredAdminPredefinedTests = useMemo(() => {
+    if (!adminContextFilter) return adminPredefinedTests.slice().sort(sortPredefinedTests);
+    const targetFunction = adminContextFilter.functionName.trim().toLowerCase();
+    return adminPredefinedTests
+      .filter((t) => {
+        const groupMatch =
+          normalizeTemplateSystemGroup(t) === adminContextFilter.systemGroup;
+        const typeMatch =
+          normalizeTemplateSystemType(t) === adminContextFilter.systemType;
+        const functionMatch =
+          t.function.trim().toLowerCase() === targetFunction;
+        return groupMatch && typeMatch && functionMatch;
+      })
+      .sort(sortPredefinedTests);
+  }, [adminContextFilter, adminPredefinedTests]);
 
   const stats = useMemo(() => {
     const totalRows = rows.length;
