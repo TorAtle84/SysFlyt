@@ -54,7 +54,7 @@ interface FunctionTestPDFData {
     }[];
 }
 
-    const STATUS_LABELS: Record<string, string> = {
+const STATUS_LABELS: Record<string, string> = {
     NOT_STARTED: "Ikke startet",
     IN_PROGRESS: "Pågår",
     COMPLETED: "Fullført",
@@ -97,6 +97,63 @@ function drawText(
     }
     page.drawText(displayText, { x, y, size, font, color });
     return size;
+}
+
+/**
+ * Draw multi-line text with support for newlines and word wrapping.
+ * Returns the total height used by the text.
+ */
+function drawMultiLineText(
+    page: PDFPage,
+    text: string,
+    x: number,
+    y: number,
+    font: PDFFont,
+    size: number,
+    lineHeight: number,
+    color = rgb(0.12, 0.14, 0.17),
+    maxWidth?: number
+): number {
+    if (!text) return 0;
+
+    // Split by actual newlines in the text
+    const paragraphs = text.split(/\r?\n/);
+    let currentY = y;
+    let totalHeight = 0;
+
+    for (const paragraph of paragraphs) {
+        if (maxWidth) {
+            // Wrap text to fit within maxWidth
+            const charWidth = size * 0.45;
+            const maxChars = Math.floor(maxWidth / charWidth);
+            const words = paragraph.split(' ');
+            let currentLine = '';
+
+            for (const word of words) {
+                const testLine = currentLine ? `${currentLine} ${word}` : word;
+                if (testLine.length > maxChars && currentLine) {
+                    page.drawText(currentLine, { x, y: currentY, size, font, color });
+                    currentY -= lineHeight;
+                    totalHeight += lineHeight;
+                    currentLine = word;
+                } else {
+                    currentLine = testLine;
+                }
+            }
+
+            if (currentLine) {
+                page.drawText(currentLine, { x, y: currentY, size, font, color });
+                currentY -= lineHeight;
+                totalHeight += lineHeight;
+            }
+        } else {
+            page.drawText(paragraph, { x, y: currentY, size, font, color });
+            currentY -= lineHeight;
+            totalHeight += lineHeight;
+        }
+    }
+
+    return totalHeight;
 }
 
 export async function generateMCProtocolPDF(data: ProtocolPDFData): Promise<Buffer> {
@@ -242,14 +299,14 @@ export async function generateMCProtocolPDF(data: ProtocolPDFData): Promise<Buff
     // Footer on all pages
     const pages = pdfDoc.getPages();
     for (let i = 0; i < pages.length; i++) {
-    pages[i].drawText(`Eksportert fra SysFlyt ${format(new Date(), "dd.MM.yyyy HH:mm", { locale: nb })} | Side ${i + 1} av ${pages.length}`, {
-        x: margin,
-        y: 20,
-        size: 7,
-        font,
-        color: rgb(0.5, 0.5, 0.5),
-    });
-}
+        pages[i].drawText(`Eksportert fra SysFlyt ${format(new Date(), "dd.MM.yyyy HH:mm", { locale: nb })} | Side ${i + 1} av ${pages.length}`, {
+            x: margin,
+            y: 20,
+            size: 7,
+            font,
+            color: rgb(0.5, 0.5, 0.5),
+        });
+    }
 
     const pdfBytes = await pdfDoc.save();
     return Buffer.from(pdfBytes);
@@ -334,7 +391,13 @@ export async function generateFunctionTestPDF(data: FunctionTestPDFData): Promis
     for (let i = 0; i < data.rows.length; i++) {
         const row = data.rows[i];
 
-        if (y < 100) {
+        // Calculate dynamic row height based on content (lines in testExecution and acceptanceCriteria)
+        const testExecLines = row.testExecution ? row.testExecution.split(/\r?\n/).length : 1;
+        const acceptLines = row.acceptanceCriteria ? row.acceptanceCriteria.split(/\r?\n/).length : 1;
+        const maxLines = Math.max(testExecLines, acceptLines, 1);
+        const rowHeight = Math.max(lineHeight, maxLines * 8 + 4); // 8pt per line + padding
+
+        if (y < 60 + rowHeight) {
             page = pdfDoc.addPage([595, 842]);
             y = height - margin;
             page.drawRectangle({ x: margin - 2, y: y - 5, width: width - margin * 2 + 4, height: 14, color: rgb(0.94, 0.95, 0.96) });
@@ -348,8 +411,10 @@ export async function generateFunctionTestPDF(data: FunctionTestPDFData): Promis
         drawText(page, row.category, columns[1].x, y, font, 6, undefined, columns[1].width);
         drawText(page, row.systemPart, columns[2].x, y, font, 7, undefined, columns[2].width);
         drawText(page, row.function, columns[3].x, y, font, 7, undefined, columns[3].width);
-        drawText(page, row.testExecution, columns[4].x, y, font, 6, undefined, columns[4].width);
-        drawText(page, row.acceptanceCriteria, columns[5].x, y, font, 6, undefined, columns[5].width);
+
+        // Use multi-line text for testExecution and acceptanceCriteria
+        drawMultiLineText(page, row.testExecution, columns[4].x, y, font, 6, 8, undefined, columns[4].width);
+        drawMultiLineText(page, row.acceptanceCriteria, columns[5].x, y, font, 6, 8, undefined, columns[5].width);
 
         const statusColor = row.status === "COMPLETED" ? rgb(0.09, 0.64, 0.29) :
             row.status === "DEVIATION" ? rgb(0.86, 0.14, 0.14) : rgb(0.4, 0.4, 0.4);
@@ -358,7 +423,7 @@ export async function generateFunctionTestPDF(data: FunctionTestPDFData): Promis
         const dateStr = row.completedDate ? format(row.completedDate, "dd.MM.yy", { locale: nb }) : "-";
         page.drawText(dateStr, { x: columns[7].x, y, size: 7, font });
 
-        y -= lineHeight;
+        y -= rowHeight;
     }
 
     // Signature section
@@ -388,14 +453,14 @@ export async function generateFunctionTestPDF(data: FunctionTestPDFData): Promis
     // Footer
     const pages = pdfDoc.getPages();
     for (let i = 0; i < pages.length; i++) {
-    pages[i].drawText(`Eksportert fra SysFlyt ${format(new Date(), "dd.MM.yyyy HH:mm", { locale: nb })} | Side ${i + 1} av ${pages.length}`, {
-        x: margin,
-        y: 20,
-        size: 7,
-        font,
-        color: rgb(0.5, 0.5, 0.5),
-    });
-}
+        pages[i].drawText(`Eksportert fra SysFlyt ${format(new Date(), "dd.MM.yyyy HH:mm", { locale: nb })} | Side ${i + 1} av ${pages.length}`, {
+            x: margin,
+            y: 20,
+            size: 7,
+            font,
+            color: rgb(0.5, 0.5, 0.5),
+        });
+    }
 
     const pdfBytes = await pdfDoc.save();
     return Buffer.from(pdfBytes);
