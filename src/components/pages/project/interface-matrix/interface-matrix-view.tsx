@@ -161,8 +161,12 @@ export function InterfaceMatrixView() {
     async function handleDeleteRow(rowId: string) {
         if (!confirm("Er du sikker på at du vil slette denne raden?")) return;
         try {
-            // TODO: Add proper delete endpoint. For now we'll just refetch.
-            toast.info("Sletting er ikke implementert ennå");
+            const res = await fetch(`/api/projects/${projectId}/interface-matrix/row?rowId=${rowId}`, {
+                method: "DELETE",
+            });
+            if (!res.ok) throw new Error("Delete failed");
+            toast.success("Rad slettet");
+            await fetchMatrix();
         } catch (e) {
             toast.error("Kunne ikke slette rad");
         }

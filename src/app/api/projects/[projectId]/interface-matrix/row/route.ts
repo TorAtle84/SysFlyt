@@ -34,3 +34,34 @@ export async function POST(
         );
     }
 }
+
+export async function DELETE(
+    request: NextRequest,
+    { params }: { params: Promise<{ projectId: string }> }
+) {
+    try {
+        const { projectId } = await params;
+        const authResult = await requireProjectAccess(projectId);
+        if (!authResult.success) return authResult.error;
+
+        const { searchParams } = new URL(request.url);
+        const rowId = searchParams.get("rowId");
+
+        if (!rowId) {
+            return NextResponse.json({ error: "Mangler rowId" }, { status: 400 });
+        }
+
+        // Delete row (cells will cascade delete due to schema)
+        await prisma.interfaceMatrixRow.delete({
+            where: { id: rowId },
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("Error deleting matrix row:", error);
+        return NextResponse.json(
+            { error: "Kunne ikke slette rad" },
+            { status: 500 }
+        );
+    }
+}
