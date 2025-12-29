@@ -102,15 +102,8 @@ export async function POST(
             // Current design: GET handles init of columns.)
         }
 
-        // Fetch all unique system codes from FunctionTests
-        // (User said "importert de unike {system} vi har i prosjektet". 
-        // Usually via FunctionTests, MCProtocols, or MassLists. 
-        // Let's scan FunctionTestRow.systemPart (Wait, system code is usually the prefix like 360.001? Or is it systemPart? 
-        // In SysFlyt, "System" often refers to TFM "System" part. 
-        // Let's assume we scan functionTestRow.systemPart and ensure it looks like a system.)
-
-        // Also check MCProtocol.system? 
-        // Let's aggregate unique systemStrings from FunctionTestRows for now.
+        // Fetch all unique system codes from MC Protocols
+        // {System} in TFM is found in MCProtocol.systemCode (e.g., "360.001")
 
         // 1. Get existing rows to avoid duplicates
         const existingRows = await prisma.interfaceMatrixRow.findMany({
@@ -119,25 +112,21 @@ export async function POST(
         });
         const existingCodes = new Set(existingRows.map(r => r.systemCode));
 
-        // 2. Find new candidate systems
-        // Aggregate unique systemPart from FunctionTestRow where not null
-        const ftRows = await prisma.functionTestRow.findMany({
-            where: {
-                functionTest: { projectId },
-                systemPart: { not: "" }
-            },
-            select: { systemPart: true },
-            distinct: ['systemPart']
+        // 2. Find new candidate systems from MCProtocols
+        const mcProtocols = await prisma.mCProtocol.findMany({
+            where: { projectId },
+            select: { systemCode: true, systemName: true },
+            distinct: ['systemCode']
         });
 
-        const candidates = ftRows
-            .map(r => r.systemPart)
-            .filter(code => code && code.trim().length > 0 && !existingCodes.has(code));
+        const candidatesWithName = mcProtocols
+            .filter(p => p.systemCode && p.systemCode.trim().length > 0 && !existingCodes.has(p.systemCode))
+            .map(p => ({ code: p.systemCode, name: p.systemName }));
 
-        // Sort candidates
-        candidates.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+        // Sort candidates by system code
+        candidatesWithName.sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }));
 
-        if (candidates.length === 0) {
+        if (candidatesWithName.length === 0) {
             return NextResponse.json({ createdCount: 0, message: "Ingen nye systemer funnet" });
         }
 
@@ -150,9 +139,10 @@ export async function POST(
         });
         let currentSort = (maxSort?.sortOrder ?? -1) + 1;
 
-        const rowsData = candidates.map(code => ({
+        const rowsData = candidatesWithName.map(item => ({
             matrixId: matrix!.id,
-            systemCode: code,
+            systemCode: item.code,
+            description: item.name || null,
             sortOrder: currentSort++,
         }));
 
