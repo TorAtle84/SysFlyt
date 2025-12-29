@@ -1304,8 +1304,8 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                 <td><span class="category-badge">${formatCategory(row.category)}</span></td>
                 <td>${row.systemPart}</td>
                 <td>${row.function}</td>
-                <td>${row.testExecution}${hasComments ? `<div class="comments"><strong>Kommentarer:</strong> ${comments.map((c: { content: string }) => c.content).join("; ")}</div>` : ""}</td>
-                <td>${row.acceptanceCriteria}</td>
+                <td>${(row.testExecution || "").replace(/\r?\n/g, "<br>")}${hasComments ? `<div class="comments"><strong>Kommentarer:</strong> ${comments.map((c: { content: string }) => c.content).join("; ")}</div>` : ""}</td>
+                <td>${(row.acceptanceCriteria || "").replace(/\r?\n/g, "<br>")}</td>
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                 <td>${dateStr}</td>
               </tr>
