@@ -2851,7 +2851,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                   );
                   return (
                     <TableRow key={row.id} className="align-top">
-                      <TableCell>
+                      <TableCell className="align-top">
                         <div className="flex flex-col items-center gap-0">
                           <Button
                             variant="ghost"
@@ -2876,7 +2876,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                         </div>
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="align-top">
                         <Select
                           value={row.status}
                           onValueChange={(value) => {
@@ -2903,7 +2903,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                         </Select>
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="align-top">
                         <Select
                           value={row.discipline || "__none__"}
                           onValueChange={(v) => handleRowDisciplineChange(row.id, v)}
@@ -2930,7 +2930,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                         </Select>
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="align-top">
                         <Select
                           value={row.category}
                           onValueChange={(value) => {
@@ -2953,7 +2953,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                         </Select>
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="align-top">
                         <div className="flex items-center gap-1">
                           <Input
                             value={row.systemPart}
@@ -2982,7 +2982,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                         </div>
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="align-top">
                         <Input
                           value={row.function}
                           onChange={(e) =>
@@ -2997,7 +2997,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                         />
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="align-top">
                         <div
                           className="text-left text-sm text-muted-foreground whitespace-pre-line cursor-pointer hover:text-foreground"
                           onClick={() => openRowDialog(row)}
@@ -3007,7 +3007,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                         </div>
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="align-top">
                         <div
                           className="text-left text-sm text-muted-foreground whitespace-pre-line cursor-pointer hover:text-foreground"
                           onClick={() => openRowDialog(row)}
@@ -3017,7 +3017,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                         </div>
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="align-top">
                         <Select
                           value={row.assignedToId || "__none__"}
                           onValueChange={(v) => handleRowAssignedChange(row.id, v)}
@@ -3037,7 +3037,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                         </Select>
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="align-top">
                         <Select
                           value={row.performedById || "__none__"}
                           onValueChange={(v) => handleRowPerformedByChange(row.id, v)}
@@ -3057,7 +3057,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                         </Select>
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="align-top">
                         {!completionEnabled ? (
                           <span className="text-sm text-muted-foreground">-</span>
                         ) : (
@@ -3103,7 +3103,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                         )}
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="align-top">
                         <div className="flex justify-end">
                           <Popover
                             open={rowActionsOpenId === row.id}
