@@ -22,6 +22,7 @@ import {
   Archive,
   Plus,
   Minus,
+  Grid,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -183,6 +184,13 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
           href: `/projects/${id}/quality-assurance/fdv-collection`,
           label: "FDV-samling",
           icon: Archive,
+          indent: true,
+        },
+        {
+          type: "link",
+          href: `/projects/${id}/quality-assurance/interface-matrix`,
+          label: "Grensesnittmatrise",
+          icon: Grid,
           indent: true,
         },
       ],

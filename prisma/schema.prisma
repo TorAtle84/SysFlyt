@@ -152,6 +152,7 @@ model Project {
   
   // Quality Assurance
   tfmComparisons TfmComparison[]
+  interfaceMatrix InterfaceMatrix?
 }
 
 model ProjectMember {
@@ -849,4 +850,55 @@ model TfmComparison {
   createdBy User    @relation("TfmComparisonCreator", fields: [createdById], references: [id])
 
   @@index([projectId])
+}
+
+
+// Interface Matrix (Grensesnittmatrise)
+model InterfaceMatrix {
+  id        String   @id @default(cuid())
+  projectId String   @unique // One matrix per project
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  rows      InterfaceMatrixRow[]
+  columns   InterfaceMatrixColumn[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InterfaceMatrixRow {
+  id              String   @id @default(cuid())
+  matrixId        String
+  systemCode      String   // The unique system (e.g., 360.001)
+  description     String?  // Editable text under the system code
+  sortOrder       Int      @default(0)
+  
+  matrix          InterfaceMatrix @relation(fields: [matrixId], references: [id], onDelete: Cascade)
+  cells           InterfaceMatrixCell[]
+
+  @@unique([matrixId, systemCode])
+}
+
+model InterfaceMatrixColumn {
+  id              String   @id @default(cuid())
+  matrixId        String
+  discipline      String?  // Standard discipline code (e.g., "EL", "RØR")
+  customLabel     String?  // For custom columns
+  color           String   // Hex code (Pastel)
+  sortOrder       Int      @default(0)
+  
+  matrix          InterfaceMatrix @relation(fields: [matrixId], references: [id], onDelete: Cascade)
+  cells           InterfaceMatrixCell[]
+}
+
+model InterfaceMatrixCell {
+  id              String   @id @default(cuid())
+  rowId           String
+  columnId        String
+  values          Json     // Array of strings: ["Montasje", "Leveranse", ...]
+  
+  row             InterfaceMatrixRow    @relation(fields: [rowId], references: [id], onDelete: Cascade)
+  column          InterfaceMatrixColumn @relation(fields: [columnId], references: [id], onDelete: Cascade)
+
+  @@unique([rowId, columnId])
 }
