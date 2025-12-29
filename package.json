@@ -9,7 +9,7 @@
     "prestart": "prisma db push --skip-generate",
     "start": "next start -H 0.0.0.0 -p 5000",
     "lint": "eslint",
-    "vercel-build": "prisma migrate deploy && next build",
+    "vercel-build": "node scripts/vercel-build.js",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
