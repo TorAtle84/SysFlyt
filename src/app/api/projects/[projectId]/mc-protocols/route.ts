@@ -79,6 +79,13 @@ export async function POST(
             return authResult.error;
         }
 
+        // Fetch project creator to use as default value for responsibleId
+        const project = await prisma.project.findUnique({
+            where: { id: projectId },
+            select: { createdById: true },
+        });
+        const defaultResponsibleId = project?.createdById;
+
         // Parse body
         let systemTags: string[] = [];
         let documentId: string | undefined;
@@ -235,6 +242,7 @@ export async function POST(
                         testExecution: t.testExecution,
                         acceptanceCriteria: t.acceptanceCriteria,
                         predefinedTestId: t.id,
+                        assignedToId: defaultResponsibleId,
                     }));
 
                 if (rowsToCreate.length > 0) {
@@ -297,9 +305,15 @@ export async function POST(
                             columnA: "NOT_STARTED",
                             columnB: "NOT_STARTED",
                             columnC: "NOT_STARTED",
+                            responsibleId: defaultResponsibleId,
                         },
                     });
                     createdItems++;
+                } else if (!existingItem.responsibleId && defaultResponsibleId) {
+                    await prisma.mCProtocolItem.update({
+                        where: { id: existingItem.id },
+                        data: { responsibleId: defaultResponsibleId }
+                    });
                 }
             }
         }

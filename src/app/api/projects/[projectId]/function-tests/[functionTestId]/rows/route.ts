@@ -64,6 +64,13 @@ export async function POST(
       return NextResponse.json({ error: "Funksjonstest ikke funnet" }, { status: 404 });
     }
 
+    // Fetch project creator to use as default value for assignedToId (Ansvarlig)
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+      select: { createdById: true },
+    });
+    const defaultResponsibleId = project?.createdById;
+
     const body = await request.json().catch(() => null);
     if (!isRecord(body)) {
       return NextResponse.json({ error: "Ugyldig request body" }, { status: 400 });
@@ -166,6 +173,7 @@ export async function POST(
           testExecution: template.testExecution,
           acceptanceCriteria: template.acceptanceCriteria,
           predefinedTestId: template.id,
+          assignedToId: defaultResponsibleId,
         });
       }
 
@@ -271,6 +279,7 @@ export async function POST(
         testExecution,
         acceptanceCriteria,
         predefinedTestId,
+        assignedToId: defaultResponsibleId,
       },
       include: {
         responsible: true,
