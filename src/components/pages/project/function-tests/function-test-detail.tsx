@@ -193,6 +193,8 @@ type PredefinedFunctionTestInput = {
 };
 
 type ImportedFunctionTestRow = {
+  systemGroup: string;
+  systemType: string;
   functionName: string;
   category: FunctionTestCategory;
   testExecution: string;
@@ -574,11 +576,6 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
     functionName: string;
   } | null>(null);
   const [adminImportRows, setAdminImportRows] = useState<ImportedFunctionTestRow[]>([]);
-  const [adminImportTarget, setAdminImportTarget] = useState<{
-    systemGroup: string;
-    systemType: string;
-    functionName: string;
-  } | null>(null);
   const adminModalInitializedRef = useRef(false);
 
   const filteredAdminPredefinedTests = useMemo(() => {
@@ -812,7 +809,6 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
       });
       setAdminContextFilter(null);
       setAdminImportRows([]);
-      setAdminImportTarget(null);
       return;
     }
 
@@ -1210,24 +1206,25 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
     return data.test as PredefinedFunctionTestTemplate;
   }
 
-  function resolveAdminImportContext() {
-    const systemGroup = adminNewTest.systemGroup.trim() || adminImportTarget?.systemGroup || "";
-    const systemType = adminNewTest.systemType.trim() || adminImportTarget?.systemType || "";
-    const functionName = adminNewTest.function.trim() || adminImportTarget?.functionName || "";
-    return {
-      systemGroup,
-      systemType,
-      functionName,
-    };
+  function buildImportKey(input: {
+    systemGroup: string;
+    systemType: string;
+    functionName: string;
+    category: FunctionTestCategory;
+    testExecution: string;
+    acceptanceCriteria: string;
+  }) {
+    return [
+      normalizeCategoryText(input.systemGroup || ""),
+      normalizeCategoryText(input.systemType),
+      normalizeCategoryText(input.functionName),
+      input.category,
+      input.testExecution.trim(),
+      input.acceptanceCriteria.trim(),
+    ].join("|");
   }
 
   async function handleAdminImportFile(file: File) {
-    const { systemType, functionName } = resolveAdminImportContext();
-    if (!systemType) {
-      toast.error("Velg Type før import");
-      return;
-    }
-
     try {
       const buffer = await file.arrayBuffer();
       const workbook = XLSX.read(buffer, { type: "array" });
@@ -1239,41 +1236,115 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
       }
 
       const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false }) as unknown[][];
-      const headerCell = rows[0]?.[0] ? String(rows[0][0]).toLowerCase() : "";
-      const hasHeader = headerCell.includes("funksjon");
+      if (rows.length === 0) {
+        toast.error("Filen er tom");
+        return;
+      }
+
+      const headerRow = Array.isArray(rows[0]) ? rows[0] : [];
+      const normalizedHeader = headerRow.map((cell) =>
+        normalizeCategoryText(String(cell ?? ""))
+      );
+      const findHeaderIndex = (terms: string[]) => {
+        const normalizedTerms = terms.map((term) => normalizeCategoryText(term));
+        return normalizedHeader.findIndex((cell) =>
+          normalizedTerms.some(
+            (term) => cell === term || cell.startsWith(term) || cell.includes(term)
+          )
+        );
+      };
+
+      const headerIndexes = {
+        systemGroup: findHeaderIndex(["system"]),
+        systemType: findHeaderIndex(["type", "systemtype"]),
+        functionName: findHeaderIndex(["funksjon"]),
+        category: findHeaderIndex(["kategori"]),
+        testExecution: findHeaderIndex([
+          "testutforelse",
+          "testutførelse",
+          "testutf",
+          "testutfor",
+        ]),
+        acceptanceCriteria: findHeaderIndex(["akseptkriterier", "akseptkriterie", "aksept"]),
+      };
+
+      const headerMatchCount = Object.values(headerIndexes).filter((idx) => idx >= 0).length;
+      const hasHeader =
+        headerMatchCount >= 3 &&
+        normalizedHeader.some((cell) => cell.includes("funksjon") || cell.includes("testutf"));
+
+      const columnMap = hasHeader
+        ? headerIndexes
+        : {
+            systemGroup: 0,
+            systemType: 1,
+            functionName: 2,
+            category: 3,
+            testExecution: 4,
+            acceptanceCriteria: 5,
+          };
+
+      if (
+        hasHeader &&
+        (columnMap.systemType < 0 ||
+          columnMap.functionName < 0 ||
+          columnMap.testExecution < 0 ||
+          columnMap.acceptanceCriteria < 0)
+      ) {
+        toast.error(
+          "Fant ikke alle kolonner. Forventet System, Type, Funksjon, Kategori, Testutførelse, Akseptkriterier."
+        );
+        return;
+      }
+
       const startIndex = hasHeader ? 1 : 0;
 
       const parsed: ImportedFunctionTestRow[] = [];
       for (let i = startIndex; i < rows.length; i += 1) {
         const row = Array.isArray(rows[i]) ? rows[i] : [];
-        const rowFunction = String(row[0] ?? "").trim();
-        const categoryLabel = String(row[1] ?? "").trim();
-        const testExecution = String(row[2] ?? "").trim();
-        const acceptanceCriteria = String(row[3] ?? "").trim();
+        const systemGroup =
+          columnMap.systemGroup >= 0 ? String(row[columnMap.systemGroup] ?? "").trim() : "";
+        const systemType =
+          columnMap.systemType >= 0 ? String(row[columnMap.systemType] ?? "").trim() : "";
+        const functionName =
+          columnMap.functionName >= 0 ? String(row[columnMap.functionName] ?? "").trim() : "";
+        const categoryLabel =
+          columnMap.category >= 0 ? String(row[columnMap.category] ?? "").trim() : "";
+        const testExecution =
+          columnMap.testExecution >= 0 ? String(row[columnMap.testExecution] ?? "").trim() : "";
+        const acceptanceCriteria =
+          columnMap.acceptanceCriteria >= 0
+            ? String(row[columnMap.acceptanceCriteria] ?? "").trim()
+            : "";
 
-        if (!rowFunction && !categoryLabel && !testExecution && !acceptanceCriteria) continue;
-        if (!rowFunction || !testExecution || !acceptanceCriteria) continue;
+        if (
+          !systemGroup &&
+          !systemType &&
+          !functionName &&
+          !categoryLabel &&
+          !testExecution &&
+          !acceptanceCriteria
+        ) {
+          continue;
+        }
+        if (!systemType || !functionName || !testExecution || !acceptanceCriteria) continue;
 
         parsed.push({
-          functionName: rowFunction,
+          systemGroup,
+          systemType,
+          functionName,
           category: categoryLabel ? mapCategoryLabel(categoryLabel) : "OTHER",
           testExecution,
           acceptanceCriteria,
         });
       }
 
-      const filtered = functionName
-        ? parsed.filter(
-            (row) => row.functionName.trim().toLowerCase() === functionName.toLowerCase()
-          )
-        : parsed;
-
-      if (filtered.length === 0) {
+      if (parsed.length === 0) {
         toast.error("Fant ingen gyldige rader i importen");
         return;
       }
 
-      setAdminImportRows(filtered);
+      setAdminImportRows(parsed);
     } catch (e: unknown) {
       toast.error(errorMessage(e, "Kunne ikke lese Excel-fil"));
     } finally {
@@ -1284,29 +1355,63 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
   async function handleAdminImportSubmit() {
     if (adminImportRows.length === 0) return;
 
-    const { systemGroup, systemType, functionName } = resolveAdminImportContext();
-    if (!systemType) {
-      toast.error("Velg Type før import");
+    const existingKeys = new Set(
+      adminPredefinedTests.map((test) =>
+        buildImportKey({
+          systemGroup: test.systemGroup || "",
+          systemType: test.systemType || test.systemPart || "",
+          functionName: test.function,
+          category: test.category,
+          testExecution: test.testExecution,
+          acceptanceCriteria: test.acceptanceCriteria,
+        })
+      )
+    );
+    const seenKeys = new Set<string>();
+
+    const rowsToImport = adminImportRows.filter((row) => {
+      const systemGroup = row.systemGroup.trim();
+      const systemType = row.systemType.trim();
+      const functionName = row.functionName.trim();
+      const testExecution = row.testExecution.trim();
+      const acceptanceCriteria = row.acceptanceCriteria.trim();
+
+      if (!systemType || !functionName || !testExecution || !acceptanceCriteria) return false;
+
+      const key = buildImportKey({
+        systemGroup,
+        systemType,
+        functionName,
+        category: row.category,
+        testExecution,
+        acceptanceCriteria,
+      });
+      if (existingKeys.has(key) || seenKeys.has(key)) return false;
+      seenKeys.add(key);
+      return true;
+    });
+
+    if (rowsToImport.length === 0) {
+      toast.info("Ingen nye rader å importere");
+      setAdminImportRows([]);
       return;
     }
+
+    const skippedCount = adminImportRows.length - rowsToImport.length;
 
     markBusy("admin:import", true);
     try {
       const results = await Promise.allSettled(
-        adminImportRows.map((row) => {
-          const fn = row.functionName || functionName;
-          if (!fn) {
-            return Promise.reject(new Error("Mangler funksjonsnavn"));
-          }
-          return createPredefinedTest({
+        rowsToImport.map((row) =>
+          createPredefinedTest({
             category: row.category,
-            systemGroup,
-            systemType,
-            function: fn,
-            testExecution: row.testExecution,
-            acceptanceCriteria: row.acceptanceCriteria,
-          });
-        })
+            systemGroup: row.systemGroup.trim(),
+            systemType: row.systemType.trim(),
+            function: row.functionName.trim(),
+            testExecution: row.testExecution.trim(),
+            acceptanceCriteria: row.acceptanceCriteria.trim(),
+          })
+        )
       );
 
       const created = results
@@ -1332,6 +1437,9 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
         setAdminImportRows([]);
       }
 
+      if (skippedCount > 0) {
+        toast.info(`Hoppet over ${skippedCount} eksisterende rader`);
+      }
       if (failed.length > 0) {
         toast.error(`Kunne ikke importere ${failed.length} rader`);
       }
@@ -1443,7 +1551,6 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
   ) {
     setAdminModalOpen(true);
     setAdminContextFilter({ systemGroup, systemType, functionName });
-    setAdminImportTarget({ systemGroup, systemType, functionName });
     setAdminImportRows([]);
     setAdminNewTest((prev) => ({
       ...prev,
@@ -4052,12 +4159,11 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Mal: TestutførelsesMal.xlsx (Funksjon, Kategori, Testutførelse, Akseptkriterier).
+                      Mal: TestutførelsesMal.xlsx (System, Type, Funksjon, Kategori, Testutførelse,
+                      Akseptkriterier).
                     </p>
                     <div className="text-xs text-muted-foreground">
-                      Import til: {resolveAdminImportContext().systemGroup || "-"} ·{" "}
-                      {resolveAdminImportContext().systemType || "-"} ·{" "}
-                      {resolveAdminImportContext().functionName || "Alle funksjoner"}
+                      System, Type og Funksjon leses fra filen.
                     </div>
                     <Input
                       ref={adminImportInputRef}
@@ -4072,22 +4178,33 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                       <div className="space-y-3">
                         <div className="max-h-48 overflow-y-auto rounded-lg border border-border">
                           <div className="divide-y divide-border">
-                            {adminImportRows.map((row, idx) => (
-                              <div key={`${row.functionName}-${idx}`} className="space-y-1 p-3">
-                                <div className="flex items-center justify-between gap-2">
-                                  <div className="text-sm font-medium">{row.functionName}</div>
-                                  <Badge variant="outline" className="text-xs">
-                                    {formatCategory(row.category)}
-                                  </Badge>
+                            {adminImportRows.map((row, idx) => {
+                              const systemGroupLabel = row.systemGroup.trim() || "Generelt";
+                              const systemTypeLabel = row.systemType.trim() || "Ukjent type";
+
+                              return (
+                                <div
+                                  key={`${systemGroupLabel}-${systemTypeLabel}-${row.functionName}-${idx}`}
+                                  className="space-y-1 p-3"
+                                >
+                                  <div className="text-xs text-muted-foreground">
+                                    {systemGroupLabel} · {systemTypeLabel}
+                                  </div>
+                                  <div className="flex items-center justify-between gap-2">
+                                    <div className="text-sm font-medium">{row.functionName}</div>
+                                    <Badge variant="outline" className="text-xs">
+                                      {formatCategory(row.category)}
+                                    </Badge>
+                                  </div>
+                                  <div className="text-xs text-muted-foreground line-clamp-2">
+                                    {row.testExecution}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground line-clamp-2">
+                                    {row.acceptanceCriteria}
+                                  </div>
                                 </div>
-                                <div className="text-xs text-muted-foreground line-clamp-2">
-                                  {row.testExecution}
-                                </div>
-                                <div className="text-xs text-muted-foreground line-clamp-2">
-                                  {row.acceptanceCriteria}
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                         <div className="flex justify-end">

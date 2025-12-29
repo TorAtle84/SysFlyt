@@ -86,6 +86,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const existing = await prisma.predefinedFunctionTest.findFirst({
+      where: {
+        category,
+        systemGroup: systemGroup || null,
+        systemType,
+        function: functionName,
+        testExecution,
+        acceptanceCriteria,
+        isActive: true,
+      },
+      select: {
+        id: true,
+        category: true,
+        systemGroup: true,
+        systemType: true,
+        systemPart: true,
+        function: true,
+        testExecution: true,
+        acceptanceCriteria: true,
+      },
+    });
+
+    if (existing) {
+      return NextResponse.json({ test: existing, skipped: true });
+    }
+
     const created = await prisma.predefinedFunctionTest.create({
       data: {
         category,
