@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, ArrowDownToLine, Pencil, CheckCircle2, XCircle, FileDown, Plus, Trash2, MoreHorizontal } from "lucide-react";
+import { Loader2, ArrowDownToLine, Pencil, CheckCircle2, XCircle, FileDown, Plus, Trash2, MoreHorizontal, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,6 +19,12 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -189,121 +195,133 @@ export function InterfaceMatrixView() {
     const sortedRows = [...data.rows].sort((a, b) => a.systemCode.localeCompare(b.systemCode, undefined, { numeric: true }));
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-2 border-b">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Grensesnittmatrise</h1>
-                    <p className="text-muted-foreground mt-1 text-sm max-w-2xl">
-                        Definer ansvarsfordeling mellom systemer og fag. Systemkoder hentes fra MC-protokollene.
-                    </p>
-                </div>
-                <div className="flex gap-2 items-center flex-wrap">
-                    <Popover open={isAddingCol} onOpenChange={setIsAddingCol}>
-                        <PopoverTrigger asChild>
-                            <Button variant="outline" size="sm" className="h-9">
-                                <Plus className="mr-2 h-4 w-4" />
-                                Nytt Fag
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-80">
-                            <div className="grid gap-4">
-                                <div className="space-y-2">
-                                    <h4 className="font-medium leading-none">Nytt Fag / Motpart</h4>
-                                    <p className="text-sm text-muted-foreground">Legg til en ny kolonne i matrisen.</p>
-                                </div>
-                                <div className="grid gap-2">
-                                    <div className="grid grid-cols-3 items-center gap-4">
-                                        <Label htmlFor="name">Navn</Label>
-                                        <Input
-                                            id="name"
-                                            value={newColName}
-                                            onChange={(e) => setNewColName(e.target.value)}
-                                            className="col-span-2 h-8"
-                                            placeholder="F.eks. LÅS"
-                                        />
+        <TooltipProvider>
+            <div className="space-y-6 animate-in fade-in duration-500">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-2 border-b">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">Grensesnittmatrise</h1>
+                        <p className="text-muted-foreground mt-1 text-sm max-w-2xl">
+                            Definer ansvarsfordeling mellom systemer og fag. Systemkoder hentes fra MC-protokollene.
+                        </p>
+                    </div>
+                    <div className="flex gap-2 items-center flex-wrap">
+                        <Popover open={isAddingCol} onOpenChange={setIsAddingCol}>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" size="sm" className="h-9">
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Nytt Fag
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80">
+                                <div className="grid gap-4">
+                                    <div className="space-y-2">
+                                        <h4 className="font-medium leading-none">Nytt Fag / Motpart</h4>
+                                        <p className="text-sm text-muted-foreground">Legg til en ny kolonne i matrisen.</p>
                                     </div>
-                                    <div className="grid grid-cols-3 items-center gap-4">
-                                        <Label>Farge</Label>
-                                        <div className="col-span-2 flex flex-wrap gap-1.5">
-                                            {PASTEL_COLORS.map(c => (
-                                                <div
-                                                    key={c}
-                                                    className={cn(
-                                                        "w-6 h-6 rounded-full cursor-pointer border-2 transition-all hover:scale-110",
-                                                        newColColor === c ? 'border-primary shadow-sm' : 'border-transparent'
-                                                    )}
-                                                    style={{ backgroundColor: c }}
-                                                    onClick={() => setNewColColor(c)}
-                                                />
-                                            ))}
+                                    <div className="grid gap-2">
+                                        <div className="grid grid-cols-3 items-center gap-4">
+                                            <Label htmlFor="name">Navn</Label>
+                                            <Input
+                                                id="name"
+                                                value={newColName}
+                                                onChange={(e) => setNewColName(e.target.value)}
+                                                className="col-span-2 h-8"
+                                                placeholder="F.eks. LÅS"
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-3 items-center gap-4">
+                                            <Label>Farge</Label>
+                                            <div className="col-span-2 flex flex-wrap gap-1.5">
+                                                {PASTEL_COLORS.map(c => (
+                                                    <div
+                                                        key={c}
+                                                        className={cn(
+                                                            "w-6 h-6 rounded-full cursor-pointer border-2 transition-all hover:scale-110",
+                                                            newColColor === c ? 'border-primary shadow-sm' : 'border-transparent'
+                                                        )}
+                                                        style={{ backgroundColor: c }}
+                                                        onClick={() => setNewColColor(c)}
+                                                    />
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
+                                    <Button onClick={handleAddColumn} size="sm">Lagre</Button>
                                 </div>
-                                <Button onClick={handleAddColumn} size="sm">Lagre</Button>
-                            </div>
-                        </PopoverContent>
-                    </Popover>
+                            </PopoverContent>
+                        </Popover>
 
-                    <Button variant="outline" size="sm" className="h-9" onClick={handleExport}>
-                        <FileDown className="mr-2 h-4 w-4" />
-                        PDF
-                    </Button>
-                    <Button onClick={handleImport} disabled={isImporting} size="sm" className="h-9">
-                        {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowDownToLine className="mr-2 h-4 w-4" />}
-                        Importer fra MC
-                    </Button>
+                        <Button variant="outline" size="sm" className="h-9" onClick={handleExport}>
+                            <FileDown className="mr-2 h-4 w-4" />
+                            PDF
+                        </Button>
+                        <Button onClick={handleImport} disabled={isImporting} size="sm" className="h-9">
+                            {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowDownToLine className="mr-2 h-4 w-4" />}
+                            Importer fra MC
+                        </Button>
+                    </div>
                 </div>
-            </div>
 
-            {/* Matrix Table */}
-            <Card className="overflow-hidden border shadow-sm bg-card">
-                <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="border-b hover:bg-transparent">
-                                <TableHead className="w-[300px] min-w-[300px] border-r bg-muted/30 sticky left-0 z-20">
-                                    <span className="font-semibold text-foreground px-2">System</span>
-                                </TableHead>
-                                {data.columns.map((col) => (
-                                    <TableHead
-                                        key={col.id}
-                                        className="text-center min-w-[180px] border-r px-0 py-0 h-auto"
-                                    >
-                                        <div
-                                            className="w-full h-full py-3 px-2 flex items-center justify-center font-bold text-sm tracking-wide shadow-sm"
-                                            style={{ backgroundColor: col.color, color: "#1a1a1a" }}
-                                        >
-                                            {col.discipline || col.customLabel}
-                                        </div>
+                {/* Matrix Table */}
+                <Card className="overflow-hidden border shadow-sm bg-card">
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="border-b hover:bg-transparent">
+                                    <TableHead className="w-[300px] min-w-[300px] border-r bg-muted/30 sticky left-0 z-20">
+                                        <span className="font-semibold text-foreground px-2 flex items-center gap-1">
+                                            System
+                                            <Tooltip>
+                                                <TooltipTrigger>
+                                                    <span className="text-destructive font-bold text-lg cursor-help leading-none pt-1">*</span>
+                                                </TooltipTrigger>
+                                                <TooltipContent className="max-w-xs">
+                                                    <p>Rød stjerne (*) indikerer ansvar som <strong>må</strong> fylles ut for at systemet skal regnes som komplett.</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </span>
                                     </TableHead>
-                                ))}
-                                <TableHead className="w-[60px] min-w-[60px] bg-muted/30 sticky right-0 z-20"></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {sortedRows.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={data.columns.length + 2} className="h-32 text-center text-muted-foreground">
-                                        Ingen systemer lagt til. Klikk "Importer fra MC" for å starte.
-                                    </TableCell>
+                                    {data.columns.map((col) => (
+                                        <TableHead
+                                            key={col.id}
+                                            className="text-center min-w-[180px] border-r px-0 py-0 h-auto"
+                                        >
+                                            <div
+                                                className="w-full h-full py-3 px-2 flex items-center justify-center font-bold text-sm tracking-wide shadow-sm"
+                                                style={{ backgroundColor: col.color, color: "#1a1a1a" }}
+                                            >
+                                                {col.discipline || col.customLabel}
+                                            </div>
+                                        </TableHead>
+                                    ))}
+                                    <TableHead className="w-[60px] min-w-[60px] bg-muted/30 sticky right-0 z-20"></TableHead>
                                 </TableRow>
-                            ) : (
-                                sortedRows.map((row) => (
-                                    <MatrixRowItem
-                                        key={row.id}
-                                        row={row}
-                                        columns={data.columns}
-                                        projectId={projectId}
-                                        onDelete={() => handleDeleteRow(row.id)}
-                                    />
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
-            </Card>
-        </div>
+                            </TableHeader>
+                            <TableBody>
+                                {sortedRows.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={data.columns.length + 2} className="h-32 text-center text-muted-foreground">
+                                            Ingen systemer lagt til. Klikk "Importer fra MC" for å starte.
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    sortedRows.map((row) => (
+                                        <MatrixRowItem
+                                            key={row.id}
+                                            row={row}
+                                            columns={data.columns}
+                                            projectId={projectId}
+                                            onDelete={() => handleDeleteRow(row.id)}
+                                        />
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </Card>
+            </div>
+        </TooltipProvider>
     );
 }
 
@@ -331,7 +349,7 @@ function MatrixRowItem({ row, columns, projectId, onDelete }: { row: MatrixRow; 
     return (
         <TableRow className="group border-b hover:bg-muted/30 transition-colors">
             {/* System Column - Sticky */}
-            <TableCell className="sticky left-0 z-10 bg-background group-hover:bg-muted/30 border-r align-top p-0 transition-colors">
+            <TableCell className="sticky left-0 z-10 bg-background border-r align-top p-0 transition-colors">
                 <div className="flex flex-col h-full min-h-[60px] p-4 relative">
                     <div className="flex items-start justify-between gap-2 mb-1">
                         <span className="font-mono font-semibold text-base tracking-tight text-foreground">
@@ -357,7 +375,7 @@ function MatrixRowItem({ row, columns, projectId, onDelete }: { row: MatrixRow; 
                                 onBlur={saveDescription}
                                 onKeyDown={(e) => e.key === 'Enter' && saveDescription()}
                                 autoFocus
-                                className="h-7 text-sm px-2 bg-background"
+                                className="h-7 text-sm px-2 bg-background z-20 relative"
                             />
                         ) : (
                             <div
@@ -498,7 +516,7 @@ function MatrixCellItem({ rowId, columnId, initialValues, color, projectId }: { 
                                             />
                                             <span className="flex-1">{tag}</span>
                                             {isMandatory && (
-                                                <span className="text-[10px] text-destructive bg-destructive/10 px-1.5 py-0.5 rounded font-medium">Påkrevd</span>
+                                                <span className="text-[14px] text-destructive leading-none font-bold pt-1">*</span>
                                             )}
                                         </CommandItem>
                                     );
