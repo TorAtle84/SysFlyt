@@ -76,6 +76,8 @@ async function main() {
     {
       id: "pft_start_stop_001",
       category: "START_STOP" as const,
+      systemGroup: "Generelt",
+      systemType: "Aggregat",
       systemPart: "Aggregat",
       function: "Normal start",
       testExecution: "Start anlegget via HMI/automatikk og verifiser at alle relevante komponenter starter i riktig rekkefølge.",
@@ -84,6 +86,8 @@ async function main() {
     {
       id: "pft_start_stop_002",
       category: "START_STOP" as const,
+      systemGroup: "Generelt",
+      systemType: "Aggregat",
       systemPart: "Aggregat",
       function: "Normal stopp",
       testExecution: "Stopp anlegget via HMI/automatikk og verifiser kontrollert nedstengning.",
@@ -92,6 +96,8 @@ async function main() {
     {
       id: "pft_security_001",
       category: "SECURITY" as const,
+      systemGroup: "Generelt",
+      systemType: "Sikkerhet",
       systemPart: "Sikkerhet",
       function: "Nødstop",
       testExecution: "Aktiver nødstop og verifiser at anlegget går til sikker tilstand.",
@@ -100,6 +106,8 @@ async function main() {
     {
       id: "pft_security_002",
       category: "SECURITY" as const,
+      systemGroup: "Generelt",
+      systemType: "Brann",
       systemPart: "Brann",
       function: "Brannsignal",
       testExecution: "Simuler brannsignal og verifiser at anlegget responderer iht. brannstrategi.",
@@ -108,6 +116,8 @@ async function main() {
     {
       id: "pft_regulation_001",
       category: "REGULATION" as const,
+      systemGroup: "Generelt",
+      systemType: "Regulering",
       systemPart: "Regulering",
       function: "Settpunkt og regulering",
       testExecution: "Endre settpunkt og verifiser at regulering følger og stabiliserer innen rimelig tid.",
@@ -116,6 +126,8 @@ async function main() {
     {
       id: "pft_regulation_002",
       category: "REGULATION" as const,
+      systemGroup: "Generelt",
+      systemType: "Sensorer",
       systemPart: "Sensorer",
       function: "Sensorverifikasjon",
       testExecution: "Sammenlign sensorverdier med referanse/kalibrert måling der det er relevant.",
@@ -124,6 +136,8 @@ async function main() {
     {
       id: "pft_external_001",
       category: "EXTERNAL" as const,
+      systemGroup: "Generelt",
+      systemType: "Integrasjoner",
       systemPart: "Integrasjoner",
       function: "Eksterne signaler",
       testExecution: "Verifiser mottak og sending av eksterne signaler (BMS/SD, brann, adgang) iht. I/O-liste.",
@@ -132,6 +146,8 @@ async function main() {
     {
       id: "pft_other_001",
       category: "OTHER" as const,
+      systemGroup: "Generelt",
+      systemType: "Dokumentasjon",
       systemPart: "Dokumentasjon",
       function: "Merking og sporbarhet",
       testExecution: "Verifiser at relevant merking, komponent-ID og referanser stemmer med tegning/systemskjema.",
@@ -145,6 +161,8 @@ async function main() {
         where: { id: t.id },
         update: {
           category: t.category,
+          systemGroup: t.systemGroup,
+          systemType: t.systemType,
           systemPart: t.systemPart,
           function: t.function,
           testExecution: t.testExecution,
@@ -155,6 +173,8 @@ async function main() {
         create: {
           id: t.id,
           category: t.category,
+          systemGroup: t.systemGroup,
+          systemType: t.systemType,
           systemPart: t.systemPart,
           function: t.function,
           testExecution: t.testExecution,

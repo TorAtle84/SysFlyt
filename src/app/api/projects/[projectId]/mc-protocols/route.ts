@@ -99,7 +99,12 @@ export async function POST(
         // without requiring a separate "generate" step.
         const predefinedFunctionTests = await prisma.predefinedFunctionTest.findMany({
             where: { isActive: true },
-            orderBy: [{ category: "asc" }, { systemPart: "asc" }, { function: "asc" }],
+            orderBy: [
+                { systemGroup: "asc" },
+                { systemType: "asc" },
+                { function: "asc" },
+                { category: "asc" },
+            ],
         }).catch(() => []);
 
         // 1. Fetch Document Components (The Source of Truth)

@@ -25,10 +25,17 @@ export async function GET() {
 
     const tests = await prisma.predefinedFunctionTest.findMany({
       where: { isActive: true },
-      orderBy: [{ category: "asc" }, { systemPart: "asc" }, { function: "asc" }],
+      orderBy: [
+        { systemGroup: "asc" },
+        { systemType: "asc" },
+        { function: "asc" },
+        { category: "asc" },
+      ],
       select: {
         id: true,
         category: true,
+        systemGroup: true,
+        systemType: true,
         systemPart: true,
         function: true,
         testExecution: true,
@@ -66,12 +73,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Ugyldig kategori" }, { status: 400 });
     }
 
-    const systemPart = String(body["systemPart"] ?? "").trim();
+    const systemGroup = String(body["systemGroup"] ?? "").trim();
+    const systemType = String(body["systemType"] ?? body["systemPart"] ?? "").trim();
     const functionName = String(body["function"] ?? "").trim();
     const testExecution = String(body["testExecution"] ?? "").trim();
     const acceptanceCriteria = String(body["acceptanceCriteria"] ?? "").trim();
 
-    if (!systemPart || !functionName || !testExecution || !acceptanceCriteria) {
+    if (!systemType || !functionName || !testExecution || !acceptanceCriteria) {
       return NextResponse.json(
         { error: "Alle felt må fylles ut" },
         { status: 400 }
@@ -81,7 +89,9 @@ export async function POST(request: NextRequest) {
     const created = await prisma.predefinedFunctionTest.create({
       data: {
         category,
-        systemPart,
+        systemGroup: systemGroup || null,
+        systemType,
+        systemPart: systemType,
         function: functionName,
         testExecution,
         acceptanceCriteria,
@@ -91,6 +101,8 @@ export async function POST(request: NextRequest) {
       select: {
         id: true,
         category: true,
+        systemGroup: true,
+        systemType: true,
         systemPart: true,
         function: true,
         testExecution: true,
@@ -149,8 +161,18 @@ export async function PUT(request: NextRequest) {
       data.category = category;
     }
 
-    if (body["systemPart"] !== undefined) {
-      data.systemPart = String(body["systemPart"] ?? "").trim();
+    if (body["systemGroup"] !== undefined) {
+      const value = String(body["systemGroup"] ?? "").trim();
+      data.systemGroup = value || null;
+    }
+
+    if (body["systemType"] !== undefined || body["systemPart"] !== undefined) {
+      const value = String(body["systemType"] ?? body["systemPart"] ?? "").trim();
+      if (!value) {
+        return NextResponse.json({ error: "Type kan ikke være tom" }, { status: 400 });
+      }
+      data.systemType = value;
+      data.systemPart = value;
     }
 
     if (body["function"] !== undefined) {
@@ -171,6 +193,8 @@ export async function PUT(request: NextRequest) {
       select: {
         id: true,
         category: true,
+        systemGroup: true,
+        systemType: true,
         systemPart: true,
         function: true,
         testExecution: true,
@@ -231,4 +255,3 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
-

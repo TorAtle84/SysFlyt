@@ -533,6 +533,8 @@ model FunctionTestRow {
 model PredefinedFunctionTest {
   id                 String               @id @default(cuid())
   category           FunctionTestCategory @default(OTHER)
+  systemGroup        String?
+  systemType         String?
   systemPart         String
   function           String
   testExecution      String

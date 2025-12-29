@@ -132,7 +132,12 @@ export async function POST(
 
     const predefinedTests = await prisma.predefinedFunctionTest.findMany({
       where: { isActive: true },
-      orderBy: [{ category: "asc" }, { systemPart: "asc" }, { function: "asc" }],
+      orderBy: [
+        { systemGroup: "asc" },
+        { systemType: "asc" },
+        { function: "asc" },
+        { category: "asc" },
+      ],
     });
 
     if (predefinedTests.length === 0) {

@@ -28,6 +28,7 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
+import * as XLSX from "xlsx";
 import { cn } from "@/lib/utils";
 import { normalizeSystemCode } from "@/lib/tfm-id";
 import { DISCIPLINES } from "@/lib/constants";
@@ -174,8 +175,26 @@ type FunctionTestData = {
 type PredefinedFunctionTestTemplate = {
   id: string;
   category: FunctionTestCategory;
+  systemGroup: string | null;
+  systemType: string | null;
   systemPart: string;
   function: string;
+  testExecution: string;
+  acceptanceCriteria: string;
+};
+
+type PredefinedFunctionTestInput = {
+  category: FunctionTestCategory;
+  systemGroup: string;
+  systemType: string;
+  function: string;
+  testExecution: string;
+  acceptanceCriteria: string;
+};
+
+type ImportedFunctionTestRow = {
+  functionName: string;
+  category: FunctionTestCategory;
   testExecution: string;
   acceptanceCriteria: string;
 };
@@ -227,6 +246,42 @@ function formatCategory(category: FunctionTestCategory) {
     default:
       return "Øvrig";
   }
+}
+
+function normalizeTemplateSystemGroup(template: PredefinedFunctionTestTemplate) {
+  const value = (template.systemGroup || "").trim();
+  return value || "Generelt";
+}
+
+function normalizeTemplateSystemType(template: PredefinedFunctionTestTemplate) {
+  const value = (template.systemType || "").trim();
+  if (value) return value;
+  const legacy = (template.systemPart || "").trim();
+  return legacy || "Ukjent type";
+}
+
+function formatTemplateSystemPart(template: PredefinedFunctionTestTemplate) {
+  const type = normalizeTemplateSystemType(template);
+  return type || normalizeTemplateSystemGroup(template);
+}
+
+function normalizeCategoryText(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
+}
+
+function mapCategoryLabel(value: string): FunctionTestCategory {
+  const normalized = normalizeCategoryText(value);
+  if (normalized.includes("start") || normalized.includes("stopp")) return "START_STOP";
+  if (normalized.includes("sikker") || normalized.includes("brann")) return "SECURITY";
+  if (normalized.includes("reguler")) return "REGULATION";
+  if (normalized.includes("ekstern")) return "EXTERNAL";
+  if (normalized.includes("ovrig") || normalized.includes("annet")) return "OTHER";
+  return "OTHER";
 }
 
 function statusLabel(status: FunctionTestRowStatus) {
@@ -286,6 +341,32 @@ const CATEGORY_ORDER: Record<FunctionTestCategory, number> = {
   OTHER: 4,
 };
 
+function sortPredefinedTests(a: PredefinedFunctionTestTemplate, b: PredefinedFunctionTestTemplate) {
+  const groupA = normalizeTemplateSystemGroup(a);
+  const groupB = normalizeTemplateSystemGroup(b);
+  if (groupA !== groupB) return groupA.localeCompare(groupB, "nb");
+
+  const typeA = normalizeTemplateSystemType(a);
+  const typeB = normalizeTemplateSystemType(b);
+  if (typeA !== typeB) return typeA.localeCompare(typeB, "nb");
+
+  const functionCompare = a.function.localeCompare(b.function, "nb");
+  if (functionCompare !== 0) return functionCompare;
+
+  return CATEGORY_ORDER[a.category] - CATEGORY_ORDER[b.category];
+}
+
+function upsertPredefinedTests(
+  tests: PredefinedFunctionTestTemplate[],
+  entry: PredefinedFunctionTestTemplate
+) {
+  const exists = tests.some((t) => t.id === entry.id);
+  const next = exists
+    ? tests.map((t) => (t.id === entry.id ? entry : t))
+    : [...tests, entry];
+  return next.sort(sortPredefinedTests);
+}
+
 const DEFAULT_ROW_CATEGORY_FILTERS: Record<FunctionTestCategory, boolean> = {
   START_STOP: true,
   SECURITY: true,
@@ -317,6 +398,7 @@ function errorMessage(error: unknown, fallback: string): string {
 export function FunctionTestDetail({ project, functionTest, members, userId, isAdmin }: FunctionTestDetailProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const adminImportInputRef = useRef<HTMLInputElement>(null);
   const responsiblesModalInitializedRef = useRef(false);
   const predefinedTestsInitializedRef = useRef(false);
 
@@ -388,6 +470,11 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
   const [predefinedTests, setPredefinedTests] = useState<PredefinedFunctionTestTemplate[]>([]);
   const [predefinedSearch, setPredefinedSearch] = useState("");
   const [predefinedCategory, setPredefinedCategory] = useState<"ALL" | FunctionTestCategory>("ALL");
+  const [templatePickerRow, setTemplatePickerRow] = useState<FunctionTestRow | null>(null);
+  const [templatePickerSystem, setTemplatePickerSystem] = useState("");
+  const [templatePickerType, setTemplatePickerType] = useState("");
+  const [templatePickerFunction, setTemplatePickerFunction] = useState("");
+  const [templatePickerSearch, setTemplatePickerSearch] = useState("");
 
   const [responsiblesOpen, setResponsiblesOpen] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -414,6 +501,76 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
   const [sendTargetSystemsLoading, setSendTargetSystemsLoading] = useState(false);
   const [sendSelectedSystemIds, setSendSelectedSystemIds] = useState<Set<string>>(new Set());
 
+  const templateTree = useMemo(() => {
+    const tree = new Map<string, Map<string, Map<string, PredefinedFunctionTestTemplate[]>>>();
+    for (const template of predefinedTests) {
+      const group = normalizeTemplateSystemGroup(template);
+      const type = normalizeTemplateSystemType(template);
+      const functionName = template.function.trim() || "Ukjent funksjon";
+      const groupMap = tree.get(group) ?? new Map();
+      const typeMap = groupMap.get(type) ?? new Map();
+      const list = typeMap.get(functionName) ?? [];
+      list.push(template);
+      typeMap.set(functionName, list);
+      groupMap.set(type, typeMap);
+      tree.set(group, groupMap);
+    }
+
+    for (const groupMap of tree.values()) {
+      for (const typeMap of groupMap.values()) {
+        for (const [fn, list] of typeMap.entries()) {
+          typeMap.set(
+            fn,
+            list.slice().sort((a, b) => CATEGORY_ORDER[a.category] - CATEGORY_ORDER[b.category])
+          );
+        }
+      }
+    }
+
+    return tree;
+  }, [predefinedTests]);
+
+  const templateSystemOptions = useMemo(
+    () => Array.from(templateTree.keys()).sort((a, b) => a.localeCompare(b, "nb")),
+    [templateTree]
+  );
+
+  const templateTypeOptions = useMemo(() => {
+    const map = templateTree.get(templatePickerSystem);
+    if (!map) return [];
+    return Array.from(map.keys()).sort((a, b) => a.localeCompare(b, "nb"));
+  }, [templateTree, templatePickerSystem]);
+
+  const templateFunctionOptions = useMemo(() => {
+    const map = templateTree.get(templatePickerSystem)?.get(templatePickerType);
+    if (!map) return [];
+    const query = templatePickerSearch.trim().toLowerCase();
+    const items = Array.from(map.keys()).sort((a, b) => a.localeCompare(b, "nb"));
+    if (!query) return items;
+    return items.filter((fn) => fn.toLowerCase().includes(query));
+  }, [templateTree, templatePickerSystem, templatePickerType, templatePickerSearch]);
+
+  const templateEntriesForFunction = useMemo(() => {
+    const map = templateTree.get(templatePickerSystem)?.get(templatePickerType);
+    return map?.get(templatePickerFunction) ?? [];
+  }, [templateTree, templatePickerSystem, templatePickerType, templatePickerFunction]);
+
+  const filteredAdminPredefinedTests = useMemo(() => {
+    if (!adminContextFilter) return adminPredefinedTests.slice().sort(sortPredefinedTests);
+    const targetFunction = adminContextFilter.functionName.trim().toLowerCase();
+    return adminPredefinedTests
+      .filter((t) => {
+        const groupMatch =
+          normalizeTemplateSystemGroup(t) === adminContextFilter.systemGroup;
+        const typeMatch =
+          normalizeTemplateSystemType(t) === adminContextFilter.systemType;
+        const functionMatch =
+          t.function.trim().toLowerCase() === targetFunction;
+        return groupMatch && typeMatch && functionMatch;
+      })
+      .sort(sortPredefinedTests);
+  }, [adminContextFilter, adminPredefinedTests]);
+
   // Admin modal state
   const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [adminPredefinedTests, setAdminPredefinedTests] = useState<PredefinedFunctionTestTemplate[]>([]);
@@ -421,11 +578,23 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
   const [adminEditingTest, setAdminEditingTest] = useState<PredefinedFunctionTestTemplate | null>(null);
   const [adminNewTest, setAdminNewTest] = useState({
     category: "OTHER" as FunctionTestCategory,
-    systemPart: "",
+    systemGroup: "",
+    systemType: "",
     function: "",
     testExecution: "",
     acceptanceCriteria: "",
   });
+  const [adminContextFilter, setAdminContextFilter] = useState<{
+    systemGroup: string;
+    systemType: string;
+    functionName: string;
+  } | null>(null);
+  const [adminImportRows, setAdminImportRows] = useState<ImportedFunctionTestRow[]>([]);
+  const [adminImportTarget, setAdminImportTarget] = useState<{
+    systemGroup: string;
+    systemType: string;
+    functionName: string;
+  } | null>(null);
   const adminModalInitializedRef = useRef(false);
 
   const stats = useMemo(() => {
@@ -541,7 +710,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
   }, [functionTest.id, members, project.id, responsibles, responsiblesOpen]);
 
   useEffect(() => {
-    if (!addRowOpen) return;
+    if (!addRowOpen && !templatePickerRow) return;
     if (predefinedTestsInitializedRef.current) return;
     predefinedTestsInitializedRef.current = true;
 
@@ -566,6 +735,8 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
               return {
                 id: String(t["id"]),
                 category,
+                systemGroup: t["systemGroup"] ? String(t["systemGroup"]) : null,
+                systemType: t["systemType"] ? String(t["systemType"]) : null,
                 systemPart: String(t["systemPart"] ?? ""),
                 function: String(t["function"] ?? ""),
                 testExecution: String(t["testExecution"] ?? ""),
@@ -579,7 +750,52 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
         setPredefinedTestsLoading(false);
       }
     })();
-  }, [addRowOpen]);
+  }, [addRowOpen, templatePickerRow]);
+
+  useEffect(() => {
+    if (!templatePickerRow || predefinedTests.length === 0) return;
+
+    const match = predefinedTests.find((t) => {
+      const functionMatch =
+        t.function.trim().toLowerCase() === templatePickerRow.function.trim().toLowerCase();
+      if (!functionMatch) return false;
+      const typeLabel = normalizeTemplateSystemType(t).toLowerCase();
+      const partLabel = (templatePickerRow.systemPart || "").trim().toLowerCase();
+      return !partLabel || typeLabel === partLabel;
+    });
+
+    const nextSystem = match
+      ? normalizeTemplateSystemGroup(match)
+      : templateSystemOptions[0] || "";
+    const availableTypes = templateTree.get(nextSystem);
+    const fallbackType =
+      match?.systemType?.trim() ||
+      match?.systemPart?.trim() ||
+      (availableTypes ? Array.from(availableTypes.keys())[0] : "");
+    const availableFunctions = availableTypes?.get(fallbackType);
+    const fallbackFunction =
+      match?.function ||
+      (availableFunctions ? Array.from(availableFunctions.keys())[0] : "");
+
+    setTemplatePickerSystem(nextSystem);
+    setTemplatePickerType(fallbackType);
+    setTemplatePickerFunction(fallbackFunction);
+    setTemplatePickerSearch("");
+  }, [predefinedTests, templatePickerRow, templateSystemOptions, templateTree]);
+
+  useEffect(() => {
+    if (!templatePickerSystem || templateTypeOptions.length === 0) return;
+    if (!templateTypeOptions.includes(templatePickerType)) {
+      setTemplatePickerType(templateTypeOptions[0]);
+    }
+  }, [templatePickerSystem, templateTypeOptions, templatePickerType]);
+
+  useEffect(() => {
+    if (!templatePickerType || templateFunctionOptions.length === 0) return;
+    if (!templateFunctionOptions.includes(templatePickerFunction)) {
+      setTemplatePickerFunction(templateFunctionOptions[0]);
+    }
+  }, [templatePickerType, templateFunctionOptions, templatePickerFunction]);
 
   // Admin modal - load predefined tests when opened
   useEffect(() => {
@@ -588,11 +804,15 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
       setAdminEditingTest(null);
       setAdminNewTest({
         category: "OTHER",
-        systemPart: "",
+        systemGroup: "",
+        systemType: "",
         function: "",
         testExecution: "",
         acceptanceCriteria: "",
       });
+      setAdminContextFilter(null);
+      setAdminImportRows([]);
+      setAdminImportTarget(null);
       return;
     }
 
@@ -615,6 +835,8 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
               return {
                 id: String(t["id"]),
                 category,
+                systemGroup: t["systemGroup"] ? String(t["systemGroup"]) : null,
+                systemType: t["systemType"] ? String(t["systemType"]) : null,
                 systemPart: String(t["systemPart"] ?? ""),
                 function: String(t["function"] ?? ""),
                 testExecution: String(t["testExecution"] ?? ""),
@@ -977,35 +1199,181 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
     printWindow.document.close();
   }
 
+  async function createPredefinedTest(payload: PredefinedFunctionTestInput) {
+    const res = await fetch("/api/function-tests/predefined", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "Kunne ikke opprette testmal");
+    return data.test as PredefinedFunctionTestTemplate;
+  }
+
+  function resolveAdminImportContext() {
+    const systemGroup = adminNewTest.systemGroup.trim() || adminImportTarget?.systemGroup || "";
+    const systemType = adminNewTest.systemType.trim() || adminImportTarget?.systemType || "";
+    const functionName = adminNewTest.function.trim() || adminImportTarget?.functionName || "";
+    return {
+      systemGroup,
+      systemType,
+      functionName,
+    };
+  }
+
+  async function handleAdminImportFile(file: File) {
+    const { systemType, functionName } = resolveAdminImportContext();
+    if (!systemType) {
+      toast.error("Velg Type før import");
+      return;
+    }
+
+    try {
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = sheetName ? workbook.Sheets[sheetName] : undefined;
+      if (!sheet) {
+        toast.error("Fant ingen ark i filen");
+        return;
+      }
+
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false }) as unknown[][];
+      const headerCell = rows[0]?.[0] ? String(rows[0][0]).toLowerCase() : "";
+      const hasHeader = headerCell.includes("funksjon");
+      const startIndex = hasHeader ? 1 : 0;
+
+      const parsed: ImportedFunctionTestRow[] = [];
+      for (let i = startIndex; i < rows.length; i += 1) {
+        const row = Array.isArray(rows[i]) ? rows[i] : [];
+        const rowFunction = String(row[0] ?? "").trim();
+        const categoryLabel = String(row[1] ?? "").trim();
+        const testExecution = String(row[2] ?? "").trim();
+        const acceptanceCriteria = String(row[3] ?? "").trim();
+
+        if (!rowFunction && !categoryLabel && !testExecution && !acceptanceCriteria) continue;
+        if (!rowFunction || !testExecution || !acceptanceCriteria) continue;
+
+        parsed.push({
+          functionName: rowFunction,
+          category: categoryLabel ? mapCategoryLabel(categoryLabel) : "OTHER",
+          testExecution,
+          acceptanceCriteria,
+        });
+      }
+
+      const filtered = functionName
+        ? parsed.filter(
+            (row) => row.functionName.trim().toLowerCase() === functionName.toLowerCase()
+          )
+        : parsed;
+
+      if (filtered.length === 0) {
+        toast.error("Fant ingen gyldige rader i importen");
+        return;
+      }
+
+      setAdminImportRows(filtered);
+    } catch (e: unknown) {
+      toast.error(errorMessage(e, "Kunne ikke lese Excel-fil"));
+    } finally {
+      if (adminImportInputRef.current) adminImportInputRef.current.value = "";
+    }
+  }
+
+  async function handleAdminImportSubmit() {
+    if (adminImportRows.length === 0) return;
+
+    const { systemGroup, systemType, functionName } = resolveAdminImportContext();
+    if (!systemType) {
+      toast.error("Velg Type før import");
+      return;
+    }
+
+    markBusy("admin:import", true);
+    try {
+      const results = await Promise.allSettled(
+        adminImportRows.map((row) => {
+          const fn = row.functionName || functionName;
+          if (!fn) {
+            return Promise.reject(new Error("Mangler funksjonsnavn"));
+          }
+          return createPredefinedTest({
+            category: row.category,
+            systemGroup,
+            systemType,
+            function: fn,
+            testExecution: row.testExecution,
+            acceptanceCriteria: row.acceptanceCriteria,
+          });
+        })
+      );
+
+      const created = results
+        .filter((r): r is PromiseFulfilledResult<PredefinedFunctionTestTemplate> => r.status === "fulfilled")
+        .map((r) => r.value);
+      const failed = results.filter((r) => r.status === "rejected");
+
+      if (created.length > 0) {
+        setAdminPredefinedTests((prev) => {
+          let next = prev.slice();
+          for (const entry of created) {
+            next = upsertPredefinedTests(next, entry);
+          }
+          return next;
+        });
+        setPredefinedTests((prev) => {
+          let next = prev.slice();
+          for (const entry of created) {
+            next = upsertPredefinedTests(next, entry);
+          }
+          return next;
+        });
+        setAdminImportRows([]);
+      }
+
+      if (failed.length > 0) {
+        toast.error(`Kunne ikke importere ${failed.length} rader`);
+      }
+      if (created.length > 0) {
+        toast.success(`Importerte ${created.length} testmaler`);
+      }
+    } catch (e: unknown) {
+      toast.error(errorMessage(e, "Kunne ikke importere testmaler"));
+    } finally {
+      markBusy("admin:import", false);
+    }
+  }
+
   async function adminCreatePredefinedTest() {
-    if (!adminNewTest.systemPart || !adminNewTest.function || !adminNewTest.testExecution || !adminNewTest.acceptanceCriteria) {
+    if (
+      !adminNewTest.systemType ||
+      !adminNewTest.function ||
+      !adminNewTest.testExecution ||
+      !adminNewTest.acceptanceCriteria
+    ) {
       toast.error("Alle felt må fylles ut");
       return;
     }
 
     markBusy("admin:create", true);
     try {
-      const res = await fetch("/api/function-tests/predefined", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(adminNewTest),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Kunne ikke opprette testmal");
-
-      const created = data.test as PredefinedFunctionTestTemplate;
-      setAdminPredefinedTests((prev) => [...prev, created].sort((a, b) => {
-        if (a.category !== b.category) return a.category.localeCompare(b.category);
-        if (a.systemPart !== b.systemPart) return a.systemPart.localeCompare(b.systemPart);
-        return a.function.localeCompare(b.function);
-      }));
-      setAdminNewTest({
-        category: "OTHER",
-        systemPart: "",
-        function: "",
+      const payload: PredefinedFunctionTestInput = {
+        category: adminNewTest.category,
+        systemGroup: adminNewTest.systemGroup.trim(),
+        systemType: adminNewTest.systemType.trim(),
+        function: adminNewTest.function.trim(),
+        testExecution: adminNewTest.testExecution.trim(),
+        acceptanceCriteria: adminNewTest.acceptanceCriteria.trim(),
+      };
+      const created = await createPredefinedTest(payload);
+      setAdminPredefinedTests((prev) => upsertPredefinedTests(prev, created));
+      setPredefinedTests((prev) => upsertPredefinedTests(prev, created));
+      setAdminNewTest((prev) => ({
+        ...prev,
         testExecution: "",
         acceptanceCriteria: "",
-      });
+      }));
       toast.success("Testmal opprettet");
     } catch (e: unknown) {
       toast.error(errorMessage(e, "Kunne ikke opprette testmal"));
@@ -1019,22 +1387,26 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
 
     markBusy(`admin:update:${adminEditingTest.id}`, true);
     try {
+      const payload: PredefinedFunctionTestInput & { id: string } = {
+        id: adminEditingTest.id,
+        category: adminEditingTest.category,
+        systemGroup: (adminEditingTest.systemGroup || "").trim(),
+        systemType: (adminEditingTest.systemType || "").trim(),
+        function: adminEditingTest.function.trim(),
+        testExecution: adminEditingTest.testExecution.trim(),
+        acceptanceCriteria: adminEditingTest.acceptanceCriteria.trim(),
+      };
       const res = await fetch("/api/function-tests/predefined", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(adminEditingTest),
+        body: JSON.stringify(payload),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Kunne ikke oppdatere testmal");
 
       const updated = data.test as PredefinedFunctionTestTemplate;
-      setAdminPredefinedTests((prev) =>
-        prev.map((t) => (t.id === updated.id ? updated : t)).sort((a, b) => {
-          if (a.category !== b.category) return a.category.localeCompare(b.category);
-          if (a.systemPart !== b.systemPart) return a.systemPart.localeCompare(b.systemPart);
-          return a.function.localeCompare(b.function);
-        })
-      );
+      setAdminPredefinedTests((prev) => upsertPredefinedTests(prev, updated));
+      setPredefinedTests((prev) => upsertPredefinedTests(prev, updated));
       setAdminEditingTest(null);
       toast.success("Testmal oppdatert");
     } catch (e: unknown) {
@@ -1054,11 +1426,43 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
       if (!res.ok) throw new Error(data.error || "Kunne ikke slette testmal");
 
       setAdminPredefinedTests((prev) => prev.filter((t) => t.id !== testId));
+      setPredefinedTests((prev) => prev.filter((t) => t.id !== testId));
       toast.success("Testmal slettet");
     } catch (e: unknown) {
       toast.error(errorMessage(e, "Kunne ikke slette testmal"));
     } finally {
       markBusy(`admin:delete:${testId}`, false);
+    }
+  }
+
+  function openAdminForFunction(
+    systemGroup: string,
+    systemType: string,
+    functionName: string,
+    mode: "create" | "edit" = "create"
+  ) {
+    setAdminModalOpen(true);
+    setAdminContextFilter({ systemGroup, systemType, functionName });
+    setAdminImportTarget({ systemGroup, systemType, functionName });
+    setAdminImportRows([]);
+    setAdminNewTest((prev) => ({
+      ...prev,
+      systemGroup,
+      systemType,
+      function: functionName,
+    }));
+
+    if (mode === "edit") {
+      const match = adminPredefinedTests.find((t) => {
+        const groupMatch = normalizeTemplateSystemGroup(t) === systemGroup;
+        const typeMatch = normalizeTemplateSystemType(t) === systemType;
+        const functionMatch =
+          t.function.trim().toLowerCase() === functionName.trim().toLowerCase();
+        return groupMatch && typeMatch && functionMatch;
+      });
+      setAdminEditingTest(match ?? null);
+    } else {
+      setAdminEditingTest(null);
     }
   }
 
@@ -1336,6 +1740,29 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
 
   async function handleRowFunctionCommit(rowId: string, value: string) {
     await patchRow(rowId, { function: value.trim() }, "Kunne ikke oppdatere funksjon");
+  }
+
+  async function applyTemplateToRow(
+    row: FunctionTestRow,
+    template: PredefinedFunctionTestTemplate
+  ) {
+    markBusy(`row:${row.id}`, true);
+    try {
+      const updated = await updateRow(row.id, {
+        category: template.category,
+        systemPart: formatTemplateSystemPart(template),
+        function: template.function,
+        testExecution: template.testExecution,
+        acceptanceCriteria: template.acceptanceCriteria,
+      });
+      setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, ...updated } : r)));
+      setTemplatePickerRow(null);
+      toast.success("Testmal brukt på raden");
+    } catch (e: unknown) {
+      toast.error(errorMessage(e, "Kunne ikke oppdatere testpunkt"));
+    } finally {
+      markBusy(`row:${row.id}`, false);
+    }
   }
 
   async function createRowFromTemplate(predefinedTestId: string) {
@@ -2204,18 +2631,32 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                       </TableCell>
 
                       <TableCell>
-                        <Input
-                          value={row.systemPart}
-                          onChange={(e) =>
-                            setRows((prev) =>
-                              prev.map((r) =>
-                                r.id === row.id ? { ...r, systemPart: e.target.value } : r
+                        <div className="flex items-center gap-1">
+                          <Input
+                            value={row.systemPart}
+                            onChange={(e) =>
+                              setRows((prev) =>
+                                prev.map((r) =>
+                                  r.id === row.id ? { ...r, systemPart: e.target.value } : r
+                                )
                               )
-                            )
-                          }
-                          onBlur={(e) => handleRowSystemPartCommit(row.id, e.target.value)}
-                          disabled={busy[`row:${row.id}`]}
-                        />
+                            }
+                            onBlur={(e) => handleRowSystemPartCommit(row.id, e.target.value)}
+                            disabled={busy[`row:${row.id}`]}
+                            className="h-9"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setTemplatePickerRow(row)}
+                            disabled={busy[`row:${row.id}`]}
+                            title="Velg funksjonstest"
+                          >
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
 
                       <TableCell>
@@ -2496,12 +2937,15 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                   .filter((t) => {
                     if (!q) return true;
                     return (
+                      normalizeTemplateSystemGroup(t).toLowerCase().includes(q) ||
+                      normalizeTemplateSystemType(t).toLowerCase().includes(q) ||
                       t.systemPart.toLowerCase().includes(q) ||
                       t.function.toLowerCase().includes(q) ||
                       t.testExecution.toLowerCase().includes(q) ||
                       t.acceptanceCriteria.toLowerCase().includes(q)
                     );
-                  });
+                  })
+                  .sort(sortPredefinedTests);
 
                 if (filtered.length === 0) {
                   return (
@@ -2520,10 +2964,11 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                             <Badge variant="outline" className="text-xs">
                               {formatCategory(t.category)}
                             </Badge>
-                            <div className="font-medium leading-snug">
-                              {t.systemPart} – {t.function}
-                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {normalizeTemplateSystemGroup(t)} · {normalizeTemplateSystemType(t)}
+                            </span>
                           </div>
+                          <div className="font-medium leading-snug">{t.function}</div>
                           <div className="text-sm text-muted-foreground line-clamp-2">
                             {t.testExecution}
                           </div>
@@ -2548,6 +2993,198 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddRowOpen(false)}>
+              Lukk
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!templatePickerRow}
+        onOpenChange={(open) => {
+          if (!open) setTemplatePickerRow(null);
+        }}
+      >
+        <DialogContent className="max-w-5xl">
+          <DialogHeader>
+            <DialogTitle>Velg funksjonstest</DialogTitle>
+            <DialogDescription>
+              Velg system, type og funksjon for{" "}
+              {templatePickerRow ? `${templatePickerRow.systemPart || "rad"} - ${templatePickerRow.function}` : "rad"}.
+            </DialogDescription>
+          </DialogHeader>
+
+          {predefinedTestsLoading ? (
+            <div className="p-6 text-sm text-muted-foreground">Henter testmaler...</div>
+          ) : templateSystemOptions.length === 0 ? (
+            <div className="p-6 text-sm text-muted-foreground">
+              Ingen testmaler er tilgjengelige ennå.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-sm text-muted-foreground">System</label>
+                  <Select
+                    value={templatePickerSystem}
+                    onValueChange={setTemplatePickerSystem}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Velg system" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {templateSystemOptions.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-muted-foreground">Type</label>
+                  <Select
+                    value={templatePickerType}
+                    onValueChange={setTemplatePickerType}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Velg type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {templateTypeOptions.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+                <div className="space-y-2">
+                  <label className="text-sm text-muted-foreground">Funksjon</label>
+                  <Input
+                    placeholder="Søk funksjon..."
+                    value={templatePickerSearch}
+                    onChange={(e) => setTemplatePickerSearch(e.target.value)}
+                  />
+                  <div className="max-h-[320px] overflow-y-auto rounded-lg border border-border">
+                    {templateFunctionOptions.length === 0 ? (
+                      <div className="p-4 text-sm text-muted-foreground">
+                        Ingen funksjoner matcher valget.
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-border">
+                        {templateFunctionOptions.map((fn) => {
+                          const isActive = fn === templatePickerFunction;
+                          return (
+                            <div
+                              key={fn}
+                              className={cn(
+                                "flex items-center justify-between gap-2 px-3 py-2",
+                                isActive ? "bg-muted" : "hover:bg-muted/50"
+                              )}
+                            >
+                              <button
+                                type="button"
+                                className="flex-1 text-left text-sm font-medium"
+                                onClick={() => setTemplatePickerFunction(fn)}
+                              >
+                                {fn}
+                              </button>
+                              {isAdmin && (
+                                <div className="flex items-center gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openAdminForFunction(
+                                        templatePickerSystem,
+                                        templatePickerType,
+                                        fn,
+                                        "create"
+                                      );
+                                    }}
+                                    title="Legg til testprosedyre"
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openAdminForFunction(
+                                        templatePickerSystem,
+                                        templatePickerType,
+                                        fn,
+                                        "edit"
+                                      );
+                                    }}
+                                    title="Rediger testprosedyre"
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm text-muted-foreground">Testmaler</label>
+                  <div className="rounded-lg border border-border">
+                    {templateEntriesForFunction.length === 0 ? (
+                      <div className="p-4 text-sm text-muted-foreground">
+                        Velg en funksjon for å se testmaler.
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-border">
+                        {templateEntriesForFunction.map((template) => (
+                          <div key={template.id} className="space-y-2 p-4">
+                            <div className="flex items-center justify-between gap-3">
+                              <Badge variant="outline" className="text-xs">
+                                {formatCategory(template.category)}
+                              </Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  if (templatePickerRow) {
+                                    applyTemplateToRow(templatePickerRow, template);
+                                  }
+                                }}
+                                disabled={templatePickerRow ? busy[`row:${templatePickerRow.id}`] : false}
+                              >
+                                Bruk
+                              </Button>
+                            </div>
+                            <div className="text-sm text-muted-foreground whitespace-pre-line">
+                              {template.testExecution}
+                            </div>
+                            <div className="text-xs text-muted-foreground whitespace-pre-line">
+                              {template.acceptanceCriteria}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTemplatePickerRow(null)}>
               Lukk
             </Button>
           </DialogFooter>
@@ -3141,35 +3778,58 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
               {/* Existing tests list */}
               <div className="space-y-3">
                 <div className="text-sm font-medium">Eksisterende tester</div>
+                {adminContextFilter && (
+                  <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs">
+                    <span>
+                      Filtrert: {adminContextFilter.systemGroup} · {adminContextFilter.systemType} ·{" "}
+                      {adminContextFilter.functionName}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setAdminContextFilter(null)}
+                    >
+                      Vis alle
+                    </Button>
+                  </div>
+                )}
                 <div className="rounded-lg border border-border">
                   {adminPredefinedTestsLoading ? (
                     <div className="p-6 text-center text-sm text-muted-foreground">
                       Henter testmaler...
                     </div>
-                  ) : adminPredefinedTests.length === 0 ? (
+                  ) : filteredAdminPredefinedTests.length === 0 ? (
                     <div className="p-6 text-center text-sm text-muted-foreground">
-                      Ingen predefinerte tester finnes ennå.
+                      {adminContextFilter
+                        ? "Ingen testmaler matcher filteret."
+                        : "Ingen predefinerte tester finnes ennå."}
                     </div>
                   ) : (
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead className="w-[140px]">System</TableHead>
+                          <TableHead className="w-[160px]">Type</TableHead>
+                          <TableHead className="w-[200px]">Funksjon</TableHead>
                           <TableHead className="w-[120px]">Kategori</TableHead>
-                          <TableHead className="w-[150px]">Systemdel</TableHead>
-                          <TableHead className="w-[150px]">Funksjon</TableHead>
                           <TableHead className="w-[80px]">Handlinger</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {adminPredefinedTests.map((test) => (
+                        {filteredAdminPredefinedTests.map((test) => (
                           <TableRow key={test.id}>
+                            <TableCell className="text-sm">
+                              {normalizeTemplateSystemGroup(test)}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {normalizeTemplateSystemType(test)}
+                            </TableCell>
+                            <TableCell className="text-sm">{test.function}</TableCell>
                             <TableCell>
                               <Badge variant="outline" className="text-xs">
                                 {formatCategory(test.category)}
                               </Badge>
                             </TableCell>
-                            <TableCell className="text-sm">{test.systemPart}</TableCell>
-                            <TableCell className="text-sm">{test.function}</TableCell>
                             <TableCell>
                               <div className="flex items-center gap-1">
                                 <Button
@@ -3238,11 +3898,24 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm text-muted-foreground">Systemdel</label>
+                      <label className="text-sm text-muted-foreground">System</label>
                       <Input
-                        value={adminEditingTest.systemPart}
+                        value={adminEditingTest.systemGroup ?? ""}
                         onChange={(e) =>
-                          setAdminEditingTest((prev) => prev ? { ...prev, systemPart: e.target.value } : prev)
+                          setAdminEditingTest((prev) =>
+                            prev ? { ...prev, systemGroup: e.target.value } : prev
+                          )
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-muted-foreground">Type</label>
+                      <Input
+                        value={adminEditingTest.systemType ?? adminEditingTest.systemPart}
+                        onChange={(e) =>
+                          setAdminEditingTest((prev) =>
+                            prev ? { ...prev, systemType: e.target.value } : prev
+                          )
                         }
                       />
                     </div>
@@ -3251,7 +3924,9 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                       <Input
                         value={adminEditingTest.function}
                         onChange={(e) =>
-                          setAdminEditingTest((prev) => prev ? { ...prev, function: e.target.value } : prev)
+                          setAdminEditingTest((prev) =>
+                            prev ? { ...prev, function: e.target.value } : prev
+                          )
                         }
                       />
                     </div>
@@ -3315,19 +3990,33 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm text-muted-foreground">Systemdel</label>
+                      <label className="text-sm text-muted-foreground">System</label>
                       <Input
-                        placeholder="f.eks. Brannspjeld"
-                        value={adminNewTest.systemPart}
-                        onChange={(e) => setAdminNewTest((prev) => ({ ...prev, systemPart: e.target.value }))}
+                        placeholder="f.eks. Ventilasjon"
+                        value={adminNewTest.systemGroup}
+                        onChange={(e) =>
+                          setAdminNewTest((prev) => ({ ...prev, systemGroup: e.target.value }))
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-muted-foreground">Type</label>
+                      <Input
+                        placeholder="f.eks. Avkastsystemer"
+                        value={adminNewTest.systemType}
+                        onChange={(e) =>
+                          setAdminNewTest((prev) => ({ ...prev, systemType: e.target.value }))
+                        }
                       />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm text-muted-foreground">Funksjon</label>
                       <Input
-                        placeholder="f.eks. Lukking"
+                        placeholder="f.eks. Avkastvifte, drift og feil"
                         value={adminNewTest.function}
-                        onChange={(e) => setAdminNewTest((prev) => ({ ...prev, function: e.target.value }))}
+                        onChange={(e) =>
+                          setAdminNewTest((prev) => ({ ...prev, function: e.target.value }))
+                        }
                       />
                     </div>
                   </div>
@@ -3348,6 +4037,66 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
                       onChange={(e) => setAdminNewTest((prev) => ({ ...prev, acceptanceCriteria: e.target.value }))}
                       className="min-h-[80px]"
                     />
+                  </div>
+                  <div className="space-y-3 rounded-lg border border-dashed border-border p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm font-medium">Importer testprosedyre (Excel)</div>
+                      {adminImportRows.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setAdminImportRows([])}
+                        >
+                          Tøm
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Mal: TestutførelsesMal.xlsx (Funksjon, Kategori, Testutførelse, Akseptkriterier).
+                    </p>
+                    <div className="text-xs text-muted-foreground">
+                      Import til: {resolveAdminImportContext().systemGroup || "-"} ·{" "}
+                      {resolveAdminImportContext().systemType || "-"} ·{" "}
+                      {resolveAdminImportContext().functionName || "Alle funksjoner"}
+                    </div>
+                    <Input
+                      ref={adminImportInputRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleAdminImportFile(file);
+                      }}
+                    />
+                    {adminImportRows.length > 0 && (
+                      <div className="space-y-3">
+                        <div className="max-h-48 overflow-y-auto rounded-lg border border-border">
+                          <div className="divide-y divide-border">
+                            {adminImportRows.map((row, idx) => (
+                              <div key={`${row.functionName}-${idx}`} className="space-y-1 p-3">
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="text-sm font-medium">{row.functionName}</div>
+                                  <Badge variant="outline" className="text-xs">
+                                    {formatCategory(row.category)}
+                                  </Badge>
+                                </div>
+                                <div className="text-xs text-muted-foreground line-clamp-2">
+                                  {row.testExecution}
+                                </div>
+                                <div className="text-xs text-muted-foreground line-clamp-2">
+                                  {row.acceptanceCriteria}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex justify-end">
+                          <Button onClick={handleAdminImportSubmit} disabled={busy["admin:import"]}>
+                            {busy["admin:import"] ? "Importerer..." : `Importer ${adminImportRows.length}`}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex justify-end gap-2">
                     <Button
