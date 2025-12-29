@@ -391,8 +391,8 @@ export async function generatePlansystemPdf({ projectName, tests, generatedAt }:
         maxWidth: page.getWidth() - margin * 2 - 14,
       });
 
-      // Only show delansvarlige and forutsetninger once per function test (on first phase)
-      if (item.isFirstForSystem) {
+      // Only show delansvarlige and forutsetninger under Funksjonstest phase
+      if (item.phase === "funksjonstest") {
         const participants = item.responsibles.map((r) => {
           const user = r.user ? ` (${formatUserName(r.user)})` : "";
           return `${r.systemCode} - ${r.discipline}${user}`;
