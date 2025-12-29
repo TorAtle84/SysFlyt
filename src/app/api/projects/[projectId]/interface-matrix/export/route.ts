@@ -40,7 +40,7 @@ export async function GET(
             projectName: project.name,
         });
 
-        return new NextResponse(pdfBytes, {
+        return new NextResponse(Buffer.from(pdfBytes), {
             headers: {
                 "Content-Type": "application/pdf",
                 "Content-Disposition": `attachment; filename="Grensesnittmatrise - ${project.name}.pdf"`,
