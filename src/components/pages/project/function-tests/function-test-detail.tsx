@@ -2337,7 +2337,8 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
         original.discipline.trim() !== r.discipline ||
         (original.systemOwnerDiscipline || null) !== (r.systemOwnerDiscipline || null) ||
         (original.testParticipation || null) !== (r.testParticipation || null) ||
-        (original.userId || null) !== (r.userId || null)
+        (original.userId || null) !== (r.userId || null) ||
+        (original.prerequisites || null) !== (r.prerequisites || null)
       );
     });
 
@@ -2370,6 +2371,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
               systemOwnerDiscipline: r.systemOwnerDiscipline,
               testParticipation: r.testParticipation,
               userId: r.userId,
+              prerequisites: r.prerequisites,
             }),
           }
         );
@@ -2390,6 +2392,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
               testParticipation: r.testParticipation,
               userId: r.userId,
               isAutoDetected: r.isAutoDetected,
+              prerequisites: r.prerequisites,
             }),
           }
         );

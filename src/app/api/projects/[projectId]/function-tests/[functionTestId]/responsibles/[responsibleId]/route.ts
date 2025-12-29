@@ -86,6 +86,10 @@ export async function PUT(
       const value = body["userId"];
       data.userId = value ? String(value) : null;
     }
+    if (body["prerequisites"] !== undefined) {
+      const value = body["prerequisites"];
+      data.prerequisites = value ? String(value) : null;
+    }
 
     const updated = await prisma.functionTestResponsible.update({
       where: { id: responsibleId },

@@ -97,6 +97,7 @@ export async function POST(
     const testParticipation = body?.testParticipation ? String(body.testParticipation).trim() : null;
     const userId = body?.userId ? String(body.userId) : null;
     const isAutoDetected = Boolean(body?.isAutoDetected);
+    const prerequisites = body?.prerequisites ? String(body.prerequisites) : null;
 
     if (!systemCode) {
       return NextResponse.json({ error: "systemCode er påkrevd" }, { status: 400 });
@@ -119,6 +120,7 @@ export async function POST(
         testParticipation,
         userId,
         isAutoDetected,
+        prerequisites,
       },
       include: { user: { select: { id: true, firstName: true, lastName: true } } },
     });
