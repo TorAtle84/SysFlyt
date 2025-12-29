@@ -1123,9 +1123,11 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
 
     const testDate = startDate ? format(startDate, "dd.MM.yyyy") : "-";
     const systemOwnerMember = systemOwnerId ? members.find((m) => m.id === systemOwnerId) : null;
-    const systemOwnerName = systemOwnerMember
-      ? `${systemOwnerMember.firstName} ${systemOwnerMember.lastName}`
-      : "-";
+    const systemOwnerName = systemOwnerDiscipline
+      ? systemOwnerDiscipline
+      : systemOwnerMember
+        ? `${systemOwnerMember.firstName} ${systemOwnerMember.lastName}`
+        : "-";
 
     // Group rows by category
     const rowsByCategory = FUNCTION_TEST_CATEGORIES.reduce((acc, cat) => {
@@ -1254,7 +1256,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
           <thead>
             <tr>
               <th>System</th>
-              <th>Disiplin</th>
+              <th>Fag</th>
               <th>Ansvarlig</th>
             </tr>
           </thead>
