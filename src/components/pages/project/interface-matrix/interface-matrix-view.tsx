@@ -269,7 +269,7 @@ export function InterfaceMatrixView() {
                         <Table>
                             <TableHeader>
                                 <TableRow className="border-b hover:bg-transparent">
-                                    <TableHead className="w-[300px] min-w-[300px] border-r bg-muted/30 sticky left-0 z-20">
+                                    <TableHead className="w-[300px] min-w-[300px] border-r bg-card sticky left-0 z-20">
                                         <span className="font-semibold text-foreground px-2 flex items-center gap-1">
                                             System
                                             <Tooltip>
@@ -295,7 +295,7 @@ export function InterfaceMatrixView() {
                                             </div>
                                         </TableHead>
                                     ))}
-                                    <TableHead className="w-[60px] min-w-[60px] bg-muted/30 sticky right-0 z-20"></TableHead>
+                                    <TableHead className="w-[60px] min-w-[60px] bg-card sticky right-0 z-20"></TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -349,7 +349,7 @@ function MatrixRowItem({ row, columns, projectId, onDelete }: { row: MatrixRow; 
     return (
         <TableRow className="group border-b hover:bg-muted/30 transition-colors">
             {/* System Column - Sticky */}
-            <TableCell className="sticky left-0 z-10 bg-background border-r align-top p-0 transition-colors">
+            <TableCell className="sticky left-0 z-10 bg-card border-r align-top p-0 transition-colors">
                 <div className="flex flex-col h-full min-h-[60px] p-4 relative">
                     <div className="flex items-start justify-between gap-2 mb-1">
                         <span className="font-mono font-semibold text-base tracking-tight text-foreground">
@@ -413,7 +413,7 @@ function MatrixRowItem({ row, columns, projectId, onDelete }: { row: MatrixRow; 
             })}
 
             {/* Delete Action Column */}
-            <TableCell className="sticky right-0 z-10 bg-background group-hover:bg-muted/30 p-2 align-middle text-center transition-colors">
+            <TableCell className="sticky right-0 z-10 bg-card p-2 align-middle text-center transition-colors">
                 <Button
                     variant="ghost"
                     size="icon"
