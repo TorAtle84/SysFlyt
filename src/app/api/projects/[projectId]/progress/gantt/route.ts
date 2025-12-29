@@ -80,83 +80,100 @@ export async function GET(
         });
 
         for (const ft of functionTests) {
-            // Parse dates from JSON field - structure is: { ioTesting: { start, end }, egentest: { start, end }, funksjonstest: { start, end } }
+            // Parse dates from JSON field
             const dates = ft.dates as Record<string, { start?: string; end?: string }> | null;
-
             // Helper to parse date string
             const parseDate = (dateStr?: string) => dateStr ? new Date(dateStr) : null;
 
-            // Extract all valid dates from all phases
-            const allStartDates: Date[] = [];
-            const allEndDates: Date[] = [];
-            const phases: string[] = [];
+            let hasEmitted = false;
+            let earliestDate: Date | null = null;
 
-            if (dates && typeof dates === 'object') {
-                for (const [phase, phaseData] of Object.entries(dates)) {
-                    if (phaseData && typeof phaseData === 'object') {
-                        const start = parseDate(phaseData.start);
-                        const end = parseDate(phaseData.end);
-                        if (start && !isNaN(start.getTime())) {
-                            allStartDates.push(start);
-                            phases.push(phase);
-                        }
-                        if (end && !isNaN(end.getTime())) {
-                            allEndDates.push(end);
+            const phases = [
+                { key: "ioTesting", label: "I/O-test" },
+                { key: "egentest", label: "Egentest" },
+                { key: "funksjonstest", label: "Funksjonstest" }
+            ] as const;
+
+            // 1. Create items for each phase with dates
+            if (dates) {
+                for (const phase of phases) {
+                    const phaseData = dates[phase.key];
+                    const startRaw = phaseData?.start;
+                    const endRaw = phaseData?.end;
+
+                    if (startRaw) {
+                        const startDate = parseDate(startRaw);
+                        const endDate = parseDate(endRaw) || startDate;
+
+                        if (startDate && !isNaN(startDate.getTime())) {
+                            if (!earliestDate || startDate < earliestDate) {
+                                earliestDate = startDate;
+                            }
+
+                            // Calculate status for this phase
+                            let phaseRows = ft.rows;
+                            if (phase.key === "egentest") {
+                                phaseRows = ft.rows.filter(r => r.testParticipation === "Egentest" || r.testParticipation === "Begge");
+                            } else if (phase.key === "funksjonstest") {
+                                phaseRows = ft.rows.filter(r => r.testParticipation === "Funksjonstest" || r.testParticipation === "Begge");
+                            }
+                            // ioTesting uses all rows
+
+                            const totalRows = phaseRows.length;
+                            const completedRows = phaseRows.filter(r => r.status === "COMPLETED").length;
+                            let status = "NOT_STARTED";
+                            if (totalRows > 0) {
+                                if (completedRows === totalRows) status = "COMPLETED";
+                                else if (completedRows > 0) status = "IN_PROGRESS";
+                            }
+
+                            items.push({
+                                id: `${ft.id}-${phase.key}`,
+                                type: "FUNCTION_TEST",
+                                systemCode: ft.systemCode,
+                                systemName: ft.systemName,
+                                subType: phase.label,
+                                startDate: startDate.toISOString(),
+                                endDate: endDate ? endDate.toISOString() : null,
+                                status,
+                                href: `/projects/${projectId}/protocols/function-tests/${ft.id}`,
+                            });
+                            hasEmitted = true;
                         }
                     }
                 }
             }
 
-            // Get earliest start and latest end
-            const startDate = allStartDates.length > 0
-                ? new Date(Math.min(...allStartDates.map(d => d.getTime())))
-                : null;
-            const endDate = allEndDates.length > 0
-                ? new Date(Math.max(...allEndDates.map(d => d.getTime())))
-                : null;
+            // 2. If no scheduled phases, add a generic unscheduled item
+            if (!hasEmitted) {
+                // Calculate overall status
+                const totalRows = ft.rows.length;
+                const completedRows = ft.rows.filter((r) => r.status === "COMPLETED").length;
+                const status = totalRows === 0
+                    ? "NOT_STARTED"
+                    : completedRows === totalRows
+                        ? "COMPLETED"
+                        : completedRows > 0
+                            ? "IN_PROGRESS"
+                            : "NOT_STARTED";
 
-            // Map phase keys to human-readable labels
-            const phaseLabels: Record<string, string> = {
-                ioTesting: "I/O Test",
-                egentest: "Egentest",
-                funksjonstest: "Funksjonstest",
-            };
+                items.push({
+                    id: ft.id,
+                    type: "FUNCTION_TEST",
+                    systemCode: ft.systemCode,
+                    systemName: ft.systemName,
+                    subType: "Funksjonstest",
+                    startDate: null,
+                    endDate: null,
+                    status,
+                    href: `/projects/${projectId}/protocols/function-tests/${ft.id}`,
+                });
+            }
 
-            // Get the primary phase label (prioritize funksjonstest > egentest > ioTesting)
-            const phaseOrder = ["funksjonstest", "egentest", "ioTesting"];
-            const primaryPhase = phaseOrder.find(p => phases.includes(p)) || phases[0];
-            const subType = primaryPhase ? phaseLabels[primaryPhase] || primaryPhase : undefined;
-
-            // Derive status from rows
-            const totalRows = ft.rows.length;
-            const completedRows = ft.rows.filter((r) => r.status === "COMPLETED").length;
-            const status = totalRows === 0
-                ? "NOT_STARTED"
-                : completedRows === totalRows
-                    ? "COMPLETED"
-                    : completedRows > 0
-                        ? "IN_PROGRESS"
-                        : "NOT_STARTED";
-
-            items.push({
-                id: ft.id,
-                type: "FUNCTION_TEST",
-                systemCode: ft.systemCode,
-                systemName: ft.systemName,
-                subType,
-                startDate: startDate?.toISOString() || null,
-                endDate: endDate?.toISOString() || null,
-                status,
-                href: `/projects/${projectId}/protocols/function-tests/${ft.id}`,
-            });
-
-            // Add Programansvarlig milestone (3 weeks = 15 business days before I/O test or earliest date)
-            if (startDate) {
-                // Try to get I/O test start date, fallback to earliest date
-                const ioTestStart = dates?.ioTesting?.start
-                    ? parseDate(dates.ioTesting.start)
-                    : null;
-                const referenceDate = ioTestStart || startDate;
+            // 3. Add Programansvarlig milestone (15 business days before I/O test or earliest date)
+            if (earliestDate) {
+                const ioTestStart = parseDate(dates?.ioTesting?.start);
+                const referenceDate = ioTestStart || earliestDate;
 
                 // Calculate 15 business days before reference date
                 const programansvarligDate = subtractBusinessDays(referenceDate, 15);
