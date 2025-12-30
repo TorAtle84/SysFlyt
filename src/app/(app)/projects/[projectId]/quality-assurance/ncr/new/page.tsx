@@ -27,11 +27,11 @@ type Member = {
 };
 
 const STATUS_OPTIONS = [
-  { value: "IN_PROGRESS", label: "P\u00e5g\u00e5r" },
+  { value: "IN_PROGRESS", label: "Pågår" },
   { value: "DEVIATION", label: "Avvik" },
   { value: "CANCELED", label: "Avlyst" },
   { value: "REMEDIATED", label: "Utbedret" },
-  { value: "COMPLETED", label: "Fullf\u00f8rt" },
+  { value: "COMPLETED", label: "Fullført" },
 ];
 
 const CATEGORY_OPTIONS = [
@@ -45,7 +45,7 @@ const CATEGORY_OPTIONS = [
 const SEVERITY_OPTIONS = [
   { value: "LOW", label: "Lav" },
   { value: "MEDIUM", label: "Middels" },
-  { value: "HIGH", label: "H\u00f8y" },
+  { value: "HIGH", label: "Høy" },
   { value: "CRITICAL", label: "Kritisk" },
 ];
 
@@ -113,7 +113,7 @@ export default function NcrCreatePage() {
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      toast.error("Tittel er p\u00e5krevd");
+      toast.error("Tittel er påkrevd");
       return;
     }
 
@@ -271,12 +271,12 @@ export default function NcrCreatePage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="rootCause">Rot\u00e5rsak</Label>
+            <Label htmlFor="rootCause">Rotårsak</Label>
             <Textarea
               id="rootCause"
               value={rootCause}
               onChange={(event) => setRootCause(event.target.value)}
-              placeholder="Hva er \u00e5rsaken til avviket?"
+              placeholder="Hva er årsaken til avviket?"
               className="min-h-[100px]"
             />
           </div>
@@ -286,7 +286,7 @@ export default function NcrCreatePage() {
               id="corrective"
               value={corrective}
               onChange={(event) => setCorrective(event.target.value)}
-              placeholder="Tiltak som l\u00f8ser avviket"
+              placeholder="Tiltak som løser avviket"
               className="min-h-[100px]"
             />
           </div>

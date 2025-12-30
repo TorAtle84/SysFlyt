@@ -58,11 +58,11 @@ type NcrResponse = {
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  IN_PROGRESS: "P\u00e5g\u00e5r",
+  IN_PROGRESS: "Pågår",
   DEVIATION: "Avvik",
   CANCELED: "Avlyst",
   REMEDIATED: "Utbedret",
-  COMPLETED: "Fullf\u00f8rt",
+  COMPLETED: "Fullført",
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -76,7 +76,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 const SEVERITY_LABELS: Record<string, string> = {
   LOW: "Lav",
   MEDIUM: "Middels",
-  HIGH: "H\u00f8y",
+  HIGH: "Høy",
   CRITICAL: "Kritisk",
 };
 
@@ -172,7 +172,7 @@ export default function NcrListPage() {
         <div>
           <h1 className="text-2xl font-bold">Avvik (NCR)</h1>
           <p className="text-muted-foreground">
-            Registrer og f\u00f8lg opp avvik i prosjektet
+            Registrer og følg opp avvik i prosjektet
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -214,12 +214,12 @@ export default function NcrListPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Fullf\u00f8rt
+              Fullført
             </CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
             <div className="text-2xl font-semibold">{headerSummary.completed}</div>
-            <Badge tone="success">Fullf\u00f8rt</Badge>
+            <Badge tone="success">Fullført</Badge>
           </CardContent>
         </Card>
       </div>
@@ -231,7 +231,7 @@ export default function NcrListPage() {
             <div className="relative md:col-span-2">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="S\u00f8k etter tittel eller navn..."
+                placeholder="Søk etter tittel eller navn..."
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 className="pl-9"

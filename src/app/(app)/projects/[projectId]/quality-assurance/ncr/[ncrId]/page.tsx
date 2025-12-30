@@ -58,11 +58,11 @@ type NcrDetails = {
 };
 
 const STATUS_OPTIONS = [
-  { value: "IN_PROGRESS", label: "P\u00e5g\u00e5r" },
+  { value: "IN_PROGRESS", label: "Pågår" },
   { value: "DEVIATION", label: "Avvik" },
   { value: "CANCELED", label: "Avlyst" },
   { value: "REMEDIATED", label: "Utbedret" },
-  { value: "COMPLETED", label: "Fullf\u00f8rt" },
+  { value: "COMPLETED", label: "Fullført" },
 ];
 
 const CATEGORY_OPTIONS = [
@@ -76,7 +76,7 @@ const CATEGORY_OPTIONS = [
 const SEVERITY_OPTIONS = [
   { value: "LOW", label: "Lav" },
   { value: "MEDIUM", label: "Middels" },
-  { value: "HIGH", label: "H\u00f8y" },
+  { value: "HIGH", label: "Høy" },
   { value: "CRITICAL", label: "Kritisk" },
 ];
 
@@ -175,11 +175,11 @@ export default function NcrDetailPage() {
   const handleSave = async () => {
     if (!ncr) return;
     if (!title.trim()) {
-      toast.error("Tittel er p\u00e5krevd");
+      toast.error("Tittel er påkrevd");
       return;
     }
     if (status === "COMPLETED" && canSetCompleted && !corrective.trim()) {
-      toast.error("Korrigerende tiltak er p\u00e5krevd f\u00f8r fullf\u00f8ring");
+      toast.error("Korrigerende tiltak er påkrevd før fullføring");
       return;
     }
 
@@ -402,7 +402,7 @@ export default function NcrDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="rootCause">Rot\u00e5rsak</Label>
+                <Label htmlFor="rootCause">Rotårsak</Label>
                 <Textarea
                   id="rootCause"
                   value={rootCause}
@@ -424,7 +424,7 @@ export default function NcrDetailPage() {
 
           <div className="flex flex-wrap items-center gap-3">
             <Button variant="outline" onClick={() => setPhotosOpen(true)}>
-              H\u00e5ndter bilder
+              Håndter bilder
             </Button>
             <Button onClick={handleSave} disabled={isSaving}>
               {isSaving ? (
