@@ -66,7 +66,7 @@ export async function POST(
 
     const rawMentionIds: string[] = mentions
       .filter((id: unknown): id is string => typeof id === "string")
-      .filter((id) => id !== session.user.id);
+      .filter((id: string) => id !== session.user.id);
 
     const uniqueMentionIds = Array.from(new Set(rawMentionIds));
 
