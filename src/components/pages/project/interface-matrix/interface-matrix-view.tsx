@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2, ArrowDownToLine, Pencil, CheckCircle2, XCircle, FileDown, Plus, Trash2, MoreHorizontal, Info } from "lucide-react";
@@ -328,7 +328,28 @@ export function InterfaceMatrixView() {
 function MatrixRowItem({ row, columns, projectId, onDelete }: { row: MatrixRow; columns: MatrixColumn[], projectId: string, onDelete: () => void }) {
     const [description, setDescription] = useState(row.description || "");
     const [isEditing, setIsEditing] = useState(false);
-    const isComplete = isRowComplete(row);
+
+    // Lift cell values state to row level for real-time status calculation
+    const [cellValuesMap, setCellValuesMap] = useState<Record<string, string[]>>(() => {
+        const map: Record<string, string[]> = {};
+        row.cells.forEach(c => {
+            map[c.columnId] = Array.isArray(c.values) ? c.values : [];
+        });
+        return map;
+    });
+
+    // Calculate completion based on current cell values state
+    const isComplete = useMemo(() => {
+        const presentTags = new Set<string>();
+        Object.values(cellValuesMap).forEach(values => {
+            values.forEach(v => presentTags.add(v));
+        });
+        return MANDATORY_TAGS.every(tag => presentTags.has(tag));
+    }, [cellValuesMap]);
+
+    function handleCellValuesChange(columnId: string, newValues: string[]) {
+        setCellValuesMap(prev => ({ ...prev, [columnId]: newValues }));
+    }
 
     async function saveDescription() {
         setIsEditing(false);
@@ -399,13 +420,13 @@ function MatrixRowItem({ row, columns, projectId, onDelete }: { row: MatrixRow; 
 
             {/* Dynamic Columns */}
             {columns.map(col => {
-                const cell = row.cells.find(c => c.columnId === col.id);
                 return (
                     <MatrixCellItem
                         key={col.id}
                         rowId={row.id}
                         columnId={col.id}
-                        initialValues={cell?.values as string[] || []}
+                        values={cellValuesMap[col.id] || []}
+                        onValuesChange={(newValues) => handleCellValuesChange(col.id, newValues)}
                         color={col.color}
                         projectId={projectId}
                     />
@@ -428,8 +449,7 @@ function MatrixRowItem({ row, columns, projectId, onDelete }: { row: MatrixRow; 
     );
 }
 
-function MatrixCellItem({ rowId, columnId, initialValues, color, projectId }: { rowId: string, columnId: string, initialValues: string[], color: string, projectId: string }) {
-    const [values, setValues] = useState<string[]>(initialValues);
+function MatrixCellItem({ rowId, columnId, values, onValuesChange, color, projectId }: { rowId: string, columnId: string, values: string[], onValuesChange: (newValues: string[]) => void, color: string, projectId: string }) {
     const [open, setOpen] = useState(false);
 
     async function handleValueChange(tag: string, checked: boolean) {
@@ -439,7 +459,7 @@ function MatrixCellItem({ rowId, columnId, initialValues, color, projectId }: { 
         } else {
             newValues = newValues.filter(v => v !== tag);
         }
-        setValues(newValues);
+        onValuesChange(newValues);
 
         try {
             await fetch(`/api/projects/${projectId}/interface-matrix/cell`, {
