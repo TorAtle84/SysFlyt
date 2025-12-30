@@ -25,7 +25,7 @@ export async function GET(
                 select: { columnA: true, columnB: true, columnC: true },
             }),
             prisma.functionTestRow.findMany({
-                where: { test: { projectId } },
+                where: { functionTest: { projectId } },
                 select: { status: true },
             }),
         ]);
