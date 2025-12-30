@@ -35,7 +35,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   loading?: boolean;
 }
@@ -43,6 +43,11 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, loading, disabled, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
+
+    // When asChild is true, Slot requires exactly one child element
+    // We cannot add the loading spinner as a sibling, so we skip it for asChild
+    const showLoadingSpinner = loading && !asChild;
+
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
@@ -50,7 +55,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}
         {...props}
       >
-        {loading && <Loader2 className="animate-spin" size={16} />}
+        {showLoadingSpinner && <Loader2 className="animate-spin" size={16} />}
         {children}
       </Comp>
     );
