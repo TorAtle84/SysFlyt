@@ -44,9 +44,20 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, loading, disabled, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
 
-    // When asChild is true, Slot requires exactly one child element
-    // We cannot add the loading spinner as a sibling, so we skip it for asChild
-    const showLoadingSpinner = loading && !asChild;
+    // When asChild is true, Slot requires exactly ONE child element
+    // We must not render any additional elements or fragments
+    if (asChild) {
+      return (
+        <Comp
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          disabled={disabled || loading}
+          {...props}
+        >
+          {children}
+        </Comp>
+      );
+    }
 
     return (
       <Comp
@@ -55,7 +66,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}
         {...props}
       >
-        {showLoadingSpinner && <Loader2 className="animate-spin" size={16} />}
+        {loading && <Loader2 className="animate-spin" size={16} />}
         {children}
       </Comp>
     );
