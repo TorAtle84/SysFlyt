@@ -37,11 +37,17 @@ interface Project {
   name: string;
   description: string | null;
   status: string;
-  archivedAt: Date | null;
+  createdById?: string | null;
   createdAt: Date;
   updatedAt: Date;
-  members: { user: { firstName: string; lastName: string } }[];
-  documents: { id: string }[];
+  members: { userId: string; role: string }[];
+  _count: {
+    documents: number;
+    members: number;
+    massList: number;
+    mcProtocols: number;
+    functionTests: number;
+  };
 }
 
 interface ProjectExplorerProps {
@@ -328,11 +334,11 @@ export function ProjectExplorer({
                   <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <FileText size={12} />
-                      {project.documents.length} dok
+                      {project._count.documents} dok
                     </span>
                     <span className="flex items-center gap-1">
                       <Users size={12} />
-                      {project.members.length} medlem{project.members.length !== 1 ? "mer" : ""}
+                      {project._count.members} medlem{project._count.members !== 1 ? "mer" : ""}
                     </span>
                     <span className="flex items-center gap-1">
                       <Calendar size={12} />
@@ -424,8 +430,9 @@ export function ProjectExplorer({
               </div>
             ))}
           </div>
-        )}
-      </CardContent>
-    </Card>
+        )
+        }
+      </CardContent >
+    </Card >
   );
 }

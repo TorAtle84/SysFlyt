@@ -15,20 +15,26 @@ export default async function DashboardPage() {
 
   const projects = await prisma.project.findMany({
     where: { OR: [{ createdById: user.id }, { members: { some: { userId: user.id } } }] },
-    include: {
-      members: { include: { user: true } },
-      documents: true,
-      chatRooms: {
-        where: { isActive: true },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      status: true,
+      createdById: true,
+      createdAt: true,
+      updatedAt: true,
+      // Only fetch member IDs for access check, not full user objects
+      members: { select: { userId: true, role: true } },
+      // Use counts instead of full arrays for performance
+      _count: {
         select: {
-          id: true,
-          name: true,
-          type: true,
-          _count: { select: { messages: true } },
-        },
-        take: 5,
+          documents: true,
+          members: true,
+          massList: true,
+          mcProtocols: true,
+          functionTests: true,
+        }
       },
-      _count: { select: { chatRooms: true } },
     },
     orderBy: { updatedAt: "desc" },
   });

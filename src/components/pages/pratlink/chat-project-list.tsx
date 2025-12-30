@@ -32,10 +32,13 @@ interface Project {
   description: string | null;
   status: string;
   createdAt: Date;
-  members: { user: { firstName: string; lastName: string } }[];
-  chatRooms?: ChatRoom[];
-  _count?: {
-    chatRooms: number;
+  members: { userId: string; role: string }[];
+  _count: {
+    documents: number;
+    members: number;
+    massList: number;
+    mcProtocols: number;
+    functionTests: number;
   };
 }
 
@@ -123,28 +126,9 @@ export function ChatProjectList({ projects }: ChatProjectListProps) {
                   <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Users size={14} />
-                      <span>{project.members.length} medlemmer</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Hash size={14} />
-                      <span>{project._count?.chatRooms || 0} rom</span>
+                      <span>{project._count.members} medlemmer</span>
                     </div>
                   </div>
-
-                  {project.chatRooms && project.chatRooms.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {project.chatRooms.slice(0, 3).map((room) => (
-                        <Badge key={room.id} tone="muted" className="text-xs">
-                          # {room.name}
-                        </Badge>
-                      ))}
-                      {project.chatRooms.length > 3 && (
-                        <Badge tone="muted" className="text-xs">
-                          +{project.chatRooms.length - 3}
-                        </Badge>
-                      )}
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </Link>

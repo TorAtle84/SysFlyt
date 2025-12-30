@@ -15,18 +15,17 @@ interface Project {
   name: string;
   description: string | null;
   status: string;
-  archivedAt: Date | null;
+  createdById: string | null;
   createdAt: Date;
   updatedAt: Date;
-  members: { user: { firstName: string; lastName: string } }[];
-  documents: { id: string }[];
-  chatRooms?: {
-    id: string;
-    name: string;
-    type: string;
-    _count?: { messages: number };
-  }[];
-  _count?: { chatRooms: number };
+  members: { userId: string; role: string }[];
+  _count: {
+    documents: number;
+    members: number;
+    massList: number;
+    mcProtocols: number;
+    functionTests: number;
+  };
 }
 
 interface DashboardClientProps {
