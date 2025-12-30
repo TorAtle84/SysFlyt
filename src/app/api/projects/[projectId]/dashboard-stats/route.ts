@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireProjectAccess } from "@/lib/auth-helpers";
-import { startOfWeek, endOfWeek, addWeeks } from "date-fns";
 
 export async function GET(
     request: NextRequest,
@@ -56,23 +55,9 @@ export async function GET(
             }),
         ]);
 
-        // Get Gantt tasks for this week and next week
-        const now = new Date();
-        const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-        const twoWeeksEnd = endOfWeek(addWeeks(now, 1), { weekStartsOn: 1 });
-
-        const ganttTasks = await prisma.ganttTask.findMany({
-            where: {
-                projectId,
-                OR: [
-                    { startDate: { gte: weekStart, lte: twoWeeksEnd } },
-                    { endDate: { gte: weekStart, lte: twoWeeksEnd } },
-                    { startDate: { lte: weekStart }, endDate: { gte: twoWeeksEnd } },
-                ],
-            },
-            orderBy: { startDate: "asc" },
-            take: 10,
-        });
+        // Gantt tasks placeholder (model does not exist yet)
+        // TODO: Create GanttTask model when Gantt feature is implemented
+        const ganttTasks: { id: string; name: string; startDate: Date; endDate: Date; progress: number; color?: string }[] = [];
 
         // Get recent activity (last 5 items from various sources)
         const [recentDocuments, recentComments, recentNcrs] = await Promise.all([
@@ -82,7 +67,7 @@ export async function GET(
                 take: 3,
                 select: {
                     id: true,
-                    name: true,
+                    title: true,
                     createdAt: true,
                     uploadedBy: { select: { firstName: true, lastName: true } },
                 },
@@ -123,7 +108,7 @@ export async function GET(
         const activities: ActivityItem[] = [
             ...recentDocuments.map((doc) => ({
                 type: "document" as const,
-                message: `Lastet opp "${doc.name}"`,
+                message: `Lastet opp "${doc.title}"`,
                 user: doc.uploadedBy
                     ? `${doc.uploadedBy.firstName} ${doc.uploadedBy.lastName}`
                     : "Ukjent",
