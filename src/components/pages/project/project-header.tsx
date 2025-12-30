@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MemberInvite } from "./member-invite";
 
 interface ProjectMember {
-  id: string;
+  userId: string;
   role: string;
   user: {
     id: string;
@@ -36,7 +36,6 @@ interface ProjectHeaderProps {
     description: string | null;
     status: string;
     createdAt: Date;
-    updatedAt: Date;
     createdById: string | null;
     members: ProjectMember[];
   };
@@ -236,7 +235,7 @@ export function ProjectHeader({ project, canEdit, currentUserId }: ProjectHeader
 
               return (
                 <div
-                  key={member.id}
+                  key={member.userId}
                   className="group flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-sm"
                 >
                   <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/20 text-xs font-medium text-primary">

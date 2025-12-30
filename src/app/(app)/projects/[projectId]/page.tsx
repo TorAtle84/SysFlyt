@@ -1,5 +1,5 @@
 import { ProjectHeader } from "@/components/pages/project/project-header";
-import { ProjectContentSwitcher } from "@/components/pages/project/project-content-switcher";
+import { ProjectDashboard } from "@/components/pages/project/project-dashboard";
 import prisma from "@/lib/db";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
@@ -12,18 +12,23 @@ export default async function ProjectPage({ params }: { params: Promise<{ projec
 
   const { projectId } = await params;
 
+  // Lightweight query - only fetch what's needed for header and access check
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    include: {
-      members: { include: { user: true } },
-      documents: { 
-        include: { 
-          tags: { include: { systemTag: true } },
-          annotations: { select: { id: true, status: true } },
-        } 
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      status: true,
+      createdAt: true,
+      createdById: true,
+      members: {
+        select: {
+          userId: true,
+          role: true,
+          user: { select: { id: true, firstName: true, lastName: true, email: true } },
+        },
       },
-      massList: true,
-      comments: { include: { author: true }, orderBy: { createdAt: "desc" }, take: 10 },
     },
   });
 
@@ -37,7 +42,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ projec
   return (
     <div className="space-y-6">
       <ProjectHeader project={project} canEdit={canEdit} currentUserId={session.user.id} />
-      <ProjectContentSwitcher project={project} canEdit={canEdit} />
+      <ProjectDashboard projectId={projectId} />
     </div>
   );
 }
+
