@@ -273,7 +273,7 @@ export function InterfaceMatrixView() {
                                         <span className="font-semibold text-foreground px-2 flex items-center gap-1">
                                             System
                                             <Tooltip>
-                                                <TooltipTrigger>
+                                                <TooltipTrigger asChild>
                                                     <span className="text-destructive font-bold text-lg cursor-help leading-none pt-1">*</span>
                                                 </TooltipTrigger>
                                                 <TooltipContent className="max-w-xs">
