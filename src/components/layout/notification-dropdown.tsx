@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { nb } from "date-fns/locale";
-import { AlertTriangle, Bell, Check, CheckCheck, CheckSquare, ClipboardList, MessageSquare, UserCheck } from "lucide-react";
+import { AlertTriangle, Bell, Check, CheckCheck, CheckSquare, ClipboardList, MessageSquare, UserCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getNotificationContent as importGetNotificationContent } from "@/lib/notification-helpers";
@@ -111,12 +111,12 @@ export function NotificationDropdown() {
   }
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <>
       <Button
         variant="ghost"
         size="sm"
         className="relative h-9 w-9 p-0"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsOpen(true)}
         title="Varsler"
       >
         <Bell size={18} />
@@ -128,115 +128,137 @@ export function NotificationDropdown() {
       </Button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
-          <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <h3 className="font-semibold text-foreground">Varsler</h3>
-            {unreadCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={handleMarkAllRead}
-                disabled={loading}
-              >
-                <CheckCheck size={14} className="mr-1" />
-                Marker alle som lest
-              </Button>
-            )}
-          </div>
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+            onClick={() => setIsOpen(false)}
+          />
 
-          <div className="max-h-96 overflow-y-auto">
-            {notifications.length === 0 ? (
-              <div className="py-8 text-center text-sm text-muted-foreground">
-                <Bell className="mx-auto mb-2 opacity-50" size={24} />
-                Ingen varsler enda
+          {/* Sidebar */}
+          <div className="fixed inset-y-0 right-0 z-50 flex h-full w-full max-w-md flex-col border-l border-border bg-card shadow-xl animate-in slide-in-from-right duration-300">
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <div className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                <h3 className="text-lg font-semibold text-foreground">Varsler</h3>
               </div>
-            ) : (
-              notifications.map((notification) => {
-                const { icon: Icon, text, link } = getNotificationContent(notification);
-                const content = (
-                  <div
-                    className={cn(
-                      "flex gap-3 px-4 py-3 transition-colors hover:bg-muted/50",
-                      !notification.read && "bg-primary/5"
-                    )}
+              <div className="flex items-center gap-2">
+                {unreadCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-xs"
+                    onClick={handleMarkAllRead}
+                    disabled={loading}
                   >
-                    <div
-                      className={cn(
-                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
-                        notification.read ? "bg-muted" : "bg-primary/20"
-                      )}
-                    >
-                      <Icon
-                        size={14}
-                        className={notification.read ? "text-muted-foreground" : "text-primary"}
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p
+                    <CheckCheck size={14} className="mr-1" />
+                    Marker alt lest
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <X size={18} />
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-2">
+              {notifications.length === 0 ? (
+                <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+                  <Bell className="mb-4 h-12 w-12 opacity-20" />
+                  <p>Du har ingen nye varsler</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {notifications.map((notification) => {
+                    const { icon: Icon, text, link } = getNotificationContent(notification);
+                    const content = (
+                      <div
                         className={cn(
-                          "text-sm",
-                          notification.read ? "text-muted-foreground" : "text-foreground"
+                          "relative flex gap-4 rounded-lg px-4 py-3 transition-colors hover:bg-muted/50",
+                          !notification.read && "bg-primary/5"
                         )}
                       >
-                        {text}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(notification.createdAt), "d. MMM HH:mm", {
-                          locale: nb,
-                        })}
-                      </p>
-                    </div>
-                    {!notification.read && (
-                      <button
-                        type="button"
-                        className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleMarkAsRead(notification.id);
-                        }}
-                        title="Marker som lest"
-                      >
-                        <Check size={14} />
-                      </button>
-                    )}
-                  </div>
-                );
+                        <div
+                          className={cn(
+                            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full shadow-sm ring-1 ring-border",
+                            notification.read ? "bg-background text-muted-foreground" : "bg-primary/10 text-primary ring-primary/20"
+                          )}
+                        >
+                          <Icon size={18} />
+                        </div>
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <p
+                            className={cn(
+                              "text-sm leading-snug",
+                              notification.read ? "text-muted-foreground" : "text-foreground font-medium"
+                            )}
+                          >
+                            {text}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(notification.createdAt), "d. MMM HH:mm", {
+                              locale: nb,
+                            })}
+                          </p>
+                        </div>
+                        {!notification.read && (
+                          <button
+                            type="button"
+                            className="absolute right-2 top-2 rounded-full p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleMarkAsRead(notification.id);
+                            }}
+                            title="Marker som lest"
+                          >
+                            <Check size={14} />
+                          </button>
+                        )}
+                      </div>
+                    );
 
-                if (link) {
-                  return (
-                    <Link
-                      key={notification.id}
-                      href={link}
-                      onClick={() => {
-                        if (!notification.read) {
-                          handleMarkAsRead(notification.id);
-                        }
-                        setIsOpen(false);
-                      }}
-                    >
-                      {content}
-                    </Link>
-                  );
-                }
+                    if (link) {
+                      return (
+                        <Link
+                          key={notification.id}
+                          href={link}
+                          onClick={() => {
+                            if (!notification.read) {
+                              handleMarkAsRead(notification.id);
+                            }
+                            setIsOpen(false);
+                          }}
+                          className="block group"
+                        >
+                          {content}
+                        </Link>
+                      );
+                    }
 
-                return <div key={notification.id}>{content}</div>;
-              })
-            )}
+                    return <div key={notification.id} className="group">{content}</div>;
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-border p-4 bg-muted/20">
+              <Link
+                href="/notifications"
+                className="flex w-full items-center justify-center rounded-md bg-primary/10 px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+                onClick={() => setIsOpen(false)}
+              >
+                Gå til varslingssenter
+              </Link>
+            </div>
           </div>
-          <div className="border-t border-border p-2">
-            <Link
-              href="/notifications"
-              className="flex w-full items-center justify-center rounded-md px-3 py-2 text-sm text-primary transition-colors hover:bg-muted"
-              onClick={() => setIsOpen(false)}
-            >
-              Se alle varsler
-            </Link>
-          </div>
-        </div>
-      )
-      }
-    </div >
+        </>
+      )}
+    </>
   );
 }

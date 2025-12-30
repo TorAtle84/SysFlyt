@@ -106,9 +106,14 @@ export async function GET(
                             const completedRows = ft.rows.filter(r => r.status === "COMPLETED").length;
                             const progress = totalRows > 0 ? Math.round((completedRows / totalRows) * 100) : 0;
 
+                            let label = "Funk";
+                            if (key === "ioTesting") label = "I/O-test";
+                            else if (key === "egentest") label = "Egentest";
+                            else if (key === "funksjonstest") label = "Funksjonstest";
+
                             tasks.push({
                                 id: `${ft.id}-${key}`,
-                                name: `${ft.systemCode} (Funk)`,
+                                name: `${ft.systemCode} (${label})`,
                                 startDate: start,
                                 endDate: end,
                                 progress,
