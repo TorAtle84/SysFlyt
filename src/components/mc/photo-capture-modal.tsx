@@ -19,7 +19,7 @@ interface PhotoCaptureModalProps {
     projectId?: string;
     protocolId?: string;
     apiBase?: string;
-    existingPhotos: Array<{ id: string; fileUrl: string; caption?: string }>;
+    existingPhotos: Array<{ id: string; fileUrl: string; caption?: string | null }>;
     onPhotosChange: (photos: any[]) => void;
 }
 
