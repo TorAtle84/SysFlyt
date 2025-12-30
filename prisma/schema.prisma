@@ -123,6 +123,9 @@ model User {
   functionTestPerformedRows FunctionTestRow[] @relation("FunctionTestPerformedBy")
   predefinedFunctionTestsCreated PredefinedFunctionTest[] @relation("PredefinedFunctionTestCreator")
   tfmComparisonsCreated TfmComparison[] @relation("TfmComparisonCreator")
+  reportedNCRs NCR[] @relation("ReportedNCRs")
+  assignedNCRs NCR[] @relation("AssignedNCRs")
+  ncrComments NCRComment[]
 }
 
 model Project {
@@ -145,6 +148,7 @@ model Project {
   mcProtocols MCProtocol[]
   functionTests FunctionTest[]
   bimModels BimModel[]
+  ncrs NCR[]
   
   // PratLink relations
   chatRooms ChatRoom[]
@@ -393,6 +397,7 @@ model MCProtocolItem {
   responsible   User?      @relation("MCResponsible", fields: [responsibleId], references: [id])
   executor      User?      @relation("MCExecutor", fields: [executorId], references: [id])
   product       Product?   @relation(fields: [productId], references: [id])
+  ncrs          NCR[]
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -421,6 +426,62 @@ model MCItemComment {
   @@index([userId])
 }
 
+model NCR {
+  id           String      @id @default(cuid())
+  projectId    String
+  title        String
+  description  String?
+  category     NCRCategory
+  severity     NCRSeverity
+  status       NCRStatus   @default(DEVIATION)
+  reportedBy   String
+  assignedTo   String?
+  linkedItemId String?
+  rootCause    String?
+  corrective   String?
+  closedAt     DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  project   Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reporter  User          @relation("ReportedNCRs", fields: [reportedBy], references: [id])
+  assignee  User?         @relation("AssignedNCRs", fields: [assignedTo], references: [id])
+  linkedItem MCProtocolItem? @relation(fields: [linkedItemId], references: [id])
+  photos    NCRPhoto[]
+  comments  NCRComment[]
+
+  @@index([projectId])
+  @@index([status])
+  @@index([category])
+  @@index([severity])
+}
+
+model NCRPhoto {
+  id        String   @id @default(cuid())
+  ncrId     String
+  fileUrl   String
+  caption   String?
+  createdAt DateTime @default(now())
+
+  ncr NCR @relation(fields: [ncrId], references: [id], onDelete: Cascade)
+
+  @@index([ncrId])
+}
+
+model NCRComment {
+  id        String   @id @default(cuid())
+  ncrId     String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+
+  ncr  NCR  @relation(fields: [ncrId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([ncrId])
+  @@index([userId])
+}
+
 enum MCStatus {
   IN_PROGRESS
   COMPLETED
@@ -433,6 +494,29 @@ enum MCItemStatus {
   DEVIATION     // Avvik
   NA            // I/A
   COMPLETED     // Utført
+}
+
+enum NCRCategory {
+  INSTALLATION
+  DOCUMENTATION
+  EQUIPMENT
+  SAFETY
+  OTHER
+}
+
+enum NCRSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum NCRStatus {
+  IN_PROGRESS
+  DEVIATION
+  CANCELED
+  REMEDIATED
+  COMPLETED
 }
 
 // ==========================================

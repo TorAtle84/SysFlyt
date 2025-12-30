@@ -24,14 +24,15 @@ interface Comment {
 
 interface CommentThreadProps {
     projectId: string
-    protocolId: string
-    itemId: string
+    protocolId?: string
+    itemId?: string
+    apiBase?: string
     initialComments?: Comment[]
     members: User[] // Needed for mention lookup
     initialCommentId?: string
 }
 
-export function CommentThread({ projectId, protocolId, itemId, members, initialCommentId }: CommentThreadProps) {
+export function CommentThread({ projectId, protocolId, itemId, apiBase, members, initialCommentId }: CommentThreadProps) {
     const [comments, setComments] = useState<Comment[]>([])
     const [content, setContent] = useState("")
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -41,14 +42,19 @@ export function CommentThread({ projectId, protocolId, itemId, members, initialC
     const hasAutoScrolledRef = useRef(false)
 
     // Fetch comments on mount
+    const endpoint = apiBase || (protocolId && itemId
+        ? `/api/projects/${projectId}/mc-protocols/${protocolId}/items/${itemId}/comments`
+        : "")
+
     useEffect(() => {
-        fetch(`/api/projects/${projectId}/mc-protocols/${protocolId}/items/${itemId}/comments`)
+        if (!endpoint) return
+        fetch(endpoint)
             .then(res => res.json())
             .then(data => {
                 if (data.comments) setComments(data.comments)
             })
             .catch(console.error)
-    }, [itemId, projectId, protocolId])
+    }, [endpoint])
 
     useEffect(() => {
         hasAutoScrolledRef.current = false
@@ -116,7 +122,10 @@ export function CommentThread({ projectId, protocolId, itemId, members, initialC
             .map(m => m.id)
 
         try {
-            const res = await fetch(`/api/projects/${projectId}/mc-protocols/${protocolId}/items/${itemId}/comments`, {
+            if (!endpoint) {
+                throw new Error("Mangler endepunkt for kommentarer")
+            }
+            const res = await fetch(endpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ content, mentions: mentionedIds })

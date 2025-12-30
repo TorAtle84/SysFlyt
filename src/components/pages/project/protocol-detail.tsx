@@ -114,6 +114,7 @@ export function ProtocolDetail({ project, protocol, members, userId }: ProtocolD
     const [locationMenuOpenFor, setLocationMenuOpenFor] = useState<string | null>(null);
     const [itemToDelete, setItemToDelete] = useState<string | null>(null);
     const [mobileExpandedItemId, setMobileExpandedItemId] = useState<string | null>(null);
+    const [ncrPromptItem, setNcrPromptItem] = useState<any>(null);
 
     useEffect(() => {
         if (!focusItemId) return;
@@ -291,6 +292,7 @@ export function ProtocolDetail({ project, protocol, members, userId }: ProtocolD
 
     async function updateItem(itemId: string, data: any) {
         try {
+            const previousItem = items.find((item: any) => item.id === itemId);
             const res = await fetch(
                 `/api/projects/${project.id}/mc-protocols/${protocol.id}/items/${itemId}`,
                 {
@@ -311,10 +313,23 @@ export function ProtocolDetail({ project, protocol, members, userId }: ProtocolD
             );
 
             if (updatedItem.completedAt && !protocol.completedAt) {
-                toast.success("Protokoll fullført! Varsel sendt til prosjektleder.");
+                toast.success("Protokoll fullf\u00f8rt! Varsel sendt til prosjektleder.");
                 router.refresh();
             }
 
+            const wasDeviation = previousItem
+                ? previousItem.columnA === "DEVIATION" ||
+                  previousItem.columnB === "DEVIATION" ||
+                  previousItem.columnC === "DEVIATION"
+                : false;
+            const isDeviation =
+                updatedItem.columnA === "DEVIATION" ||
+                updatedItem.columnB === "DEVIATION" ||
+                updatedItem.columnC === "DEVIATION";
+
+            if (!wasDeviation && isDeviation) {
+                setNcrPromptItem(updatedItem);
+            }
         } catch (error) {
             toast.error("Lagring feilet");
             console.error(error);
@@ -1221,6 +1236,33 @@ export function ProtocolDetail({ project, protocol, members, userId }: ProtocolD
                             Slett
                         </Button>
                     </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* NCR Prompt Dialog */}
+            <Dialog open={!!ncrPromptItem} onOpenChange={(open) => !open && setNcrPromptItem(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Opprett avvik?</DialogTitle>
+                        <DialogDescription>
+                            Linjen har f\u00e5tt status <strong>Avvik</strong>. Vil du opprette en NCR?
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setNcrPromptItem(null)}>
+                            Senere
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                if (!ncrPromptItem) return;
+                                const target = `/projects/${project.id}/quality-assurance/ncr/new?linkedItemId=${ncrPromptItem.id}`;
+                                setNcrPromptItem(null);
+                                router.push(target);
+                            }}
+                        >
+                            Opprett avvik
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
             {/* Location Selection Modal */}

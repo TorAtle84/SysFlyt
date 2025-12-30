@@ -190,6 +190,48 @@ export async function fileExists(
   }
 }
 
+export async function downloadFileBuffer(
+  projectId: string,
+  fileUrlOrName: string
+): Promise<Buffer | null> {
+  try {
+    let filePath = fileUrlOrName;
+    if (fileUrlOrName.startsWith("http")) {
+      try {
+        const parsed = new URL(fileUrlOrName);
+        filePath = parsed.pathname;
+      } catch {
+        filePath = fileUrlOrName;
+      }
+    }
+
+    if (filePath.startsWith("/api/files/")) {
+      filePath = filePath.replace("/api/files/", "");
+    }
+
+    filePath = filePath.replace(/^\/+/, "");
+
+    if (!filePath.includes("/")) {
+      filePath = `${projectId}/${filePath}`;
+    }
+
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .download(filePath);
+
+    if (error || !data) {
+      console.error("Supabase download error:", error);
+      return null;
+    }
+
+    const arrayBuffer = await data.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  } catch (error) {
+    console.error("Error downloading file:", error);
+    return null;
+  }
+}
+
 export function generateSecureFileName(originalName: string): string {
   const ext = path.extname(originalName).toLowerCase();
   const baseName = path.basename(originalName, ext)

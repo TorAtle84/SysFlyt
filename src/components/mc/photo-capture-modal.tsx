@@ -15,9 +15,10 @@ import { Camera, Upload, Loader2, X, Image as ImageIcon } from "lucide-react";
 interface PhotoCaptureModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    itemId: string;
-    projectId: string;
-    protocolId: string;
+    itemId?: string;
+    projectId?: string;
+    protocolId?: string;
+    apiBase?: string;
     existingPhotos: Array<{ id: string; fileUrl: string; caption?: string }>;
     onPhotosChange: (photos: any[]) => void;
 }
@@ -28,6 +29,7 @@ export function PhotoCaptureModal({
     itemId,
     projectId,
     protocolId,
+    apiBase,
     existingPhotos,
     onPhotosChange,
 }: PhotoCaptureModalProps) {
@@ -37,9 +39,19 @@ export function PhotoCaptureModal({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
 
+    const baseEndpoint =
+        apiBase ||
+        (projectId && protocolId && itemId
+            ? `/api/projects/${projectId}/mc-protocols/${protocolId}/items/${itemId}/photos`
+            : "");
+
     async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (!file) return;
+        if (!baseEndpoint) {
+            toast.error("Mangler endepunkt for bildeopplasting");
+            return;
+        }
 
         setIsUploading(true);
         const formData = new FormData();
@@ -47,10 +59,7 @@ export function PhotoCaptureModal({
         formData.append("caption", caption);
 
         try {
-            const res = await fetch(
-                `/api/projects/${projectId}/mc-protocols/${protocolId}/items/${itemId}/photos`,
-                { method: "POST", body: formData }
-            );
+            const res = await fetch(baseEndpoint, { method: "POST", body: formData });
 
             if (!res.ok) throw new Error("Opplasting feilet");
 
@@ -72,10 +81,11 @@ export function PhotoCaptureModal({
 
     async function deletePhoto(photoId: string) {
         try {
-            const res = await fetch(
-                `/api/projects/${projectId}/mc-protocols/${protocolId}/items/${itemId}/photos?photoId=${photoId}`,
-                { method: "DELETE" }
-            );
+            if (!baseEndpoint) {
+                toast.error("Mangler endepunkt for sletting");
+                return;
+            }
+            const res = await fetch(`${baseEndpoint}?photoId=${photoId}`, { method: "DELETE" });
 
             if (!res.ok) throw new Error("Sletting feilet");
 

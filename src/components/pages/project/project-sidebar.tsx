@@ -23,6 +23,7 @@ import {
   Plus,
   Minus,
   Grid,
+  AlertTriangle,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -177,6 +178,13 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
           href: `/projects/${id}/quality-assurance/interface-matrix`,
           label: "Grensesnittmatrise",
           icon: Grid,
+          indent: true,
+        },
+        {
+          type: "link",
+          href: `/projects/${id}/quality-assurance/ncr`,
+          label: "Avvik (NCR)",
+          icon: AlertTriangle,
           indent: true,
         },
         {
