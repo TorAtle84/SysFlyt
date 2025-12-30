@@ -39,6 +39,9 @@ const CATEGORY_OPTIONS = [
   { value: "DOCUMENTATION", label: "Dokumentasjon" },
   { value: "EQUIPMENT", label: "Utstyr" },
   { value: "SAFETY", label: "Sikkerhet" },
+  { value: "SOFTWARE", label: "Programvare" },
+  { value: "PLANNING", label: "Planlegging" },
+  { value: "PROGRESS", label: "Fremdrift" },
   { value: "OTHER", label: "Annet" },
 ];
 

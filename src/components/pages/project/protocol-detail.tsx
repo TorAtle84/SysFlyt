@@ -313,14 +313,14 @@ export function ProtocolDetail({ project, protocol, members, userId }: ProtocolD
             );
 
             if (updatedItem.completedAt && !protocol.completedAt) {
-                toast.success("Protokoll fullf\u00f8rt! Varsel sendt til prosjektleder.");
+                toast.success("Protokoll fullført! Varsel sendt til prosjektleder.");
                 router.refresh();
             }
 
             const wasDeviation = previousItem
                 ? previousItem.columnA === "DEVIATION" ||
-                  previousItem.columnB === "DEVIATION" ||
-                  previousItem.columnC === "DEVIATION"
+                previousItem.columnB === "DEVIATION" ||
+                previousItem.columnC === "DEVIATION"
                 : false;
             const isDeviation =
                 updatedItem.columnA === "DEVIATION" ||
@@ -1245,7 +1245,7 @@ export function ProtocolDetail({ project, protocol, members, userId }: ProtocolD
                     <DialogHeader>
                         <DialogTitle>Opprett avvik?</DialogTitle>
                         <DialogDescription>
-                            Linjen har f\u00e5tt status <strong>Avvik</strong>. Vil du opprette en NCR?
+                            Linjen har fått status <strong>Avvik</strong>. Vil du opprette en NCR?
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>

@@ -3,7 +3,7 @@ import prisma from "@/lib/db";
 import { requireProjectAccess } from "@/lib/auth-helpers";
 
 const STATUS_VALUES = ["IN_PROGRESS", "DEVIATION", "CANCELED", "REMEDIATED", "COMPLETED"] as const;
-const CATEGORY_VALUES = ["INSTALLATION", "DOCUMENTATION", "EQUIPMENT", "SAFETY", "OTHER"] as const;
+const CATEGORY_VALUES = ["INSTALLATION", "DOCUMENTATION", "EQUIPMENT", "SAFETY", "SOFTWARE", "PLANNING", "PROGRESS", "OTHER"] as const;
 const SEVERITY_VALUES = ["LOW", "MEDIUM", "HIGH", "CRITICAL"] as const;
 
 type StatusValue = (typeof STATUS_VALUES)[number];
@@ -106,7 +106,7 @@ export async function PUT(
     const severityValue = body.severity;
 
     if (typeof body.title === "string" && !body.title.trim()) {
-      return NextResponse.json({ error: "Tittel er p\u00e5krevd" }, { status: 400 });
+      return NextResponse.json({ error: "Tittel er påkrevd" }, { status: 400 });
     }
 
     if (categoryValue !== undefined && !isCategory(categoryValue)) {
@@ -128,14 +128,14 @@ export async function PUT(
 
       if (!canSetCompleted) {
         return NextResponse.json(
-          { error: "Kun prosjektleder kan sette avvik til fullf\u00f8rt" },
+          { error: "Kun prosjektleder kan sette avvik til fullført" },
           { status: 403 }
         );
       }
 
       if (!nextCorrective) {
         return NextResponse.json(
-          { error: "Korrigerende tiltak er p\u00e5krevd f\u00f8r avslutning" },
+          { error: "Korrigerende tiltak er påkrevd før avslutning" },
           { status: 400 }
         );
       }
@@ -200,6 +200,14 @@ export async function PUT(
         },
       },
     });
+
+    // Sync status with linked MC item when NCR is completed
+    if (statusValue === "COMPLETED" && ncr.linkedItemId) {
+      await prisma.mCProtocolItem.update({
+        where: { id: ncr.linkedItemId },
+        data: { columnA: "COMPLETED", columnB: "COMPLETED", columnC: "COMPLETED" },
+      });
+    }
 
     return NextResponse.json({ ncr });
   } catch (error) {

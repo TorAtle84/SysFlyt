@@ -185,7 +185,7 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
         {
           type: "link",
           href: `/projects/${id}/quality-assurance/ncr`,
-          label: "Avvik (NCR)",
+          label: "Avviksbehandling",
           icon: AlertTriangle,
           indent: true,
         },
