@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireProjectAccess } from "@/lib/auth-helpers";
+import { startOfWeek, endOfWeek, addWeeks } from "date-fns";
 
 export async function GET(
     request: NextRequest,
@@ -55,9 +56,71 @@ export async function GET(
             }),
         ]);
 
-        // Gantt tasks placeholder (model does not exist yet)
-        // TODO: Create GanttTask model when Gantt feature is implemented
-        const ganttTasks: { id: string; name: string; startDate: Date; endDate: Date; progress: number; color?: string }[] = [];
+        // Get Gantt tasks for this week and next week
+        const now = new Date();
+        const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+        const twoWeeksEnd = endOfWeek(addWeeks(now, 1), { weekStartsOn: 1 });
+
+        const [mcProtocols, functionTests] = await Promise.all([
+            prisma.mCProtocol.findMany({
+                where: {
+                    projectId,
+                    OR: [
+                        { startTime: { gte: weekStart, lte: twoWeeksEnd } },
+                        { endTime: { gte: weekStart, lte: twoWeeksEnd } },
+                        { startTime: { lte: weekStart }, endTime: { gte: twoWeeksEnd } },
+                    ],
+                },
+                select: { id: true, systemCode: true, startTime: true, endTime: true, status: true },
+            }),
+            prisma.functionTest.findMany({
+                where: { projectId }, // Filter dates in memory because of JSON structure
+                select: { id: true, systemCode: true, dates: true, rows: { select: { status: true } } },
+            }),
+        ]);
+
+        const ganttTasks = [
+            ...mcProtocols.map(p => ({
+                id: p.id,
+                name: `${p.systemCode} (MC)`,
+                startDate: p.startTime,
+                endDate: p.endTime,
+                progress: p.status === "COMPLETED" ? 100 : 0, // Simplified progress
+                color: "#3b82f6" // blue
+            })),
+            ...functionTests.flatMap(ft => {
+                const dates = ft.dates as Record<string, { start?: string; end?: string }> | null;
+                const tasks = [];
+                if (dates) {
+                    // Check if any phase overlaps with our window
+                    for (const [key, range] of Object.entries(dates)) {
+                        const start = range.start ? new Date(range.start) : null;
+                        const end = range.end ? new Date(range.end) : start;
+
+                        if (start && end &&
+                            ((start >= weekStart && start <= twoWeeksEnd) ||
+                                (end >= weekStart && end <= twoWeeksEnd) ||
+                                (start <= weekStart && end >= twoWeeksEnd))) {
+
+                            const totalRows = ft.rows.length;
+                            const completedRows = ft.rows.filter(r => r.status === "COMPLETED").length;
+                            const progress = totalRows > 0 ? Math.round((completedRows / totalRows) * 100) : 0;
+
+                            tasks.push({
+                                id: `${ft.id}-${key}`,
+                                name: `${ft.systemCode} (Funk)`,
+                                startDate: start,
+                                endDate: end,
+                                progress,
+                                color: "#10b981" // green
+                            });
+                        }
+                    }
+                }
+                return tasks;
+            })
+        ].sort((a, b) => (a.startDate && b.startDate ? a.startDate.getTime() - b.startDate.getTime() : 0))
+            .slice(0, 10);
 
         // Get recent activity (last 5 items from various sources)
         const [recentDocuments, recentComments, recentNcrs] = await Promise.all([
