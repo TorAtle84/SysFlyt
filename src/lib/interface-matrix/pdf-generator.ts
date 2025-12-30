@@ -11,6 +11,53 @@ function hexToRgb(hex: string) {
     } : { r: 1, g: 1, b: 1 }; // Default white
 }
 
+// Helper to wrap text into lines that fit within maxWidth
+function wrapText(text: string, font: PDFFont, fontSize: number, maxWidth: number): string[] {
+    const words = text.split(/[\s,]+/).filter(w => w.length > 0);
+    const lines: string[] = [];
+    let currentLine = "";
+
+    for (const word of words) {
+        const testLine = currentLine ? `${currentLine}, ${word}` : word;
+        const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+
+        if (testWidth <= maxWidth) {
+            currentLine = testLine;
+        } else {
+            if (currentLine) lines.push(currentLine);
+            currentLine = word;
+        }
+    }
+    if (currentLine) lines.push(currentLine);
+    return lines;
+}
+
+// Calculate required row height based on content
+function calculateRowHeight(
+    row: InterfaceMatrixRow & { cells: InterfaceMatrixCell[] },
+    columns: InterfaceMatrixColumn[],
+    font: PDFFont,
+    fontSize: number,
+    colWidth: number,
+    lineHeight: number
+): number {
+    let maxLines = 1;
+
+    for (const col of columns) {
+        const cell = row.cells.find(c => c.columnId === col.id);
+        if (cell && Array.isArray(cell.values) && cell.values.length > 0) {
+            const txt = (cell.values as string[]).join(", ");
+            const lines = wrapText(txt, font, fontSize, colWidth - 10);
+            maxLines = Math.max(maxLines, lines.length);
+        }
+    }
+
+    // Minimum height for system code + description, or content lines
+    const minHeight = 45;
+    const contentHeight = maxLines * lineHeight + 15;
+    return Math.max(minHeight, contentHeight);
+}
+
 type MatrixData = {
     columns: InterfaceMatrixColumn[];
     rows: (InterfaceMatrixRow & { cells: InterfaceMatrixCell[] })[];
@@ -23,11 +70,11 @@ export async function generateInterfaceMatrixPdf(data: MatrixData): Promise<Uint
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
     // A3 Landscape for more width
-    const page = pdfDoc.addPage([1190.55, 841.89]); // A3 landscape point size
-    const { width, height } = page.getSize();
-
+    const pageWidth = 1190.55;
+    const pageHeight = 841.89;
+    let page = pdfDoc.addPage([pageWidth, pageHeight]);
     const margin = 30;
-    let y = height - margin;
+    let y = pageHeight - margin;
 
     // Title
     page.drawText(`Grensesnittmatrise - ${data.projectName}`, {
@@ -39,59 +86,72 @@ export async function generateInterfaceMatrixPdf(data: MatrixData): Promise<Uint
     });
     y -= 40;
 
-    // Headers
-    const sysColWidth = 200;
-    let x = margin;
+    // Calculate column widths
+    const sysColWidth = 180;
+    const colWidth = (pageWidth - margin * 2 - sysColWidth) / data.columns.length;
+    const fontSize = 8;
+    const lineHeight = 11;
+    const headerHeight = 25;
 
-    // System Header
-    page.drawRectangle({
-        x, y: y - 20, width: sysColWidth, height: 20,
-        borderColor: rgb(0, 0, 0), borderWidth: 1, color: rgb(0.95, 0.95, 0.95)
-    });
-    page.drawText("System", { x: x + 5, y: y - 15, size: 10, font: fontBold });
-    x += sysColWidth;
+    // Draw headers function
+    function drawHeaders(pg: PDFPage, startY: number): number {
+        let x = margin;
 
-    const colWidth = (width - margin * 2 - sysColWidth) / data.columns.length;
-
-    for (const col of data.columns) {
-        const c = hexToRgb(col.color);
-        page.drawRectangle({
-            x, y: y - 20, width: colWidth, height: 20,
-            borderColor: rgb(0, 0, 0), borderWidth: 1, color: rgb(c.r, c.g, c.b)
+        // System Header
+        pg.drawRectangle({
+            x, y: startY - headerHeight, width: sysColWidth, height: headerHeight,
+            borderColor: rgb(0, 0, 0), borderWidth: 1, color: rgb(0.95, 0.95, 0.95)
         });
-        page.drawText(col.discipline || col.customLabel || "", {
-            x: x + 5, y: y - 15, size: 10, font: fontBold
-        });
-        x += colWidth;
+        pg.drawText("System", { x: x + 5, y: startY - 17, size: 11, font: fontBold });
+        x += sysColWidth;
+
+        for (const col of data.columns) {
+            const c = hexToRgb(col.color);
+            pg.drawRectangle({
+                x, y: startY - headerHeight, width: colWidth, height: headerHeight,
+                borderColor: rgb(0, 0, 0), borderWidth: 1, color: rgb(c.r, c.g, c.b)
+            });
+            pg.drawText(col.discipline || col.customLabel || "", {
+                x: x + 5, y: startY - 17, size: 10, font: fontBold
+            });
+            x += colWidth;
+        }
+        return startY - headerHeight;
     }
-    y -= 20;
+
+    y = drawHeaders(page, y);
 
     // Rows
     for (const row of data.rows) {
+        const rowHeight = calculateRowHeight(row, data.columns, font, fontSize, colWidth, lineHeight);
+
         // Check page break
-        if (y < margin + 20) {
-            const newPage = pdfDoc.addPage([1190.55, 841.89]);
-            y = 841.89 - margin;
-            // Could redraw headers... for now simple list
+        if (y - rowHeight < margin) {
+            page = pdfDoc.addPage([pageWidth, pageHeight]);
+            y = pageHeight - margin;
+            y = drawHeaders(page, y);
         }
 
-        x = margin;
+        let x = margin;
 
         // System Cell
         page.drawRectangle({
-            x, y: y - 40, width: sysColWidth, height: 40,
-            borderColor: rgb(0, 0, 0), borderWidth: 1
+            x, y: y - rowHeight, width: sysColWidth, height: rowHeight,
+            borderColor: rgb(0, 0, 0), borderWidth: 1, color: rgb(1, 1, 1)
         });
 
         page.drawText(row.systemCode, { x: x + 5, y: y - 15, size: 10, font: fontBold });
         if (row.description) {
-            page.drawText(row.description, { x: x + 5, y: y - 30, size: 8, font: font, color: rgb(0.4, 0.4, 0.4) });
+            // Truncate description if too long
+            const maxDescWidth = sysColWidth - 25;
+            let desc = row.description;
+            while (font.widthOfTextAtSize(desc, 8) > maxDescWidth && desc.length > 3) {
+                desc = desc.slice(0, -4) + "...";
+            }
+            page.drawText(desc, { x: x + 5, y: y - 28, size: 8, font: font, color: rgb(0.4, 0.4, 0.4) });
         }
 
         // Status Indicator
-        // TODO: Draw Circle based on validation logic?
-        // Implementing basic validation check logic here to match frontend
-        // MANDATORY_TAGS = ["Montasje", "Leveranse", "Merking", "Systemeier", "Delansvarlig", "Kabling og kobling"]
         const tags = new Set<string>();
         row.cells.forEach(c => {
             if (Array.isArray(c.values)) (c.values as string[]).forEach(v => tags.add(v));
@@ -99,44 +159,44 @@ export async function generateInterfaceMatrixPdf(data: MatrixData): Promise<Uint
         const missing = ["Montasje", "Leveranse", "Merking", "Systemeier", "Delansvarlig", "Kabling og kobling"].filter(t => !tags.has(t));
         const isOk = missing.length === 0;
 
-        if (isOk) {
-            page.drawCircle({ x: x + sysColWidth - 15, y: y - 20, size: 5, color: rgb(0, 1, 0) });
-        } else {
-            page.drawCircle({ x: x + sysColWidth - 15, y: y - 20, size: 5, color: rgb(1, 0, 0) });
-        }
+        page.drawCircle({
+            x: x + sysColWidth - 12,
+            y: y - 12,
+            size: 5,
+            color: isOk ? rgb(0.2, 0.8, 0.2) : rgb(0.9, 0.2, 0.2)
+        });
 
         x += sysColWidth;
 
         // Discipline Cells
         for (const col of data.columns) {
             const c = hexToRgb(col.color);
-            // Lighten the color for cell background (simpler: use low opacity simulation or just same pastel)
-            // User asked for "lys pastell gul farge" for values.
 
             page.drawRectangle({
-                x, y: y - 40, width: colWidth, height: 40,
+                x, y: y - rowHeight, width: colWidth, height: rowHeight,
                 borderColor: rgb(0, 0, 0), borderWidth: 1,
-                color: rgb(c.r, c.g, c.b) // Using the column color directly as it should be pastel
+                color: rgb(c.r, c.g, c.b)
             });
 
             const cell = row.cells.find(cell => cell.columnId === col.id);
-            if (cell && Array.isArray(cell.values)) {
+            if (cell && Array.isArray(cell.values) && cell.values.length > 0) {
                 const txt = (cell.values as string[]).join(", ");
-                // Text wrapping simple logic
-                // drawing just the first line for now or truncate
-                // pdf-lib text wrapping is manual. 
-                // We just truncate for MVP functionality
-                if (txt.length > 0) {
-                    const fontSize = 8;
-                    page.drawText(txt, {
-                        x: x + 2, y: y - 20, size: fontSize, font: font, maxWidth: colWidth - 4
-                    });
+                const lines = wrapText(txt, font, fontSize, colWidth - 10);
+
+                let textY = y - 12;
+                for (const line of lines) {
+                    if (textY > y - rowHeight + 5) {
+                        page.drawText(line, {
+                            x: x + 5, y: textY, size: fontSize, font: font, color: rgb(0.1, 0.1, 0.1)
+                        });
+                        textY -= lineHeight;
+                    }
                 }
             }
 
             x += colWidth;
         }
-        y -= 40;
+        y -= rowHeight;
     }
 
     return pdfDoc.save();

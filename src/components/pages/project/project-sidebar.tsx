@@ -174,9 +174,9 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
       children: [
         {
           type: "link",
-          href: `/projects/${id}/quality-assurance/comparison`,
-          label: "Sammenligning",
-          icon: GitCompare,
+          href: `/projects/${id}/quality-assurance/interface-matrix`,
+          label: "Grensesnittmatrise",
+          icon: Grid,
           indent: true,
         },
         {
@@ -188,9 +188,9 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
         },
         {
           type: "link",
-          href: `/projects/${id}/quality-assurance/interface-matrix`,
-          label: "Grensesnittmatrise",
-          icon: Grid,
+          href: `/projects/${id}/quality-assurance/comparison`,
+          label: "Sammenligning",
+          icon: GitCompare,
           indent: true,
         },
       ],
