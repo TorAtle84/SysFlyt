@@ -14,6 +14,7 @@ import {
   ChevronRight,
   PanelRightClose,
   PanelRightOpen,
+  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -121,8 +122,8 @@ export function AppShell({ children, sidebar }: AppShellProps) {
 
   const sidebarWithMobileClose = sidebar && isValidElement(sidebar) && typeof sidebar.type !== "string"
     ? cloneElement(sidebar as ReactElement<any>, {
-        onNavigate: () => setMobileProjectMenuOpen(false),
-      })
+      onNavigate: () => setMobileProjectMenuOpen(false),
+    })
     : sidebar;
 
   return (
@@ -213,6 +214,24 @@ export function AppShell({ children, sidebar }: AppShellProps) {
               </Link>
             );
           })}
+
+          {isAdmin && (
+            <a
+              href="/SysLink-Systematisk-Flyt-for-Byggprosjekter.pdf"
+              download
+              className={cn(
+                "flex min-h-[44px] items-center rounded-lg text-sm font-medium transition-colors touch-manipulation",
+                "gap-3 px-3 py-2",
+                leftSidebarCollapsed ? "lg:justify-center lg:px-2" : "",
+                "text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted/80"
+              )}
+              onClick={() => setMobileMenuOpen(false)}
+              title={leftSidebarCollapsed ? "Presentasjon" : undefined}
+            >
+              <FileText size={20} />
+              <span className={cn(leftSidebarCollapsed ? "lg:hidden" : "")}>Presentasjon</span>
+            </a>
+          )}
 
           {isAdmin && (
             <>
