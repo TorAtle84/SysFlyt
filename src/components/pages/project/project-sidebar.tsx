@@ -35,10 +35,12 @@ interface ProjectSidebarProps {
     description?: string | null;
     members?: { user: { firstName: string; lastName: string } }[];
     documents?: { id: string; type: string }[];
-    massList?: { id: string }[];
-    mcProtocols?: { id: string }[];
-    functionTests?: { id: string }[];
-    bimModels?: { id: string }[];
+    _count?: {
+      massList: number;
+      mcProtocols: number;
+      functionTests: number;
+      bimModels: number;
+    };
   };
   projectId?: string;
   onNavigate?: () => void;
@@ -104,9 +106,9 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
   const drawingCount = project?.documents?.filter((d) => d.type === "DRAWING").length || 0;
   const schemaCount = project?.documents?.filter((d) => d.type === "SCHEMA").length || 0;
   const functionDescriptionCount = project?.documents?.filter((d) => d.type === "FUNCTION_DESCRIPTION").length || 0;
-  const massListCount = project?.massList?.length || 0;
-  const modelCount = project?.bimModels?.length || 0;
-  const functionTestCount = project?.functionTests?.length || 0;
+  const massListCount = project?._count?.massList || 0;
+  const modelCount = project?._count?.bimModels || 0;
+  const functionTestCount = project?._count?.functionTests || 0;
 
   const navItems: NavItem[] = [
     {
@@ -213,7 +215,7 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
           href: `/projects/${id}/protocols`,
           label: "Protokoll MC",
           icon: ClipboardCheck,
-          count: project?.mcProtocols?.length || 0,
+          count: project?._count?.mcProtocols || 0,
           indent: true,
         },
         {
@@ -368,7 +370,7 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <List size={14} />
-            <span>{project.massList?.length || 0} i masseliste</span>
+            <span>{project._count?.massList || 0} i masseliste</span>
           </div>
         </div>
       )}

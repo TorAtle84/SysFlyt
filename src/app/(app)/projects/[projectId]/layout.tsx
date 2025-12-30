@@ -23,13 +23,22 @@ export default async function ProjectLayout({ children, params }: ProjectLayoutP
 
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      description: true,
       members: { select: { userId: true, role: true, user: { select: { firstName: true, lastName: true } } } },
+      // Keep documents for type filtering in sidebar
       documents: { select: { id: true, type: true } },
-      massList: { select: { id: true } },
-      mcProtocols: { select: { id: true } },
-      functionTests: { select: { id: true } },
-      bimModels: { select: { id: true } },
+      // Use counts for simple numeric badges
+      _count: {
+        select: {
+          massList: true,
+          mcProtocols: true,
+          functionTests: true,
+          bimModels: true,
+        }
+      }
     },
   });
 
