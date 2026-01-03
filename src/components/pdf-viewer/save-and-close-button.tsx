@@ -24,7 +24,7 @@ export default function SaveAndCloseButton({
     setSaving(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      router.push(`/projects/${projectId}`);
+      router.push(`/syslink/projects/${projectId}`);
     } catch (err) {
       console.error(err);
       setSaving(false);
@@ -32,7 +32,7 @@ export default function SaveAndCloseButton({
   }
 
   function handleBack() {
-    router.push(`/projects/${projectId}`);
+    router.push(`/syslink/projects/${projectId}`);
   }
 
   return (

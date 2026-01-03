@@ -104,7 +104,7 @@ export function ChatProjectList({ projects }: ChatProjectListProps) {
           {filteredProjects.map((project) => (
             <Link
               key={project.id}
-              href={`/pratlink/${project.id}`}
+              href={`/syslink/pratlink/${project.id}`}
               className="group"
             >
               <Card className="h-full transition-all hover:border-primary/50 hover:shadow-md">

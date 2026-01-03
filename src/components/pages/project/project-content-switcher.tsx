@@ -318,7 +318,7 @@ export function ProjectContentSwitcher({
                 {recentDocuments.map((doc) => (
                   <Link
                     key={doc.id}
-                    href={`/projects/${project.id}/documents/${doc.id}`}
+                    href={`/syslink/projects/${project.id}/documents/${doc.id}`}
                     className="flex items-center justify-between rounded-lg border border-border p-3 transition-colors hover:bg-muted/50"
                   >
                     <div className="flex items-center gap-3">
@@ -353,7 +353,7 @@ export function ProjectContentSwitcher({
               <List className="text-primary" size={18} />
               Masseliste
             </CardTitle>
-            <Link href={`/projects/${project.id}/mass-list`}>
+            <Link href={`/syslink/projects/${project.id}/mass-list`}>
               <Button size="sm" variant="outline">
                 Se alle
               </Button>

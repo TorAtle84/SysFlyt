@@ -79,7 +79,7 @@ export function getNotificationContent(notification: Notification): Notification
             typeof meta?.link === "string"
                 ? meta.link
                 : notification.annotation?.document
-                    ? `/projects/${notification.annotation.document.projectId}/documents/${notification.annotation.document.id}`
+                    ? `/syslink/projects/${notification.annotation.document.projectId}/documents/${notification.annotation.document.id}`
                     : null;
 
         return {
@@ -139,7 +139,7 @@ export function getNotificationContent(notification: Notification): Notification
             icon: UserCheck,
             text: `${meta.assignedBy || "Noen"} tildelte deg test: "${meta.systemPart || ""} – ${meta.function || ""}" i funksjonstest ${meta.systemCode || ""}${meta.projectName ? ` (${meta.projectName})` : ""}`,
             link: meta.projectId && meta.functionTestId
-                ? `/projects/${meta.projectId}/protocols/function-tests/${meta.functionTestId}`
+                ? `/syslink/projects/${meta.projectId}/protocols/function-tests/${meta.functionTestId}`
                 : null,
         };
     }
@@ -158,7 +158,7 @@ export function getNotificationContent(notification: Notification): Notification
             icon: AlertTriangle,
             text: `${meta.reportedBy || "Noen"} registrerte avvik: "${meta.systemPart || ""} – ${meta.function || ""}" i funksjonstest ${meta.systemCode || ""}${meta.projectName ? ` (${meta.projectName})` : ""}`,
             link: meta.projectId && meta.functionTestId
-                ? `/projects/${meta.projectId}/protocols/function-tests/${meta.functionTestId}`
+                ? `/syslink/projects/${meta.projectId}/protocols/function-tests/${meta.functionTestId}`
                 : null,
         };
     }
@@ -177,7 +177,7 @@ export function getNotificationContent(notification: Notification): Notification
             icon: ClipboardList,
             text: `${meta.addedBy || "Du"} ble lagt til som delansvarlig for ${meta.responsibleSystemCode || ""} (${meta.discipline || ""}) i funksjonstest ${meta.systemCode || ""}${meta.projectName ? ` (${meta.projectName})` : ""}`,
             link: meta.projectId && meta.functionTestId
-                ? `/projects/${meta.projectId}/protocols/function-tests/${meta.functionTestId}`
+                ? `/syslink/projects/${meta.projectId}/protocols/function-tests/${meta.functionTestId}`
                 : null,
         };
     }

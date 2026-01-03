@@ -309,7 +309,7 @@ export function ProjectExplorer({
                 className="group relative rounded-xl border border-border bg-card/50 p-4 transition-all hover:border-primary/50 hover:shadow-md"
               >
                 <Link
-                  href={`/projects/${project.id}`}
+                  href={`/syslink/projects/${project.id}`}
                   className="block"
                 >
                   <div className="mb-3 flex items-start justify-between">

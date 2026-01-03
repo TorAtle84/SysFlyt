@@ -186,7 +186,7 @@ export function ProjectDashboard({ projectId }: ProjectDashboardProps) {
                             Fremdrift (2 uker)
                         </CardTitle>
                         <Link
-                            href={`/projects/${projectId}/gantt`}
+                            href={`/syslink/projects/${projectId}/gantt`}
                             className="flex items-center gap-1 text-xs text-info hover:underline"
                         >
                             Se full Gantt
@@ -201,7 +201,7 @@ export function ProjectDashboard({ projectId }: ProjectDashboardProps) {
                                     Ingen oppgaver denne perioden
                                 </p>
                                 <Link
-                                    href={`/projects/${projectId}/gantt`}
+                                    href={`/syslink/projects/${projectId}/gantt`}
                                     className="mt-2 text-xs text-info hover:underline"
                                 >
                                     Legg til oppgaver i Gantt

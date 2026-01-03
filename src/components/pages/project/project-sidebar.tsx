@@ -113,7 +113,7 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
   const navItems: NavItem[] = [
     {
       type: "link",
-      href: `/projects/${id}`,
+      href: `/syslink/projects/${id}`,
       label: "Dashboard",
       icon: FolderKanban,
       exact: true,
@@ -126,7 +126,7 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
       children: [
         {
           type: "link",
-          href: `/projects/${id}/mass-list`,
+          href: `/syslink/projects/${id}/mass-list`,
           label: "Masseliste",
           icon: List,
           count: massListCount,
@@ -134,7 +134,7 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
         },
         {
           type: "link",
-          href: `/projects/${id}/drawings`,
+          href: `/syslink/projects/${id}/drawings`,
           label: "Arbeidstegninger",
           icon: PenTool,
           count: drawingCount,
@@ -142,7 +142,7 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
         },
         {
           type: "link",
-          href: `/projects/${id}/schemas`,
+          href: `/syslink/projects/${id}/schemas`,
           label: "Systemskjema",
           icon: Network,
           count: schemaCount,
@@ -150,7 +150,7 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
         },
         {
           type: "link",
-          href: `/projects/${id}/function-descriptions`,
+          href: `/syslink/projects/${id}/function-descriptions`,
           label: "Funksjonsbeskrivelse",
           icon: FileText,
           count: functionDescriptionCount,
@@ -160,7 +160,7 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
           ? [
             {
               type: "link" as const,
-              href: `/projects/${id}/models`,
+              href: `/syslink/projects/${id}/models`,
               label: "Modell",
               icon: Box,
               count: modelCount,
@@ -177,28 +177,28 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
       children: [
         {
           type: "link",
-          href: `/projects/${id}/quality-assurance/interface-matrix`,
+          href: `/syslink/projects/${id}/quality-assurance/interface-matrix`,
           label: "Grensesnittmatrise",
           icon: Grid,
           indent: true,
         },
         {
           type: "link",
-          href: `/projects/${id}/quality-assurance/ncr`,
+          href: `/syslink/projects/${id}/quality-assurance/ncr`,
           label: "Avviksbehandling",
           icon: AlertTriangle,
           indent: true,
         },
         {
           type: "link",
-          href: `/projects/${id}/quality-assurance/fdv-collection`,
+          href: `/syslink/projects/${id}/quality-assurance/fdv-collection`,
           label: "FDV-samling",
           icon: Archive,
           indent: true,
         },
         {
           type: "link",
-          href: `/projects/${id}/quality-assurance/comparison`,
+          href: `/syslink/projects/${id}/quality-assurance/comparison`,
           label: "Sammenligning",
           icon: GitCompare,
           indent: true,
@@ -212,7 +212,7 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
       children: [
         {
           type: "link",
-          href: `/projects/${id}/protocols`,
+          href: `/syslink/projects/${id}/protocols`,
           label: "Protokoll MC",
           icon: ClipboardCheck,
           count: project?._count?.mcProtocols || 0,
@@ -220,7 +220,7 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
         },
         {
           type: "link",
-          href: `/projects/${id}/protocols/function-tests`,
+          href: `/syslink/projects/${id}/protocols/function-tests`,
           label: "Funksjonstest",
           icon: ListChecks,
           count: functionTestCount,
@@ -235,14 +235,14 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
       children: [
         {
           type: "link",
-          href: `/projects/${id}/progress`,
+          href: `/syslink/projects/${id}/progress`,
           label: "Produksjonsstatus",
           icon: TrendingUp,
           indent: true,
         },
         {
           type: "link",
-          href: `/projects/${id}/progress/plan`,
+          href: `/syslink/projects/${id}/progress/plan`,
           label: "Fremdriftsplan",
           icon: ListChecks,
           indent: true,

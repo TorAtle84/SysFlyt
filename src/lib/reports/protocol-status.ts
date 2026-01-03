@@ -133,7 +133,7 @@ function buildMcProtocolItem(protocol: {
     missingLabels.push(`Komponenter: ${progressStats.completedItems}/${progressStats.totalItems} ferdig`);
   }
 
-  const link = baseUrl ? `${baseUrl}/projects/${projectId}/protocols/${protocol.id}` : null;
+  const link = baseUrl ? `${baseUrl}/syslink/projects/${projectId}/protocols/${protocol.id}` : null;
 
   return {
     title: buildTitle(protocol.systemCode, protocol.systemName),
@@ -180,7 +180,7 @@ function buildFunctionTestItem(test: {
     missingLabels.push(`Tester: ${progressStats.completedRows}/${progressStats.totalRows} ferdig`);
   }
 
-  const link = baseUrl ? `${baseUrl}/projects/${projectId}/protocols/function-tests/${test.id}` : null;
+  const link = baseUrl ? `${baseUrl}/syslink/projects/${projectId}/protocols/function-tests/${test.id}` : null;
 
   return {
     title: buildTitle(test.systemCode, test.systemName),
@@ -274,8 +274,8 @@ export async function sendDailyProtocolStatusReports() {
       continue;
     }
 
-    const projectUrl = baseUrl ? `${baseUrl}/projects/${project.id}` : null;
-    const profileUrl = baseUrl ? `${baseUrl}/profile` : null;
+    const projectUrl = baseUrl ? `${baseUrl}/syslink/projects/${project.id}` : null;
+    const profileUrl = baseUrl ? `${baseUrl}/syslink/profile` : null;
 
     await sendProtocolStatusReportEmail({
       to: leader.email,
