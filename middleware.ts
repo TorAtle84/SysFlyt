@@ -25,7 +25,7 @@ export async function middleware(req: NextRequest) {
     if (path.startsWith("/api")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   if (token.status === "SUSPENDED") {
@@ -54,7 +54,7 @@ export async function middleware(req: NextRequest) {
     if (path.startsWith("/api")) {
       return NextResponse.json({ error: "Kontoen er ikke aktiv" }, { status: 403 });
     }
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   if (path.startsWith("/admin") && token.role !== "ADMIN") {

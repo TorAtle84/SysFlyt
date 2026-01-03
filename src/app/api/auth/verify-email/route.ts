@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
 
         if (admins.length > 0) {
             const baseUrl = buildBaseUrl(request);
-            const adminUrl = `${baseUrl}/admin/users`;
+            const adminUrl = `${baseUrl}/syslink/admin/users`;
             await sendAdminNewUserNotification(
                 admins.map((a) => a.email),
                 { firstName: user.firstName, lastName: user.lastName, email: user.email, company: user.company },
