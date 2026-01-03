@@ -98,7 +98,7 @@ export default function FlytLinkRegisterPage() {
         }
 
         // Redirect to root or pending page
-        router.replace("/syslink/pending"); // Or a generic pending page? 
+        router.replace("/flytlink/pending");
         // There is likely /syslink/pending. Is there /flytlink/pending?
         // User wants FlytLink experience. 
         // I should check if /flytlink/pending exists. For now, use /syslink/pending or copy it.
