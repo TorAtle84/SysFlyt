@@ -14,9 +14,11 @@ export interface ExtractedText {
 export async function extractPdfText(buffer: Buffer, fileName: string): Promise<ExtractedText> {
     try {
         const data = await pdfParse(buffer);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pageCount = (data as any).numpages;
         return {
             content: data.text,
-            pageCount: data.numpages,
+            pageCount,
             wordCount: data.text.split(/\s+/).filter(Boolean).length,
             fileName,
         };
