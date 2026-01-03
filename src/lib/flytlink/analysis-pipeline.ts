@@ -27,6 +27,9 @@ interface DisciplineWithKeywords {
     keywords: string[];
 }
 
+// Maximum cost allowed per analysis (in USD) - safety limit
+const MAX_COST_USD = 2.0;
+
 /**
  * Run the full 3-stage analysis pipeline
  */
@@ -38,7 +41,14 @@ export async function runAnalysisPipeline(
 ): Promise<void> {
     const tracker = new UsageTracker();
 
+    const checkCostLimit = () => {
+        if (tracker.totals.apiCostUsd > MAX_COST_USD) {
+            throw new Error(`Kostnadsgrense overskredet: $${tracker.totals.apiCostUsd.toFixed(2)} > $${MAX_COST_USD}. Analysen ble stoppet for sikkerhet.`);
+        }
+    };
+
     const report = (progress: AnalysisProgress) => {
+        checkCostLimit();
         onProgress?.({ ...progress, costNok: tracker.totals.apiCostNok });
         console.log(`[Analysis ${analysisId}] ${progress.stage}: ${progress.message} (${tracker.totals.apiCostNok.toFixed(2)} NOK)`);
     };
