@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { db } from "@/lib/db";
+import prisma from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { ProjectHeader } from "@/components/pages/project/project-header";
 import { ProjectSidebar } from "@/components/pages/project/project-sidebar";
@@ -12,7 +12,7 @@ export default async function ProjectPage({ params }: { params: { id: string } }
   }
   const { user } = authResult;
 
-  const project = await db.project.findUnique({
+  const project = await prisma.project.findUnique({
     where: { id: params.id },
     include: {
       members: {
