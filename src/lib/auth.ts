@@ -11,7 +11,7 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   pages: {
-    signIn: "/login",
+    signIn: "/syslink/login",
   },
   providers: [
     CredentialsProvider({
@@ -88,8 +88,8 @@ export const authOptions: NextAuthOptions = {
 
           if (!isValidTotp) {
             const newFailedAttempts = user.totpFailedAttempts + 1;
-            const lockoutTime = newFailedAttempts >= 5 
-              ? new Date(Date.now() + 15 * 60 * 1000) 
+            const lockoutTime = newFailedAttempts >= 5
+              ? new Date(Date.now() + 15 * 60 * 1000)
               : null;
 
             await prisma.user.update({

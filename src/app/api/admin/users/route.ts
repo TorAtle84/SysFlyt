@@ -107,7 +107,7 @@ export async function PATCH(req: NextRequest) {
   // Send activation email if user was activated
   if (isActivating) {
     const baseUrl = buildBaseUrl(req);
-    const loginUrl = `${baseUrl}/login`;
+    const loginUrl = `${baseUrl}/syslink/login`;
 
     try {
       await sendAccountActivatedEmail(updated.email, updated.firstName, loginUrl);

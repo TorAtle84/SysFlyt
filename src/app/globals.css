@@ -4,58 +4,71 @@
 
 :root {
   @theme {
-    --color-background: hsl(0 0% 100%);
-    --color-foreground: hsl(240 10% 3.9%);
-    --color-card: hsl(0 0% 100%);
-    --color-card-foreground: hsl(240 10% 3.9%);
-    --color-popover: hsl(0 0% 100%);
-    --color-popover-foreground: hsl(240 10% 3.9%);
-    --color-primary: hsl(240 5.9% 10%);
-    --color-primary-foreground: hsl(0 0% 98%);
-    --color-secondary: hsl(240 4.8% 95.9%);
-    --color-secondary-foreground: hsl(240 5.9% 10%);
-    --color-muted: hsl(240 4.8% 95.9%);
-    --color-muted-foreground: hsl(240 3.8% 46.1%);
-    --color-accent: hsl(240 4.8% 95.9%);
-    --color-accent-foreground: hsl(240 5.9% 10%);
-    --color-destructive: hsl(0 84.2% 60.2%);
-    --color-destructive-foreground: hsl(0 0% 98%);
-    --color-border: hsl(240 5.9% 90%);
-    --color-input: hsl(240 5.9% 90%);
-    --color-ring: hsl(240 5.9% 10%);
-    --color-info: hsl(220 90% 56%);
-    --color-danger: hsl(0 84.2% 60.2%);
+    /* Canvas & Surfaces */
+    --color-canvas: #0B1220;
+    --color-surface-1: #111A2E;
+    --color-surface-2: #16213A;
+    
+    /* Typography */
+    --color-ink: #E8EEF7;
+    --color-ink-muted: #A8B3C7;
+    --color-ink-disabled: #6B7790;
+    
+    /* Brand Colors */
+    --color-navy: #002346;
+    --color-blue: #20528D;
+    --color-green: #529233;
+    --color-orange: #EE6507;
+    --color-lime: #CCE448;
+    
+    /* Semantic Colors - Mapped to design tokens */
+    --color-background: #0B1220;
+    --color-foreground: #E8EEF7;
+    --color-card: #111A2E;
+    --color-card-foreground: #E8EEF7;
+    --color-popover: #111A2E;
+    --color-popover-foreground: #E8EEF7;
+    
+    /* Primary = Secondary blue (standard buttons) */
+    --color-primary: #20528D;
+    --color-primary-foreground: #E8EEF7;
+    
+    /* Secondary = Surface for contrast elements */
+    --color-secondary: #16213A;
+    --color-secondary-foreground: #E8EEF7;
+    
+    /* Muted = Subtler backgrounds and text */
+    --color-muted: #16213A;
+    --color-muted-foreground: #A8B3C7;
+    
+    /* Accent = Hover/active states */
+    --color-accent: #16213A;
+    --color-accent-foreground: #E8EEF7;
+    
+    /* Destructive */
+    --color-destructive: #DC2626;
+    --color-destructive-foreground: #E8EEF7;
+    
+    /* Border & Input */
+    --color-border: #24314A;
+    --color-input: #24314A;
+    --color-ring: #20528D;
+    
+    /* Status Colors */
+    --color-info: #20528D;
+    --color-success: #529233;
+    --color-warning: #EE6507;
+    --color-danger: #DC2626;
+    
     --radius: 0.5rem;
   }
 
-  color-scheme: light;
+  color-scheme: dark;
 }
 
+/* Force dark mode - no light theme variant needed */
 .dark {
   color-scheme: dark;
-  @theme {
-    --color-background: hsl(240 10% 3.9%);
-    --color-foreground: hsl(0 0% 98%);
-    --color-card: hsl(240 10% 3.9%);
-    --color-card-foreground: hsl(0 0% 98%);
-    --color-popover: hsl(240 10% 3.9%);
-    --color-popover-foreground: hsl(0 0% 98%);
-    --color-primary: hsl(0 0% 98%);
-    --color-primary-foreground: hsl(240 5.9% 10%);
-    --color-secondary: hsl(240 3.7% 15.9%);
-    --color-secondary-foreground: hsl(0 0% 98%);
-    --color-muted: hsl(240 3.7% 15.9%);
-    --color-muted-foreground: hsl(240 5% 64.9%);
-    --color-accent: hsl(240 3.7% 15.9%);
-    --color-accent-foreground: hsl(0 0% 98%);
-    --color-destructive: hsl(0 62.8% 30.6%);
-    --color-destructive-foreground: hsl(0 0% 98%);
-    --color-border: hsl(240 3.7% 15.9%);
-    --color-input: hsl(240 3.7% 15.9%);
-    --color-ring: hsl(240 4.9% 83.9%);
-    --color-info: hsl(220 90% 56%);
-    --color-danger: hsl(0 62.8% 30.6%);
-  }
 }
 
 * {
@@ -67,9 +80,30 @@ body {
   color: var(--color-foreground);
 }
 
+/* Utility classes for the design system */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(17, 26, 46, 0.8);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(36, 49, 74, 0.5);
 }
+
+/* Module accent stripes */
+.stripe-syslink {
+  background: linear-gradient(90deg, #20528D, #529233, #CCE448);
+}
+
+.stripe-flytlink {
+  background: linear-gradient(90deg, #002346, #0F3259, #EE6507);
+}
+
+/* Text colors */
+.text-ink { color: #E8EEF7; }
+.text-ink-muted { color: #A8B3C7; }
+.text-ink-disabled { color: #6B7790; }
+
+/* Background surfaces */
+.bg-canvas { background-color: #0B1220; }
+.bg-surface-1 { background-color: #111A2E; }
+.bg-surface-2 { background-color: #16213A; }
+.bg-navy { background-color: #002346; }

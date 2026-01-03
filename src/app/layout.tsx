@@ -6,8 +6,11 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { InactivityProvider } from "@/components/providers/inactivity-provider";
 
 export const metadata: Metadata = {
-  title: "SysLink - Prosjekthåndtering",
+  title: "FlytLink - Plattform for byggeprosjekter",
   description: "Plattform for dokumenthåndtering og QA i byggeprosjekter",
+  icons: {
+    icon: "/flytlinkfavikon.png",
+  },
 };
 
 export default function RootLayout({
@@ -21,7 +24,7 @@ export default function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
-          enableSystem
+          forcedTheme="dark"
           disableTransitionOnChange
         >
           <AuthSessionProvider>

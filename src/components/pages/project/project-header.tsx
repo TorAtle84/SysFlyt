@@ -81,7 +81,7 @@ export function ProjectHeader({ project, canEdit, currentUserId }: ProjectHeader
         method: "POST",
       });
       if (res.ok) {
-        router.push("/dashboard");
+        router.push("/syslink/dashboard");
         router.refresh();
       }
     } catch (err) {

@@ -24,7 +24,7 @@ export function InactivityProvider({
     // Handle logout
     const handleLogout = useCallback(() => {
         console.log("[InactivityProvider] Logging out due to inactivity");
-        signOut({ callbackUrl: "/login?reason=inactivity" });
+        signOut({ callbackUrl: "/syslink/login?reason=inactivity" });
     }, []);
 
     // Reset the inactivity timer

@@ -19,7 +19,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { TotpWarningBanner } from "@/components/totp/totp-warning-banner";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { NotificationDropdown } from "@/components/layout/notification-dropdown";
 
 interface TotpWarning {
@@ -35,12 +34,12 @@ interface AppShellProps {
 }
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/profile", label: "Profil", icon: User },
+  { href: "/syslink/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/syslink/profile", label: "Profil", icon: User },
 ];
 
 const adminItems = [
-  { href: "/admin/approvals", label: "Godkjenninger", icon: Shield },
+  { href: "/syslink/admin/approvals", label: "Godkjenninger", icon: Shield },
 ];
 
 export function AppShell({ children, sidebar }: AppShellProps) {
@@ -158,7 +157,7 @@ export function AppShell({ children, sidebar }: AppShellProps) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex flex-col border-r border-border bg-card transition-all duration-300 ease-in-out",
+          "fixed inset-y-0 left-0 z-40 flex flex-col border-r border-[#24314A] bg-[#002346] transition-all duration-300 ease-in-out",
           "pb-[env(safe-area-inset-bottom)]",
           // Desktop: show based on collapse state
           leftSidebarCollapsed ? "lg:w-16 overflow-hidden" : "lg:w-64",
@@ -168,10 +167,10 @@ export function AppShell({ children, sidebar }: AppShellProps) {
         )}
       >
         <div className={cn(
-          "flex h-16 items-center border-b border-border transition-all justify-between px-6",
+          "flex h-16 items-center border-b border-[#24314A] transition-all justify-between px-6",
           leftSidebarCollapsed ? "lg:justify-center lg:px-2" : ""
         )}>
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link href="/syslink/dashboard" className="flex items-center gap-2">
             <span className={cn("text-xl font-bold text-foreground", leftSidebarCollapsed ? "lg:hidden" : "")}>
               SysLink
             </span>
@@ -181,10 +180,7 @@ export function AppShell({ children, sidebar }: AppShellProps) {
             />
           </Link>
           <div className={cn("flex items-center gap-2", leftSidebarCollapsed ? "lg:hidden" : "")}>
-            <div className="flex items-center gap-2">
-              <NotificationDropdown />
-              <ThemeToggle />
-            </div>
+            <NotificationDropdown />
           </div>
         </div>
 
@@ -199,12 +195,12 @@ export function AppShell({ children, sidebar }: AppShellProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex min-h-[44px] items-center rounded-lg text-sm font-medium transition-colors touch-manipulation",
-                  "gap-3 px-3 py-2",
+                  "flex min-h-[44px] items-center rounded-r-lg text-sm font-medium transition-colors touch-manipulation",
+                  "gap-3 px-3 py-2 border-l-2",
                   leftSidebarCollapsed ? "lg:justify-center lg:px-2" : "",
                   isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted/80"
+                    ? "border-[#20528D] bg-[#111A2E] text-white"
+                    : "border-transparent text-[#A8B3C7] hover:bg-[#111A2E] hover:text-white"
                 )}
                 onClick={() => setMobileMenuOpen(false)}
                 title={leftSidebarCollapsed ? item.label : undefined}
@@ -291,11 +287,11 @@ export function AppShell({ children, sidebar }: AppShellProps) {
             type="button"
             variant="ghost"
             className={cn(
-              "min-h-[44px] text-muted-foreground hover:text-foreground touch-manipulation",
+              "min-h-[44px] text-[#A8B3C7] hover:text-white hover:bg-[#111A2E] touch-manipulation",
               "w-full justify-start gap-2",
               leftSidebarCollapsed ? "lg:justify-center lg:p-2" : ""
             )}
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            onClick={() => signOut({ callbackUrl: "/syslink/login" })}
             title={leftSidebarCollapsed ? "Logg ut" : undefined}
           >
             <LogOut size={20} />

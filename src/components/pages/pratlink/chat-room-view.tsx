@@ -387,7 +387,7 @@ export function ChatRoomView({
     <div className="flex h-[calc(100dvh-8rem)] flex-col gap-4 lg:flex-row">
       <div className="lg:hidden space-y-3">
         <div className="flex items-center gap-3">
-          <Link href="/dashboard">
+          <Link href="/syslink/dashboard">
             <Button variant="ghost" size="sm">
               <ArrowLeft size={16} />
             </Button>
@@ -477,7 +477,7 @@ export function ChatRoomView({
 
       <div className="hidden lg:flex flex-col gap-4 w-72">
         <div className="flex items-center gap-3">
-          <Link href="/dashboard">
+          <Link href="/syslink/dashboard">
             <Button variant="ghost" size="sm">
               <ArrowLeft size={16} />
             </Button>
@@ -643,7 +643,7 @@ export function ChatRoomView({
                         className={cn(
                           "group flex gap-3 scroll-mt-24",
                           message.id === highlightMessageId &&
-                            "rounded-lg bg-primary/5 ring-1 ring-primary/30 p-2"
+                          "rounded-lg bg-primary/5 ring-1 ring-primary/30 p-2"
                         )}
                       >
                         <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">

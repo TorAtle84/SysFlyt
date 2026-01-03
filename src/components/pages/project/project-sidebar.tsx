@@ -254,7 +254,7 @@ export function ProjectSidebar({ project, projectId, onNavigate }: ProjectSideba
   return (
     <div className="flex h-full flex-col p-4">
       <Link
-        href="/dashboard"
+        href="/syslink/dashboard"
         className="mb-4 flex min-h-[44px] items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground active:bg-muted/60 touch-manipulation"
         onClick={() => onNavigate?.()}
       >

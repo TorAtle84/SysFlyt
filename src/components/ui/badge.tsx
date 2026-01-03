@@ -16,12 +16,12 @@ const badgeVariants = cva(
         outline: "text-foreground",
       },
       tone: {
-        default: "",
-        info: "border-blue-500/30 bg-blue-500/10 text-blue-400",
-        success: "border-green-500/30 bg-green-500/10 text-green-400",
-        warning: "border-yellow-500/30 bg-yellow-500/10 text-yellow-400",
-        danger: "border-red-500/30 bg-red-500/10 text-red-400",
-        muted: "border-border bg-muted text-muted-foreground",
+        default: "border-transparent bg-[#111A2E] text-white",
+        info: "border-[#20528D] bg-[#111A2E] text-white",
+        success: "border-[#529233] bg-[#111A2E] text-white",
+        warning: "border-[#EE6507] bg-[#111A2E] text-white",
+        danger: "border-[#DC2626] bg-[#111A2E] text-white",
+        muted: "border-[#24314A] bg-[#111A2E] text-[#A8B3C7]",
       },
     },
     defaultVariants: {
@@ -33,7 +33,7 @@ const badgeVariants = cva(
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+  VariantProps<typeof badgeVariants> { }
 
 function Badge({ className, variant, tone, ...props }: BadgeProps) {
   return (

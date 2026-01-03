@@ -9,15 +9,29 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground active:bg-accent/80",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70",
-        ghost: "hover:bg-accent hover:text-accent-foreground active:bg-accent/80",
-        link: "text-primary underline-offset-4 hover:underline",
+        // Default = Secondary blue (standard actions: Lagre, Oppdater, Fortsett)
+        default: "bg-[#20528D] text-white hover:bg-[#2A6AAD] active:bg-[#1A4273]",
+
+        // CTA = Attention orange (primary CTA: Opprett, Generer, Send) - use sparingly
+        cta: "bg-[#EE6507] text-white hover:bg-[#FF7A1F] active:bg-[#D55906]",
+
+        // Success = Green (confirmations, positive actions)
+        success: "bg-[#529233] text-white hover:bg-[#5FA63C] active:bg-[#467A2B]",
+
+        // Destructive
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80",
+
+        // Outline = Bordered button on surface
+        outline: "border border-[#24314A] bg-transparent text-[#E8EEF7] hover:bg-[#16213A] hover:text-white active:bg-[#1E2D4A]",
+
+        // Secondary = Subtle background
+        secondary: "bg-[#16213A] text-[#E8EEF7] hover:bg-[#1E2D4A] active:bg-[#24314A]",
+
+        // Ghost = No background until hover
+        ghost: "text-[#A8B3C7] hover:bg-[#16213A] hover:text-[#E8EEF7] active:bg-[#1E2D4A]",
+
+        // Link = Text link style
+        link: "text-[#20528D] underline-offset-4 hover:underline hover:text-[#2A6AAD]",
       },
       size: {
         default: "min-h-[44px] sm:min-h-[40px] px-4 py-2",
