@@ -14,7 +14,7 @@ const applications = [
     color: "from-purple-500 to-pink-500",
     href: "/flytlink/login",
     features: ["Kravsporing", "Grensesnittmatrise", "Prosjektplanlegging"],
-    comingSoon: true,
+    comingSoon: false,
   },
   {
     code: "syslink",
