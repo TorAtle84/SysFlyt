@@ -267,20 +267,26 @@ export default function KravsporingProjectPage() {
         }
     };
 
-    const handleCancelAnalysis = async () => {
-        if (!currentAnalysisId) return;
-
+    const cancelAnalysis = async (id: string) => {
         try {
-            const res = await fetch(`/api/flytlink/kravsporing/projects/${projectId}/analyze/${currentAnalysisId}/cancel`, {
+            const res = await fetch(`/api/flytlink/kravsporing/projects/${projectId}/analyze/${id}/cancel`, {
                 method: "POST",
             });
 
             if (!res.ok) throw new Error("Kunne ikke kansellere analyse");
 
             toast.info("Kansellering sendt...");
+            // Refresh project data to show updated status immediately if possible, 
+            // though polling/next load will also catch it.
+            loadProject();
         } catch (error) {
             toast.error("Kunne ikke kansellere analyse");
         }
+    };
+
+    const handleCancelAnalysis = async () => {
+        if (!currentAnalysisId) return;
+        await cancelAnalysis(currentAnalysisId);
     };
 
     function getStageMessage(stage: string): string {
@@ -562,17 +568,30 @@ export default function KravsporingProjectPage() {
                                                 )}
                                             </div>
                                         </div>
-                                        <Badge variant={
-                                            analysis.status === "COMPLETED" ? "default" :
-                                                analysis.status === "PROCESSING" ? "secondary" :
-                                                    analysis.status === "FAILED" ? "destructive" : "outline"
-                                        }>
-                                            {analysis.status === "COMPLETED" && "Fullført"}
-                                            {analysis.status === "PROCESSING" && "Pågår"}
-                                            {analysis.status === "FAILED" && "Feilet"}
-                                            {analysis.status === "PENDING" && "Venter"}
-                                            {analysis.status === "CANCELLED" && "Avbrutt"}
-                                        </Badge>
+                                        <div className="flex items-center gap-3">
+                                            {(analysis.status === "PROCESSING" || analysis.status === "PENDING") && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                    onClick={() => cancelAnalysis(analysis.id)}
+                                                    title="Avbryt analyse"
+                                                >
+                                                    <XCircle className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                            <Badge variant={
+                                                analysis.status === "COMPLETED" ? "default" :
+                                                    analysis.status === "PROCESSING" ? "secondary" :
+                                                        analysis.status === "FAILED" ? "destructive" : "outline"
+                                            }>
+                                                {analysis.status === "COMPLETED" && "Fullført"}
+                                                {analysis.status === "PROCESSING" && "Pågår"}
+                                                {analysis.status === "FAILED" && "Feilet"}
+                                                {analysis.status === "PENDING" && "Venter"}
+                                                {analysis.status === "CANCELLED" && "Avbrutt"}
+                                            </Badge>
+                                        </div>
                                     </CardContent>
                                 </Card>
                             ))}
