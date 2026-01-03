@@ -160,27 +160,68 @@ export default function KravsporingProjectPage() {
         setProgress(0);
 
         try {
-            // TODO: Implement actual file upload and analysis
-            const interval = setInterval(() => {
-                setProgress((prev) => {
-                    if (prev >= 95) {
-                        clearInterval(interval);
-                        return prev;
+            // Create FormData with files
+            const formData = new FormData();
+            files.forEach((file, index) => {
+                formData.append(`file${index}`, file);
+            });
+
+            // Start analysis
+            const res = await fetch(`/api/flytlink/kravsporing/projects/${projectId}/analyze`, {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || "Kunne ikke starte analyse");
+            }
+
+            const { analysisId } = await res.json();
+            toast.success("Analyse startet!");
+
+            // Poll for progress
+            const pollInterval = setInterval(async () => {
+                try {
+                    const statusRes = await fetch(
+                        `/api/flytlink/kravsporing/projects/${projectId}/analyze?analysisId=${analysisId}`
+                    );
+                    if (statusRes.ok) {
+                        const { analysis } = await statusRes.json();
+
+                        if (analysis.status === "COMPLETED") {
+                            clearInterval(pollInterval);
+                            setProgress(100);
+                            toast.success(`Analyse fullført! ${analysis._count.requirements} krav funnet.`);
+                            setFiles([]);
+                            loadProject();
+                            loadRequirements();
+                            setAnalyzing(false);
+                        } else if (analysis.status === "FAILED") {
+                            clearInterval(pollInterval);
+                            toast.error(analysis.errorMessage || "Analyse feilet");
+                            setAnalyzing(false);
+                        } else {
+                            // Still processing - increment progress
+                            setProgress((prev) => Math.min(prev + 5, 95));
+                        }
                     }
-                    return prev + Math.random() * 15;
-                });
-            }, 500);
+                } catch (err) {
+                    console.error("Error polling analysis status:", err);
+                }
+            }, 2000);
 
-            await new Promise((resolve) => setTimeout(resolve, 3000));
+            // Timeout after 5 minutes
+            setTimeout(() => {
+                clearInterval(pollInterval);
+                if (analyzing) {
+                    toast.error("Analyse tok for lang tid");
+                    setAnalyzing(false);
+                }
+            }, 300000);
 
-            clearInterval(interval);
-            setProgress(100);
-            toast.success("Analyse fullført!");
-            setFiles([]);
-            loadProject(); // Refresh project data
         } catch (err) {
-            toast.error("Analyse feilet");
-        } finally {
+            toast.error(err instanceof Error ? err.message : "Analyse feilet");
             setAnalyzing(false);
         }
     };

@@ -56,7 +56,7 @@
     "nodemailer": "^7.0.10",
     "otplib": "^12.0.1",
     "pdf-lib": "^1.17.1",
-    "pdf-parse": "^1.1.1",
+    "pdf-parse": "^1.1.4",
     "pdfjs-dist": "^5.4.394",
     "qrcode": "^1.5.4",
     "react": "^19.2.3",
