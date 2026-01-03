@@ -25,6 +25,7 @@ import {
     AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RequirementsTable } from "@/components/pages/flytlink/requirements-table";
 
 const ACCEPTED_TYPES = {
     "application/pdf": [".pdf"],
@@ -53,6 +54,18 @@ interface Analysis {
     };
 }
 
+interface Requirement {
+    id: string;
+    text: string;
+    shortText: string | null;
+    score: number;
+    status: "ACTIVE" | "INACTIVE" | "DUPLICATE";
+    source: string | null;
+    disciplineId: string | null;
+    discipline: Discipline | null;
+    createdAt: string;
+}
+
 interface Project {
     id: string;
     name: string;
@@ -79,7 +92,9 @@ export default function KravsporingProjectPage() {
     const projectId = params.projectId as string;
 
     const [project, setProject] = useState<Project | null>(null);
+    const [requirements, setRequirements] = useState<Requirement[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingRequirements, setLoadingRequirements] = useState(false);
     const [files, setFiles] = useState<File[]>([]);
     const [analyzing, setAnalyzing] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -99,6 +114,20 @@ export default function KravsporingProjectPage() {
             router.push("/flytlink/kravsporing");
         } finally {
             setLoading(false);
+        }
+    }
+
+    async function loadRequirements() {
+        setLoadingRequirements(true);
+        try {
+            const res = await fetch(`/api/flytlink/kravsporing/projects/${projectId}/requirements`);
+            if (!res.ok) throw new Error("Kunne ikke laste krav");
+            const data = await res.json();
+            setRequirements(data.requirements || []);
+        } catch (error) {
+            console.error("Error loading requirements:", error);
+        } finally {
+            setLoadingRequirements(false);
         }
     }
 
@@ -386,16 +415,33 @@ export default function KravsporingProjectPage() {
                 </TabsContent>
 
                 {/* Requirements Tab */}
-                <TabsContent value="requirements">
-                    <Card>
-                        <CardContent className="flex flex-col items-center justify-center py-12">
-                            <List className="h-12 w-12 text-muted-foreground mb-4" />
-                            <h3 className="text-lg font-medium mb-2">Kravliste kommer snart</h3>
-                            <p className="text-muted-foreground text-center max-w-md">
-                                Her vil du kunne se alle identifiserte krav, filtrere per fag, og eksportere
-                            </p>
-                        </CardContent>
-                    </Card>
+                <TabsContent value="requirements" onFocus={() => {
+                    if (requirements.length === 0 && !loadingRequirements) {
+                        loadRequirements();
+                    }
+                }}>
+                    {loadingRequirements ? (
+                        <div className="flex items-center justify-center py-12">
+                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        </div>
+                    ) : requirements.length === 0 ? (
+                        <Card>
+                            <CardContent className="flex flex-col items-center justify-center py-12">
+                                <List className="h-12 w-12 text-muted-foreground mb-4" />
+                                <h3 className="text-lg font-medium mb-2">Ingen krav funnet</h3>
+                                <p className="text-muted-foreground text-center max-w-md">
+                                    Kjør en analyse for å identifisere krav fra dokumentene dine
+                                </p>
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <RequirementsTable
+                            requirements={requirements}
+                            disciplines={project.disciplines}
+                            projectId={projectId}
+                            onUpdate={loadRequirements}
+                        />
+                    )}
                 </TabsContent>
 
                 {/* Settings Tab */}
