@@ -24,6 +24,7 @@ import {
     Play,
     AlertCircle,
     Key,
+    XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RequirementsTable } from "@/components/pages/flytlink/requirements-table";
@@ -112,6 +113,7 @@ export default function KravsporingProjectPage() {
         costNok?: number;
         activeKeys?: string;
     } | null>(null);
+    const [currentAnalysisId, setCurrentAnalysisId] = useState<string | null>(null);
 
     useEffect(() => {
         loadProject();
@@ -193,6 +195,7 @@ export default function KravsporingProjectPage() {
             }
 
             const { analysisId } = await res.json();
+            setCurrentAnalysisId(analysisId);
             toast.success("Analyse startet!");
 
             // Poll for progress
@@ -212,10 +215,19 @@ export default function KravsporingProjectPage() {
                             loadProject();
                             loadRequirements();
                             setAnalyzing(false);
+                            setAnalyzing(false);
+                            setCurrentAnalysisId(null);
                         } else if (analysis.status === "FAILED") {
                             clearInterval(pollInterval);
                             toast.error(analysis.errorMessage || "Analyse feilet");
                             setAnalyzing(false);
+                            setCurrentAnalysisId(null);
+                        } else if (analysis.status === "CANCELLED") {
+                            clearInterval(pollInterval);
+                            toast.info("Analyse avbrutt");
+                            setAnalyzing(false);
+                            setAnalysisStatus({ stage: "cancelled", message: "Analyse avbrutt" });
+                            setCurrentAnalysisId(null);
                         } else {
                             // Still processing - update progress and status
                             setProgress((prev) => Math.min(prev + 5, 95));
@@ -251,6 +263,23 @@ export default function KravsporingProjectPage() {
             toast.error(err instanceof Error ? err.message : "Analyse feilet");
             setAnalyzing(false);
             setAnalysisStatus(null);
+            setCurrentAnalysisId(null);
+        }
+    };
+
+    const handleCancelAnalysis = async () => {
+        if (!currentAnalysisId) return;
+
+        try {
+            const res = await fetch(`/api/flytlink/kravsporing/projects/${projectId}/analyze/${currentAnalysisId}/cancel`, {
+                method: "POST",
+            });
+
+            if (!res.ok) throw new Error("Kunne ikke kansellere analyse");
+
+            toast.info("Kansellering sendt...");
+        } catch (error) {
+            toast.error("Kunne ikke kansellere analyse");
         }
     };
 
@@ -416,9 +445,20 @@ export default function KravsporingProjectPage() {
                                     </p>
                                     {analysisStatus && (
                                         <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-2">
-                                            <p className="text-sm font-medium text-foreground">
-                                                {analysisStatus.message}
-                                            </p>
+                                            <div className="flex justify-between items-center">
+                                                <p className="text-sm font-medium text-foreground">
+                                                    {analysisStatus.message}
+                                                </p>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={handleCancelAnalysis}
+                                                    className="h-6 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                >
+                                                    <XCircle className="h-4 w-4 mr-1" />
+                                                    Avbryt
+                                                </Button>
+                                            </div>
                                             <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                                                 {analysisStatus.candidatesFound !== undefined && (
                                                     <span>Kandidater funnet: <strong>{analysisStatus.candidatesFound}</strong></span>
@@ -531,6 +571,7 @@ export default function KravsporingProjectPage() {
                                             {analysis.status === "PROCESSING" && "Pågår"}
                                             {analysis.status === "FAILED" && "Feilet"}
                                             {analysis.status === "PENDING" && "Venter"}
+                                            {analysis.status === "CANCELLED" && "Avbrutt"}
                                         </Badge>
                                     </CardContent>
                                 </Card>

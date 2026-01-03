@@ -16,8 +16,25 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { FileSearch, Plus, FolderOpen, Clock, ArrowRight, Loader2 } from "lucide-react";
+import { FileSearch, Plus, FolderOpen, Clock, ArrowRight, Loader2, MoreVertical, Archive, RotateCcw, Trash2 } from "lucide-react";
 
 interface KravsporingProject {
     id: string;
@@ -37,13 +54,19 @@ export default function KravsporingPage() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [newProject, setNewProject] = useState({ name: "", description: "" });
 
-    useEffect(() => {
-        loadProjects();
-    }, []);
+    // New state for tabs and actions
+    const [activeTab, setActiveTab] = useState("active");
+    const [projectToAction, setProjectToAction] = useState<KravsporingProject | null>(null);
+    const [actionType, setActionType] = useState<"archive" | "restore" | "delete" | null>(null);
 
-    async function loadProjects() {
+    useEffect(() => {
+        loadProjects(activeTab === "archived");
+    }, [activeTab]);
+
+    async function loadProjects(isArchived = false) {
+        setLoading(true);
         try {
-            const res = await fetch("/api/flytlink/kravsporing/projects");
+            const res = await fetch(`/api/flytlink/kravsporing/projects?archived=${isArchived}`);
             if (!res.ok) throw new Error("Kunne ikke laste prosjekter");
             const data = await res.json();
             setProjects(data.projects || []);
@@ -51,6 +74,45 @@ export default function KravsporingPage() {
             toast.error("Kunne ikke laste prosjekter");
         } finally {
             setLoading(false);
+        }
+    }
+
+    async function handleActionConfirm() {
+        if (!projectToAction || !actionType) return;
+
+        try {
+            let res;
+            if (actionType === "delete") {
+                // Permanent delete
+                res = await fetch(`/api/flytlink/kravsporing/projects/${projectToAction.id}?permanent=true`, {
+                    method: "DELETE",
+                });
+            } else if (actionType === "restore") {
+                // Restore
+                res = await fetch(`/api/flytlink/kravsporing/projects/${projectToAction.id}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ restore: true }),
+                });
+            } else if (actionType === "archive") {
+                // Archive (Soft delete)
+                res = await fetch(`/api/flytlink/kravsporing/projects/${projectToAction.id}`, {
+                    method: "DELETE",
+                });
+            }
+
+            if (!res?.ok) throw new Error("Handling feilet");
+
+            toast.success(
+                actionType === "delete" ? "Prosjekt slettet permanent" :
+                    actionType === "restore" ? "Prosjekt gjenopprettet" : "Prosjekt arkivert"
+            );
+
+            setProjectToAction(null);
+            setActionType(null);
+            loadProjects(activeTab === "archived");
+        } catch (error) {
+            toast.error("Noe gikk galt");
         }
     }
 
@@ -151,60 +213,158 @@ export default function KravsporingPage() {
                 </Dialog>
             </div>
 
-            {/* Project List */}
-            {loading ? (
-                <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-            ) : projects.length === 0 ? (
-                <Card className="border-dashed">
-                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                        <FolderOpen className="h-12 w-12 text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-medium mb-2">Ingen prosjekter ennå</h3>
-                        <p className="text-muted-foreground mb-4 max-w-md">
-                            Opprett ditt første kravsporing-prosjekt for å komme i gang med dokumentanalyse
-                        </p>
-                        <Button onClick={() => setDialogOpen(true)}>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Opprett prosjekt
-                        </Button>
-                    </CardContent>
-                </Card>
-            ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {projects.map((project) => (
-                        <Link key={project.id} href={`/flytlink/kravsporing/${project.id}`}>
-                            <Card className="group cursor-pointer hover:border-primary/50 transition-colors h-full">
-                                <CardHeader>
-                                    <CardTitle className="group-hover:text-primary transition-colors">
-                                        {project.name}
-                                    </CardTitle>
-                                    {project.description && (
-                                        <CardDescription className="line-clamp-2">
-                                            {project.description}
-                                        </CardDescription>
-                                    )}
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                                        <div className="flex items-center gap-4">
-                                            <span>{project._count.analyses} analyser</span>
-                                            <span>{project._count.disciplines} fag</span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <Clock className="h-3 w-3" />
-                                            <span>{new Date(project.createdAt).toLocaleDateString("nb-NO")}</span>
-                                        </div>
+            {/* Tabs and Project List */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="mb-4">
+                    <TabsTrigger value="active">Aktive prosjekter</TabsTrigger>
+                    <TabsTrigger value="archived">Arkiverte prosjekter</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value={activeTab}>
+                    {loading ? (
+                        <div className="flex items-center justify-center py-12">
+                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        </div>
+                    ) : projects.length === 0 ? (
+                        <Card className="border-dashed">
+                            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                                <FolderOpen className="h-12 w-12 text-muted-foreground mb-4" />
+                                <h3 className="text-lg font-medium mb-2">Ingen {activeTab === "active" ? "aktive" : "arkiverte"} prosjekter</h3>
+                                <p className="text-muted-foreground mb-4 max-w-md">
+                                    {activeTab === "active"
+                                        ? "Opprett ditt første kravsporing-prosjekt for å komme i gang"
+                                        : "Arkiverte prosjekter vil vises her"}
+                                </p>
+                                {activeTab === "active" && (
+                                    <Button onClick={() => setDialogOpen(true)}>
+                                        <Plus className="h-4 w-4 mr-2" />
+                                        Opprett prosjekt
+                                    </Button>
+                                )}
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            {projects.map((project) => (
+                                <div key={project.id} className="relative group h-full">
+                                    <Link href={`/flytlink/kravsporing/${project.id}`} className="block h-full">
+                                        <Card className="hover:border-primary/50 transition-colors h-full">
+                                            <CardHeader>
+                                                <div className="flex justify-between items-start">
+                                                    <CardTitle className="group-hover:text-primary transition-colors pr-8">
+                                                        {project.name}
+                                                    </CardTitle>
+                                                </div>
+                                                {project.description && (
+                                                    <CardDescription className="line-clamp-2">
+                                                        {project.description}
+                                                    </CardDescription>
+                                                )}
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                                                    <div className="flex items-center gap-4">
+                                                        <span>{project._count.analyses} analyser</span>
+                                                        <span>{project._count.disciplines} fag</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <Clock className="h-3 w-3" />
+                                                        <span>{new Date(project.createdAt).toLocaleDateString("nb-NO")}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="mt-4 flex justify-between items-end">
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {activeTab === "archived" ? "Arkivert" : "Aktiv"}
+                                                    </span>
+                                                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </Link>
+
+                                    {/* Actions Menu */}
+                                    <div className="absolute top-4 right-4 z-10">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity bg-background/50 backdrop-blur-sm hover:bg-background">
+                                                    <MoreVertical className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                {activeTab === "active" ? (
+                                                    <DropdownMenuItem
+                                                        className="text-amber-500 focus:text-amber-500"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setProjectToAction(project);
+                                                            setActionType("archive");
+                                                        }}
+                                                    >
+                                                        <Archive className="h-4 w-4 mr-2" />
+                                                        Arkiver prosjekt
+                                                    </DropdownMenuItem>
+                                                ) : (
+                                                    <>
+                                                        <DropdownMenuItem
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setProjectToAction(project);
+                                                                setActionType("restore");
+                                                            }}
+                                                        >
+                                                            <RotateCcw className="h-4 w-4 mr-2" />
+                                                            Gjenopprett
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            className="text-destructive focus:text-destructive"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setProjectToAction(project);
+                                                                setActionType("delete");
+                                                            }}
+                                                        >
+                                                            <Trash2 className="h-4 w-4 mr-2" />
+                                                            Slett permanent
+                                                        </DropdownMenuItem>
+                                                    </>
+                                                )}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </div>
-                                    <div className="mt-4 flex justify-end">
-                                        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </Link>
-                    ))}
-                </div>
-            )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </TabsContent>
+            </Tabs>
+
+            <AlertDialog open={!!projectToAction} onOpenChange={(open: boolean) => !open && setProjectToAction(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {actionType === "archive" ? "Arkiver prosjekt?" :
+                                actionType === "restore" ? "Gjenopprett prosjekt?" :
+                                    "Slett prosjekt permanent?"}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {actionType === "archive" ? "Prosjektet vil bli flyttet til arkivet og kan gjenopprettes senere." :
+                                actionType === "restore" ? "Prosjektet vil bli flyttet tilbake til aktive prosjekter." :
+                                    "Dette vil slette prosjektet og alle tilhørende analyser permanent. Handlingen kan ikke angres."}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                        <AlertDialogAction
+                            className={actionType === "delete" ? "bg-destructive hover:bg-destructive/90" : ""}
+                            onClick={handleActionConfirm}
+                        >
+                            {actionType === "archive" ? "Arkiver" :
+                                actionType === "restore" ? "Gjenopprett" :
+                                    "Slett"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

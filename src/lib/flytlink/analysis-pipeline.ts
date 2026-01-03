@@ -47,6 +47,16 @@ export async function runAnalysisPipeline(
         }
     };
 
+    const checkCancellation = async () => {
+        const check = await prisma.kravsporingAnalysis.findUnique({
+            where: { id: analysisId },
+            select: { status: true }
+        });
+        if (check?.status === "CANCELLED") {
+            throw new Error("CANCELLED");
+        }
+    };
+
     const report = (progress: AnalysisProgress) => {
         checkCostLimit();
         onProgress?.({ ...progress, costNok: tracker.totals.apiCostNok });
@@ -109,6 +119,8 @@ export async function runAnalysisPipeline(
                 progress: 5 + (i / files.length) * 15,
                 message: `Lest ${i + 1} av ${files.length} filer`,
             });
+
+            await checkCancellation();
         }
 
         // =========================================
@@ -129,10 +141,12 @@ export async function runAnalysisPipeline(
 
             report({
                 stage: "finding",
-                progress: 20 + (i / extractedTexts.length) * 25,
+                progress: 10 + (i / extractedTexts.length) * 35,
                 message: `Analysert ${i + 1} av ${extractedTexts.length} dokumenter`,
                 candidatesFound: allCandidates.length,
             });
+
+            await checkCancellation();
         }
 
         report({
@@ -168,9 +182,11 @@ export async function runAnalysisPipeline(
             report({
                 stage: "validating",
                 progress: 50 + (i / allCandidates.length) * 20,
-                message: `Validert ${Math.min(i + batchSize, allCandidates.length)} av ${allCandidates.length}`,
+                message: `Validert ${i + validated.length} av ${allCandidates.length} kandidater`,
                 requirementsValidated: validatedRequirements.length,
             });
+
+            await checkCancellation();
         }
 
         report({
@@ -288,10 +304,11 @@ export async function runAnalysisPipeline(
             } as any,
         });
 
+        // If it was cancelled, we don't report failure to the UI in the same way, or the UI handles "failed" with message "Analyse avbrutt"
         report({
             stage: "failed",
             progress: 0,
-            message: error instanceof Error ? error.message : "Analyse feilet",
+            message: error instanceof Error && error.message === "CANCELLED" ? "Analyse avbrutt av bruker" : (error instanceof Error ? error.message : "Analyse feilet"),
         });
 
         throw error;

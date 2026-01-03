@@ -13,7 +13,10 @@ const DEFAULT_DISCIPLINES = [
     { name: "Uspesifisert", color: "#9CA3AF", sortOrder: 5 },
 ];
 
-export async function GET() {
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url);
+    const showArchived = searchParams.get("archived") === "true";
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
         return NextResponse.json({ error: "Ikke autorisert" }, { status: 401 });
@@ -30,7 +33,10 @@ export async function GET() {
         }
 
         const projects = await prisma.kravsporingProject.findMany({
-            where: { userId: user.id },
+            where: {
+                userId: user.id,
+                deletedAt: showArchived ? { not: null } : null
+            },
             orderBy: { updatedAt: "desc" },
             include: {
                 _count: {
