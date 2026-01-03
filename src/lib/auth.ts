@@ -47,9 +47,9 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Kontoen din er suspendert. Kontakt administrator.");
         }
 
-        if (user.status === "PENDING") {
-          throw new Error("Kontoen din venter på godkjenning fra administrator.");
-        }
+        // if (user.status === "PENDING") {
+        //   throw new Error("Kontoen din venter på godkjenning fra administrator.");
+        // }
 
         if (user.status !== "ACTIVE") {
           throw new Error("Kontoen din er ikke aktiv.");

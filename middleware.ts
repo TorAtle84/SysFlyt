@@ -35,11 +35,19 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login?error=suspended", req.url));
   }
 
-  if (token.status === "PENDING" && path !== "/pending") {
-    if (path.startsWith("/api")) {
-      return NextResponse.json({ error: "Kontoen venter på godkjenning" }, { status: 403 });
+  if (token.status === "PENDING") {
+    // Check if we are already on a pending page
+    if (path === "/pending" || path === "/flytlink/pending" || path === "/syslink/pending") {
+      return NextResponse.next();
     }
-    return NextResponse.redirect(new URL("/pending", req.url));
+
+    // Redirect based on the app context (path prefix)
+    if (path.startsWith("/flytlink")) {
+      return NextResponse.redirect(new URL("/flytlink/pending", req.url));
+    } else {
+      // Default to SysLink/Global pending
+      return NextResponse.redirect(new URL("/syslink/pending", req.url));
+    }
   }
 
   if (token.status !== "ACTIVE" && path !== "/pending") {
