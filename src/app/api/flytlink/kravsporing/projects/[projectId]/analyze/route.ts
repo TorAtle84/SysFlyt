@@ -4,6 +4,9 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { runAnalysisPipeline } from "@/lib/flytlink/analysis-pipeline";
 
+export const maxDuration = 60; // Allow up to 60 seconds (Vercel Hobby limit 10s usually, Pro 60s/300s)
+export const dynamic = 'force-dynamic';
+
 export async function POST(
     request: Request,
     { params }: { params: Promise<{ projectId: string }> }
@@ -68,11 +71,9 @@ export async function POST(
             },
         });
 
-        // Start analysis in background (non-blocking)
-        // Note: In production, use a proper job queue like BullMQ or Celery
-        runAnalysisPipeline(analysis.id, files, user.id).catch((error) => {
-            console.error("Background analysis failed:", error);
-        });
+        // Run analysis synchronously (blocking) to ensure it finishes on Vercel
+        // Note: For large files/production, this should be offloaded to a background job queue (e.g. Inngest)
+        await runAnalysisPipeline(analysis.id, files, user.id);
 
         return NextResponse.json({
             analysisId: analysis.id,
