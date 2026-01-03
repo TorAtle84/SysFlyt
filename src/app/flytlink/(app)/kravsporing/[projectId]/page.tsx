@@ -48,6 +48,8 @@ interface Analysis {
     status: string;
     startedAt: string;
     completedAt: string | null;
+    tokensUsed: number;
+    apiCostNok: number;
     _count: {
         files: number;
         requirements: number;
@@ -241,6 +243,9 @@ export default function KravsporingProjectPage() {
     const totalSize = files.reduce((acc, f) => acc + f.size, 0);
     const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
 
+    // Calculate total API cost for this project
+    const totalCostNok = project.analyses.reduce((acc, a) => acc + (a.apiCostNok || 0), 0);
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -251,7 +256,14 @@ export default function KravsporingProjectPage() {
                     </Button>
                 </Link>
                 <div className="flex-1">
-                    <h1 className="text-2xl font-bold text-foreground">{project.name}</h1>
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-2xl font-bold text-foreground">{project.name}</h1>
+                        {totalCostNok > 0 && (
+                            <Badge variant="outline" className="text-xs">
+                                API: {totalCostNok.toFixed(2)} NOK
+                            </Badge>
+                        )}
+                    </div>
                     {project.description && (
                         <p className="text-muted-foreground">{project.description}</p>
                     )}
@@ -435,6 +447,7 @@ export default function KravsporingProjectPage() {
                                                 </p>
                                                 <p className="text-sm text-muted-foreground">
                                                     {analysis._count.files} filer · {analysis._count.requirements} krav
+                                                    {analysis.apiCostNok > 0 && ` · ${analysis.apiCostNok.toFixed(2)} NOK`}
                                                 </p>
                                             </div>
                                         </div>

@@ -8,6 +8,7 @@ import {
     RequirementCandidate,
     ValidatedRequirement,
     DEFAULT_DISCIPLINE_KEYWORDS,
+    UsageTracker,
 } from "./gemini-analysis";
 import prisma from "@/lib/db";
 
@@ -17,6 +18,7 @@ export interface AnalysisProgress {
     message: string;
     candidatesFound?: number;
     requirementsValidated?: number;
+    costNok?: number;
 }
 
 interface DisciplineWithKeywords {
@@ -34,9 +36,11 @@ export async function runAnalysisPipeline(
     userId: string,
     onProgress?: (progress: AnalysisProgress) => void
 ): Promise<void> {
+    const tracker = new UsageTracker();
+
     const report = (progress: AnalysisProgress) => {
-        onProgress?.(progress);
-        console.log(`[Analysis ${analysisId}] ${progress.stage}: ${progress.message}`);
+        onProgress?.({ ...progress, costNok: tracker.totals.apiCostNok });
+        console.log(`[Analysis ${analysisId}] ${progress.stage}: ${progress.message} (${tracker.totals.apiCostNok.toFixed(2)} NOK)`);
     };
 
     try {
@@ -61,7 +65,7 @@ export async function runAnalysisPipeline(
         }
 
         // Prepare disciplines with keywords
-        const disciplines: DisciplineWithKeywords[] = analysis.project.disciplines.map(d => ({
+        const disciplines: DisciplineWithKeywords[] = analysis.project.disciplines.map((d: { id: string; name: string }) => ({
             id: d.id,
             name: d.name,
             keywords: DEFAULT_DISCIPLINE_KEYWORDS[d.name] || [],
@@ -109,7 +113,7 @@ export async function runAnalysisPipeline(
             const chunks = splitIntoChunks(content, 4000);
 
             for (const chunk of chunks) {
-                const candidates = await findRequirementCandidates(apiKey, chunk, fileName);
+                const candidates = await findRequirementCandidates(apiKey, chunk, fileName, tracker);
                 allCandidates.push(...candidates);
             }
 
@@ -139,7 +143,7 @@ export async function runAnalysisPipeline(
 
         for (let i = 0; i < allCandidates.length; i += batchSize) {
             const batch = allCandidates.slice(i, i + batchSize);
-            const validated = await validateRequirements(apiKey, batch);
+            const validated = await validateRequirements(apiKey, batch, tracker);
 
             // Match validated results with original candidates to preserve source
             for (let j = 0; j < validated.length; j++) {
@@ -187,7 +191,7 @@ export async function runAnalysisPipeline(
 
             // If low confidence, use AI
             if (assignment.confidence < 0.6) {
-                assignment = await assignDisciplineWithAI(apiKey, req.text, disciplines);
+                assignment = await assignDisciplineWithAI(apiKey, req.text, disciplines, tracker);
             }
 
             requirementsToSave.push({
@@ -218,31 +222,43 @@ export async function runAnalysisPipeline(
             })),
         });
 
-        // Mark analysis as completed
+        // Get final costs
+        const { tokensUsed, apiCostUsd, apiCostNok } = tracker.totals;
+
+        // Mark analysis as completed with costs
         await prisma.kravsporingAnalysis.update({
             where: { id: analysisId },
             data: {
                 status: "COMPLETED",
                 completedAt: new Date(),
+                tokensUsed,
+                apiCostUsd,
+                apiCostNok,
             },
         });
 
         report({
             stage: "completed",
             progress: 100,
-            message: `Analyse fullført! ${requirementsToSave.length} krav lagret.`,
+            message: `Analyse fullført! ${requirementsToSave.length} krav lagret. Kostnad: ${apiCostNok.toFixed(2)} NOK`,
             requirementsValidated: requirementsToSave.length,
         });
 
     } catch (error) {
         console.error("Analysis pipeline error:", error);
 
-        // Mark analysis as failed
+        // Get costs even on failure
+        const { tokensUsed, apiCostUsd, apiCostNok } = tracker.totals;
+
+        // Mark analysis as failed with costs
         await prisma.kravsporingAnalysis.update({
             where: { id: analysisId },
             data: {
                 status: "FAILED",
                 errorMessage: error instanceof Error ? error.message : "Ukjent feil",
+                tokensUsed,
+                apiCostUsd,
+                apiCostNok,
             },
         });
 

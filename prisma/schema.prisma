@@ -1110,6 +1110,11 @@ model KravsporingAnalysis {
   completedAt DateTime?
   errorMessage String?
   
+  // API Cost tracking
+  tokensUsed     Int      @default(0)
+  apiCostUsd     Float    @default(0)
+  apiCostNok     Float    @default(0)
+  
   projectId   String
   project     KravsporingProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
   

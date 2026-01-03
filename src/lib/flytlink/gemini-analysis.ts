@@ -12,6 +12,11 @@ interface GeminiResponse {
             parts: { text: string }[];
         };
     }[];
+    usageMetadata?: {
+        promptTokenCount: number;
+        candidatesTokenCount: number;
+        totalTokenCount: number;
+    };
 }
 
 export interface RequirementCandidate {
@@ -37,6 +42,20 @@ export interface DisciplineAssignment {
     reasoning?: string;
 }
 
+export interface ApiUsage {
+    tokensUsed: number;
+    costUsd: number;
+}
+
+// Pricing per 1M tokens (as of 2024)
+const GEMINI_PRICING = {
+    "gemini-1.5-flash": { input: 0.075, output: 0.30 },
+    "gemini-1.5-pro": { input: 1.25, output: 5.00 },
+};
+
+// USD to NOK exchange rate (approximate)
+const USD_TO_NOK = 10.5;
+
 /**
  * Get user's Gemini API key (decrypted)
  */
@@ -50,20 +69,32 @@ export async function getUserGeminiKey(userId: string): Promise<string | null> {
         return null;
     }
 
-    // Note: In production, decrypt the key here
-    // For now, we store it encrypted but return as-is for simplicity
     return user.geminiApiKey;
 }
 
 /**
- * Call Gemini API
+ * Calculate cost from tokens
+ */
+function calculateCost(
+    model: "gemini-1.5-flash" | "gemini-1.5-pro",
+    promptTokens: number,
+    outputTokens: number
+): number {
+    const pricing = GEMINI_PRICING[model];
+    const inputCost = (promptTokens / 1_000_000) * pricing.input;
+    const outputCost = (outputTokens / 1_000_000) * pricing.output;
+    return inputCost + outputCost;
+}
+
+/**
+ * Call Gemini API with usage tracking
  */
 async function callGemini(
     apiKey: string,
     model: "gemini-1.5-flash" | "gemini-1.5-pro",
     prompt: string,
     systemInstruction?: string
-): Promise<string> {
+): Promise<{ text: string; usage: ApiUsage }> {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
     const body: {
@@ -107,7 +138,35 @@ async function callGemini(
     }
 
     const data: GeminiResponse = await response.json();
-    return data.candidates[0]?.content?.parts[0]?.text || "";
+
+    const tokensUsed = data.usageMetadata?.totalTokenCount || 0;
+    const promptTokens = data.usageMetadata?.promptTokenCount || 0;
+    const outputTokens = data.usageMetadata?.candidatesTokenCount || 0;
+    const costUsd = calculateCost(model, promptTokens, outputTokens);
+
+    return {
+        text: data.candidates[0]?.content?.parts[0]?.text || "",
+        usage: { tokensUsed, costUsd },
+    };
+}
+
+// Accumulator for tracking total usage across calls
+export class UsageTracker {
+    private totalTokens = 0;
+    private totalCostUsd = 0;
+
+    add(usage: ApiUsage) {
+        this.totalTokens += usage.tokensUsed;
+        this.totalCostUsd += usage.costUsd;
+    }
+
+    get totals() {
+        return {
+            tokensUsed: this.totalTokens,
+            apiCostUsd: this.totalCostUsd,
+            apiCostNok: this.totalCostUsd * USD_TO_NOK,
+        };
+    }
 }
 
 /**
@@ -116,7 +175,8 @@ async function callGemini(
 export async function findRequirementCandidates(
     apiKey: string,
     text: string,
-    fileName: string
+    fileName: string,
+    tracker?: UsageTracker
 ): Promise<RequirementCandidate[]> {
     const systemInstruction = `Du er en ekspert på å identifisere krav i tekniske dokumenter for byggebransjen.
 Din oppgave er å finne setninger som KAN være krav.
@@ -148,7 +208,8 @@ Returner JSON i dette formatet:
 Confidence skal være mellom 0.0 og 1.0 basert på hvor sannsynlig det er at dette er et krav.`;
 
     try {
-        const result = await callGemini(apiKey, "gemini-1.5-flash", prompt, systemInstruction);
+        const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-flash", prompt, systemInstruction);
+        tracker?.add(usage);
         const candidates = JSON.parse(result) as RequirementCandidate[];
         return candidates.map(c => ({ ...c, source: fileName }));
     } catch (error) {
@@ -162,7 +223,8 @@ Confidence skal være mellom 0.0 og 1.0 basert på hvor sannsynlig det er at det
  */
 export async function validateRequirements(
     apiKey: string,
-    candidates: RequirementCandidate[]
+    candidates: RequirementCandidate[],
+    tracker?: UsageTracker
 ): Promise<ValidatedRequirement[]> {
     const systemInstruction = `Du er en ekspert på kravsporing i byggebransjen.
 Din oppgave er å vurdere om kandidatene er EKTE krav eller bare informasjon.
@@ -196,7 +258,8 @@ For hver kandidat, returner:
 Type kan være: FUNCTION, PERFORMANCE, DESIGN, OTHER`;
 
     try {
-        const result = await callGemini(apiKey, "gemini-1.5-pro", prompt, systemInstruction);
+        const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-pro", prompt, systemInstruction);
+        tracker?.add(usage);
         return JSON.parse(result) as ValidatedRequirement[];
     } catch (error) {
         console.error("Error validating requirements:", error);
@@ -227,7 +290,6 @@ export function matchDisciplineByKeywords(
     scores.sort((a, b) => b.score - a.score);
 
     if (scores[0]?.score > 0) {
-        // Calculate confidence based on how much better top score is vs second
         const topScore = scores[0].score;
         const secondScore = scores[1]?.score || 0;
         const confidence = topScore > secondScore
@@ -254,7 +316,8 @@ export function matchDisciplineByKeywords(
 export async function assignDisciplineWithAI(
     apiKey: string,
     requirement: string,
-    disciplines: { id: string; name: string; keywords: string[] }[]
+    disciplines: { id: string; name: string; keywords: string[] }[],
+    tracker?: UsageTracker
 ): Promise<DisciplineAssignment> {
     const disciplineList = disciplines
         .map(d => `- ${d.name}: ${d.keywords.slice(0, 5).join(", ")}...`)
@@ -276,7 +339,8 @@ Returner JSON:
 Hvis kravet ikke passer noen fag, bruk disciplineName: null`;
 
     try {
-        const result = await callGemini(apiKey, "gemini-1.5-flash", prompt);
+        const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-flash", prompt);
+        tracker?.add(usage);
         const assignment = JSON.parse(result);
         const discipline = disciplines.find(d => d.name === assignment.disciplineName);
 
