@@ -282,14 +282,17 @@ async function mergeMatrices(
                 const targetColId = targetColMap.get(sourceColKey.discipline || sourceColKey.customLabel || "");
                 if (!targetColId) continue;
 
-                await prisma.interfaceMatrixCell.create({
-                    data: {
-                        rowId: newRow.id,
-                        columnId: targetColId,
-                        values: sourceCell.values,
-                    },
-                });
-                cellsUpdated++;
+                const cellValues = sourceCell.values as string[] | null;
+                if (cellValues && cellValues.length > 0) {
+                    await prisma.interfaceMatrixCell.create({
+                        data: {
+                            rowId: newRow.id,
+                            columnId: targetColId,
+                            values: cellValues,
+                        },
+                    });
+                    cellsUpdated++;
+                }
             }
 
             rowsAdded++;
