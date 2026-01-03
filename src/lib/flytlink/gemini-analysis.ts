@@ -270,15 +270,10 @@ Returner JSON i dette formatet:
 
 Confidence skal være mellom 0.0 og 1.0 basert på hvor sannsynlig det er at dette er et krav.`;
 
-    try {
-        const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-flash", prompt, systemInstruction);
-        tracker?.add(usage);
-        const candidates = JSON.parse(result) as RequirementCandidate[];
-        return candidates.map(c => ({ ...c, source: fileName }));
-    } catch (error) {
-        console.error("Error finding candidates:", error);
-        return [];
-    }
+    const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-flash", prompt, systemInstruction);
+    tracker?.add(usage);
+    const candidates = JSON.parse(result) as RequirementCandidate[];
+    return candidates.map(c => ({ ...c, source: fileName }));
 }
 
 /**
@@ -320,14 +315,9 @@ For hver kandidat, returner:
 
 Type kan være: FUNCTION, PERFORMANCE, DESIGN, OTHER`;
 
-    try {
-        const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-pro", prompt, systemInstruction);
-        tracker?.add(usage);
-        return JSON.parse(result) as ValidatedRequirement[];
-    } catch (error) {
-        console.error("Error validating requirements:", error);
-        return [];
-    }
+    const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-pro", prompt, systemInstruction);
+    tracker?.add(usage);
+    return JSON.parse(result) as ValidatedRequirement[];
 }
 
 /**
@@ -401,22 +391,17 @@ Returner JSON:
 
 Hvis kravet ikke passer noen fag, bruk disciplineName: null`;
 
-    try {
-        const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-flash", prompt);
-        tracker?.add(usage);
-        const assignment = JSON.parse(result);
-        const discipline = disciplines.find(d => d.name === assignment.disciplineName);
+    const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-flash", prompt);
+    tracker?.add(usage);
+    const assignment = JSON.parse(result);
+    const discipline = disciplines.find(d => d.name === assignment.disciplineName);
 
-        return {
-            disciplineId: discipline?.id || null,
-            disciplineName: assignment.disciplineName,
-            confidence: assignment.confidence || 0.5,
-            reasoning: assignment.reasoning,
-        };
-    } catch (error) {
-        console.error("Error assigning discipline with AI:", error);
-        return { disciplineId: null, disciplineName: null, confidence: 0 };
-    }
+    return {
+        disciplineId: discipline?.id || null,
+        disciplineName: assignment.disciplineName,
+        confidence: assignment.confidence || 0.5,
+        reasoning: assignment.reasoning,
+    };
 }
 
 // Default discipline keywords (from legacy Prosjektbasen)
