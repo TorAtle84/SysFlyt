@@ -97,10 +97,17 @@ export async function runAnalysisPipeline(
         report({ stage: "extracting", progress: 5, message: "Leser dokumenter..." });
 
         const extractedTexts: { fileName: string; content: string }[] = [];
+        let emptyFilesCount = 0;
 
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
             const extracted = await extractText(file.buffer, file.name, file.mimeType);
+
+            if (!extracted.content || extracted.content.trim().length === 0) {
+                emptyFilesCount++;
+                console.warn(`[Analysis ${analysisId}] No text found in file: ${file.name}`);
+            }
+
             extractedTexts.push({ fileName: file.name, content: extracted.content });
 
             // Save file record
@@ -271,10 +278,16 @@ export async function runAnalysisPipeline(
             data: updateData as any,
         });
 
+        let completionMessage = `Analyse fullført! ${requirementsToSave.length} krav lagret. Kostnad: ${totals.apiCostNok.toFixed(2)} NOK`;
+
+        if (emptyFilesCount > 0) {
+            completionMessage += `. ADVARSEL: Fant ingen tekst i ${emptyFilesCount} av ${files.length} filer.`;
+        }
+
         report({
             stage: "completed",
             progress: 100,
-            message: `Analyse fullført! ${requirementsToSave.length} krav lagret. Kostnad: ${totals.apiCostNok.toFixed(2)} NOK`,
+            message: completionMessage,
             requirementsValidated: requirementsToSave.length,
         });
 
