@@ -213,27 +213,28 @@ export function LinkDogPopup() {
                                             )}
                                         >
                                             {msg.role === 'assistant' ? (
-                                                <ReactMarkdown
-                                                    className="text-sm prose prose-sm dark:prose-invert max-w-none"
-                                                    components={{
-                                                        a: ({ href, children }) => (
-                                                            <a
-                                                                href={href}
-                                                                className="text-primary hover:underline"
-                                                                onClick={(e) => {
-                                                                    if (href?.startsWith('/')) {
-                                                                        e.preventDefault();
-                                                                        window.location.href = href;
-                                                                    }
-                                                                }}
-                                                            >
-                                                                {children}
-                                                            </a>
-                                                        )
-                                                    }}
-                                                >
-                                                    {msg.content}
-                                                </ReactMarkdown>
+                                                <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
+                                                    <ReactMarkdown
+                                                        components={{
+                                                            a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
+                                                                <a
+                                                                    href={href}
+                                                                    className="text-primary hover:underline"
+                                                                    onClick={(e) => {
+                                                                        if (href?.startsWith('/')) {
+                                                                            e.preventDefault();
+                                                                            window.location.href = href;
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    {children}
+                                                                </a>
+                                                            )
+                                                        }}
+                                                    >
+                                                        {msg.content}
+                                                    </ReactMarkdown>
+                                                </div>
                                             ) : (
                                                 <p className="text-sm">{msg.content}</p>
                                             )}
