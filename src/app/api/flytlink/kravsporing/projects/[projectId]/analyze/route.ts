@@ -103,7 +103,7 @@ export async function GET(
         const analysisId = url.searchParams.get("analysisId");
 
         if (analysisId) {
-            // Get specific analysis
+            // Get specific analysis with counts
             const analysis = await prisma.kravsporingAnalysis.findFirst({
                 where: { id: analysisId, projectId },
                 include: {
@@ -112,6 +112,27 @@ export async function GET(
                     },
                 },
             });
+
+            if (analysis) {
+                // Estimate current stage based on state
+                let currentStage = "extracting";
+                if (analysis._count.files > 0 && analysis._count.requirements === 0 && analysis.status === "PROCESSING") {
+                    currentStage = "finding";
+                }
+                if (analysis.tokensUsed > 1000) {
+                    currentStage = "validating";
+                }
+                if (analysis.tokensUsed > 5000) {
+                    currentStage = "assigning";
+                }
+
+                return NextResponse.json({
+                    analysis: {
+                        ...analysis,
+                        currentStage,
+                    },
+                });
+            }
 
             return NextResponse.json({ analysis });
         }

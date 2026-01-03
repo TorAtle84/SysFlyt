@@ -100,6 +100,13 @@ export default function KravsporingProjectPage() {
     const [files, setFiles] = useState<File[]>([]);
     const [analyzing, setAnalyzing] = useState(false);
     const [progress, setProgress] = useState(0);
+    const [analysisStatus, setAnalysisStatus] = useState<{
+        stage: string;
+        message: string;
+        candidatesFound?: number;
+        requirementsValidated?: number;
+        costNok?: number;
+    } | null>(null);
 
     useEffect(() => {
         loadProject();
@@ -160,6 +167,7 @@ export default function KravsporingProjectPage() {
 
         setAnalyzing(true);
         setProgress(0);
+        setAnalysisStatus({ stage: "starting", message: "Starter analyse..." });
 
         try {
             // Create FormData with files
@@ -204,8 +212,19 @@ export default function KravsporingProjectPage() {
                             toast.error(analysis.errorMessage || "Analyse feilet");
                             setAnalyzing(false);
                         } else {
-                            // Still processing - increment progress
+                            // Still processing - update progress and status
                             setProgress((prev) => Math.min(prev + 5, 95));
+
+                            // Update status info if available
+                            if (analysis.currentStage) {
+                                setAnalysisStatus({
+                                    stage: analysis.currentStage,
+                                    message: getStageMessage(analysis.currentStage),
+                                    candidatesFound: analysis.candidatesFound,
+                                    requirementsValidated: analysis.requirementsValidated,
+                                    costNok: analysis.apiCostNok,
+                                });
+                            }
                         }
                     }
                 } catch (err) {
@@ -225,8 +244,19 @@ export default function KravsporingProjectPage() {
         } catch (err) {
             toast.error(err instanceof Error ? err.message : "Analyse feilet");
             setAnalyzing(false);
+            setAnalysisStatus(null);
         }
     };
+
+    function getStageMessage(stage: string): string {
+        switch (stage) {
+            case "extracting": return "Leser innhold fra dokumenter...";
+            case "finding": return "Søker etter krav-kandidater med AI...";
+            case "validating": return "Validerer og klassifiserer krav...";
+            case "assigning": return "Tildeler fagdisipliner...";
+            default: return "Behandler...";
+        }
+    }
 
     if (loading) {
         return (
@@ -373,11 +403,29 @@ export default function KravsporingProjectPage() {
                             )}
 
                             {analyzing && (
-                                <div className="space-y-2">
+                                <div className="space-y-3">
                                     <Progress value={progress} className="h-2" />
                                     <p className="text-sm text-muted-foreground text-center">
                                         Analyserer dokumenter... {Math.round(progress)}%
                                     </p>
+                                    {analysisStatus && (
+                                        <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-2">
+                                            <p className="text-sm font-medium text-foreground">
+                                                {analysisStatus.message}
+                                            </p>
+                                            <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                                                {analysisStatus.candidatesFound !== undefined && (
+                                                    <span>Kandidater funnet: <strong>{analysisStatus.candidatesFound}</strong></span>
+                                                )}
+                                                {analysisStatus.requirementsValidated !== undefined && (
+                                                    <span>Validerte krav: <strong>{analysisStatus.requirementsValidated}</strong></span>
+                                                )}
+                                                {analysisStatus.costNok !== undefined && analysisStatus.costNok > 0 && (
+                                                    <span>Kostnad: <strong>{analysisStatus.costNok.toFixed(2)} NOK</strong></span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
