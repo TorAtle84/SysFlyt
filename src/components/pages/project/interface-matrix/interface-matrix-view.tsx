@@ -438,7 +438,7 @@ function MatrixRowItem({ row, columns, projectId, onDelete }: { row: MatrixRow; 
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all duration-200"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-70 hover:opacity-100 transition-all duration-200"
                     onClick={onDelete}
                     title="Slett system"
                 >
@@ -491,7 +491,7 @@ function MatrixCellItem({ rowId, columnId, values, onValuesChange, color, projec
                                     <Badge
                                         key={v}
                                         variant="outline"
-                                        className="text-[10px] px-2 py-0.5 font-medium border-0 shadow-sm leading-tight text-neutral-900"
+                                        className="text-xs px-2.5 py-1 font-medium border-0 shadow-sm leading-tight text-neutral-900"
                                         style={{ backgroundColor: color }}
                                     >
                                         {v}
