@@ -146,9 +146,14 @@ model User {
   appAccess          UserAppAccess[]
   appAccessApprovals UserAppAccess[] @relation("AppAccessApprover")
 
-  // FlytLink API Keys (encrypted)
+  // API Keys (encrypted)
   geminiApiKey       String?
   openaiApiKey       String?
+  claudeApiKey       String?
+  
+  // LinkDog Settings
+  linkdogEnabled     Boolean  @default(true)
+  linkdogProvider    String   @default("gemini") // "gemini" | "claude"
   
   // FlytLink Kravsporing
   kravsporingProjects KravsporingProject[]

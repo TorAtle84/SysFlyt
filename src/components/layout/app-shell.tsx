@@ -16,11 +16,13 @@ import {
   PanelRightOpen,
   FileText,
   FileSearch,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { TotpWarningBanner } from "@/components/totp/totp-warning-banner";
 import { NotificationDropdown } from "@/components/layout/notification-dropdown";
+import { LinkDogProvider, LinkDogPopup } from "@/components/linkdog";
 
 interface TotpWarning {
   daysRemaining: number;
@@ -48,6 +50,7 @@ const flytlinkNavItems = [
 
 const adminItems = [
   { href: "/syslink/admin/approvals", label: "Godkjenninger", icon: Shield },
+  { href: "/syslink/admin/users", label: "Brukere", icon: Users },
 ];
 
 export function AppShell({ children, sidebar, variant = "syslink" }: AppShellProps) {
@@ -434,6 +437,10 @@ export function AppShell({ children, sidebar, variant = "syslink" }: AppShellPro
           aria-hidden="true"
         />
       )}
+      {/* LinkDog Chatbot */}
+      <LinkDogProvider>
+        <LinkDogPopup />
+      </LinkDogProvider>
     </div>
   );
 }
