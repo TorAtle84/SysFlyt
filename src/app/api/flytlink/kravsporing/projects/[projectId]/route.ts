@@ -5,8 +5,9 @@ import prisma from "@/lib/db";
 
 export async function GET(
     request: Request,
-    { params }: { params: { projectId: string } }
+    { params }: { params: Promise<{ projectId: string }> }
 ) {
+    const { projectId } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
         return NextResponse.json({ error: "Ikke autorisert" }, { status: 401 });
@@ -24,7 +25,7 @@ export async function GET(
 
         const project = await prisma.kravsporingProject.findFirst({
             where: {
-                id: params.projectId,
+                id: projectId,
                 userId: user.id,
             },
             include: {
@@ -63,8 +64,9 @@ export async function GET(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { projectId: string } }
+    { params }: { params: Promise<{ projectId: string }> }
 ) {
+    const { projectId } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
         return NextResponse.json({ error: "Ikke autorisert" }, { status: 401 });
@@ -80,10 +82,9 @@ export async function DELETE(
             return NextResponse.json({ error: "Bruker ikke funnet" }, { status: 404 });
         }
 
-        // Verify ownership before deleting
         const project = await prisma.kravsporingProject.findFirst({
             where: {
-                id: params.projectId,
+                id: projectId,
                 userId: user.id,
             },
         });
@@ -93,7 +94,7 @@ export async function DELETE(
         }
 
         await prisma.kravsporingProject.delete({
-            where: { id: params.projectId },
+            where: { id: projectId },
         });
 
         return NextResponse.json({ success: true });
