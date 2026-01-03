@@ -94,15 +94,60 @@ export async function GET(
       },
     });
 
+    // START FIX: Also fetch documents linked via DocumentComponent (TFM tagging)
+    const tfmList = items
+      .map((i) => i.massList?.tfm)
+      .filter((tfm): tfm is string => !!tfm);
+
+    const taggedDocs = await prisma.documentComponent.findMany({
+      where: {
+        document: { projectId },
+        code: { in: tfmList },
+      },
+      include: {
+        document: {
+          select: {
+            id: true,
+            title: true,
+            fileUrl: true,
+            type: true,
+          },
+        },
+      },
+    });
+
+    const taggedDocsMap = new Map<string, typeof taggedDocs>();
+    taggedDocs.forEach((dc) => {
+      const list = taggedDocsMap.get(dc.code) || [];
+      list.push(dc);
+      taggedDocsMap.set(dc.code, list);
+    });
+    // END FIX
+
     const uniqueFileKeys = new Set<string>();
     const components: FdvComponentResponse[] = items.map((item) => {
-      const datasheets = item.product?.datasheets || [];
-      const { datasheetCount, installationCount } = countDocTypes(datasheets);
-      const fileCount = datasheets.length;
+      const productDatasheets = item.product?.datasheets || [];
+
+      // Get tagged documents for this component's TFM
+      const tfm = item.massList?.tfm;
+      const componentDocs = tfm ? taggedDocsMap.get(tfm) || [] : [];
+
+      // Combine counts
+      const { datasheetCount, installationCount } = countDocTypes(productDatasheets);
+
+      // Count generic documents (we assume OTHER/DATASHEET maps to datasheet count for now)
+      // or just treat them as generic files.
+      // Since DocumentType doesn't strictly match "DATASHEET"/"INSTALLATION" strings from ProductDatasheet, 
+      // we'll add them to fileCount and ensure hasFdv is true.
+
+      const fileCount = productDatasheets.length + componentDocs.length;
       const hasFdv = fileCount > 0;
 
-      datasheets.forEach((ds) => {
+      productDatasheets.forEach((ds) => {
         uniqueFileKeys.add(ds.fileHash || ds.fileUrl || ds.id);
+      });
+      componentDocs.forEach((cd) => {
+        uniqueFileKeys.add(cd.document.id);
       });
 
       return {
@@ -113,7 +158,7 @@ export async function GET(
         name: resolveComponentName(item),
         productName: item.product?.name || item.massList?.productName || null,
         supplierName: item.product?.supplier?.name || item.massList?.supplierName || null,
-        datasheetCount,
+        datasheetCount: datasheetCount + componentDocs.length, // Add tagged docs to count
         installationCount,
         fileCount,
         hasFdv,
