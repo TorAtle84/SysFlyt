@@ -1,0 +1,166 @@
+{
+  "JP": [
+    {
+      "navn": "Pumpe, varme shuntgruppe",
+      "test": "1. Manipuler et høyt varmesettpunkt i systemets temperaturregulator for å aktivere varmepådrag.",
+      "aksept": "1. Kontroller at pumpe starter ved pådrag > 0% for ventilmotor. Slå av strømmen på pumpen ved drift for å kontrollere alarmfunksjon og at systemet stanser. Ved feil på pumpen kontroller at ventilmotor åpner 100%,  og registrering av alarm i HMI/SD."
+    },
+    {
+      "navn": "Pumpe, varme shuntgruppe, og minimumsregulering",
+      "test": "1. Manipuler et høyt varmesettpunkt i systemets temperaturregulator for å aktivere varmepådrag.\n\n2. Øk settpunkt for minimumsregulering høyere enn utetemperaturen for å aktivere minimumsregulering av pumpe",
+      "aksept": "1. Kontroller at pumpe starter ved pådrag > 0% for ventilmotor. Slå av strømmen på pumpen ved drift for å kontrollere alarmfunksjon og at systemet stanser. Ved feil på pumpen kontroller at ventilmotor åpner 100%. \n\n2. Kontroller at pumpe starter når utetemperaturen er lavere enn srttpunkt for minimumsregulering."
+    },
+    {
+      "navn": "Pumpe, kjøle shuntgruppe",
+      "test": "1. Manipuler et lavt varmesettpunkt i systemets temperaturregulator for å aktivere kjølepådrag.",
+      "aksept": "1. Kontroller at pumpe starter ved pådrag > 0% for ventilmotor. Slå av strømmen på pumpen ved drift for å kontrollere alarmfunksjon og registrering av alarm i HMI/SD."
+    }
+  ],
+  "JV": [
+    {
+      "navn": "Vifte med tilhørende frekvensomformer",
+      "test": "Gi et startsignal for viften via HMI/SD, ved bruk av enten vender, eller tidsprogram. Øk pådrag ved å endre reguleringssetpunktet for viften.",
+      "aksept": "Vifte startes ved startsignal med riktig dreieretning og regulerer pådraget etter settpunkt. Pådraget styrer hastigheten på viften, settpunkt manipuleres for å kontrollere at pådrag endres. Koble vekk strøm (via sikkerhetsbryter/eller sikring) til omformer for å kontrollere at det sendes alarm til HMI/SD."
+    },
+    {
+      "navn": "Vifte med EC-motor",
+      "test": "Gi et pådrag til viften via HMI/SD, ved bruk av enten vender, eller tidsprogram. Øk pådrag ved å endre reguleringssetpunktet for viften.",
+      "aksept": "Vifte startes ved startsignal med riktig dreieretning og regulerer pådraget etter settpunkt. Pådraget styrer hastigheten på viften, settpunkt manipuleres for å kontrollere at pådrag endres. Koble vekk strøm (via sikkerhetsbryter/eller sikring) til vifte for å kontrollere at det sendes alarm til HMI/SD."
+    }
+  ],
+  "JW": [
+    {
+      "navn": "Vifte med tilhørende frekvensomformer",
+      "test": "Gi et startsignal for viften via HMI/SD, ved bruk av enten vender, eller tidsprogram. Øk pådrag ved å endre reguleringssetpunktet for viften.",
+      "aksept": "Vifte startes ved startsignal med riktig dreieretning og regulerer pådraget etter settpunkt. Pådraget styrer hastigheten på viften, settpunkt manipuleres for å kontrollere at pådrag endres. Koble vekk strøm (via sikkerhetsbryter/eller sikring) til omformer for å kontrollere at det sendes alarm til HMI/SD."
+    },
+    {
+      "navn": "Vifte med EC-motor",
+      "test": "Gi et pådrag til viften via HMI/SD, ved bruk av enten vender, eller tidsprogram. Øk pådrag ved å endre reguleringssetpunktet for viften.",
+      "aksept": "Vifte startes ved startsignal med riktig dreieretning og regulerer pådraget etter settpunkt. Pådraget styrer hastigheten på viften, settpunkt manipuleres for å kontrollere at pådrag endres. Koble vekk strøm (via sikkerhetsbryter/eller sikring) til vifte for å kontrollere at det sendes alarm til HMI/SD."
+    }
+  ],
+  "KA": [
+    {
+      "navn": "Spjeldmotor, med frostfunksjon",
+      "test": "1. Plasser systemet i PÅ, AV, FROST, NETTUTFALL",
+      "aksept": "1. Visuell kontroll av spjeldposisjon LUKKET/ÅPEN når systemet er AV/PÅ. Kontroller posisjon \"stengt\" ved frost og nettutfall"
+    },
+    {
+      "navn": "Spjeldmotor",
+      "test": "1. Plasser systemet i PÅ, AV",
+      "aksept": "1. Visuell kontroll av spjeldposisjon LUKKET/ÅPEN når systemet er AV/PÅ."
+    },
+    {
+      "navn": "Spjeldmotor, med endebrytere/BUS og frostfunksjon",
+      "test": "1. Plasser systemet i PÅ, AV, FROST, NETTUTFALL",
+      "aksept": "1. Visuell kontroll, samt avlest i HMI/SD at spjeldposisjon LUKKET/ÅPEN når systemet er AV/PÅ. Kontroller og avlest posisjon \"stengt\" ved frost og nettutfall"
+    },
+    {
+      "navn": "Spjeldmotor, med endebrytere/BUS",
+      "test": "1. Plasser systemet i PÅ, AV",
+      "aksept": "1. Visuell kontroll, samt avlest i HMI/SD at spjeldposisjon LUKKET/ÅPEN når systemet er AV/PÅ."
+    }
+  ],
+  "LU": [
+    {
+      "navn": "Adiabatisk (sildrerør)",
+      "test": "1. Senk settpunkt på aggregatets utekompensering/settpunktstyring for temperaturregulering til eks. 10 °C for å starte systemets kjøleregulator (0-100%).",
+      "aksept": "1. Ved pådrag kontroller at magnetventil åpner for nødvendig fylling av vann i kar, og at  trykket utjevnes slik at vannet fordeles tilstrekkelig for vann over \"\"sildrerør\"\", samt at -roterende gjenvinner er i 100% pådrag. \nKontroller at vann som blir tilført sildrer rolig gjennom kassene for befukning av avtrekksluften.\nVed bruk av kaldt vann og høy luftfuktighet vil den kjemiske effekten over gjenvinner være høyere, enn ved motsatte forhold.\n\nDeretter verifiseres funksjon ved å se at tilluftstemperatur synker"
+    }
+  ],
+  "RD": [
+    {
+      "navn": "Differansetrykkgiver, for luft",
+      "test": "1. Aktiver systemet for å tilfører luft over giveren.",
+      "aksept": "1. Kontroller at slanger er montert riktig, samt at det leses av riktig verdi på HMI/SD. Koble fra ene slangen inn på føleren for å verifisere at føler mister differanseverdi."
+    },
+    {
+      "navn": "Differansetrykkgiver, for vann",
+      "test": "1. Aktiver systemet for å tilfører sirkulasjon over giveren.",
+      "aksept": "1. Kontroller at slanger er montert riktig, samt at det leses av riktig verdi på HMI/SD. Steng det ene røret inn på føleren for å verifisere at føler mister differanseverdi."
+    }
+  ],
+  "RF": [
+    {
+      "navn": "Diff.trykkgiver for luftmengdekalkulasjon",
+      "test": "1. System i drift: Ingen manipulasjon. \n\n2. System i drift: Koble vekk en av slangene fra giveren\n\n3. Systemet uten drift",
+      "aksept": "1. Kontroller at føler registrerer drift av vifte, samt kalkulasjon av luftmengde i HMI/SD. \n\n2. Kontroller at det registreres alarm for ikke oppnådd minimumsluftmengde i anlegget/ feil på vifte i HMI/SD.\n\n3. Kontroller at føler registrer vifta av"
+    }
+  ],
+  "RP": [
+    {
+      "navn": "Trykkgiver, for trykkregulering vifter",
+      "test": "1. Aktiver systemet for å tilfører luft over giveren.\n\n2. Manipuler et lavt maks trykksettpunkt ca. 50 Pa. \n\n3. Demonter slangen under drift.\nNB! Husk å koble slanger tilbake igjen raskt før viften får for høy hastighet.",
+      "aksept": "1. Kontroller at det vises verdi i HMI. \n\n2. Kontroller at vifte regulerer seg inn på 50 Pa.\n\n3. Vifte regulerer automatisk opp da den registerer 0 Pa. Når vifte har økt med 5-10% verifiseres funksjonen og slange kobles tilbake.\nNB! Husk å koble slanger tilbake igjen raskt."
+    },
+    {
+      "navn": "Trykkgiver, for trykkregulering vifter med optimalisering",
+      "test": "1. Aktiver systemet for å tilfører luft over giveren.\n\n2. Manipuler et lavt maks trykksettpunkt ca. 50 Pa. \n\n3. Demonter slangen under drift.\nNB! Husk å koble slanger tilbake igjen raskt før viften får for høy hastighet.\n\nOptimalisering:\nEndre trykksettpunkt for å verifisere at vifte reguleres inn slik at trykket stemmer med gitte settpunkt (endre min/maks til samme settpunkt på opimizer). Eks. settpunkter, Min: 50 Pa, Maks 50 Pa / Min. 90 Pa, Maks 90 Pa.",
+      "aksept": "1. Kontroller at det vises verdi i HMI. \n\n2. Kontroller at vifte regulerer seg inn på 50 Pa.\n\n3. Vifte regulerer automatisk opp da den registerer 0 Pa. Når vifte har økt med 5-10% verifiseres funksjonen og slange kobles tilbake.\nNB! Husk å koble slanger tilbake igjen raskt.\n\nOptimalisering:\nVerifiser at vifte følger settpunktjusteringen innstilt for min. og maks."
+    }
+  ],
+  "RT": [
+    {
+      "navn": "Temperaturføler (generelt)",
+      "test": "1. Koble fra/hold hånden på følerelementet.",
+      "aksept": "1. Kontroller at verdi registreres i HMI/SD og endres varm/kaldere enn først registrert. Verifiser at det er riktig føler som blir registrert i HMI/SD."
+    },
+    {
+      "navn": "Temperaturføler (FROST)",
+      "test": "1. Koble fra/hold hånden på følerelementet. \n\n2. Bruk isspray el., evt. koble fra føler for å indikere at føleren er kald (under innstilt settpunkt for frost), eller ødelagt.",
+      "aksept": "1. Kontroller at verdi registreres i HMI/SD og endres varm/kaldere enn først registrert. Verifiser at det er riktig føler som blir registrert i HMI/SD.\n\n2. Kontroller at anlegget slår ut i frostalarm og stanser. Feilmelding skal vises i HMI/SD. Pumpe skal være i drift og ventilmotor skal være i 100%. \nKontroller at anlegget må manulet settes tilbake (reset) når temperaturføler er tilbake til normalt/utenfor alarmkriteriene."
+    },
+    {
+      "navn": "Temperaturføler (temperaturregulerende for varme)",
+      "test": "1. Koble fra/hold hånden på følerelementet. \n\n2. Kjøle ned føler ved hjelp av isspray, eller manipulere en verdi via HMI/SD.",
+      "aksept": "1. Kontroller at verdi registreres i HMI/SD og endres varm/kaldere enn først registrert. Verifiser at det er riktig føler som blir registrert i HMI/SD.\n\n2. Når føler er kaldere enn settpunkt skal regulator for systemet starte varmesekvensen. Verifiser at  varmeorganer i systemet begynner å øke reguleringssignalet."
+    },
+    {
+      "navn": "Temperaturføler (temperaturregulerende for varme og kjøle)",
+      "test": "1. Koble fra/hold hånden på følerelementet. \n\n2. Varme opp føler ved hjelp av å holde på den, eller manipulere en verdi via HMI/SD.\n\n3. Kjøle ned føler ved hjelp av isspray, eller manipulere en verdi via HMI/SD.",
+      "aksept": "1. Kontroller at verdi registreres i HMI/SD og endres varm/kaldere enn først registrert. Verifiser at det er riktig føler som blir registrert i HMI/SD.\n\n2. Når føler er varmere enn settpunkt skal regulator for systemet starte kjølesekvensen. Verifiser at varmeorganer går til 0%, og kjøleorganer i systemet begynner å øke reguleringssignalet.\n\n3. Når føler er kaldere enn settpunkt skal regulator for systemet starte varmesekvensen. Verifiser at kjøleorganer går til 0%, og varmeorganer i systemet begynner å øke reguleringssignalet."
+    },
+    {
+      "navn": "Temperaturføler (temperaturregulerende for kjøle)",
+      "test": "1. Koble fra/hold hånden på følerelementet. \n\n2. Varme opp føler ved hjelp av å holde på den, eller manipulere en verdi via HMI/SD.",
+      "aksept": "1. Kontroller at verdi registreres i HMI/SD og endres varm/kaldere enn først registrert. Verifiser at det er riktig føler som blir registrert i HMI/SD.\n\n2. Når føler er varmere enn settpunkt skal regulator for systemet starte kjølesekvensen. Verifiser at varmeorganer går til 0%, og kjøleorganer i systemet begynner å øke reguleringssignalet."
+    }
+  ],
+  "RY": [
+    {
+      "navn": "Røykmelder",
+      "test": "1. Aktiver systemet og sett det i normal drift, deretter bruk enten røykspray/testknapp på selve røykmelderen.",
+      "aksept": "1. Anlegget slår seg av ved aktiv alarm. Når melder er tilbake til normal, skal anlegget returnere til den modusen den står i."
+    }
+  ],
+  "SB": [
+    {
+      "navn": "Ventilmotor, varme",
+      "test": "1. Manipuler et høyt varmesettpunkt i aggregatets temperaturregulering.",
+      "aksept": "1.  Kontroller at ventilmotor får pådrag (0-100%), først etter at gjenvinner har oppnådd 100%."
+    },
+    {
+      "navn": "Ventilmotor, kjøle",
+      "test": "1. Manipuler et høyt kjølesettpunkt i aggregatets temperaturregulering.",
+      "aksept": "1.  Kontroller at ventilmotor får pådrag (0-100%), først etter at gjenvinner er i 0%."
+    }
+  ],
+  "XS": [
+    {
+      "navn": "Bryter med AV/PÅ/AUTO",
+      "test": "Av:\nBetjen programvender i Av.\n\nPå:\nBetjen programvender i På.\n\nAuto:\nBetjen programvender i Auto.",
+      "aksept": "Av:\nKontroller at systemet slår seg av på normal måte, og forblir avslått. Systemet påvirkes heller ikke av aktiv brannalarm (se brannalarm for testutførelse).\n\nPå:\nKontroller at systemet går kontinuerlig. \n\nAuto:\nKontroller at anlegget er i drift i henhold til innstilt tidsprogram i SD-Anlegg. Endre mellom start og stopp, og kontroller at anlegget endrer driftsform.\nTidsprogram blir testet under IT-test, i regi av rITB evt. annen stedfortreder (eller om annet avtalt)."
+    },
+    {
+      "navn": "Bryter med AV/AUTO",
+      "test": "Av:\nBetjen programvender i Av.\n\nAuto:\nBetjen programvender i Auto.",
+      "aksept": "Av:\nKontroller at systemet slår seg av på normal måte, og forblir avslått. Systemet påvirkes heller ikke av aktiv brannalarm (se brannalarm for testutførelse).\n\nAuto:\nKontroller at anlegget er i drift i henhold til innstilt tidsprogram i SD-Anlegg. Endre mellom start og stopp, og kontroller at anlegget endrer driftsform.\nTidsprogram blir testet under IT-test, i regi av rITB evt. annen stedfortreder (eller om annet avtalt)."
+    },
+    {
+      "navn": "Bryter med AV/PÅ",
+      "test": "Av:\nBetjen programvender i Av.\n\nPå:\nBetjen programvender i På.",
+      "aksept": "Av:\nKontroller at systemet slår seg av på normal måte, og forblir avslått. Systemet påvirkes heller ikke av aktiv brannalarm (se brannalarm for testutførelse).\n\nPå:\nKontroller at systemet går kontinuerlig."
+    }
+  ]
+}

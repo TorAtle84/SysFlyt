@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+{% block title %}Generer merkeskilt{% endblock %}
+
+{% block content %}
+<style>
+/* === Segmenter (originale farger og kompakt) === */
+#segmenter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+#segmenter .segment {
+  display: inline-block;
+  margin: 0;
+  padding: 0.9rem 0.9rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1;
+  user-select: none;
+  transition: filter 0.2s;
+}
+
+#segmenter .byggnr {
+  background: #28a745;  /* grønn */
+  color: #fff;
+}
+
+#segmenter .system {
+  background: #17a2b8;  /* blå */
+  color: #fff;
+}
+
+#segmenter .komponent {
+  background: #ffc107;  /* gul */
+  color: #000;
+}
+
+#segmenter .typekode {
+  background: #6f42c1;  /* lilla */
+  color: #fff;
+}
+
+#segmenter .segment:hover {
+  filter: brightness(1.1);
+}
+
+/* === Format-input === */
+.format-input {
+  width: 100%;
+  font-family: monospace;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+/* === System-knapper – kompakt stil === */
+.sys-btn {
+  display: inline-block;
+  margin: 0 0.1rem 0.3rem 0;
+  padding: 0.6rem 0.8rem;
+  border: 1.5px solid #ccc;
+  border-radius: 0.3rem;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-width: 2.2rem;
+  height: 2.2rem;
+  line-height: 1;
+  text-align: center;
+  user-select: none;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.sys-btn:hover {
+  background: #e0e0e0;
+}
+
+.sys-btn.selected {
+  background: #6f42c1;
+  color: #fff;
+  border-color: #004a9f;
+}
+
+/* TFM-knapp spesial */
+.tfm-btn {
+  border-radius: 0.3rem;
+  padding: 0 0.6rem;
+  height: 2.2rem;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border: 1.5px solid #ccc;
+}
+
+.tfm-btn:hover {
+  background: #e0e0e0;
+}
+
+.tfm-btn.selected {
+  background: #6f42c1;
+  color: #fff;
+  border-color: #004a9f;
+}
+
+/* === TFM-tabell (riktig ID + én kilde for farge) === */
+/* Fargelegger hele raden (dette hadde du fra før) */
+#tfm-tabell tbody tr.tfm-active   { background: #e9f7ec; }
+#tfm-tabell tbody tr.tfm-inactive { background: #eef1f5; color:#6b7280; }
+
+/* NYTT: Fargelegger selve <select>-boksen 
+  Basert på klassen som JS setter på raden (<tr>) 
+*/
+#tfm-tabell tbody tr.tfm-active .tfm-status {
+  background-color: #d4edda; /* Lys pastellgrønn */
+  border-color: #c3e6cb;
+}
+
+#tfm-tabell tbody tr.tfm-inactive .tfm-status {
+  background-color: #f8d7da; /* Lys pastellrød */
+  border-color: #f5c6cb;
+}
+/* === Slutt på NYTT === */
+
+
+/* === Tilpassede knapper === */
+.btn-pastell-gronn {
+  background-color: #b2e6b2;
+  color: #1b3b1b;
+  border: 1px solid #9fd89f;
+}
+/* Tastaturfokus */
+.sys-btn:focus-visible,
+.tfm-btn:focus-visible,
+#segmenter .segment:focus-visible {
+  outline: 2px solid #6f42c1;
+  outline-offset: 2px;
+}
+.btn-pastell-gronn:hover {
+  background-color: #9fd99f;
+  border-color: #8dcf8d;
+}
+
+/* === Utility === */
+.d-flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#segmenter .segment.selected {
+  box-shadow: 0 0 0 3px rgba(111,66,193,.25);
+}
+</style>
+
+
+<div class="container my-4">
+  <h1 class="mb-4"><i class="bi bi-tags"></i> Generering av merkeskilt</h1>
+
+  <div class="row g-4">
+    <!-- Venstre kolonne -->
+    <div class="col-md-5">
+      <!-- Formatbygger -->
+      <div class="app-card mb-4">
+        <div class="card-body">
+          <h5>Velg hvilke deler du vil inkludere i formatet:</h5>
+          <div id="segmenter" class="mb-3">
+            <span class="segment byggnr"    data-placeholder="{byggnr}">+260801A</span>
+            <span class="segment system"    data-placeholder="{system}">=5630.0102</span>
+            <span class="segment komponent" data-placeholder="{komponent}">-SQZ5004</span>
+            <span class="segment typekode"  data-placeholder="{typekode}">%SQZ.0001</span>
+          </div>
+          <textarea id="egendefinert-format" class="format-input" rows="1" readonly
+                    placeholder="Klikk på segmentene over for å bygge formatet"></textarea>
+          <small class="text-muted d-block">
+            Bruk <code>{byggnr}</code>, <code>{system}</code>, <code>{komponent}</code>, <code>{typekode}</code>
+          </small>
+        </div>
+      </div>
+
+      <!-- Filopplasting -->
+      <div class="app-card">
+        <div class="card-body">
+          <h5>Last opp filer</h5>
+          <input type="file" id="file-input" multiple accept=".xlsx,.xls,.pdf,.docx,.txt" class="form-control mb-3">
+          <small class="text-muted">Støtter Excel</small>
+
+          <div class="mt-3 mb-2">
+            <label>Ordrenummer (påkrevd):</label>
+            <input type="text" id="ordrenummer" class="form-control" placeholder="F.eks. 20230123" required>
+          </div>
+          <hr>
+
+          <h5>Systemkriterier</h5>
+          <p class="text-muted">Klikk på tallene for å angi {system}:</p>
+          <div id="system-kriterier" class="mb-3">
+            {% for n in range(1,10) %}
+              <span class="sys-btn" data-val="{{ n }}">{{ n }}</span>
+            {% endfor %}
+            <button id="tfm-popup-btn" class="sys-btn tfm-btn ms-2">TFM</button>
+          </div>
+          <hr>
+
+          <h5>Komponent‐ID (alternativt)</h5>
+          <textarea id="venstre-tabell" class="form-control" rows="7"
+                    placeholder="Eller lim inn komponenter her (én per linje)..."></textarea>
+          <small class="text-muted d-block">Hvis du limer inn her, vil scanning av filer ikke kjøres.</small>
+
+          <div class="mt-3 d-flex gap-2">
+            <button id="scan-btn"    class="btn btn-secondary">Scan filer og generer</button>
+            <button id="generer-btn" class="btn btn-primary">Generer fra tekstboks</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Høyre kolonne -->
+    <div class="col-md-7">
+      <div class="app-card">
+        <div class="card-body">
+          <!-- Knappelinje -->
+          <div class="d-flex align-items-center mb-3">
+            <select id="velgProsjekt" class="form-select me-2" style="width: auto">
+              <option value="">Velg prosjekt (valgfritt)</option>
+              {% for p in projects %}
+                <option value="{{ p.id }}">{{ p.project_name }} ({{ p.location }})</option>
+              {% endfor %}
+            </select>
+
+            <button id="sendTilProsjekt" class="btn btn-primary me-3" style="display: none;">
+              Send til prosjekt
+            </button>
+
+            <button id="lastned-btn" class="btn btn-pastell-gronn me-2">
+              Last ned Excel
+            </button>
+
+            <button id="tom-tabell-btn" class="btn btn-warning">
+              Tøm tabell
+            </button>
+          </div>
+
+          <h5 class="mb-3">Generert tabell</h5>
+
+          <div class="table-responsive">
+            <table id="hoyre-tabell" class="table table-bordered">
+              <thead class="table-primary">
+                <tr>
+                  <th>Komponent-ID</th>
+                  <th>Beskrivelse</th>
+                  <th>Himlingsskilt</th>
+                  <th>Stripsskilt</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div id="feilmelding" class="text-danger mt-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TFM Modal -->
+<div class="modal fade" id="tfmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">TFM-liste</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Lukk"></button>
+      </div>
+      <div class="modal-body">
+        <table id="tfm-tabel" class="table">
+          <thead>
+            <tr><th>Kode</th><th>Beskrivelse</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            {% for kode, beskrivelse, aktiv in tfm_liste %}
+              <tr class="{{ aktiv and 'tfm-active' or 'tfm-inactive' }}">
+                <td>{{ kode }}</td>
+                <td>{{ beskrivelse if beskrivelse and beskrivelse|string|lower!='nan' else 'Ikke i bruk' }}</td>
+                <td>
+                  <select class="form-control tfm-status" data-kode="{{ kode }}">
+                    <option value="aktiv"   {{ aktiv and 'selected' or '' }}>Aktiv</option>
+                    <option value="inaktiv" {{ not aktiv and 'selected' or '' }}>Inaktiv</option>
+                  </select>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Lukk</button>
+        <button id="lagre-tfm-btn" class="btn btn-primary">Lagre</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Undersystemvalg -->
+<div id="filterModal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 id="modalTitle" class="modal-title">Velg undersystemer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modalCheckboxes"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="modalConfirm" class="btn btn-primary">Bekreft</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Lukk</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/merkeskilt.js') }}"></script>
+{% endblock %}

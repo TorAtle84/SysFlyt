@@ -1,0 +1,241 @@
+SFP for balansert ventilasjon skal ikke overstige 1,8 kW/(m³/s).
+Varmegjenvinner i ventilasjonsaggregat skal ha temperaturvirkningsgrad ≥ 80 %.
+CO₂-nivå i kontorareal skal ikke overstige 700 ppm ved normal belastning.
+Samtlige VAV-spjeld skal behovsstyres etter CO₂ og temperatur og innreguleres i henhold til NS-EN 12599.
+Luftmengde i møterom skal være minimum 7 l/s per person eller 2,5 m³/m²h, avhengig av hva som er størst.
+Trykkfall i hovedkanaler skal ikke overstige 150 Pa ved prosjektert luftmengde.
+Aggregatets filterklasse på tilluft skal være minimum ePM1 60 % iht. EN ISO 16890.
+Avkast og inntak skal plasseres slik at resirkulasjon unngås; korteste avstand ≥ 8 meter.
+Røykkontroll: trapperom skal trykksettes iht. NS-EN 12101-6 med differansetrykk ≥ 50 Pa.
+VAV-regulatorer skal ha Modbus-kommunikasjon og leveres med fabrikkalibrert mengdemåling.
+Innregulering av kanalnett skal dokumenteres; avvik fra prosjektert luftmengde ≤ ±10 %.
+Kjøkkenavtrekk skal utføres som separat system med hetter i rustfritt stål og egen avkastkanal.
+Systemets garanterte oppetid: 99.9%.
+Lydnivå i kontorareal: Maks 35 dBA.
+For å tilfredsstille TEK17, er entreprenøren ansvarlig for at alle gjennomføringer branntettes.
+Alle kabler skal merkes i begge ender i henhold til merkeregister.
+Det må leveres en komplett og digital FDV-dokumentasjon for anlegget ved overlevering.
+Ventilasjonsaggregatet skal ha en termisk virkningsgrad på minst 85%.
+Rørgjennomføringer i brannklassifiserte vegger og dekker skal tettes med typegodkjent produkt.
+Totalentreprenøren er forpliktet til å sørge for at alle underleverandører følger de til enhver tid gjeldende sikkerhetsforskrifter på byggeplassen.
+Det skal utarbeides en detaljert fremdriftsplan som viser alle hovedaktiviteter og milepæler, og denne skal oversendes byggherren for godkjenning.
+Systemet må være fullt ut kompatibelt med eksisterende SD-anlegg via BACnet IP.
+Det kreves at alle hovedmaterialer har en EPD (Environmental Product Declaration) som dokumenterer miljøpåvirkningen.
+Leveransen omfatter også all nødvendig programmering, testing og igangkjøring av de tekniske anleggene.
+Entreprenøren er ansvarlig for å innhente alle nødvendige godkjenninger fra offentlige myndigheter før arbeidet påbegynnes.
+Det forutsettes at all fast belysning styres via et DALI-system for maksimal fleksibilitet og energieffektivitet.
+Hovedtavlen skal utstyres med overspenningsvern type 2 for å beskytte mot transienter.
+Alle sanitærinstallasjoner skal trykktestes med en protokoll som overleveres til rørlegger for kontroll.
+Luftmengder for hvert enkelt rom skal måles og dokumenteres i en separat innreguleringsrapport.
+Bærende stålkonstruksjoner skal brannmales til brannmotstandsklasse R60 i henhold til NS-EN 13501-2.
+Alt avfall fra byggeplassen skal kildesorteres i henhold til prosjektets avfallsplan, med en sorteringsgrad på minimum 95%.
+Det skal installeres energimålere for varme, kjøling og elektrisitet for hver hovedsone i bygget.
+Byggherren skal gis full opplæring i drift og vedlikehold av de tekniske anleggene før overtakelse.
+Alle endringer og avvik fra kontraktsdokumentene må meldes skriftlig og godkjennes av byggherrens representant.
+Garantitiden for utført arbeid og leverte materialer settes til 5 år fra overtakelsesdato.
+Nødlysanlegg skal prosjekteres og utføres i henhold til kravene i NS-EN 1838.
+Det skal benyttes lavkarbonbetong klasse A for alle plasstøpte betongkonstruksjoner.
+Alle pumper i varme- og kjøleanlegget må være utstyrt med frekvensomformere for turtallsregulering.
+Entreprenøren plikter å delta i ukentlige byggemøter og månedlige fremdriftsmøter.
+Alle tekniske rom skal ha sluk i gulv med tilstrekkelig kapasitet.
+Det skal leveres en komplett sett med "som bygget"-tegninger i både PDF- og DWG-format.
+Sprinkleranlegget skal utføres som et våtanlegg og dekke alle arealer i henhold til NS-EN 12845.
+Fasadematerialer må ha en dokumentert levetid på minst 50 år med normalt vedlikehold.
+Alle utendørs stikkontakter skal være IP44 og utstyrt med jordfeilbryter.
+Det skal etableres et adgangskontrollsystem for alle ytterdører og tekniske rom.
+Akustiske tiltak må iverksettes for å sikre at lydnivået i kontorlandskap ikke overstiger 45 dBA.
+Alle materialer som benyttes innendørs skal være lavemitterende og ikke avgi skadelige gasser.
+Entreprenøren skal sørge for kontinuerlig og tilstrekkelig renhold av byggeplassen gjennom hele prosjektperioden.
+En uavhengig tredjepart skal utføre tetthetsprøving av bygget, og resultatet må tilfredsstille kravene i TEK17.
+Alle vinduer og glassdører skal leveres med en U-verdi på 0.8 W/m²K eller lavere.
+Det påligger entreprenøren å koordinere sitt arbeid med de andre tekniske fagene.
+Før overtakelse skal en fullskala funksjonstest av alle tekniske systemer gjennomføres med byggherren til stede.
+Alle komponenter som installeres skal være CE-merket og dokumentert i samsvar med gjeldende normer.
+Installasjonen skal utføres i henhold til leverandørens anvisninger og spesifikasjonene i teknisk beskrivelse.
+Entreprenøren skal føre digital logg over fremdrift og eventuelle avvik gjennom hele byggeperioden.
+Alle dørmiljøer skal leveres med dørautomatikk og adgangskontroll hvor dette er angitt i plantegning.
+Det skal benyttes prefabrikkerte rørbøyler med vibrasjonsdempere i tekniske føringsveier.
+Alle tekniske føringer i himling skal koordineres i BIM-modell og være kollisjonskontrollert før installasjon.
+Varmeanlegget skal reguleres via romfølere og være klargjort for SD-integrasjon.
+Alt installert utstyr skal dokumenteres med serienummer og garantibevis.
+Det skal leveres målerapport som viser at jordingsresistansen ikke overstiger 10 ohm.
+Det er krav om at alle branntettingsprodukter er sertifisert og montert av godkjente installatører.
+Alle skap og tavler skal ha entydig merking og oversiktsdokumentasjon i dør eller frontpanel.
+Det skal benyttes isolasjon med brannklasse A2-s1,d0 i henhold til NS-EN 13501-1 for ventilasjonskanaler.
+Kabelbroer over himling skal ha bæreavstand i henhold til produktblad og være jordet.
+Før teknisk ferdigstillelse skal alle målinger og innreguleringer være dokumentert og godkjent.
+Det er et krav at alt materiell har kortreist leveranse og lavt CO2-avtrykk, dersom dette er tilgjengelig.
+Branntetting og lydtetting skal gjennomføres samtidig og dokumenteres med bilder og produktdatablad.
+Alt arbeid i høyden skal utføres i henhold til Arbeidstilsynets forskrifter og med nødvendige sikringstiltak.
+Avvik fra plantegning eller spesifikasjon skal ikke utføres uten skriftlig godkjenning fra byggherren.
+Det skal monteres automatisk vannstoppventil i rom med vanninstallasjoner uten sluk.
+Varmesentral skal ha alarm ved temperaturavvik og lekkasje, og varsling integreres mot SD-anlegg.
+Sikkerhetsventiler skal ha avløp ført til egnet oppsamlingssted med synlig visning.
+Alle skap og installasjoner i fellesareal skal ha låsbar utførelse med systemnøkkel.
+Gulvvarme skal ha separate reguleringssoner for hvert rom og være balansert før overtakelse.
+Det skal monteres LED-nødlysarmaturer i alle rømningsveier og tekniske rom.
+Alle motorer over 1,5 kW skal ha mykstarter eller frekvensomformer tilpasset last.
+Midlertidige anlegg skal demonteres og området ryddes før overtakelse.
+Det skal leveres en komplett samsvarserklæring for elektriske installasjoner ved ferdigstillelse.
+Alle tekniske anlegg skal kunne styres og overvåkes via mobil grensesnitt.
+Innvendig luftkvalitet skal dokumenteres med målinger etter igangkjøring.
+Temperatur, luftfuktighet og CO₂-nivå skal kunne logges i minimum 14 dager før overtakelse.
+Alle el-tavler skal være tydelig merket og ha oversiktlig kursfortegnelse.
+Samtlige føringsveier skal prosjekteres og utføres med tilstrekkelig kapasitet for fremtidige utvidelser.
+Det skal leveres samsvarserklæring for alt elektrisk arbeid i henhold til gjeldende forskrift.
+Entreprenøren er ansvarlig for å beskytte alle installasjoner mot fukt, støv og mekanisk skade under byggeperioden.
+Alle systemkomponenter skal ha dokumentert kompatibilitet med valgt SD-plattform.
+Det skal utføres uavhengig kontroll av brannteknisk prosjektering i henhold til SAK10.
+Alle ventiler skal leveres med posisjonsindikator og tydelig merking av funksjon.
+Driftssentralen skal være utstyrt med skjerm for visualisering av SD-anlegg og alarmer.
+Prosjekterende skal dokumentere at løsninger oppfyller energikrav i TEK17 kapittel 14.
+Alle føringsveier over himling skal merkes med system, retning og mål for enkel identifisering.
+Entreprenøren skal overlevere komplett kontrollskjema for brannisolering av tekniske føringer.
+Avfallsplan skal oppdateres månedlig og dokumenteres med vekt og sorteringsgrad.
+Funksjonssikkerheten til nødstrømsaggregat skal testes med full belastning før overlevering.
+Det skal benyttes prefabrikkerte føringsveier der dette er hensiktsmessig for å redusere montasjetid.
+All prosjektering skal skje i henhold til NS 3935 for teknisk bygganalyse.
+Prosjektets SHA-plan skal gjennomgås og signeres av alle involverte før oppstart på byggeplass.
+Alle kanaler i ventilasjonssystemet skal rengjøres og dokumenteres før idriftsettelse.
+Romkontrollere skal monteres i ergonomisk høyde og i tråd med innredningsplan.
+Kabelbroer skal jorde i begge ender og være dokumentert i måleprotokoll.
+Automatikkentreprenør skal levere komplett IO-liste før oppstart av programmering.
+Dokumentasjon på energiberegning skal foreligge før igangsettingstillatelse gis.
+Kapasitet på varmevekslere skal dimensjoneres etter maks effektbehov ved -15 °C utetemperatur.
+Alle rørføringer gjennom yttervegg skal ha tett mansjett og være dokumentert vanntett.
+Byggherrens krav til universell utforming skal oppfylles i alle fellesarealer.
+Det skal gjennomføres visuell kontroll og termografering av hovedtavle ved 75 % last.
+Alle komponenter skal være CE-merket og ha produktdokumentasjon tilgjengelig.
+Entreprenøren skal stille med kvalifisert driftsassistent i opplæringsperioden etter overlevering.
+Installasjoner i tekniske sjakter skal være utført slik at adgang til vedlikehold er sikret.
+Entreprenør må bistå i utarbeidelse av kapasitets- og sonekart for ventilasjonssystemet.
+Det skal benyttes løsninger med lavt trykkfall for å sikre energieffektiv drift.
+Entreprenøren er ansvarlig for at alle leveranser er i henhold til spesifikasjoner og kontraktstegninger.
+Det skal være nødstrømsforsyning til alt sikkerhetsrelatert utstyr som heis, brannalarmanlegg og nødlys.
+Alle ventiler i ventilasjonsanlegget skal være tilgjengelige for service og merkes med funksjon og luftretning.
+Trykkfall i hovedkanaler skal ikke overstige 200 Pa ved prosjektert luftmengde.
+Samtlige VAV-spjeld skal ha Modbus-kommunikasjon for integrasjon med SD-anlegg.
+Alle el-tavler skal være tydelig merket med kursoversikt og nødinformasjon.
+Kabelbroer over himling skal festes i henhold til gjeldende statiske krav og brannforskrifter.
+Det skal installeres lekkasjevakt i kjølerom og teknisk rom for kuldeanlegg.
+Alle rør skal isoleres med mineralull med dampbarriere i henhold til NS-EN 14303.
+Ventilasjonskanaler i brannseksjoner skal være utført i stål og utstyres med brannspjeld med smeltesikring.
+Automatikkskapet skal leveres komplett ferdig koblet og testet før montering på anlegg.
+Temperaturfølere i SD-anlegg skal være nøyaktige innenfor ±0.5°C og kalibreres på stedet.
+Alle kuldemedier skal være i henhold til F-gassforordningen og dokumenteres med type og mengde.
+FDV-dokumentasjonen skal inneholde serviceintervaller for alle komponenter og ettersynsprotokoller.
+Rør for varme og kjøling skal trykktestes til 1.5 ganger driftstrykk i minimum 2 timer.
+Alle motorventiler skal være montert med unionskoblinger for enkel utskiftning.
+Det skal monteres sug- og væskeledninger med oljeutskiller på kompressorkretsen.
+El-installasjoner skal utføres i samsvar med NEK 400 og kontrolleres før spenningssetting.
+Fleksible tilkoblinger til ventilasjonsaggregat skal være av ikke-brennbar type og tilfredsstille ISO 6944.
+SD-anlegget skal ha webgrensesnitt tilgjengelig på lokalnettverket for byggherre.
+Det skal installeres temperatursensor i hver sone og kobles mot SD for behovsstyrt regulering.
+Ved oppstart skal kuldeanlegget innreguleres av autorisert kjølemontør og dokumenteres.
+Komplette testrapporter for isolasjonsmotstand, jording og spenningsfall skal leveres før overtakelse.
+FDV-manualen skal inkludere anbefalte reservedeler og kontaktinformasjon for kritiske leverandører.
+Alle tekniske data for SD-komponenter skal legges inn i anleggets database med entydig referanse.
+Rørføring gjennom yttervegg skal være isolert og lufttett for å unngå kuldebroer.
+Avkastkanaler skal avsluttes minimum 2 meter over tak og plasseres i le av inntak.
+Alle fordelingstavler skal ha dedikert overspenningsvern og automatsikringer merket med kursnummer.
+Kuldemediefylling skal skje med godkjent utstyr og loggføres etter gjeldende miljøkrav.
+Det skal utføres funksjonstest av ventilasjonens bypass-spjeld under både drift og nødmodus.
+SD-anleggets alarmlogger skal kunne eksporteres til Excel-format for analyse.
+Kursfortegnelse for tavler skal speile faktisk utførelse og oppdateres før overlevering.
+Samtlige filter i ventilasjonsanlegget skal merkes med utskiftningsintervall og filterklasse.
+Alle tilkoblinger i el-tavle skal momentdras og kontrolleres med termografering før drift.
+Tekniske rom med kuldeanlegg skal ha automatisk ventilasjon for å unngå oppsamling av gass.
+Alle tappevannsledninger skal isoleres med minst 30 mm mineralullisolasjon.
+Det skal installeres tilbakeslagsventiler på alle vanninntak i henhold til VA-normen.
+Varmesentralen skal utstyres med sikkerhetsventil, ekspansjonskar og manometer.
+Kjøkkenavløp skal tilknyttes fettutskiller i samsvar med kommunale krav.
+Rørinstallasjoner i våtrom skal legges med fall mot sluk og være lett tilgjengelige for inspeksjon.
+Avløpsrør i bygget skal være av støydempet materiale og opphengt med vibrasjonsdempere.
+Det skal benyttes pressfittingsystem for alle kobberrør i fordelingsnettet.
+Gulvvarmeanlegg skal reguleres med termostat i hvert rom.
+Alle installasjoner for kaldtvann skal utføres med legionellaforebyggende tiltak.
+Opplegg for sprinkler skal føres separat fra øvrige rørføringer og merkes tydelig.
+Alle tilluftsventiler skal ha justerbare spjeld og være plassert minst 2,1 meter over gulv.
+Avtrekksluft skal føres via lydfeller før aggregatet for å redusere støynivå.
+Ventilasjonskanaler over himling skal ha inspeksjonsluker for rengjøring.
+Kanalføringer i tekniske rom skal være i galvanisert stål og merkes i henhold til NS 3940.
+Aggregatet skal ha integrert CO2-regulering i undervisningsarealer.
+Alle kanalgjennomføringer i brannskiller skal ha branngodkjente tetningssystemer.
+Luftmengde til datasentral skal være minimum 6 luftvekslinger per time.
+Det skal leveres separat balansert ventilasjon til våtrom og kjøkken.
+Filterklasse på tilluft skal være minimum ePM1 60% i henhold til EN ISO 16890.
+Trykktest av ventilasjonskanaler skal utføres etter NS-EN 12599 og dokumenteres.
+Alle stikkontakter skal ha barnesikring og være i henhold til NEK 400.
+Det skal etableres separate kurser for IT-utstyr i kontorlandskap.
+Belysning i fellesareal skal styres med bevegelsessensor og dagslysstyring.
+Det skal monteres overspenningsvern i alle underfordelinger.
+Kabler gjennom brannskiller skal tettes med sertifiserte produkter i samsvar med EI60.
+Elektroinstallasjonene skal ha en selektiv jordfeilbryter på alle kurser med stikkontakter.
+Alle føringsveier skal være i perforert kabelstige og jordet i begge ender.
+Det skal monteres utvendig stikkontakt ved hovedinngang og bakside av bygget.
+Tavler skal ha tydelig merkeskjema med tilkoblingsoversikt.
+Alle rom skal ha minimum én 16A kontakt på egen kurs.
+Kjølemediet skal være naturlig og ha lav GWP-verdi, i henhold til F-gass-forordningen.
+Alle kjølerør skal isoleres for å unngå kondens og energitap.
+Fordamper i kjølerom skal ha automatisk avriming og dryppanne med avløp.
+Kjøleaggregat skal monteres på vibrasjonsdempere og ha støydempet kapsling.
+Det skal etableres lekkasjealarm og automatisk stans ved overskridelse av grenseverdier.
+Kuldemedierør skal være i kobber og sertifisert for høyt trykk.
+Alle kjøleanlegg skal trykktestes og lekkasjekontrolleres før igangkjøring.
+Regulatoren skal ha logging av driftstemperatur og alarmhistorikk.
+Isvannssystemet skal ha nødstoppsystem og sirkulasjonspumpe med variabel hastighet.
+Automatisk påfyllingssystem for frostvæske skal være inkludert i leveransen.
+Alle tekniske anlegg skal integreres i SD-anlegget via åpen protokoll (BACnet eller Modbus).
+SD-anlegget skal ha grafisk brukergrensesnitt tilpasset byggherrens behov.
+Alle alarmer fra tekniske systemer skal vises i SD-anlegget med kvitteringslogg.
+Alle signaler fra teknisk utstyr skal ha tag-liste med IO-matrise.
+Det skal leveres automatisk trendlogging av inneklima- og energidata.
+Backup-løsning for SD-server skal inkluderes med ukentlig sikkerhetskopi.
+SD-skjermen skal ha touch-panel og være veggmontert i teknisk rom.
+Det skal være mulig å eksportere alle logger til Excel eller CSV-format.
+Alle regulatorer i SD-anlegget skal være fritt programmerbare.
+Anlegget skal kunne fjernstyres via VPN med sikker autentisering.
+FDV-dokumentasjon skal leveres digitalt i henhold til NS 3456 og inneholde alle nødvendige vedlegg.
+Vedlikeholdsintervaller for alle komponenter skal være tydelig spesifisert.
+Alle produktdatablader skal inneholde informasjon om energiklasse og forventet levetid.
+FDV skal inneholde garantier, leverandøroversikt og installasjonstegninger.
+Det skal leveres en komplett komponentliste med tilhørende serviceprotokoller.
+Brukerveiledning for driftspersonell skal være inkludert og på norsk.
+Systemansvarlige skal få opplæring i vedlikehold og alarmhåndtering.
+Alle komponenter skal ha unik ID som samsvarer med merking og FDV-register.
+Det skal være en QR-kode på hver teknisk komponent som linker til FDV-dokumentasjon.
+FDV-dokumentasjonen skal kunne oppdateres løpende i byggeiers system.
+Bygget skal tilfredsstille energiklasse A i henhold til NS 3700/NS 3701.
+Det skal installeres energimålere på alle hovedstrømkurser og varmekilder.
+Energiforbruk skal overvåkes via SD-anlegget og kunne eksporteres til Excel.
+Bygget skal oppnå en spesifikk netto energibehov under 95 kWh/m²år.
+Det skal benyttes LED-belysning med lysstyring for å redusere energibruk.
+Oppvarming skal i hovedsak baseres på fjernvarme eller varmepumpe med høy COP-verdi.
+Solavskjerming skal være automatisk styrt basert på solinnstråling og romtemperatur.
+Ventilasjonsaggregatet skal ha varmegjenvinner med temperaturvirkningsgrad > 85%.
+Det skal installeres bevegelsessensorer i korridorer og fellesarealer for energisparing.
+Alt elektrisk utstyr skal være merket med energiklasse A eller bedre.
+Det skal være minimum 10 % dekning av lokal fornybar energi, f.eks. solcelleanlegg.
+Bygget skal utstyres med automatisk nattsenking av temperatur i lavlastperioder.
+All varmeisolasjon i klimaskallet skal tilfredsstille krav til passivhusstandard.
+Energibruken skal dokumenteres i henhold til kravene i TEK17 §14-2.
+Kjøleanlegg skal ha frikjølingsfunksjon der det er hensiktsmessig.
+Oppvarming av tappevann skal skje via varmepumpe eller solfangere der dette er mulig.
+Automatiske avlesere for strøm, varme og vann skal kunne rapportere månedlig forbruk.
+Prosjektet skal levere en energioppfølgingsplan (EOP) som en del av FDV.
+Energibudsjett skal utarbeides og oppdateres gjennom hele prosjektperioden.
+Tiltak for å redusere transmisjonstap skal dokumenteres i energiberegning.
+krav til oppfølging/service av anlegg og utstyr angitt i FDV-dokumentasjon (fra leverandør/ entreprenør).Summen skal ikke inngå i tilbudssummen.
+360.0004 betjener i hovedsak urene arealer i plan3.GENERELLE KRAVDokumentasjon i form av sertifikater, monteringsanvisning, drifts- og vedlikeholdsinstruks skal innngå som en del av FDV-dokumentasjonen.
+Videre skal det kun benyttesfabrikkproduserte deler som bend, T-rør, avgreninger,dimensjonsendringer ol.
+For å unngå fuktig luft ut i arealet skal ventil utformes konisk (kanalovergang kan benyttes) og avsluttes med rist.
+Rør og lameller skal være epoksylakkerte. Varmebatteriet skal forberedes for montasje av temperaturgiver for frostvernsfunksjon som skal måle returvannstemperaturen i et av lamellrørene.
+Rør og lameller skal være epoksylakkerte. Batteriene skal være spylbare og ha oppsamlings- og avløpsmulighet ved rengjøring.
+GENERELLE KRAVDokumentasjon i form av sertifikater, monteringsanvisning, drifts- og vedlikeholdsinstruks skal innngå som en del av FDV-dokumentasjonen.
+02.6.1.3.1-23Side 4 av 162.4.Merking ved gjennomføringer Ved gjennomføringer i vegger, dekker, sjakter, luker og lignende skal kabler, rør osv.
+av 165.MERKING AV KANALER OG RØRKanaler og rør skal merkes med systemnummer, funksjon/navn og flow-retning.
+Merking på kanaler og rør skal alltid foretas minimum hver 15 meter.
+Eksempelvis skal det henges opp brukanvisninger/veiledere for.
+lysstyringtemperaturstyringstyring av ventilasjonbruk av tøy- og bossug I tekniske rom skal det henges opp informasjonsplansjer som forteller hvordan de ulike systemene fungerer.
+Eksempelvis skal det på hvert enkelt ventilasjonsaggregat henges opp en plakat med minimum følgende orientering.
+TFM-nummerDekningsområdeFabrikatLeverandør av aggregat og automatikkLuftmengderTrykkInnstillinger på frekvensomformerHva aggregatet består av inkl. eventuelle kapasiteter I hoved- og underfordelinger skal følgende henges opp. o Enlinjeskjemao Tavleskjemao Styrestrømsskjema I hovedfordelinger skal det i tillegg henges opp.

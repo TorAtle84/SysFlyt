@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block title %}Tidskalkulator{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+
+  <!-- Overskrift -->
+  <h1>🕒 Tidskalkulator</h1>
+
+  <!-- Velg Fag -->
+  <div class="mb-4">
+    <label for="fagSelect" class="form-label">Velg fag:</label>
+    <select id="fagSelect" class="form-select w-auto d-inline-block"
+            onchange="location.href='?fag='+this.value">
+      {% for fag in fager %}
+      <option value="{{ fag.name }}" {% if selected_fag == fag.name %}selected{% endif %}>
+        {{ fag.name | capitalize }}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- Legg til ny gruppe (admin) -->
+  {% if current_user.is_admin %}
+  <button id="add-group-btn" class="btn btn-success mb-4">➕ Legg til ny gruppe</button>
+  {% endif %}
+
+  <!-- Kalkulator-seksjoner -->
+  <div id="calculator-sections">
+    {% for gruppe in grupper %}
+    <div class="app-card mb-4">
+
+      <!-- Gruppens header: navn + total + slett-knapp -->
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <h5 class="d-inline-block">{{ gruppe.name }}</h5>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="fw-bold" id="total-{{ gruppe.id }}">0.00 t</span>
+          {% if current_user.is_admin %}
+          <button type="button" class="btn btn-sm btn-danger remove-group">
+            🗑️
+          </button>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Legg til underpunkt (admin) -->
+      {% if current_user.is_admin %}
+      <button class="btn btn-sm btn-primary mb-2 add-subpoint-btn" data-gruppe-id="{{ gruppe.id }}">
+        ➕ Legg til underpunkt
+      </button>
+      {% endif %}
+
+      <!-- Underpunkter-tabell -->
+      <div class="table-responsive">
+        <table class="table table-bordered mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Underpunkt</th>
+              <th>Antall</th>
+              <th>Tid pr. stk (t)</th>
+              <th>Total tid (t)</th>
+              {% if current_user.is_admin %}
+              <th>Handling</th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody id="tbody-{{ gruppe.id }}">
+            {% for u in gruppe.underpunkter | sort(attribute='order') %}
+            <tr class="underpunkt-row">
+              <td>
+                <input type="text" class="form-control form-control-sm subpoint-name"
+                       value="{{ u.name }}">
+              </td>
+              <td>
+                <input type="number" class="form-control form-control-sm subpoint-count"
+                       value="{{ u.default_count }}">
+              </td>
+              <td>
+                <input type="number" step="0.1" class="form-control form-control-sm subpoint-time"
+                       value="{{ u.default_time }}">
+              </td>
+              <td class="subpoint-total">0.00 t</td>
+              {% if current_user.is_admin %}
+              <td class="text-nowrap">
+                <button type="button" class="btn btn-sm btn-light move-up">⬆️</button>
+                <button type="button" class="btn btn-sm btn-light move-down">⬇️</button>
+                <button type="button" class="btn btn-sm btn-danger remove-subpoint">❌</button>
+              </td>
+              {% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Risiko-beregning -->
+  <div class="app-card p-3 mb-4">
+    <h5>Risiko</h5>
+    <div class="mb-2">
+      <label for="riskPercent" class="form-label">Prosentpåslag:</label>
+      <input type="number" id="riskPercent"
+             class="form-control w-auto d-inline-block"
+             value="0" min="0"> %
+    </div>
+    <table class="table mb-0">
+      <tbody>
+        <tr>
+          <td>Total tid før risiko:</td>
+          <td id="risk-total-before">0.00 t</td>
+        </tr>
+        <tr>
+          <td>Ekstra tid risiko:</td>
+          <td id="risk-extra">0.00 t</td>
+        </tr>
+        <tr>
+          <td>Sum total tid:</td>
+          <td id="risk-total-after">0.00 t</td>
+        </tr>
+        <tr>
+          <td>Rundet opp:</td>
+          <td id="risk-rounded">0 dager eller 0 t</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Knapper nederst -->
+  <div class="d-flex gap-2">
+    <button id="calc-btn" class="btn btn-secondary">Beregne</button>
+    <button id="export-btn" class="btn btn-outline-primary">Eksporter til Excel</button>
+    {% if current_user.is_admin %}
+    <button id="save-template-btn" class="btn btn-success">💾 Lagre mal</button>
+    {% endif %}
+    <select id="velgProsjekt" class="form-select w-auto">
+      <option value="">Velg prosjekt (valgfritt)</option>
+      {% for p in projects %}
+        <option value="{{ p.id }}">{{ p.project_name }} ({{ p.location }})</option>
+      {% endfor %}
+    </select>
+    <button id="sendTilProsjekt" class="btn btn-success" style="display: none;">
+      Send til prosjekt
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/timecalculator.js') }}"></script>
+{% endblock %}

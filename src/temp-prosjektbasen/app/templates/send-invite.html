@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send Møteinvitasjon</title>
+</head>
+<body class="p-4">
+  <h1 class="text-xl font-bold mb-4">Send møteinvitasjon</h1>
+
+  <!-- Knapp for å trigge sending -->
+  <button id="sendBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Send invitasjon</button>
+
+  <!-- SMTPJS for e-post via client-side SMTP -->
+  <script src="https://smtpjs.com/v3/smtp.js"></script>
+  <!-- ICS Builder (ekstern fil eller lim inn fra ics-builder.js) -->
+  <script src="ics-builder.js"></script>
+
+  <script>
+    // Eksempeldata for møtet
+    const eventData = {
+      id: '5ebe5db6-e072-4369-aff5-0a653bd49929',
+      title: 'Allegaten 70 – Innregulering, Plan 3',
+      start: '2025-07-14T08:00:00',
+      end:   '2025-07-14T16:00:00',
+      extendedProps: {
+        location: 'Allegaten 70',
+        description: 'Ordrenummer: 21007552-100\n\nKommentar:\nKlaus skal sjekke at BA er klar, og at det er vasket ut.',
+        organizerEmail: 'tm5479@gk.no',
+        attendees: [
+          { email: 'as80258@gk.no' }
+        ],
+        status: 'CONFIRMED'
+      }
+    };
+
+    async function sendInvite(evt) {
+      // Generer .ics-innholdet
+      const icsContent = icsBuilder.build(evt, 'REQUEST');
+
+      // Send e-posten via SMTPJS
+      Email.send({
+        Host: 'smtp.office365.com',
+        Username: 'tm5479@gk.no',      // bytt til din Office365-konto
+        Password: 'InfernO43',        // eller SMTPJS SecureToken
+        To: evt.extendedProps.attendees.map(a => a.email).join(','),
+        From: evt.extendedProps.organizerEmail,
+        Subject: `Invitasjon: ${evt.title}`,
+        Body: 'Se vedlagt møteinnkallelse.',
+        Attachments: [
+          {
+            name: 'invitasjon.ics',
+            data: 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icsContent)
+          }
+        ]
+      }).then(
+        message => alert('Invitasjon sendt: ' + message)
+      ).catch(
+        err => alert('Feil ved sending: ' + err)
+      );
+    }
+
+    document.getElementById('sendBtn').addEventListener('click', () => {
+      sendInvite(eventData);
+    });
+  </script>
+</body>
+</html>

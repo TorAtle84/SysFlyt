@@ -1,0 +1,2452 @@
+[
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 97.65144348144531,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "armatur",
+      "sem_sc": 71.08573913574219
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "rørlegger",
+        0.7722897796868408
+      ]
+    ],
+    "fag_score": 0.772,
+    "gruppe": "rørlegger",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "rørlegger",
+        0.7722897796868408
+      ]
+    ],
+    "gruppe_score": 0.772,
+    "keyword": "armatur",
+    "korttekst": "Foran hvert sanitærutstyr skal det være avstengningsventiler",
+    "kravtype": "krav",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 109
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 60.8,
+        "side": 40,
+        "standard": "NS3457",
+        "tekst": "For eksempel heis, ventilasjonsaggregat, kjølemaskin og lignende."
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 21",
+    "score": 97.7,
+    "short_text": "Foran hvert sanitærutstyr skal det være avstengningsventiler",
+    "status": "Aktiv",
+    "text": "Foran hvert sanitærutstyr skal det være avstengningsventiler. All armatur til nytt sanitærutstyr skal medtas.",
+    "top_fag": [
+      {
+        "label": "rørlegger",
+        "score": 0.7722897796868408
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 100,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "automatikk",
+      "sem_sc": 75.35706758499146
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "rørlegger",
+        0.635676103730372
+      ]
+    ],
+    "fag_score": 0.636,
+    "gruppe": "rørlegger",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "rørlegger",
+        0.635676103730372
+      ]
+    ],
+    "gruppe_score": 0.636,
+    "keyword": "automatikk",
+    "korttekst": "Det skal derfor leveres og monteres en pumpestasjon med doble pumper inklusive komplett automatikk for tilknytning til b...",
+    "kravtype": "krav",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 339
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 25",
+    "score": 100,
+    "short_text": "Det skal derfor leveres og monteres en pumpestasjon med doble pumper inklusive komplett automatikk for tilknytning til b...",
+    "status": "Aktiv",
+    "text": "Det skal derfor leveres og monteres en pumpestasjon med doble pumper inklusive komplett automatikk for tilknytning til byggets SD-anlegg. I forbindelse med at man ønsker et oppsamlingspunkt for eventuell sprinkelutløsning i scenehus skal det leveres en avløpspumpe for montasje i bygningsmessig pumpesump med innvendige mål 600x600x600 mm.",
+    "top_fag": [
+      {
+        "label": "rørlegger",
+        "score": 0.635676103730372
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 75,
+      "combined": 93.90069603919983,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "automatikk",
+      "sem_sc": 64.83449339866638
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "rørlegger",
+        0.530494438527277
+      ]
+    ],
+    "fag_score": 0.53,
+    "gruppe": "rørlegger",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "rørlegger",
+        0.530494438527277
+      ]
+    ],
+    "gruppe_score": 0.53,
+    "keyword": "automatikk",
+    "korttekst": "Pumpen må ha en kapasitet på 10 l/s mot 100 k Pa",
+    "kravtype": "ytelse",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 104
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 25",
+    "score": 93.9,
+    "short_text": "Pumpen må ha en kapasitet på 10 l/s mot 100 k Pa",
+    "status": "Aktiv",
+    "text": "Pumpen må ha en kapasitet på 10 l/s mot 100 k Pa. Komplett med automatikk for tilknytning til SD-anlegg.",
+    "top_fag": [
+      {
+        "label": "rørlegger",
+        "score": 0.530494438527277
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 95.94213604927063,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "beregninger",
+      "sem_sc": 68.23689341545105
+    },
+    "fag": [
+      "felles"
+    ],
+    "fag_rank": [
+      [
+        "Uspesifisert",
+        0.3809658886785811
+      ]
+    ],
+    "fag_score": 0.381,
+    "gruppe": "uspesifisert",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "Uspesifisert",
+        0.3809658886785811
+      ]
+    ],
+    "gruppe_score": 0.381,
+    "keyword": "beregninger",
+    "korttekst": "30",
+    "kravtype": "dokumentasjon",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 103
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 67.3,
+        "side": 25,
+        "standard": "NS8415",
+        "tekst": "23 Målinger og påvisninger som er nødvendige for å beregne avdrag og fakturagrunnlag for øvrig, skal foretas av underentreprenøren."
+      },
+      {
+        "score": 65.9,
+        "side": 16,
+        "standard": "NS8415",
+        "tekst": "19.4 Fastmerker for utmåling, byggelinje"
+      },
+      {
+        "score": 65.3,
+        "side": 4,
+        "standard": "NS8417",
+        "tekst": "17 18.4 Fastmerker for utmåling, byggelinje"
+      },
+      {
+        "score": 63.6,
+        "side": 20,
+        "standard": "NS8417",
+        "tekst": "18.4 Fastmerker for utmåling, byggelinje"
+      },
+      {
+        "score": 61,
+        "side": 9,
+        "standard": "NS6450",
+        "tekst": "— Faser i byggeprosesser 4.2 Prosjekteringsfasen |"
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 16",
+    "score": 95.9,
+    "short_text": "30",
+    "status": "Aktiv",
+    "text": "30.16 Dimensjonering og beregninger. Det skal utføres følgende beregninger som fremlegges tiltakshaver.",
+    "top_fag": [
+      {
+        "label": "Uspesifisert",
+        "score": 0.3809658886785811
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 35,
+      "combined": 94.16870594024658,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "beregninger",
+      "sem_sc": 65.28117656707764
+    },
+    "fag": [
+      "felles"
+    ],
+    "fag_rank": [
+      [
+        "Uspesifisert",
+        0.3241647057060504
+      ]
+    ],
+    "fag_score": 0.324,
+    "gruppe": "uspesifisert",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "Uspesifisert",
+        0.3241647057060504
+      ]
+    ],
+    "gruppe_score": 0.324,
+    "keyword": "beregninger",
+    "korttekst": "Det skal utføres følgende beregninger som fremlegges tiltakshaver",
+    "kravtype": "dokumentasjon",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 85
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 67.9,
+        "side": 22,
+        "standard": "NS3457",
+        "tekst": "Inntaksbryter Inntaksbryter skal merkes med referanse til den fordelingen den er plassert i og forsyner."
+      },
+      {
+        "score": 66.9,
+        "side": 9,
+        "standard": "NS6450",
+        "tekst": "lapet av fasen skal det ogsa utarbeides en kravspesifikasjon med testkriterier som leverandarer skal oppfylle i lapet av bygge- prosjektet."
+      },
+      {
+        "score": 66.2,
+        "side": 9,
+        "standard": "NS3935",
+        "tekst": "Detaljer som gjelder ytelser i disse fasene er beskrevet i denne."
+      },
+      {
+        "score": 63.9,
+        "side": 8,
+        "standard": "NS3935",
+        "tekst": "3.9 integrerte funksjonsbeskrivelser beskrivelse av hvordan to eller flere ulike systemer skal fungere sammen 3.10 table-tester test som gjennomfores ved at partene motes og diskuterer hvordan oppgaven skal lgses teknisk 311 ibruktakelsesplan"
+      },
+      {
+        "score": 63.3,
+        "side": 20,
+        "standard": "NS8417",
+        "tekst": "Han skal påse at fastmerker for høydemålinger, byggelinjer, nabogrense o.l. samt alle nødvendige utmålinger for øvrig etableres og følges."
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 17",
+    "score": 94.2,
+    "short_text": "Det skal utføres følgende beregninger som fremlegges tiltakshaver",
+    "status": "Aktiv",
+    "text": "Det skal utføres følgende beregninger som fremlegges tiltakshaver. Effektberegninger.",
+    "top_fag": [
+      {
+        "label": "Uspesifisert",
+        "score": 0.3241647057060504
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 93.5179877281189,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "beregninger",
+      "sem_sc": 64.1966462135315
+    },
+    "fag": [
+      "felles"
+    ],
+    "fag_rank": [
+      [
+        "Uspesifisert",
+        0.38698681128451273
+      ]
+    ],
+    "fag_score": 0.387,
+    "gruppe": "ventilasjon",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "Uspesifisert",
+        0.38698681128451273
+      ]
+    ],
+    "gruppe_score": 0.387,
+    "keyword": "beregninger",
+    "korttekst": "Varmebehovsberegninger",
+    "kravtype": "dokumentasjon",
+    "nlp_vurdering": {
+      "has_verb": false,
+      "len": 91
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 64.6,
+        "side": 14,
+        "standard": "NS6450",
+        "tekst": "Proveperioden skal inkludere arsvariasjoner i utetemperatur automasjon og styring (BACS)?, og teknisk bygnings- automasjon (TMB)?"
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 17",
+    "score": 93.5,
+    "short_text": "Varmebehovsberegninger",
+    "status": "Aktiv",
+    "text": "Varmebehovsberegninger. Luftmengdeberegninger. beregninger og simuleringer. Lydberegninger.",
+    "top_fag": [
+      {
+        "label": "Uspesifisert",
+        "score": 0.38698681128451273
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 98.38714122772217,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "brannspjeld",
+      "sem_sc": 72.31190204620361
+    },
+    "fag": [
+      "ventilasjon"
+    ],
+    "fag_rank": [
+      [
+        "ventilasjon",
+        0.5476910588687718
+      ]
+    ],
+    "fag_score": 0.548,
+    "gruppe": "ventilasjon",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "ventilasjon",
+        0.5476910588687718
+      ]
+    ],
+    "gruppe_score": 0.548,
+    "keyword": "brannspjeld",
+    "korttekst": "Spjeldene skal kunne styres fra brannsentral",
+    "kravtype": "krav",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 163
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 69,
+        "side": 36,
+        "standard": "NS3457",
+        "tekst": "Strømtilførsel til brannalarmsentralen —"
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 45",
+    "score": 98.4,
+    "short_text": "Spjeldene skal kunne styres fra brannsentral",
+    "status": "Aktiv",
+    "text": "Spjeldene skal kunne styres fra brannsentral. Som Opsjon skal det tilbys brann- og røykgasspjeld som lukker ved varmepåkjenning (kjemiske brannspjeld foretrekkes).",
+    "top_fag": [
+      {
+        "label": "ventilasjon",
+        "score": 0.5476910588687718
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 92.57689714431763,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "brannspjeld",
+      "sem_sc": 62.628161907196045
+    },
+    "fag": [
+      "ventilasjon"
+    ],
+    "fag_rank": [
+      [
+        "ventilasjon",
+        0.36995726595274414
+      ]
+    ],
+    "fag_score": 0.37,
+    "gruppe": "elektro",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "ventilasjon",
+        0.36995726595274414
+      ]
+    ],
+    "gruppe_score": 0.37,
+    "keyword": "brannspjeld",
+    "korttekst": "I tråd med brannteknisk tilstandsrapport ble det registrert ventilasjonskanaler uten brannspjeld ved gjennomføring i bra...",
+    "kravtype": "installasjon",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 173
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 65.2,
+        "side": 18,
+        "standard": "NS3457",
+        "tekst": "Ventilasjonskanaler skal merkes i henhold til eksemplet som er vist i Figur 14."
+      },
+      {
+        "score": 64.1,
+        "side": 36,
+        "standard": "NS3457",
+        "tekst": "Strømtilførsel til brannalarmsentralen —"
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 43",
+    "score": 92.6,
+    "short_text": "I tråd med brannteknisk tilstandsrapport ble det registrert ventilasjonskanaler uten brannspjeld ved gjennomføring i bra...",
+    "status": "Aktiv",
+    "text": "I tråd med brannteknisk tilstandsrapport ble det registrert ventilasjonskanaler uten brannspjeld ved gjennomføring i branncellebegrensende bygningsdeler – dette må utbedres.",
+    "top_fag": [
+      {
+        "label": "ventilasjon",
+        "score": 0.36995726595274414
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 60,
+      "combined": 83.38865686345983,
+      "fokus_boost": 0,
+      "kw_sc": 81.48148148148148,
+      "matched_keyword": "byggherrens krav",
+      "sem_sc": 64.2897367477417
+    },
+    "fag": [
+      "felles"
+    ],
+    "fag_rank": [
+      [
+        "felles",
+        0.7243847556395426
+      ]
+    ],
+    "fag_score": 0.724,
+    "gruppe": "felles",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "felles",
+        0.7243847556395426
+      ]
+    ],
+    "gruppe_score": 0.724,
+    "keyword": "byggherrens krav",
+    "korttekst": "Den har som overordnet mål å gjøre byggherrens driftspersonell kjent med systemets oppbygging, funksjoner og virkemåter ...",
+    "kravtype": "ytelse",
+    "nlp_vurdering": {
+      "has_verb": false,
+      "len": 190
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 77.3,
+        "side": 8,
+        "standard": "NS6450",
+        "tekst": "Fullskalatesten involverer brukere og driftspersonell, og avdekker om driftspersonellets og brukernes prosedyrer er tilpasset de tekniske bygnings- installasjonene som er levert."
+      },
+      {
+        "score": 69.3,
+        "side": 11,
+        "standard": "NS3935",
+        "tekst": "5.1 Hovedoppgave for ITB-ansvarlig ITB-ansvarlig skal sikre at alle aktorer i byggeprosjektet er informert om ansvar og forventinger til prosessene beskrevet i denne standarden."
+      },
+      {
+        "score": 67.8,
+        "side": 12,
+        "standard": "NS6450",
+        "tekst": "Byggherren skal drifte de tekniske bygningsinstallasjonene i provedriftsfasen."
+      },
+      {
+        "score": 67.6,
+        "side": 4,
+        "standard": "NS3935",
+        "tekst": "3) Det forutsettes at prosjekterende utarbeider en helhetlig teknisk lpsning med ytelsesbeskrivelse slik at dette kan kontraktsfestes mellom oppdragsgiver og leverander."
+      },
+      {
+        "score": 66.8,
+        "side": 6,
+        "standard": "NS8415",
+        "tekst": "Denne standarden er utarbeidet for bruk i kontraktsforhold hvor en part (underentreprenøren) påtar seg en del av utførelsen av et bygg- eller anleggsarbeid (herunder anlegg, nybygg, vedlikehold, reparasjon og ombygging) som den andre parten (hovedentreprenøren) har påtatt seg overfor byggherren eller en annen entreprenør, og hvor det vesentlige av tegninger, beskrivelser og beregninger skal leveres av hovedentreprenøren."
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 11",
+    "score": 83.4,
+    "short_text": "Den har som overordnet mål å gjøre byggherrens driftspersonell kjent med systemets oppbygging, funksjoner og virkemåter ...",
+    "status": "Aktiv",
+    "text": "Den har som overordnet mål å gjøre byggherrens driftspersonell kjent med systemets oppbygging, funksjoner og virkemåter slik at driftsorganisasjonen kan beherske sitt anlegg ved overtakelse.",
+    "top_fag": [
+      {
+        "label": "felles",
+        "score": 0.7243847556395426
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 55,
+      "combined": 83.39879918981481,
+      "fokus_boost": 0,
+      "kw_sc": 81.48148148148148,
+      "matched_keyword": "byggherrens krav",
+      "sem_sc": 64.306640625
+    },
+    "fag": [
+      "felles"
+    ],
+    "fag_rank": [
+      [
+        "felles",
+        0.8218082605591446
+      ]
+    ],
+    "fag_score": 0.822,
+    "gruppe": "felles",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "felles",
+        0.8218082605591446
+      ]
+    ],
+    "gruppe_score": 0.822,
+    "keyword": "byggherrens krav",
+    "korttekst": "FDV-dokumentasjonen skal lastes opp elektronisk i byggherrens FDV system",
+    "kravtype": "dokumentasjon",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 73
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 67.7,
+        "side": 34,
+        "standard": "NS8417",
+        "tekst": "36.3 Levering av FDV-dokumentasjon"
+      },
+      {
+        "score": 67.5,
+        "side": 6,
+        "standard": "NS8417",
+        "tekst": "32 36.3 Levering av FDV-dokumentasjon"
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 14",
+    "score": 83.4,
+    "short_text": "FDV-dokumentasjonen skal lastes opp elektronisk i byggherrens FDV system",
+    "status": "Aktiv",
+    "text": "FDV-dokumentasjonen skal lastes opp elektronisk i byggherrens FDV system.",
+    "top_fag": [
+      {
+        "label": "felles",
+        "score": 0.8218082605591446
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 1,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 94.33967351913452,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "dcv",
+      "sem_sc": 65.56612253189087
+    },
+    "fag": [
+      "byggautomasjon"
+    ],
+    "fag_rank": [
+      [
+        "byggautomasjon",
+        0.6001489175787966
+      ]
+    ],
+    "fag_score": 0.6,
+    "gruppe": "byggautomasjon",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "byggautomasjon",
+        0.6001489175787966
+      ]
+    ],
+    "gruppe_score": 0.6,
+    "keyword": "dcv",
+    "korttekst": "Optimatoren skal benyttes til å programmere/ endre reguleringsparametere, samt for å avlese innstilte verdier og logging...",
+    "kravtype": "funksjon",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 169
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 42",
+    "score": 94.3,
+    "short_text": "Optimatoren skal benyttes til å programmere/ endre reguleringsparametere, samt for å avlese innstilte verdier og logging... (konsolidert x2)",
+    "status": "Aktiv",
+    "text": "Optimatoren skal benyttes til å programmere/ endre reguleringsparametere, samt for å avlese innstilte verdier og logging av DCV systemets verdier. CO2 /tilstedeværelse).",
+    "top_fag": [
+      {
+        "label": "byggautomasjon",
+        "score": 0.6001489175787966
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 95.21659851074219,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "ekspansjonskar",
+      "sem_sc": 67.02766418457031
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "rørlegger",
+        0.7162366735842424
+      ]
+    ],
+    "fag_score": 0.716,
+    "gruppe": "rørlegger",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "rørlegger",
+        0.7162366735842424
+      ]
+    ],
+    "gruppe_score": 0.716,
+    "keyword": "ekspansjonskar",
+    "korttekst": "Ved ekspansjonskar skal det monteres sikkerhetsventiler med kapasitet og trykknivå tilpasset varmeanleggets behov",
+    "kravtype": "krav",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 114
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 30",
+    "score": 95.2,
+    "short_text": "Ved ekspansjonskar skal det monteres sikkerhetsventiler med kapasitet og trykknivå tilpasset varmeanleggets behov",
+    "status": "Aktiv",
+    "text": "Ved ekspansjonskar skal det monteres sikkerhetsventiler med kapasitet og trykknivå tilpasset varmeanleggets behov.",
+    "top_fag": [
+      {
+        "label": "rørlegger",
+        "score": 0.7162366735842424
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 35,
+      "combined": 92.94464517522741,
+      "fokus_boost": 0,
+      "kw_sc": 81.48148148148148,
+      "matched_keyword": "energimåler vann",
+      "sem_sc": 80.216383934021
+    },
+    "fag": [
+      "byggautomasjon"
+    ],
+    "fag_rank": [
+      [
+        "Uspesifisert",
+        0.30597343503190644
+      ]
+    ],
+    "fag_score": 0.306,
+    "gruppe": "elektro",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "Uspesifisert",
+        0.30597343503190644
+      ]
+    ],
+    "gruppe_score": 0.306,
+    "keyword": "energimåler vann",
+    "korttekst": "Energimåler skal ha overføring til energioppfølgingssystemet (EOS)",
+    "kravtype": "krav",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 67
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 66.3,
+        "side": 14,
+        "standard": "NS6450",
+        "tekst": "Kontroll av at energibruk er i henhold til energiberegninger og energisertifisering"
+      },
+      {
+        "score": 66,
+        "side": 11,
+        "standard": "NS3935",
+        "tekst": "Eventuelle energimdl og miljgsertifiseringskrav"
+      },
+      {
+        "score": 63.5,
+        "side": 14,
+        "standard": "NS6450",
+        "tekst": "Energiproduksjon 12 Skal inkludere arsvariasjoner i utetemperatur"
+      },
+      {
+        "score": 62.1,
+        "side": 19,
+        "standard": "NS3457",
+        "tekst": "Elektro (elkraft og EKOM)"
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 5",
+    "score": 92.9,
+    "short_text": "Energimåler skal ha overføring til energioppfølgingssystemet (EOS)",
+    "status": "Aktiv",
+    "text": "Energimåler skal ha overføring til energioppfølgingssystemet (EOS).",
+    "top_fag": [
+      {
+        "label": "Uspesifisert",
+        "score": 0.30597343503190644
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 93.97737503051758,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "energimåling",
+      "sem_sc": 64.9622917175293
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "byggautomasjon",
+        0.2899035066383705
+      ]
+    ],
+    "fag_score": 0.29,
+    "gruppe": "rørlegger",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "byggautomasjon",
+        0.2899035066383705
+      ]
+    ],
+    "gruppe_score": 0.29,
+    "keyword": "energimåling",
+    "korttekst": "Alle reguleringsventiler leveres som trykkuavhengige ventiler med integrert energimåling og vannmengderegulering",
+    "kravtype": "krav",
+    "nlp_vurdering": {
+      "has_verb": false,
+      "len": 113
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 56",
+    "score": 94,
+    "short_text": "Alle reguleringsventiler leveres som trykkuavhengige ventiler med integrert energimåling og vannmengderegulering",
+    "status": "Aktiv",
+    "text": "Alle reguleringsventiler leveres som trykkuavhengige ventiler med integrert energimåling og vannmengderegulering.",
+    "top_fag": [
+      {
+        "label": "byggautomasjon",
+        "score": 0.2899035066383705
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 97.38722801208496,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "energisentral",
+      "sem_sc": 70.6453800201416
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "byggautomasjon",
+        0.3879812304987042
+      ]
+    ],
+    "fag_score": 0.388,
+    "gruppe": "byggautomasjon",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "byggautomasjon",
+        0.3879812304987042
+      ]
+    ],
+    "gruppe_score": 0.388,
+    "keyword": "energisentral",
+    "korttekst": "I varmekursene i energisentral og foran hvert batteri skal det også sveises inn nødvendig antall følerlommer for reguler...",
+    "kravtype": "installasjon",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 150
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 69.5,
+        "side": 14,
+        "standard": "NS6450",
+        "tekst": "Kontroll av at energibruk er i henhold til energiberegninger og energisertifisering"
+      },
+      {
+        "score": 67.8,
+        "side": 39,
+        "standard": "NS3457",
+        "tekst": "9.2.1 Generelt Elkraftfordeling til driftstekniske installasjoner som kjøleanlegg, varmeanlegg, ventilasjonsanlegg og lignende inneholder eller ivaretar ofte flere systemer, som elkraft, BUSS-system og den maskinen eller det anlegget den styrer og overvåker, se eksempel i Tabell 4."
+      },
+      {
+        "score": 65.3,
+        "side": 24,
+        "standard": "NS3457",
+        "tekst": "Forsynt fra både hovedtavle og batterier"
+      },
+      {
+        "score": 63.7,
+        "side": 14,
+        "standard": "NS6450",
+        "tekst": "Energiproduksjon 12 Skal inkludere arsvariasjoner i utetemperatur"
+      },
+      {
+        "score": 62.4,
+        "side": 11,
+        "standard": "NS3935",
+        "tekst": "Eventuelle energimdl og miljgsertifiseringskrav"
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 30",
+    "score": 97.4,
+    "short_text": "I varmekursene i energisentral og foran hvert batteri skal det også sveises inn nødvendig antall følerlommer for reguler...",
+    "status": "Aktiv",
+    "text": "I varmekursene i energisentral og foran hvert batteri skal det også sveises inn nødvendig antall følerlommer for regulering og overvåking av anlegget.",
+    "top_fag": [
+      {
+        "label": "byggautomasjon",
+        "score": 0.3879812304987042
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 35,
+      "combined": 97.17751502990723,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "fordelerskap",
+      "sem_sc": 70.29585838317871
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "rørlegger",
+        0.7003860307438666
+      ]
+    ],
+    "fag_score": 0.7,
+    "gruppe": "rørlegger",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "rørlegger",
+        0.7003860307438666
+      ]
+    ],
+    "gruppe_score": 0.7,
+    "keyword": "fordelerskap",
+    "korttekst": "- Det skal monteres vannstoppeventiler i fordelerskap i rom som ikke har sluk",
+    "kravtype": "krav",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 78
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 19",
+    "score": 97.2,
+    "short_text": "- Det skal monteres vannstoppeventiler i fordelerskap i rom som ikke har sluk",
+    "status": "Aktiv",
+    "text": "- Det skal monteres vannstoppeventiler i fordelerskap i rom som ikke har sluk.",
+    "top_fag": [
+      {
+        "label": "rørlegger",
+        "score": 0.7003860307438666
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 35,
+      "combined": 92.36340045928955,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "fordelerskap",
+      "sem_sc": 62.27233409881592
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "rørlegger",
+        0.6432641364888716
+      ]
+    ],
+    "fag_score": 0.643,
+    "gruppe": "rørlegger",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "rørlegger",
+        0.6432641364888716
+      ]
+    ],
+    "gruppe_score": 0.643,
+    "keyword": "fordelerskap",
+    "korttekst": "Fordelerskap for tappevann skal plasseres innfelt i vegg",
+    "kravtype": "krav",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 57
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 21",
+    "score": 92.4,
+    "short_text": "Fordelerskap for tappevann skal plasseres innfelt i vegg",
+    "status": "Aktiv",
+    "text": "Fordelerskap for tappevann skal plasseres innfelt i vegg.",
+    "top_fag": [
+      {
+        "label": "rørlegger",
+        "score": 0.6432641364888716
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 35,
+      "combined": 95.94174981117249,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "fuktføler",
+      "sem_sc": 68.23624968528748
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "rørlegger",
+        0.5676913905333116
+      ]
+    ],
+    "fag_score": 0.568,
+    "gruppe": "uspesifisert",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "rørlegger",
+        0.5676913905333116
+      ]
+    ],
+    "gruppe_score": 0.568,
+    "keyword": "fuktføler",
+    "korttekst": "Installasjoner i våtrom uten sluk skal ha fuktføler med automatisk avstenging",
+    "kravtype": "krav",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 78
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 21",
+    "score": 95.9,
+    "short_text": "Installasjoner i våtrom uten sluk skal ha fuktføler med automatisk avstenging",
+    "status": "Aktiv",
+    "text": "Installasjoner i våtrom uten sluk skal ha fuktføler med automatisk avstenging.",
+    "top_fag": [
+      {
+        "label": "rørlegger",
+        "score": 0.5676913905333116
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 35,
+      "combined": 97.23021507263184,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "gulvvarme",
+      "sem_sc": 70.38369178771973
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "rørlegger",
+        0.5058039288106724
+      ]
+    ],
+    "fag_score": 0.506,
+    "gruppe": "rørlegger",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "rørlegger",
+        0.5058039288106724
+      ]
+    ],
+    "gruppe_score": 0.506,
+    "keyword": "gulvvarme",
+    "korttekst": "Det skal leveres vannbåren gulvvarme i enkelte rom og soner",
+    "kravtype": "installasjon",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 60
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 69.9,
+        "side": 3,
+        "standard": "NS3457",
+        "tekst": "Varme-, ventilasjons- og sanitærinstallasjoner (VVS-installasjoner)"
+      },
+      {
+        "score": 69.5,
+        "side": 12,
+        "standard": "NS3457",
+        "tekst": "7 Varme-, ventilasjons- og sanitærinstallasjoner (VVS-installasjoner)"
+      },
+      {
+        "score": 65.4,
+        "side": 14,
+        "standard": "NS6450",
+        "tekst": "Klimaanlegg 12 Omfatter anlegg som regulerer temperatur, ventilasjon og luftfuktighet"
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 32",
+    "score": 97.2,
+    "short_text": "Det skal leveres vannbåren gulvvarme i enkelte rom og soner",
+    "status": "Aktiv",
+    "text": "Det skal leveres vannbåren gulvvarme i enkelte rom og soner.",
+    "top_fag": [
+      {
+        "label": "rørlegger",
+        "score": 0.5058039288106724
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 35,
+      "combined": 95.09281635284424,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "gulvvarme",
+      "sem_sc": 66.82136058807373
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "felles",
+        0.5851594717362072
+      ]
+    ],
+    "fag_score": 0.585,
+    "gruppe": "uspesifisert",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "felles",
+        0.5851594717362072
+      ]
+    ],
+    "gruppe_score": 0.585,
+    "keyword": "gulvvarme",
+    "korttekst": "Effektbehovet til radiatorer, gulvvarme og strålevarmetak er foreløpig beregnet til ca",
+    "kravtype": "dokumentasjon",
+    "nlp_vurdering": {
+      "has_verb": false,
+      "len": 87
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 60.6,
+        "side": 17,
+        "standard": "NS3457",
+        "tekst": "2021 11 Følere, termostater, aggregatdeler og lignende ++08=3200.010.04-RTB004 TEMPERATURGIVER"
+      },
+      {
+        "score": 60.5,
+        "side": 14,
+        "standard": "NS6450",
+        "tekst": "Energiproduksjon 12 Skal inkludere arsvariasjoner i utetemperatur"
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 27",
+    "score": 95.1,
+    "short_text": "Effektbehovet til radiatorer, gulvvarme og strålevarmetak er foreløpig beregnet til ca",
+    "status": "Aktiv",
+    "text": "Effektbehovet til radiatorer, gulvvarme og strålevarmetak er foreløpig beregnet til ca.",
+    "top_fag": [
+      {
+        "label": "felles",
+        "score": 0.5851594717362072
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 35,
+      "combined": 92.7613615989685,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "gulvvarme",
+      "sem_sc": 62.93560266494751
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "rørlegger",
+        0.7366807897693745
+      ]
+    ],
+    "fag_score": 0.737,
+    "gruppe": "rørlegger",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "rørlegger",
+        0.7366807897693745
+      ]
+    ],
+    "gruppe_score": 0.737,
+    "keyword": "gulvvarme",
+    "korttekst": "For gulvvarme benyttes PEX rør med diffusjonssperre",
+    "kravtype": "installasjon",
+    "nlp_vurdering": {
+      "has_verb": false,
+      "len": 52
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 28",
+    "score": 92.8,
+    "short_text": "For gulvvarme benyttes PEX rør med diffusjonssperre",
+    "status": "Aktiv",
+    "text": "For gulvvarme benyttes PEX rør med diffusjonssperre.",
+    "top_fag": [
+      {
+        "label": "rørlegger",
+        "score": 0.7366807897693745
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 35,
+      "combined": 94.98773097991943,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "komponenter",
+      "sem_sc": 66.64621829986572
+    },
+    "fag": [
+      "felles"
+    ],
+    "fag_rank": [
+      [
+        "Uspesifisert",
+        0.2736565787540136
+      ]
+    ],
+    "fag_score": 0.274,
+    "gruppe": "elektro",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "Uspesifisert",
+        0.2736565787540136
+      ]
+    ],
+    "gruppe_score": 0.274,
+    "keyword": "komponenter",
+    "korttekst": "30",
+    "kravtype": "dokumentasjon",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 79
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 71,
+        "side": 24,
+        "standard": "NS3457",
+        "tekst": "Eksempel på merking av effektbryter med retningsangivelse fra 8.16 Elektrisk underfordeling, UPS, transformator og koblingsstykke (for hovedkurser)"
+      },
+      {
+        "score": 69.4,
+        "side": 24,
+        "standard": "NS3457",
+        "tekst": "Elektrisk underfordeling, UPS, transformator og koblingsstykke (for hovedkurser) og lignende skal merkes i henhold til eksemplene i Figur 23 til Figur 25."
+      },
+      {
+        "score": 61,
+        "side": 7,
+        "standard": "NS3935",
+        "tekst": "3935:2019 Integrerte tekniske bygningsinstallasjoner"
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 6",
+    "score": 95,
+    "short_text": "30",
+    "status": "Aktiv",
+    "text": "30.3.10 Merking av komponenter og utstyr som skal ha elektrisk kabeltilkobling.",
+    "top_fag": [
+      {
+        "label": "Uspesifisert",
+        "score": 0.2736565787540136
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 35,
+      "combined": 100,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "luftinntak",
+      "sem_sc": 83.24373364448547
+    },
+    "fag": [
+      "ventilasjon"
+    ],
+    "fag_rank": [
+      [
+        "felles",
+        0.6652695468562944
+      ]
+    ],
+    "fag_score": 0.665,
+    "gruppe": "felles",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "felles",
+        0.6652695468562944
+      ]
+    ],
+    "gruppe_score": 0.665,
+    "keyword": "luftinntak",
+    "korttekst": "Eksisterende luftinntak og luftavkast benyttes som de er",
+    "kravtype": "installasjon",
+    "nlp_vurdering": {
+      "has_verb": false,
+      "len": 57
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 68.9,
+        "side": 14,
+        "standard": "NS6450",
+        "tekst": "Klimaanlegg 12 Omfatter anlegg som regulerer temperatur, ventilasjon og luftfuktighet"
+      },
+      {
+        "score": 67.5,
+        "side": 11,
+        "standard": "NS3457",
+        "tekst": "Dette gjelder for eksempel tillufts- og fraluftsventiler, stikkontakter og lysarmaturer."
+      },
+      {
+        "score": 61.5,
+        "side": 40,
+        "standard": "NS3457",
+        "tekst": "For eksempel heis, ventilasjonsaggregat, kjølemaskin og lignende."
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 45",
+    "score": 100,
+    "short_text": "Eksisterende luftinntak og luftavkast benyttes som de er",
+    "status": "Aktiv",
+    "text": "Eksisterende luftinntak og luftavkast benyttes som de er.",
+    "top_fag": [
+      {
+        "label": "felles",
+        "score": 0.6652695468562944
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 96.92813038825989,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "parameter",
+      "sem_sc": 69.88021731376648
+    },
+    "fag": [
+      "byggautomasjon"
+    ],
+    "fag_rank": [
+      [
+        "byggautomasjon",
+        0.6716026269890328
+      ]
+    ],
+    "fag_score": 0.672,
+    "gruppe": "byggautomasjon",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "byggautomasjon",
+        0.6716026269890328
+      ]
+    ],
+    "gruppe_score": 0.672,
+    "keyword": "parameter",
+    "korttekst": "Til hver alarm skal en unik alarmtekst kunne defineres, som i klartekst forklarer alarm-situasjonen, hva som utløste ala...",
+    "kravtype": "funksjon",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 209
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 64.8,
+        "side": 13,
+        "standard": "NS6450",
+        "tekst": "at leverandgren i idriftsettingsfasen giennomgar alarmloggen fra bygningsautomatiseringssystemet for & justere alarmsettingen, samt at leveranderen lager og kontrollerer trendlogger for hvert system, for & dokumentere stabile temperaturer, optimalisere parametere, alarmgrenser, virknings- grader, energibruk og liknende."
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 54",
+    "score": 96.9,
+    "short_text": "Til hver alarm skal en unik alarmtekst kunne defineres, som i klartekst forklarer alarm-situasjonen, hva som utløste ala...",
+    "status": "Aktiv",
+    "text": "Til hver alarm skal en unik alarmtekst kunne defineres, som i klartekst forklarer alarm-situasjonen, hva som utløste alarmen, aktuelle parameter som måleverdi og settpunkt og hvilke tiltak som bør iverksettes.",
+    "top_fag": [
+      {
+        "label": "byggautomasjon",
+        "score": 0.6716026269890328
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 99.9632465839386,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "radiator",
+      "sem_sc": 74.93874430656433
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "rørlegger",
+        0.6695262935227204
+      ]
+    ],
+    "fag_score": 0.67,
+    "gruppe": "rørlegger",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "rørlegger",
+        0.6695262935227204
+      ]
+    ],
+    "gruppe_score": 0.67,
+    "keyword": "radiator",
+    "korttekst": "Disse radiatorene leveres også med manuell vrider med skive, returventil og koblinger mot radiator i polert messing",
+    "kravtype": "krav",
+    "nlp_vurdering": {
+      "has_verb": false,
+      "len": 116
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 69.8,
+        "side": 13,
+        "standard": "NS3457",
+        "tekst": "Retur (Til radiatorkurs nord)"
+      },
+      {
+        "score": 62.9,
+        "side": 11,
+        "standard": "NS3457",
+        "tekst": "Dette gjelder for eksempel tillufts- og fraluftsventiler, stikkontakter og lysarmaturer."
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 32",
+    "score": 100,
+    "short_text": "Disse radiatorene leveres også med manuell vrider med skive, returventil og koblinger mot radiator i polert messing",
+    "status": "Aktiv",
+    "text": "Disse radiatorene leveres også med manuell vrider med skive, returventil og koblinger mot radiator i polert messing.",
+    "top_fag": [
+      {
+        "label": "rørlegger",
+        "score": 0.6695262935227204
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 100,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "regulering",
+      "sem_sc": 76.45244598388672
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "Uspesifisert",
+        0.3584898323363673
+      ]
+    ],
+    "fag_score": 0.358,
+    "gruppe": "rørlegger",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "Uspesifisert",
+        0.3584898323363673
+      ]
+    ],
+    "gruppe_score": 0.358,
+    "keyword": "regulering",
+    "korttekst": "Det skal ikke benyttes utenpåliggende følere",
+    "kravtype": "krav",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 138
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 62.7,
+        "side": 14,
+        "standard": "NS6450",
+        "tekst": "Klimaanlegg 12 Omfatter anlegg som regulerer temperatur, ventilasjon og luftfuktighet"
+      },
+      {
+        "score": 61.1,
+        "side": 3,
+        "standard": "NS3457",
+        "tekst": "Varme-, ventilasjons- og sanitærinstallasjoner (VVS-installasjoner)"
+      },
+      {
+        "score": 60.8,
+        "side": 12,
+        "standard": "NS3457",
+        "tekst": "7 Varme-, ventilasjons- og sanitærinstallasjoner (VVS-installasjoner)"
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 30",
+    "score": 100,
+    "short_text": "Det skal ikke benyttes utenpåliggende følere",
+    "status": "Aktiv",
+    "text": "Det skal ikke benyttes utenpåliggende følere. Komplette shuntgrupper og reguleringsventiler for regulering av vannmengder i varmeanlegget.",
+    "top_fag": [
+      {
+        "label": "Uspesifisert",
+        "score": 0.3584898323363673
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 95.3364896774292,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "sanitærutstyr",
+      "sem_sc": 67.22748279571533
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "rørlegger",
+        0.5608133093473106
+      ]
+    ],
+    "fag_score": 0.561,
+    "gruppe": "rørlegger",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "rørlegger",
+        0.5608133093473106
+      ]
+    ],
+    "gruppe_score": 0.561,
+    "keyword": "sanitærutstyr",
+    "korttekst": "Det skal i hovedsak benyttes standard sanitærutstyr i hvitt porselen av anerkjent fabrikat, men med noen unntak som besk...",
+    "kravtype": "installasjon",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 132
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 71.1,
+        "side": 12,
+        "standard": "NS3457",
+        "tekst": "Servanter, blandebatterier, toaletter og andre sanitærkomponenter hvor merking ikke er kritisk."
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 23",
+    "score": 95.3,
+    "short_text": "Det skal i hovedsak benyttes standard sanitærutstyr i hvitt porselen av anerkjent fabrikat, men med noen unntak som besk...",
+    "status": "Aktiv",
+    "text": "Det skal i hovedsak benyttes standard sanitærutstyr i hvitt porselen av anerkjent fabrikat, men med noen unntak som beskrevet under.",
+    "top_fag": [
+      {
+        "label": "rørlegger",
+        "score": 0.5608133093473106
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 35,
+      "combined": 98.7651002407074,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "sikkerhetsventiler",
+      "sem_sc": 72.94183373451233
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "rørlegger",
+        0.7133743219880149
+      ]
+    ],
+    "fag_score": 0.713,
+    "gruppe": "rørlegger",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "rørlegger",
+        0.7133743219880149
+      ]
+    ],
+    "gruppe_score": 0.713,
+    "keyword": "sikkerhetsventiler",
+    "korttekst": "Sikkerhetsventiler skal leveres med avløp som føres til sluk",
+    "kravtype": "krav",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 61
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 62.4,
+        "side": 11,
+        "standard": "NS3457",
+        "tekst": "Dette gjelder for eksempel tillufts- og fraluftsventiler, stikkontakter og lysarmaturer."
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 31",
+    "score": 98.8,
+    "short_text": "Sikkerhetsventiler skal leveres med avløp som føres til sluk",
+    "status": "Aktiv",
+    "text": "Sikkerhetsventiler skal leveres med avløp som føres til sluk.",
+    "top_fag": [
+      {
+        "label": "rørlegger",
+        "score": 0.7133743219880149
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 100,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "sirkulasjonspumpe",
+      "sem_sc": 79.70709800720215
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "rørlegger",
+        0.6011307881839112
+      ]
+    ],
+    "fag_score": 0.601,
+    "gruppe": "rørlegger",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "rørlegger",
+        0.6011307881839112
+      ]
+    ],
+    "gruppe_score": 0.601,
+    "keyword": "sirkulasjonspumpe",
+    "korttekst": "Det skal legges varmtvann sirkulasjonsledninger med egen sirkulasjonspumpe som skal dekke alle tappesteder som har varmt...",
+    "kravtype": "krav",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 131
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 21",
+    "score": 100,
+    "short_text": "Det skal legges varmtvann sirkulasjonsledninger med egen sirkulasjonspumpe som skal dekke alle tappesteder som har varmt...",
+    "status": "Aktiv",
+    "text": "Det skal legges varmtvann sirkulasjonsledninger med egen sirkulasjonspumpe som skal dekke alle tappesteder som har varmt tappevann.",
+    "top_fag": [
+      {
+        "label": "rørlegger",
+        "score": 0.6011307881839112
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 55,
+      "combined": 79.29169696920059,
+      "fokus_boost": 0,
+      "kw_sc": 76.47058823529412,
+      "matched_keyword": "teknisk dokumentasjon",
+      "sem_sc": 62.0547890663147
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "rørlegger",
+        0.4635762561619847
+      ]
+    ],
+    "fag_score": 0.464,
+    "gruppe": "uspesifisert",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "rørlegger",
+        0.4635762561619847
+      ]
+    ],
+    "gruppe_score": 0.464,
+    "keyword": "teknisk dokumentasjon",
+    "korttekst": "Dokumentasjon på FG-sertifisering skal leveres med tilbudet",
+    "kravtype": "dokumentasjon",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 60
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 35",
+    "score": 79.3,
+    "short_text": "Dokumentasjon på FG-sertifisering skal leveres med tilbudet",
+    "status": "Aktiv",
+    "text": "Dokumentasjon på FG-sertifisering skal leveres med tilbudet.",
+    "top_fag": [
+      {
+        "label": "rørlegger",
+        "score": 0.4635762561619847
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 97.27133870124817,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "trendlogging",
+      "sem_sc": 70.45223116874695
+    },
+    "fag": [
+      "byggautomasjon"
+    ],
+    "fag_rank": [
+      [
+        "byggautomasjon",
+        0.7141108843744162
+      ]
+    ],
+    "fag_score": 0.714,
+    "gruppe": "byggautomasjon",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "byggautomasjon",
+        0.7141108843744162
+      ]
+    ],
+    "gruppe_score": 0.714,
+    "keyword": "trendlogging",
+    "korttekst": "Trendlogging innebærer innsamling og lagring av informasjon som tekniske data, status og måleverdier, for en tidsperiode...",
+    "kravtype": "funksjon",
+    "nlp_vurdering": {
+      "has_verb": false,
+      "len": 145
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 54",
+    "score": 97.3,
+    "short_text": "Trendlogging innebærer innsamling og lagring av informasjon som tekniske data, status og måleverdier, for en tidsperiode...",
+    "status": "Aktiv",
+    "text": "Trendlogging innebærer innsamling og lagring av informasjon som tekniske data, status og måleverdier, for en tidsperiode, kontinuerlig eller COV.",
+    "top_fag": [
+      {
+        "label": "byggautomasjon",
+        "score": 0.7141108843744162
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 96.23578786849976,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "underfordeling",
+      "sem_sc": 68.72631311416626
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "Uspesifisert",
+        0.49495801665855205
+      ]
+    ],
+    "fag_score": 0.495,
+    "gruppe": "rørlegger",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "Uspesifisert",
+        0.49495801665855205
+      ]
+    ],
+    "gruppe_score": 0.495,
+    "keyword": "underfordeling",
+    "korttekst": "Fram til nye radiatorer i publikumsgarderober føres det vertikale rørstammer opp gjennom bygningen",
+    "kravtype": "installasjon",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 184
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 64.1,
+        "side": 13,
+        "standard": "NS3457",
+        "tekst": "Retur (Til radiatorkurs nord)"
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 27",
+    "score": 96.2,
+    "short_text": "Fram til nye radiatorer i publikumsgarderober føres det vertikale rørstammer opp gjennom bygningen",
+    "status": "Aktiv",
+    "text": "Fram til nye radiatorer i publikumsgarderober føres det vertikale rørstammer opp gjennom bygningen. I vestibylen skal radiatortilknytningen foretas som underfordeling fra underetasjen.",
+    "top_fag": [
+      {
+        "label": "Uspesifisert",
+        "score": 0.49495801665855205
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 93.45529556274414,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "undersentral",
+      "sem_sc": 64.09215927124023
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "rørlegger",
+        0.7563527517275987
+      ]
+    ],
+    "fag_score": 0.756,
+    "gruppe": "rørlegger",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "rørlegger",
+        0.7563527517275987
+      ]
+    ],
+    "gruppe_score": 0.756,
+    "keyword": "undersentral",
+    "korttekst": "Det skal bygges opp en ny undersentral med nye rør, innreguleringsventiler, avstengningsventiler, pumper, shuntventiler,...",
+    "kravtype": "krav",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 205
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 60,
+        "side": 11,
+        "standard": "NS3457",
+        "tekst": "Dette gjelder for eksempel tillufts- og fraluftsventiler, stikkontakter og lysarmaturer."
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 26",
+    "score": 93.5,
+    "short_text": "Det skal bygges opp en ny undersentral med nye rør, innreguleringsventiler, avstengningsventiler, pumper, shuntventiler,...",
+    "status": "Aktiv",
+    "text": "Det skal bygges opp en ny undersentral med nye rør, innreguleringsventiler, avstengningsventiler, pumper, shuntventiler, lufteventiler, vakuumutskiller, vannbehandlings/renseanlegg, avtapningsventiler osv.",
+    "top_fag": [
+      {
+        "label": "rørlegger",
+        "score": 0.7563527517275987
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 35,
+      "combined": 100,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "ventilasjonsaggregat",
+      "sem_sc": 79.67199087142944
+    },
+    "fag": [
+      "ventilasjon"
+    ],
+    "fag_rank": [
+      [
+        "Uspesifisert",
+        0.27803918683359685
+      ]
+    ],
+    "fag_score": 0.278,
+    "gruppe": "ventilasjon",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "Uspesifisert",
+        0.27803918683359685
+      ]
+    ],
+    "gruppe_score": 0.278,
+    "keyword": "ventilasjonsaggregat",
+    "korttekst": "Både ventilasjonsaggregat og sonene skal trykkstyres",
+    "kravtype": "krav",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 53
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 70.6,
+        "side": 40,
+        "standard": "NS3457",
+        "tekst": "For eksempel heis, ventilasjonsaggregat, kjølemaskin og lignende."
+      },
+      {
+        "score": 69.1,
+        "side": 40,
+        "standard": "NS3457",
+        "tekst": "EKSEMPEL Enhetsaggregat for ventilasjon, automatikkfordeling for typisk VVS, som er satt sammen av flere komponenter til én maskin."
+      },
+      {
+        "score": 63.2,
+        "side": 14,
+        "standard": "NS6450",
+        "tekst": "Klimaanlegg 12 Omfatter anlegg som regulerer temperatur, ventilasjon og luftfuktighet"
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 40",
+    "score": 100,
+    "short_text": "Både ventilasjonsaggregat og sonene skal trykkstyres",
+    "status": "Aktiv",
+    "text": "Både ventilasjonsaggregat og sonene skal trykkstyres.",
+    "top_fag": [
+      {
+        "label": "Uspesifisert",
+        "score": 0.27803918683359685
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 100,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "ventiler",
+      "sem_sc": 77.15293169021606
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "Uspesifisert",
+        0.3197434530163001
+      ]
+    ],
+    "fag_score": 0.32,
+    "gruppe": "byggautomasjon",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "Uspesifisert",
+        0.3197434530163001
+      ]
+    ],
+    "gruppe_score": 0.32,
+    "keyword": "ventiler",
+    "korttekst": "- Reguleringsventil for varmebatteri leveres som trykkuavhengige ventiler med integrert energimåling",
+    "kravtype": "krav",
+    "nlp_vurdering": {
+      "has_verb": false,
+      "len": 101
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 62.9,
+        "side": 24,
+        "standard": "NS3457",
+        "tekst": "Forsynt fra både hovedtavle og batterier"
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 59",
+    "score": 100,
+    "short_text": "- Reguleringsventil for varmebatteri leveres som trykkuavhengige ventiler med integrert energimåling",
+    "status": "Aktiv",
+    "text": "- Reguleringsventil for varmebatteri leveres som trykkuavhengige ventiler med integrert energimåling.",
+    "top_fag": [
+      {
+        "label": "Uspesifisert",
+        "score": 0.3197434530163001
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 96.84394121170044,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "ventiler",
+      "sem_sc": 69.73990201950073
+    },
+    "fag": [
+      "rørlegger"
+    ],
+    "fag_rank": [
+      [
+        "felles",
+        0.6842682049484029
+      ]
+    ],
+    "fag_score": 0.684,
+    "gruppe": "felles",
+    "gruppe_kilde": "ai",
+    "gruppe_rank": [
+      [
+        "felles",
+        0.6842682049484029
+      ]
+    ],
+    "gruppe_score": 0.684,
+    "keyword": "ventiler",
+    "korttekst": "- Fjerde varmekurs er gulvvarmekursen som ved DUTBergen vil bli på ca",
+    "kravtype": "installasjon",
+    "nlp_vurdering": {
+      "has_verb": false,
+      "len": 194
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [
+      {
+        "score": 64.6,
+        "side": 17,
+        "standard": "NS3457",
+        "tekst": "2021 11 Følere, termostater, aggregatdeler og lignende ++08=3200.010.04-RTB004 TEMPERATURGIVER"
+      },
+      {
+        "score": 64.1,
+        "side": 14,
+        "standard": "NS6450",
+        "tekst": "innenders Skal inkludere arsvariasjoner i utetemperatur"
+      },
+      {
+        "score": 61.4,
+        "side": 14,
+        "standard": "NS6450",
+        "tekst": "Energiproduksjon 12 Skal inkludere arsvariasjoner i utetemperatur"
+      }
+    ],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 27",
+    "score": 96.8,
+    "short_text": "- Fjerde varmekurs er gulvvarmekursen som ved DUTBergen vil bli på ca",
+    "status": "Aktiv",
+    "text": "- Fjerde varmekurs er gulvvarmekursen som ved DUTBergen vil bli på ca. Alle nødvendige ventiler og andre nødvendige komponenter, instrumentering mm. som inngår i et komplett system er ikke vist.",
+    "top_fag": [
+      {
+        "label": "felles",
+        "score": 0.6842682049484029
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  },
+  {
+    "ai_loaded": true,
+    "ai_threshold": 0.6,
+    "dup_count": 0,
+    "explain": {
+      "ai_sc": 40,
+      "combined": 93.35862517356873,
+      "fokus_boost": 0,
+      "kw_sc": 100,
+      "matched_keyword": "ventiler",
+      "sem_sc": 63.931041955947876
+    },
+    "fag": [
+      "ventilasjon"
+    ],
+    "fag_rank": [
+      [
+        "ventilasjon",
+        0.5925859563738938
+      ]
+    ],
+    "fag_score": 0.593,
+    "gruppe": "uspesifisert",
+    "gruppe_kilde": "regex",
+    "gruppe_rank": [
+      [
+        "ventilasjon",
+        0.5925859563738938
+      ]
+    ],
+    "gruppe_score": 0.593,
+    "keyword": "ventiler",
+    "korttekst": "Dette skal være passive ventiler som monteres for å oppnå tilstrekkelig brannteknisk skille mellom etasjene",
+    "kravtype": "installasjon",
+    "nlp_vurdering": {
+      "has_verb": true,
+      "len": 108
+    },
+    "ns_pin": null,
+    "ns_quality": null,
+    "ns_treff": [],
+    "ref": "e.3_Bilag_01_Funksjons_og_ytelsesbeskrivelse_VVS_og_automatiseringsanlegg_for_VVS_-_tekniske_anlegg.PDF / Side 45",
+    "score": 93.4,
+    "short_text": "Dette skal være passive ventiler som monteres for å oppnå tilstrekkelig brannteknisk skille mellom etasjene",
+    "status": "Aktiv",
+    "text": "Dette skal være passive ventiler som monteres for å oppnå tilstrekkelig brannteknisk skille mellom etasjene.",
+    "top_fag": [
+      {
+        "label": "ventilasjon",
+        "score": 0.5925859563738938
+      }
+    ],
+    "uncertain": false,
+    "duplicate_of": null,
+    "user_reviewed": true
+  }
+]

@@ -1,0 +1,564 @@
+{
+  "JP": [
+    {
+      "navn": "Pumpe, varme shuntgruppe",
+      "test": "1. Sett systemet i normal drift – observer at pumpen starter ved varmebehov og at status vises korrekt i SD-anlegget\n\n2. Test reguleringsrespons – endre varmebehov eller settpunkt (behov for varme) via SD-anlegget og observer at pumpen tilpasser hastighet eller drift\n\n3. Simuler feiltilstand – koble fra signal, strømutkobling, utløse overstrøm eller stans vannstrøm, og observer at alarm genereres i SD-anlegget\n\n4. Inspiser pumpen visuelt – se etter lekkasjer, vibrasjoner, unormal lyd, overoppheting eller feilindikasjoner på display.",
+      "aksept": "1. Pumpen starter og stopper i henhold til varmebehov og styringslogikk\n\n2. Ved endring i varmebehov tilpasser pumpen drift som forventet\n\n3. Feiltilstander genererer korrekt alarm i SD-anlegget\n\n4. Ingen synlige lekkasjer, vibrasjoner, overoppheting eller feilindikasjoner."
+    },
+    {
+      "navn": "Pumpe, varme shuntgruppe, og minimumsregulering",
+      "test": "1. Sett systemet i normal drift – observer at pumpen starter ved varmebehov og at status vises korrekt i SD-anlegget\n\n2. Øk settpunkt for minimumsregulering til en verdi høyere enn aktuell utetemperatur for å aktivere funksjonen.\nObserver at pumpen starter og går med fullt pådrag i definert periode (f.eks. 1 minutt), selv om varmebehov er forriglet\n\n3. Simuler feiltilstand – koble fra signal, strømutkobling, utløse overstrøm eller stans vannstrøm, og observer at alarm genereres i SD-anlegget\n\n4. Inspiser pumpen visuelt – se etter lekkasjer, vibrasjoner, unormal lyd, overoppheting eller feilindikasjoner på display.",
+      "aksept": "1. Pumpen starter og stopper i henhold til varmebehov og styringslogikk\n\n2. Minimumsregulering aktiveres ved riktig settpunkt og fungerer som forventet\n\n3. Feiltilstander genererer korrekt alarm i SD-anlegget\n\n4. Ingen synlige lekkasjer, vibrasjoner, overoppheting eller feilindikasjoner."
+    },
+    {
+      "navn": "Pumpe, kjøle shuntgruppe",
+      "test": "1. Sett systemet i normal drift – observer at pumpen starter ved kjølebehov og at status vises korrekt i SD-anlegget\n\n2. Test reguleringsrespons – endre varmebehov eller settpunkt (behov for kjøle) via SD-anlegget og observer at pumpen tilpasser hastighet eller drift\n\n3. Etter endt mosjoneringssekvens, observer at pumpen returnerer til normal styring basert på varmebehov.\n\n4. Simuler feiltilstand – koble fra signal, strømutkobling, utløse overstrøm eller stans vannstrøm, og observer at alarm genereres i SD-anlegget\n\n5. Inspiser pumpen visuelt – se etter lekkasjer, vibrasjoner, unormal lyd, overoppheting eller feilindikasjoner på display.",
+      "aksept": "1. Pumpen starter og stopper i henhold til varmebehov og styringslogikk\n\n2. Ved endring i varmebehov tilpasser pumpen drift som forventet\n\n3. Pumpen går med fullt pådrag i definert periode, og returnerer til normal drift etterpå\n\n4. Feiltilstander genererer korrekt alarm i SD-anlegget\n\n5. Ingen synlige lekkasjer, vibrasjoner, overoppheting eller feilindikasjoner."
+    },
+    {
+      "navn": "Pumpe med styrt frekvensomformer",
+      "test": "1. Se testutførelse for LR",
+      "aksept": "1. Se akseptkriterier for LR"
+    }
+  ],
+  "JV": [
+    {
+      "navn": "Vifte med tilhørende frekvensomformer",
+      "test": "1. Se testutførelse for LR",
+      "aksept": "1. Se forventet resultat, eller akseptkriterier for LR"
+    },
+    {
+      "navn": "Vifte med EC-motor",
+      "test": "1. Gi et pådrag til viften via HMI/SD, ved bruk av enten vender, eller tidsprogram. \n\n2. Øk pådrag ved å endre reguleringssetpunktet for viften.\n\n3. Koble vekk strøm (via sikkerhetsbryter/eller sikring) til vifte for å kontrollere at det sendes alarm til HMI/SD.",
+      "aksept": "1. Vifte starter ved startsignal med riktig dreieretning og regulerer pådraget etter settpunkt. \n\n2. Pådraget styrer hastigheten på viften, og settpunktmanipulasjonen har endret pådraget for viften. \n\n3. Vifte stanser og er spenningsløs, og alarm registreres i HMI/SD."
+    }
+  ],
+  "JW": [
+    {
+      "navn": "Vifte med tilhørende frekvensomformer",
+      "test": "Gi et startsignal for viften via HMI/SD, ved bruk av enten vender, eller tidsprogram. Øk pådrag ved å endre reguleringssetpunktet for viften.",
+      "aksept": "Vifte startes ved startsignal med riktig dreieretning og regulerer pådraget etter settpunkt. Pådraget styrer hastigheten på viften, settpunkt manipuleres for å kontrollere at pådrag endres. Koble vekk strøm (via sikkerhetsbryter/eller sikring) til omformer for å kontrollere at det sendes alarm til HMI/SD."
+    },
+    {
+      "navn": "Vifte med EC-motor",
+      "test": "1. Gi et pådrag til viften via HMI/SD, ved bruk av enten vender, eller tidsprogram\n\n2. Øk pådrag ved å endre reguleringssetpunktet for viften\n\n3. Koble vekk strøm (via sikkerhetsbryter/eller sikring) til vifte for å kontrollere at det sendes alarm til HMI/SD",
+      "aksept": "1. Vifte starter ved startsignal med riktig dreieretning og regulerer pådraget etter settpunkt\n\n2. Pådraget styrer hastigheten på viften, og settpunktmanipulasjonen har endret pådraget for viften\n\n3. Vifte stanser og er spenningsløs, og alarm registreres i HMI/SD"
+    }
+  ],
+  "KA": [
+    {
+      "navn": "Spjeldmotor, med frostfunksjon",
+      "test": "1. Plasser systemet i PÅ\n\n2. Plasser systemet i AV\n\n3. Plasser systemet i FROST\n\n4. Plasser systemet i NETTUTFALL",
+      "aksept": "1. Visuell kontroll av spjeldposisjon ÅPEN når systemet er PÅ\n\n2. Visuell kontroll av spjeldposisjon LUKKET når systemet er AV \n\n3. Visuell kontroll av spjeldposisjon STENGT ved frost\n\n4. Visuell kontroll av spjeldposisjon STENGT ved nettutfall"
+    },
+    {
+      "navn": "Spjeldmotor",
+      "test": "1. Plasser systemet i PÅ\n\n2. Plasser systemet i AV",
+      "aksept": "1. Visuell kontroll av spjeldposisjon ÅPEN når systemet er PÅ\n\n2. Visuell kontroll av spjeldposisjon LUKKET når systemet er AV"
+    },
+    {
+      "navn": "Spjeldmotor, med endebrytere/BUS og frostfunksjon",
+      "test": "1. Plasser systemet i PÅ\n\n2. Plasser systemet i AV\n\n3. Plasser systemet i FROST\n\n4. Plasser systemet i NETTUTFALL",
+      "aksept": "1. Visuell kontroll av spjeldposisjon ÅPEN når systemet er PÅ, samt registrert åpen i HMI/SD\n\n2. Visuell kontroll av spjeldposisjon LUKKET når systemet er AV, samt registrert stengt i HMI/SD\n\n3. Visuell kontroll av spjeldposisjon STENGT ved frost, samt registrert stengt i HMI/SD\n\n4. Visuell kontroll av spjeldposisjon STENGT ved nettutfall, samt registrert stengt i HMI/SD"
+    },
+    {
+      "navn": "Spjeldmotor, med endebrytere/BUS",
+      "test": "1. Plasser systemet i PÅ\n\n2. Plasser systemet i AV",
+      "aksept": "1. Visuell kontroll av spjeldposisjon ÅPEN når systemet er PÅ, samt registrert åpen i HMI/SD\n\n2. Visuell kontroll av spjeldposisjon LUKKET når systemet er AV, samt registrert stengt i HMI/SD"
+    },
+    {
+      "navn": "Spjeldmotor, omluftspjeld",
+      "test": "1. Plasser systemet i PÅ\n\n2. Plasser systemet i OMLUFT\n\n3. Plasser systemet i FROST\n\n4. Plasser systemet i NETTUTFALL",
+      "aksept": "1. Visuell kontroll av spjeldposisjon STENGT når systemet er PÅ\n\n2. Visuell kontroll av spjeldposisjon ÅPEN når systemet er i OMLUFT \n\n3. Visuell kontroll av spjeldposisjon STENGT ved frost\n\n4. Visuell kontroll av spjeldposisjon STENGT ved nettutfall"
+    },
+    {
+      "navn": "Spjeldmotor, omluftspjeld m. endebrytere/BUS",
+      "test": "1. Plasser systemet i PÅ\n\n2. Plasser systemet i OMLUFT\n\n3. Plasser systemet i FROST\n\n4. Plasser systemet i NETTUTFALL",
+      "aksept": "1. Visuell kontroll av spjeldposisjon STENGT når systemet er PÅ, samt registrert stengt i HMI/SD\n\n2. Visuell kontroll av spjeldposisjon ÅPEN når systemet er i OMLUFT, samt registrert åpen i HMI/SD\n\n3. Visuell kontroll av spjeldposisjon STENGT ved frost, samt registrert stengt i HMI/SD\n\n4. Visuell kontroll av spjeldposisjon STENGT ved nettutfall, samt registrert stengt i HMI/SD"
+    }
+  ],
+  "LB": [
+    {
+      "navn": "Varmluftsvifte",
+      "test": "1. Bekreft tilkobling til HMI/SD-anlegg – sjekk at viftens styringssignal (f.eks. 0–10 V, rele eller Modbus/BACnet) er koblet og synlig i HMI/SD-anlegget\n\n2. Sett systemet i normal drift og observer at varmeviften starter ved varmebehov og at status vises korrekt i SD-anlegget\n\n3. Test temperaturregulering – endre settpunkt i HMI/SD-anlegget og observer at viften responderer med økt eller redusert luftstrøm/varme \n\n4. Simuler feiltilstand – koble fra signal eller utløse overtemperaturvern og observer at alarm genereres i HMI/SD-anlegget\n\n5. Inspiser viften visuelt – se etter støv, blokkeringer, slitasje, lekkasjer (ved vannbåren varme) eller unormal lyd.",
+      "aksept": "1. Kommunikasjon med HMI/SD-anlegget fungerer, og status oppdateres korrekt\n\n2. Viften starter og stopper i henhold til varmebehov og settpunkt\n\n3. Temperaturregulering fungerer som forventet, og luftstrøm tilpasses behov\n\n4. Feiltilstander genererer korrekt alarm i HMI/SD-anlegget\n\n5. Ingen synlige skader, blokkeringer, lekkasjer eller unormal drift"
+    }
+  ],
+  "LK": [
+    {
+      "navn": "Kjøleveksler (vann)",
+      "test": "1. Sett kjøleanlegget i normal drift og kontroller at kjøleveksleren er korrekt tilkoblet vannsystemet (primær og sekundær side)\n\n2. Les av temperaturer og vannstrøm på begge sider av kjøleveksleren (inn/ut primær og inn/ut sekundær)\n\n3. Sammenlign temperaturdifferanser med forventet ytelse (f.eks. ΔT på 5–10 °C avhengig av system)\n\n4. Simuler endring i kjølebehov ved å justere ventil eller endre vannmengde\n\n5. Observer responsen i temperatur og kjøleeffekt – kjøleveksleren skal tilpasse seg endringen\n\n6. Inspiser kjøleveksleren visuelt for lekkasjer, kondensproblemer eller unormale lyder",
+      "aksept": "1. Kjøleveksleren er korrekt tilkoblet og anlegget går i normal drift\n\n2. Temperaturer og vannstrømmer er innenfor forventede verdier\n\n3. Temperaturdifferanse mellom inn/ut er i henhold til systemets design og belastning\n\n4. Ved endring i vannmengde eller kjølebehov responderer kjøleveksleren med justert temperatur og effekt\n\n5. Ingen unormale avvik i temperatur eller ytelse under simulert belastning\n\n6. Ingen synlige lekkasjer, kondensproblemer eller mekaniske feil"
+    }
+  ],
+  "LR": [
+    {
+      "navn": "Frekvensomformer viftestyring (trykkstyring)",
+      "test": "1. Start aggregatet og sjekk at frekvensomformeren får startsignal. Når dette skjer, vil viften starte og justere hastigheten automatisk for å oppnå ønsket trykk, basert på det innstilte trykksettpunktet.\n\n2. Endre trykksettpunktet for å kontrollere at viften reagerer og justerer hastigheten i henhold til den nye verdien.\n\n3. Koble fra strømmen til frekvensomformeren for å sjekke at det utløses en alarm som vises på HMI/SD-systemet.",
+      "aksept": "1. Aggregatet starter uten feil eller alarmer, og frekvensomformeren mottar startsignal og går i drift.\nViften regulerer hastigheten automatisk, og systemet begynner å bevege seg mot det innstilte trykksettpunktet.\nIngen feilmeldinger eller avvik vises på HMI/SD under oppstart\n\n2. Endring av trykksettpunkt registreres korrekt i systemet, og viften endrer hastighet i tråd med nytt settpunkt.\nTrykkmåling viser at systemet forsøker å oppnå det nye settpunktet, og det er ingen forsinkelser eller feil i responsen fra frekvensomformer.\nHMI/SD viser korrekt informasjon om nytt settpunkt og pådrag\n\n3. Når strøm til frekvensomformer kobles fra, registreres dette som en feiltilstand, og alarm genereres og vises tydelig på HMI/SD.\nAlarmen inneholder relevant informasjon (f.eks. \"Strømbrudd frekvensomformer\").\nSystemet går til sikker tilstand dersom nødvendig.\nIngen andre uønskede systemfeil oppstår som følge av frakoblingen."
+    },
+    {
+      "navn": "Frekvensomformer viftestyring (luftmengde)",
+      "test": "1. Start aggregatet og sjekk at frekvensomformeren får startsignal. Når dette skjer, vil viften starte og justere hastigheten automatisk for å oppnå ønsket luftmengde, basert på det innstilte mengdesettpunktet.\n\n2. Endre luftmengdesettpunktet for å kontrollere at viften reagerer og justerer hastigheten i henhold til den nye verdien.\n\n3. Koble fra strømmen til frekvensomformeren for å sjekke at det utløses en alarm som vises på HMI/SD-systemet.",
+      "aksept": "1. Aggregatet starter uten feil eller alarmer, og frekvensomformeren mottar startsignal og går i drift.\nViften regulerer hastigheten automatisk, og systemet begynner å bevege seg mot det innstilte luftmengdesettpunktet.\nIngen feilmeldinger eller avvik vises på HMI/SD under oppstart\n\n2. Endring av luftmengdesettpunkt registreres korrekt i systemet, og viften endrer hastighet i tråd med nytt settpunkt.\nLuftmengden viser at systemet forsøker å oppnå det nye settpunktet, og det er ingen forsinkelser eller feil i responsen fra frekvensomformer.\nHMI/SD viser korrekt informasjon om nytt settpunkt og pådrag\n\n3. Når strøm til frekvensomformer kobles fra, registreres dette som en feiltilstand, og alarm genereres og vises tydelig på HMI/SD.\nAlarmen inneholder relevant informasjon (f.eks. \"Strømbrudd frekvensomformer\").\nSystemet går til sikker tilstand dersom nødvendig.\nIngen andre uønskede systemfeil oppstår som følge av frakoblingen."
+    },
+    {
+      "navn": "Frekvensomformer pumpestyring (trykkstyring) + alternering",
+      "test": "1. Start systemet og sjekk at frekvensomformeren får startsignal. Når dette skjer, vil pumpen starte og justere hastigheten automatisk for å oppnå ønsket trykk, basert på det innstilte trykksettpunktet\n\n2. Endre trykksettpunktet for å kontrollere at pumpen reagerer og justerer hastigheten i henhold til den nye verdien\n\n3. Koble fra strømmen til frekvensomformeren for å sjekke at det utløses en alarm som vises på HMI/SD-systemet\n\n4. Når frekvensomformer er i alarm vil det alterneres drift til frekvensomformer tilknyttet samme funksjon\n\n5. Koble tilbake strømmen til omformer og se at systemet returnerer til normal drift uten alarmer",
+      "aksept": "1. Systemet starter uten feil eller alarmer, og frekvensomformeren mottar startsignal og går i drift.\nPumpen regulerer hastigheten automatisk, og systemet begynner å bevege seg mot det innstilte trykksettpunktet.\nIngen feilmeldinger eller avvik vises på HMI/SD under oppstart\n\n2. Endring av trykksettpunkt registreres korrekt i systemet, og pumpen endrer hastighet i tråd med nytt settpunkt.\nTrykkmåling viser at systemet forsøker å oppnå det nye settpunktet, og det er ingen forsinkelser eller feil i responsen fra frekvensomformer.\nHMI/SD viser korrekt informasjon om nytt settpunkt og pådrag\n\n3. Når strøm til frekvensomformer kobles fra, registreres dette som en feiltilstand, og alarm genereres og vises tydelig på HMI/SD.\nAlarmen inneholder relevant informasjon (f.eks. \"Strømbrudd frekvensomformer\").\nSystemet går til sikker tilstand dersom nødvendig.\nIngen andre uønskede systemfeil oppstår som følge av frakoblingen\n\n4. Det er alternert drift til annen frekvensomformer og den er i normal drift\n\n5. Anlegget er tilbake til normal drift, og uten alarmer"
+    },
+    {
+      "navn": "Frekvensomformer pumpestyring (Start/Stopp) + alternering",
+      "test": "1. Start systemet og sjekk at frekvensomformeren får startsignal. Når dette skjer, vil pumpen starte og justere hastigheten automatisk for å oppnå ønsket mengde stilt internt i frekvensomformer\n\n2. Endre settpunktet i frekvensomformer for å kontrollere at pumpen reagerer og justerer hastigheten i henhold til den nye verdien\n\n3. Koble fra strømmen til frekvensomformeren for å sjekke at det utløses en alarm som vises på HMI/SD-systemet\n\n4. Når frekvensomformer er i alarm vil det alterneres drift til frekvensomformer tilknyttet samme funksjon\n\n5. Koble tilbake strømmen til omformer og se at systemet returnerer til normal drift uten alarmer",
+      "aksept": "1. Systemet starter uten feil eller alarmer, og frekvensomformeren mottar startsignal og går i drift.\nPumpen regulerer hastigheten automatisk, og systemet begynner å bevege seg mot det innstilte settpunktet.\nIngen feilmeldinger eller avvik vises på HMI/SD under oppstart\n\n2. Endring av settpunkt registreres korrekt i systemet, og pumpen endrer hastighet i tråd med nytt settpunkt.\nEvt. trykk eller mengdemålinger viser at systemet forsøker å oppnå det nye settpunktet, og det er ingen forsinkelser eller feil i responsen fra frekvensomformer.\nHMI/SD viser korrekt informasjon om nytt settpunkt og pådrag\n\n3. Når strøm til frekvensomformer kobles fra, registreres dette som en feiltilstand, og alarm genereres og vises tydelig på HMI/SD.\nAlarmen inneholder relevant informasjon (f.eks. \"Strømbrudd frekvensomformer\").\nSystemet går til sikker tilstand dersom nødvendig.\nIngen andre uønskede systemfeil oppstår som følge av frakoblingen\n\n4. Det er alternert drift til annen frekvensomformer og den er i normal drift\n\n5. Anlegget er tilbake til normal drift, og uten alarmer"
+    },
+    {
+      "navn": "Frekvensomformer roterende gjenvinner",
+      "test": "1. Start aggregatet og sjekk at frekvensomformeren får startsignal. Når dette skjer, vil gjenvinner begynne å rotere, basert på det innstilte hastighetssettpunktet\n\n2. Endre hastighetssettpunktet for å kontrollere at gjenvinner reagerer og justerer hastigheten i henhold til den nye verdien\n\n3. Koble fra strømmen til frekvensomformeren for å verifisere at det utløses en alarm som vises på HMI/SD-systemet\n\n4. Koble bort reim fra reimhjulet til gjenvinner for å verifisere at det utløses en alarm som vises på HMI/SD-systemet",
+      "aksept": "1. Aggregatet starter uten feil eller alarmer, og frekvensomformeren mottar startsignal og går i drift.\nGjenvinner roterer etter gitt settpunkt fra regulator.\nIngen feilmeldinger eller avvik vises på HMI/SD under oppstart\n\n2. Endring av hastighetssettpunkt registreres korrekt i systemet, og roterende endrer hastighet i tråd med nytt settpunkt.\nTemperaturoverføringen fra avtrekk til tilluft viser at effekt oppnås over gjenvinner, og det er ingen forsinkelser eller feil i responsen fra frekvensomformer.\nHMI/SD viser korrekt informasjon om nytt settpunkt og pådrag\n\n3. Når strøm til frekvensomformer kobles fra, registreres dette som en feiltilstand, og alarm genereres og vises tydelig på HMI/SD.\nAlarmen inneholder relevant informasjon (f.eks. \"Strømbrudd frekvensomformer\").\nSystemet går til sikker tilstand dersom nødvendig.\nIngen andre uønskede systemfeil oppstår som følge av frakoblingen\n\n4. Når reim til gjenvinner kobles fra, registreres dette som en feiltilstand, og alarm genereres og vises tydelig på HMI/SD.\nAlarmen inneholder relevant informasjon (f.eks. \"feilsignal frekvensomformer\").\nSystemet går til sikker tilstand dersom nødvendig.\nIngen andre uønskede systemfeil oppstår som følge av frakoblingen."
+    }
+  ],
+  "LU": [
+    {
+      "navn": "Adiabatisk (sildrerør)",
+      "test": "1. Senk settpunkt på aggregatets utekompensering/settpunktstyring for temperaturregulering til eks. 10 °C for å starte systemets kjøleregulator (0-100%).",
+      "aksept": "1. Ved pådrag kontroller at magnetventil åpner for nødvendig fylling av vann i kar, og at  trykket utjevnes slik at vannet fordeles tilstrekkelig for vann over \"\"sildrerør\"\", samt at -roterende gjenvinner er i 100% pådrag. \nKontroller at vann som blir tilført sildrer rolig gjennom kassene for befukning av avtrekksluften.\nVed bruk av kaldt vann og høy luftfuktighet vil den kjemiske effekten over gjenvinner være høyere, enn ved motsatte forhold.\n\nDeretter verifiseres funksjon ved å se at tilluftstemperatur synker"
+    }
+  ],
+  "LV": [
+    {
+      "navn": "Varmeveksler (vann)",
+      "test": "1. Sett anlegget i normal drift og kontroller at varmeveksleren er korrekt tilkoblet vannsystemet (primær og sekundær side)\n\n2. Les av temperaturer og vannstrøm på begge sider av varmeveksleren (inn/ut primær og inn/ut sekundær)\n\n3. Sammenlign temperaturdifferanser med forventet ytelse (f.eks. ΔT på 5–15 °C avhengig av system)\n\n4. Simuler endring i belastning ved å justere ventil eller endre vannmengde\n\n5. Observer responsen i temperatur og effekt – varmeveksleren skal tilpasse seg endringen\n\n6. Inspiser varmeveksleren visuelt for lekkasjer, korrosjon eller unormale lyder",
+      "aksept": "1. Varmeveksleren er korrekt tilkoblet og anlegget går i normal drift\n\n2. Temperaturer og vannstrømmer er innenfor forventede verdier\n\n3. Temperaturdifferanse mellom inn/ut er i henhold til systemets design og belastning\n\n4. Ved endring i vannmengde eller belastning responderer varmeveksleren med justert temperatur og effekt\n\n5. Ingen unormale avvik i temperatur eller ytelse under simulert belastning\n\n6. Ingen synlige lekkasjer, korrosjon eller mekaniske feil"
+    }
+  ],
+  "LX": [
+    {
+      "navn": "Gjenvinner (roterende)",
+      "test": "1. Sett ventilasjonsanlegget i normal drift og kontroller at rotoren er korrekt montert og roterer i riktig retning\n\n2. Observer rotasjon visuelt – rotoren skal rotere jevnt og uten vibrasjoner eller ulyder\n\n3. Kontroller tetthet mellom rotor og tetningsflater – se etter lekkasjer mellom tilluft og avtrekk\n\n4. Mål temperaturdifferanse mellom avtrekk og tilluft for å vurdere varmegjenvinningens effektivitet\n\n5. Simuler driftsendring ved å endre luftmengde eller temperatur og observer rotorens respons\n\n6. Inspiser rotorens overflate for smuss, skader, korrosjon eller deformasjon.",
+      "aksept": "1. Rotoren er korrekt montert og roterer i riktig retning under normal drift\n\n2. Rotasjonen er jevn og uten vibrasjoner, ulyder eller mekaniske hindringer\n\n3. Tetningene fungerer som de skal – ingen lekkasje mellom tilluft og avtrekk\n\n4. Temperaturdifferanse viser at varmegjenvinningen fungerer effektivt\n\n5. Rotoren responderer normalt ved endringer i luftmengde eller temperatur\n\n6. Ingen synlige skader, smuss eller deformasjon på rotorens overflate"
+    },
+    {
+      "navn": "Gjenvinner (kryss)",
+      "test": "1. Sett ventilasjonsanlegget i normal drift og kontroller at kryssveksleren er korrekt montert og integrert i luftstrømmen\n\n2. Mål temperaturer på tilluft og avtrekk før og etter varmegjenvinneren\n\n3. Beregn temperaturvirkningsgrad basert på målingene (f.eks. 60–80 % avhengig av type og drift)\n\n4. Kontroller trykkfall over varmegjenvinneren og sammenlign med spesifikasjoner\n\n5. Simuler driftsendring ved å endre luftmengde og observer endring i temperaturvirkningsgrad og trykkfall\n\n6. Inspiser varmegjenvinneren visuelt for lekkasjer, smuss, skader eller deformasjon i platene",
+      "aksept": "1. Kryssveksleren er korrekt montert og fungerer under normal drift\n\n2. Temperaturmålinger viser tydelig varmegjenvinning mellom avtrekk og tilluft\n\n3. Beregnet temperaturvirkningsgrad er innenfor forventet område\n\n4. Trykkfall over varmegjenvinneren er i henhold til tekniske spesifikasjoner\n\n5. Ved endring i luftmengde endres virkningsgrad og trykkfall som forventet\n\n6. Ingen synlige lekkasjer, skader eller oppsamling av smuss i varmegjenvinneren"
+    }
+  ],
+  "MF": [
+    {
+      "navn": "Filter (ventilasjonsanlegg)",
+      "test": "1. Visuell inspeksjon av filterets fysiske tilstand\n\n2. Sjekk montering og tetthet mot ramme\n\n3. Test tilgjengelighet for vedlikehold (fysisk fjerning og innsetting)\n\n4. Sammenlign filtertype med spesifikasjon i teknisk dokumentasjon\n\n5. Dokumenter eventuelle avvik med bilder og notater",
+      "aksept": "1. Ingen rifter, hull eller deformasjoner, og rammeverket skal være stabilt og uten sprekker\n\n2. Skal sitte tett i filterrammen uten lekkasjepunkter, og ingen synlige åpninger mellom filter og ramme\n\n3. Skal kunne fjernes og erstattes uten bruk av spesialverktøy, og tilgang skal være i henhold til HMS-krav (f.eks. ingen behov for demontering av store komponenter)\n\n4. Ingen synlig støv, fett eller partikler ved første gangs bruk\n\n5. Riktig klasse, og merket"
+    }
+  ],
+  "ML": [
+    {
+      "navn": "Luftutskiller",
+      "test": "1. Sett anlegget i normal drift med vannstrøm gjennom luftutskilleren\n\n2. Kontroller at luftutskilleren er korrekt montert og tilkoblet\n\n3. Observer visuell indikator (dersom tilgjengelig) for luftutslipp eller luftmengde\n\n4. Simuler luft i systemet ved å åpne en ventil eller koble til en luftlomme\n\n5. Verifiser at luftutskilleren fjerner luft og at systemet stabiliseres\n\n6. Inspiser komponenten for lekkasjer, korrosjon eller mekaniske skader\n\n7. Dersom luftutskilleren har automatisk utlufting, kontroller at funksjonen aktiveres og luft slippes ut",
+      "aksept": "1. Luftutskilleren er korrekt montert og vann strømmer gjennom komponenten\n\n2. Ingen luftbobler eller kavitasjon observeres i systemet under normal drift\n\n3. Visuell indikator (hvis tilgjengelig) viser luftutslipp eller aktiv funksjon\n\n4. Ved simulert luft i systemet fjerner luftutskilleren effektivt luft, og trykk/støy stabiliseres\n\n5. Automatisk utlufting fungerer som forventet og slipper ut luft ved behov\n\n6. Ingen lekkasjer, rust eller skader på luftutskillerens overflate eller tilkoblinger\n\n7. Systemet returnerer til normal drift etter luftfjerning."
+    }
+  ],
+  "MV": [
+    {
+      "navn": "Vannfilter",
+      "test": "1. Sett anlegget i normal drift og kontroller at vann strømmer gjennom filteret\n\n2. Inspiser filteret visuelt for lekkasjer, korrosjon eller mekaniske skader\n\n3. Mål trykk før og etter filteret for å beregne trykkfall\n\n4. Sammenlign trykkfallet med prosjektert verdi (f.eks. < 30 kPa ved rent filter)\n\n5. Simuler tilstopping ved å delvis stenge ventil eller bruke et skittent filter\n\n6. Observer at trykkfallet øker og eventuelt at alarm utløses ved overskridelse av grenseverdi\n\n7. Rens eller bytt filterinnsats og verifiser at trykkfallet reduseres til normal verdi",
+      "aksept": "1. Vannfilteret er korrekt montert og vann strømmer gjennom uten hindringer\n\n2. Ingen lekkasjer, rust eller skader på filterhus eller tilkoblinger\n\n3. Trykkfall over filteret er innenfor forventet område ved normal drift\n\n4. Trykkfall målt over filteret er lavere enn definert grenseverdi (f.eks. < 30 kPa ved rent filter), og samsvarer med prosjektert verdi\n\n5. Ved simulert tilstopping øker trykkfallet som forventet, og alarm utløses dersom grenseverdi overskrides\n\n6. Når trykkfallet overstiger definert grenseverdi (f.eks. > 50 kPa), utløses alarm i SD/HMI med korrekt beskrivelse (f.eks. “Filter tilstoppet”)\n\n7. Etter rensing eller bytte av filterinnsats reduseres trykkfallet til normal verdi"
+    }
+  ],
+  "NT": [
+    {
+      "navn": "Trykktank",
+      "test": "1. Sett anlegget i normal drift og kontroller at trykktanken er tilkoblet og i funksjon\n\n2. Verifiser at trykket i tanken er innenfor spesifisert område (f.eks. 1,6–2,6 bar)\n\n3. Simuler trykkendring i systemet (f.eks. ved å starte/stanse pumper) og observer at tanken tar opp eller avgir volum\n\n4. Kontroller at sikkerhetsventil på tanken ikke løser ut under normal drift\n\n5. Inspiser tanken visuelt for lekkasjer, korrosjon eller mekaniske skader\n\n6. Dersom tanken har manometer eller trykkvakt, kontroller at disse viser korrekt verdi og eventuelt gir signal til SD/HMI",
+      "aksept": "1. Tanken er korrekt tilkoblet og systemet går i normal drift uten alarmer.\n\n2. Trykket i tanken er innenfor spesifisert område (f.eks. 1,6–2,4 bar) og stabilt.\n\n3. Ved trykkendring i systemet responderer tanken som forventet – trykket endres jevnt uten raske svingninger.\n\n4. Sikkerhetsventil forblir lukket under normal drift og åpner kun ved overtrykk.\n\n5. Ingen synlige lekkasjer, rust eller skader på tankens overflate eller tilkoblinger.\n\n6. Eventuelle manometre eller trykkvakter viser korrekt verdi og gir riktig signal til SD/HMI ved avvik."
+    }
+  ],
+  "NU": [
+    {
+      "navn": "Tank uten trykk",
+      "test": "1. Sett anlegget i normal drift og kontroller at tanken er tilkoblet og fylt med vann\n\n2. Verifiser at vannmengden i tanken er stabil og innenfor forventet nivå\n\n3. Kontroller at innløp og utløp fungerer som tiltenkt – vann skal flyte fritt inn og ut av tanken\n\n4. Inspiser tanken visuelt for lekkasjer, korrosjon eller mekaniske skader\n\n5. Kontroller eventuelle nivåsensorer eller overløp for riktig funksjon\n\n6. Dersom tanken har tilknytning til SD/HMI, verifiser at nivå eller status vises korrekt",
+      "aksept": "1. Tanken er korrekt tilkoblet og fylt med vann under normal drift\n\n2. Vannnivået i tanken er stabilt og innenfor prosjektert område\n\n3. Vann flyter fritt inn og ut av tanken uten blokkeringer eller tilbakeslag\n\n4. Ingen synlige lekkasjer, rust eller skader på tankens overflate eller tilkoblinger\n\n5. Nivåsensorer eller overløp fungerer som forventet og gir riktig respons ved høy/lavt nivå\n\n6. Eventuell visning i SD/HMI samsvarer med faktisk status i tanken"
+    }
+  ],
+  "NW": [
+    {
+      "navn": "Bereder",
+      "test": "1. Slå på/start bedreder\n2. Kontroller innstilt maks temperatur på bereder\n3. Kontroller ved hjelp av manometer temperaturen inn og ut av bereder",
+      "aksept": "1. Bereder er i drift\n2. Innstilt verdi er mellom 65-70 °C\n3. Temperatur registrert er mellom 65-70 °C"
+    }
+  ],
+  "OE": [
+    {
+      "navn": "Energimåler (vann)",
+      "test": "1. Sett anlegget i normal drift og observer at måleren registrerer vannstrøm og energiforbruk\n\n2. Sammenlign målerens verdier med referansemåling (f.eks. via SD eller manuell beregning) for plausibilitet\n\n3. Test ved endret vannmengde – juster ventil eller pumpehastighet og observer at måleren responderer med endret flow og energiforbruk\n\n4. Inspiser måleren visuelt for lekkasjer, kondens, skader eller uriktig visning.",
+      "aksept": "1. Måleren registrerer vannstrøm og energiforbruk under normal drift\n\n2. Verdiene er plausible og samsvarer med referansemålinger\n\n3. Ved endring i vannmengde endres målerens verdier tilsvarende\n\n4. Ingen synlige lekkasjer, skader eller feilvisning på måleren"
+    },
+    {
+      "navn": "Energimåler (strøm)",
+      "test": "1. Sett kursen i normal drift og observer at måleren registrerer strømforbruk og energidata\n\n2. Sammenlign målerens verdier med referansemåling (f.eks. via energiovervåkingssystem eller manuell beregning)\n\n3. Test ved endret belastning – koble til/ut last og observer at måleren responderer med endret effekt og energiforbruk\n\n4. Inspiser måleren visuelt for skader, misfarging, uriktig visning eller tegn til overoppheting.",
+      "aksept": "1. Måleren registrerer strøm og energiforbruk under normal drift\n\n2. Verdiene er plausible og samsvarer med referansemålinger\n\n3. Ved endring i belastning endres målerens verdier tilsvarende\n\n4. Ingen synlige skader, misfarging eller feilvisning på måleren"
+    }
+  ],
+  "OU": [
+    {
+      "navn": "Kontroller",
+      "test": "1. Bekreft kommunikasjon med SD-anlegg – sjekk at kontrolleren er online og at datapunkter oppdateres i SD-anlegget.\n\n2. Test inngangssignaler – aktiver fysiske innganger (f.eks. temperaturføler, trykkvakt, PIR) og observer at verdiene registreres korrekt i kontrolleren og SD-anlegget\n\n3. Test utgangssignaler – aktiver utganger via SD-anlegget (f.eks. start vifte, åpne spjeld) og bekreft fysisk respons i anlegget\n\n4. Simuler alarmtilstand – trigge en feilmelding eller avvik (f.eks. brudd på føler) og observer at kontrolleren sender korrekt alarm til SD-anlegget\n\n5. Inspiser kontrolleren visuelt – se etter skader, overoppheting, løs tilkobling, LED-status og generell tilstand.",
+      "aksept": "1. Kommunikasjon med SD-anlegget fungerer stabilt og datapunkter oppdateres korrekt\n\n2. Inngangssignaler registreres nøyaktig og vises korrekt i SD-anlegget\n\n3. Utgangssignaler aktiveres som forventet og gir fysisk respons i anlegget\n\n4. Alarmtilstander registreres og overføres korrekt til SD-anlegget\n\n5. Ingen synlige skader, feilindikasjoner eller tegn til feilfunksjon."
+    },
+    {
+      "navn": "Kontroller (Brannsentral)",
+      "test": "1. Bekreft kommunikasjon med SD-anlegg – sjekk at kontrolleren er online og at datapunkter oppdateres i SD-anlegget.\n\n2. Test inngangssignaler – aktiver fysiske innganger (f.eks. brannsignal) og observer at verdiene registreres korrekt i kontrolleren og SD-anlegget\n\n3. Test utgangssignaler – aktiver utganger via HMI/SD-anlegget (f.eks. åpne/lukke alle spjeld, eller mosjoner alle spjeld) og bekreft fysisk respons i anlegget\n\n4. Simuler alarmtilstand – trigge en feilmelding eller avvik (f.eks. brudd på kommunikasjon mellom sentral og brannspjeld) og observer at kontrolleren sender korrekt alarm til SD-anlegget\n\n5. Inspiser kontrolleren visuelt – se etter skader, overoppheting, løs tilkobling, LED-status og generell tilstand.",
+      "aksept": "1. Kommunikasjon med SD-anlegget fungerer stabilt og datapunkter oppdateres korrekt\n\n2. Inngangssignaler registreres nøyaktig og vises korrekt i SD-anlegget\n\n3. Utgangssignaler aktiveres som forventet og gir fysisk respons i anlegget\n\n4. Alarmtilstander registreres og overføres korrekt til SD-anlegget\n\n5. Ingen synlige skader, feilindikasjoner eller tegn til feilfunksjon."
+    }
+  ],
+  "QE": [
+    {
+      "navn": "Overspenningvern",
+      "test": "1. Test jordforbindelse – kontroller at overspenningsvernet er koblet til bygningens jordsystem med korrekt tverrsnitt og uten skjøter\n\n2. Simuler overspenning indirekte – ved hjelp av testutstyr eller ved å observere respons ved koblingshendelser (f.eks. inn-/utkobling av last)\n\n3. Kontroller selektivitet og koordinering – vurder om overspenningsvernet er korrekt koordinert med eventuelle sekundærvern og at restspenning er innenfor akseptabelt nivå\n\n4. Om det er tilknyttet et alarmsignal til SD, koble fra vern, eller frakoble/laske denne utgangen, for å se om alarm registreres i SD",
+      "aksept": "1. Jordforbindelsen er korrekt utført med riktig tverrsnitt og tilkoblet felles jordpotensial\n\n2. Vernet reagerer som forventet ved overspenning eller koblingshendelser\n\n3. Koordinering mellom primær- og sekundærvern er ivaretatt, og restspenning er innenfor tillatt nivå\n\n4. Det registreres alarm i SD-Anlegget, med tilhørende alarmtekst"
+    }
+  ],
+  "QN": [
+    {
+      "navn": "Overspenningsvern, med alarm (Elektro)",
+      "test": "1. Koble ut vern, og utfør en isoloasjonstest\n\n2. Utfør en tennspenning (U₁), Restspenning (Ures), og responstest\n\n3. Koble tilbake",
+      "aksept": "1. Mål at vern er utkoblet (evt. se lysdiode rød). Utfør isolasjonstest, verdier under 1 MΩ kan tyde på lekkasje, eller feil. Kontroller at pot. fritt alarmsignal er N/O\n\n2. Kontroller at vern slår ut som tiltenkt, *bruk alltid leverandørens anbefalinger for test*\n\n3. Mål at vernet er innkoblet igjen (evt. se lysdiode grønn), samt kontroller at pot. fritt alarmsignal er N/C"
+    },
+    {
+      "navn": "Overspenningsvern, med alarm (BA)",
+      "test": "1. Koble ut vern\n\n2. Kontroller signalstatus i undersentral, eller SD\n\n3. Koble tilbake",
+      "aksept": "1. Vern er frakoblet (se evt. lysdiode rød)\n\n2. Verifiser at status er endret fra NORMAL til ALARM, og at alarmen er akiv med riktig beskrivende tekst ({lokasjon}+{komponent}+{alarmtekst} i undersentral/SD-Anlegget\n\n3. Vern er tilkoblet  (se evt. lysdiode grønn). Verifiser at status endres fra ALARM til NORMAL, med beskrivende tekst før kvittering av alarm utføres"
+    }
+  ],
+  "QP": [
+    {
+      "navn": "Trykkvakt",
+      "test": "1. Sett systemet i normal drift og observer at trykkvakten indikerer normal status\n\n2. Simuler trykkavvik ved å senke eller øke trykket forbi grenseverdien (f.eks. ved ventiljustering eller testutstyr)\n\n3. Observer respons – trykkvakten skal skifte status (f.eks. fra normal til alarm) umiddelbart og tydelig, samt en statusendring skal bli registrert i SD\n\n4. Inspiser trykkvakten visuelt for lekkasjer, korrosjon, mekanisk skade eller uriktig visning.",
+      "aksept": "1. Ved normal drift indikerer vakten korrekt status\n\n2. Ved trykkavvik utløses alarm presist og uten forsinkelse.\n\n3. Statusendring er tydelig og pålitelig – enten via visuell indikator eller på SD-Anlegget\n\n4. Ingen synlige skader, lekkasjer eller tegn til feilfunksjon."
+    }
+  ],
+  "QR": [
+    {
+      "navn": "Rotasjonsvakt",
+      "test": "1. Sjekk at rotasjonsvakten er online og at status- og alarmverdier oppdateres korrekt i HMI/SD-anlegget\n\n2. Simuler rotasjon (normal hastighet) og bekreft riktig retning og at vakten registrerer bevegelse, samt sender signal til frekvensomformer og ikke gir alarm til HMI/SD-anlegget\n\n3. Stopp rotasjonen under drift og bekreft at vakten registrerer stillstand og sender alarm\n\n4. Sjekk for skader, løs tilkobling, LED-status og generell tilstand",
+      "aksept": "1. Kommunikasjon med HMI/SD-anlegget fungerer stabilt og verdier oppdateres korrekt\n\n2. Normal rotasjon registreres og vises korrekt i frekvensomformer, samt HMI/SD-anlegget\n\n3. Stillstand under drift utløser alarm som vises i SD-anlegget\n\n4. Ingen synlige skader, feilindikasjoner eller tegn til feilfunksjon"
+    }
+  ],
+  "QT": [
+    {
+      "navn": "Mekanisk frostvakt (temperatur)",
+      "test": "1. Kontroller fysisk montering – temperaturvakten skal være korrekt plassert i luftstrømmen eller på vannrør der frostfare er størst\n\n2. Sett anlegget i normal drift og bekreft at temperaturen i området er over innstilt alarmgrense\n\n3. Simuler frostforhold ved å senke temperaturen (f.eks. med kald luft eller ispose) nær føleren\n\n4. Observer om temperaturvakten utløser alarm eller bryter signal ved innstilt grense (f.eks. 5 °C)\n\n5. La temperaturen stige igjen og observer om vakten tilbakestilles automatisk eller må tilbakestilles manuelt\n\n6. Inspiser temperaturvakten visuelt for skader, korrosjon, feilmontering eller mekanisk slitasje",
+      "aksept": "1. Temperaturvakten er korrekt montert og plassert i område med potensiell frostfare\n\n2. Ved normal drift er temperaturen over alarmgrensen og ingen feil vises\n\n3. Når temperaturen senkes under grenseverdi, utløses alarm eller signal brytes som forventet\n\n4. Alarmen utløses presist og uten forsinkelse ved simulert frost\n\n5. Vakten tilbakestilles korrekt når temperaturen stiger – enten automatisk eller manuelt\n\n6. Ingen synlige skader, korrosjon eller tegn til feilfunksjon på temperaturvakten"
+    }
+  ],
+  "QV": [
+    {
+      "navn": "Sikkerhetsventil",
+      "test": "1. Sett anlegget i normal drift med trykk og temperatur innenfor forventet driftsområde.\n\n2. Simuler overtrykk ved å stenge nedstrøms ventiler eller manipulere trykkøkning i systemet.\n\n3. Observer sikkerhetsventilens respons – den skal åpne ved innstilt utløsningstrykk.\n\n4. Kontroller lekkasjepunkt og avrenning – vann skal ledes trygt til avløp.\n\n5. Tilbakestill systemet og kontroller at ventilen lukker seg og ikke lekker ved normaltrykk.",
+      "aksept": "1. Systemet går i normal drift uten feil eller alarmer.\n\n2. Ved simulert overtrykk åpner sikkerhetsventilen ved korrekt utløsningstrykk (f.eks. 3 bar).\n\n3. Vann slippes ut kontrollert og ledes til riktig avløpspunkt.\n\n4. Alarm eller statusmelding vises i SD/HMI dersom aktuelt.\n\n5. Når trykket normaliseres, skal ventilen lukke seg og ikke vise tegn til lekkasje.\n\n6. Ingen uønskede effekter på øvrige komponenter i systemet."
+    }
+  ],
+  "RB": [
+    {
+      "navn": "PIR",
+      "test": "1. Sett systemet i normal drift og observer at sensoren ikke gir falske utslag ved rolig tilstand\n\n2. Simuler bevegelse innenfor sensorens dekningsområde – gå rolig og deretter raskt forbi sensoren\n\n3. Observer respons i SD-anlegget – status skal endres til \"bevegelse registrert\", og eventuelle tilkoblede funksjoner (lys, ventilasjon, alarm) skal aktiveres.\n\n4. Inspiser sensoren visuelt for skader, støv, feilvinkling eller blokkeringer som kan påvirke deteksjon.",
+      "aksept": "1. Ved normal drift vises riktig status i SD-anlegget (ingen bevegelse)\n\n2. Sensoren reagerer presist og raskt ved bevegelse innenfor dekningsområdet\n\n3. SD-anlegget viser statusendring og aktiverer tilkoblede funksjoner som forventet\n\n4. Ingen synlige skader, feilplassering eller blokkeringer som kan påvirke funksjon"
+    }
+  ],
+  "RD": [
+    {
+      "navn": "Differansetrykkgiver, for luft",
+      "test": "1. Sett ventilasjonsanlegget i normal drift og kontroller at differansetrykkgiveren er korrekt montert med slanger til høy- og lavtrykkside\n\n2. Verifiser at det vises en stabil differansetrykkverdi i HMI/SD\n\n3. Simuler trykkendring ved å justere viftehastighet eller koble bort/ eller klem en av slangene\n\n4. Observer at differansetrykkverdien endres i takt med luftmengden\n\n5. Koble fra én av slangene for å simulere feil, og kontroller at alarm genereres\n\n6. Sett tilbake slangen og verifiser at systemet går tilbake til normal drift",
+      "aksept": "1. Differansetrykkgiveren er korrekt montert og anlegget går i normal drift\n\n2. En stabil og korrekt differansetrykkverdi vises i HMI/SD\n\n3. Ved endring i luftmengde endres differansetrykkverdien som forventet\n\n4. Giveren reagerer raskt og presist uten unormale svingninger\n\n5. Ved frakobling av én slange registreres feiltilstand og alarm vises i HMI/SD\n\n6. Etter gjenoppretting returnerer systemet til normal drift uten vedvarende feil."
+    },
+    {
+      "navn": "Differansetrykkgiver, for vann",
+      "test": "1. Sett anlegget i normal drift med vannstrøm over differansetrykkgiveren.\n\n2. Kontroller at tilkoblinger (slanger/rør) til høy- og lavtrykkssiden er korrekt montert.\n\n3. Les av differansetrykk på HMI/SD eller direkte på giveren.\n\n4. Simuler endring i vannstrøm (f.eks. ved å endre ventilinnstilling eller pumpehastighet).\n\n5. Observer at differansetrykkverdien endres i takt med vannstrømmen.\n\n6. Koble fra én av tilkoblingene for å simulere feil, og kontroller at alarm genereres.\n\n7. Sett tilbake tilkoblingen og verifiser at systemet går tilbake til normal drift",
+      "aksept": "1. Systemet går i normal drift og vann strømmer over differansetrykkgiveren\n\n2. Tilkoblinger til høy- og lavtrykkssiden er korrekt montert og tette.\n\n3. Differansetrykkverdien vises korrekt i HMI/SD og samsvarer med forventet trykkfall.\n\n4. Ved endring i vannstrøm endres differansetrykkverdien som forventet.\n\n5. Responsen fra giveren er rask og stabil uten unormale svingninger.\n\n6. Ved frakobling av én tilkobling registreres feiltilstand og alarm vises i HMI/SD.\n\n7. Etter gjenoppretting returnerer systemet til normal drift uten vedvarende feil"
+    },
+    {
+      "navn": "Diff.trykkgiver for luftmengdekalkulasjon",
+      "test": "1. System i drift: Ingen manipulasjon. \n\n2. System i drift: Koble vekk en av slangene fra giveren\n\n3. Systemet uten drift",
+      "aksept": "1. Føler registrerer drift av vifte, samt kalkulasjon av luftmengde i HMI/SD. \n\n2. Registrert alarm for ikke oppnådd minimumsluftmengde i anlegget/ feil på vifte i HMI/SD.\n\n3. Vifte og kalkulasjon er stanset"
+    }
+  ],
+  "RE": [
+    {
+      "navn": "Nettanalysator (ELEKTRO)",
+      "test": "1. Koble ut tilførsel til nettanalysator\n\n2. Koble inn igjen tilførsel\n\n3. Bruk skjermen for avlesning av V kontinuitet, og andre lastdate\n\n4. Endre det øyeblikkelige lastomfanget ved å koble inn, evt. koble ut andre brytere i tavlen\n\n5. Les av verdier fra nettanalysator i tavle og SD-Anlegget",
+      "aksept": "1. Kontroller at skjerm et av, og mål at spenningen er borte\n\n2. Kontroller at skjerm får bilde + verdier, og mål at riktig spenning tilføres modulen\n\n3. Verifiser at det er ingen skjevfordelinger av last, og at V er stabil.\n\n4. Kontroller at lastomfanget er mindre, eller større enn, ved innkobling/ utkobling av andre brytere i tavlen\n\n5. Verifiser at verdiene i SD-Anlegget samstemmer med øyeblikksbildet (+ X sek. forsinkelse) som er avlest på nettanalysatoren. \nVerdisammenstemmelser blir testet under IT-test, i regi av rITB evt. annen stedfortreder (eller om annet avtalt)"
+    },
+    {
+      "navn": "Nettanalysator (BA)",
+      "test": "1. Koble til/lese av data i SD-Anlegget\n\n2. Endre det øyeblikkelige lastomfanget ved å koble inn, evt. koble ut andre brytere i tavlen\n\n3. Les av verdier fra nettanalysator i tavle og SD-Anlegget",
+      "aksept": "1. Kontroller at det er kontakt, og at man mottar verdier (dataflyt)\n\n2. Kontroller at lastomfanget er mindre, eller større enn, ved innkobling/ utkobling av andre brytere i tavlen\n\n3. Verifiser at verdiene i SD-Anlegget samstemmer med øyeblikksbildet (+ X sek. forsinkelse) som er avlest på nettanalysatoren. \nVerdisammenstemmelser blir testet under IT-test, i regi av rITB evt. annen stedfortreder (eller om annet avtalt)"
+    }
+  ],
+  "RF": [
+    {
+      "navn": "Diff.trykkgiver for luftmengdekalkulasjon",
+      "test": "1. System i drift: Ingen manipulasjon. \n\n2. System i drift: Koble vekk en av slangene fra giveren\n\n3. Systemet uten drift",
+      "aksept": "1. Føler registrerer drift av vifte, samt kalkulasjon av luftmengde i HMI/SD. \n\n2. Registrert alarm for ikke oppnådd minimumsluftmengde i anlegget/ feil på vifte i HMI/SD.\n\n3. Vifte og kalkulasjon er stanset"
+    }
+  ],
+  "RI": [
+    {
+      "navn": "Termometer",
+      "test": "1. Sjekk visuelt, temperatur og plassering (bruk verktøy som lasermåler, etc.)\n\n2. Demonter føler og hold hånden over elementet",
+      "aksept": "1. Temperatur er registrert\n\n2. Temperatur øker og vises korrekt"
+    }
+  ],
+  "RN": [
+    {
+      "navn": "Nivåmåler for kum",
+      "test": "1. Kontroller faktisk vannmengde i kum, og sammenlign med avlest verdi i regulator\n\n2. Fyll kum med en kjent mengde vann, og observer endring i målt verdi i regulator\n\n3. Endre settpunkt for nivåmåler slik at utpumping skal aktiveres, og observer om pumpe starter\n\n4. Tilbakestill settpunkt til opprinnelig verdi, og observer om pumpe stanser",
+      "aksept": "1. Avlest verdi i regulator samsvarer med faktisk vannmengde\n\n2. Regulator viser økt nivå etter påfylling\n\n3. Pumpe starter når nivå overstiger nytt settpunkt\n\n4. Pumpe stanser når nivået faller under opprinnelig settpunkt."
+    }
+  ],
+  "RP": [
+    {
+      "navn": "Trykkgiver, for trykkregulering vifter",
+      "test": "1. Aktiver systemet for å tilfører luft over giveren.\n\n2. Manipuler et lavt maks trykksettpunkt ca. 50 Pa. \n\n3. Demonter slangen under drift.\nNB! Husk å koble slanger tilbake igjen raskt før viften får for høy hastighet.",
+      "aksept": "1. Kontroller at det vises verdi i HMI. \n\n2. Kontroller at vifte regulerer seg inn på 50 Pa.\n\n3. Vifte regulerer automatisk opp da den registerer 0 Pa. Når vifte har økt med 5-10% verifiseres funksjonen og slange kobles tilbake.\nNB! Husk å koble slanger tilbake igjen raskt."
+    },
+    {
+      "navn": "Trykkgiver, for trykkregulering vifter med optimalisering",
+      "test": "1. Aktiver systemet for å tilfører luft over giveren.\n\n2. Manipuler et lavt maks trykksettpunkt ca. 50 Pa. \n\n3. Demonter slangen under drift.\nNB! Husk å koble slanger tilbake igjen raskt før viften får for høy hastighet.\n\nOptimalisering:\nEndre trykksettpunkt for å verifisere at vifte reguleres inn slik at trykket stemmer med gitte settpunkt (endre min/maks til samme settpunkt på opimizer). Eks. settpunkter, Min: 50 Pa, Maks 50 Pa / Min. 90 Pa, Maks 90 Pa.",
+      "aksept": "1. Kontroller at det vises verdi i HMI. \n\n2. Kontroller at vifte regulerer seg inn på 50 Pa.\n\n3. Vifte regulerer automatisk opp da den registerer 0 Pa. Når vifte har økt med 5-10% verifiseres funksjonen og slange kobles tilbake.\nNB! Husk å koble slanger tilbake igjen raskt.\n\nOptimalisering:\nVerifiser at vifte følger settpunktjusteringen innstilt for min. og maks."
+    },
+    {
+      "navn": "Trykkgiver (vann)",
+      "test": "1. Sett anlegget i normal drift og kontroller at trykkgiveren er korrekt montert og tilkoblet\n\n2. Les av trykkverdien på HMI/SD eller direkte på giveren, og sammenlign med forventet driftstrykk\n\n3. Simuler trykkendring i systemet (f.eks. ved å starte/stanse pumper eller manipulere ventiler)\n\n4. Observer at trykkverdien endres i takt med systemets respons\n\n5. Koble fra trykkgiveren eller steng vannstrømmen for å simulere feil, og kontroller at alarm genereres\n\n6. Sett systemet tilbake til normal drift og verifiser at trykkverdien stabiliseres",
+      "aksept": "1. Trykkgiveren er korrekt montert og systemet går i normal drift\n\n2. Trykkverdien som vises er innenfor forventet område (f.eks. 2–4 bar) og samsvarer med systemets driftstrykk\n\n3. Ved endring i vannstrøm eller pumpestatus endres trykkverdien som forventet\n\n4. Giveren reagerer raskt og presist, uten forsinkelse eller unormale svingninger\n\n5. Ved simulert feil registreres avvik og alarm vises i HMI/SD\n\n6. Etter gjenoppretting returnerer systemet til normal drift og trykkverdien stabiliseres"
+    }
+  ],
+  "RQ": [
+    {
+      "navn": "Manometer for trykk (vann)",
+      "test": "1. Sett anlegget i normal drift og kontroller at manometeret er montert korrekt\n\n2. Les av trykkverdien på manometeret og sammenlign med forventet driftstrykk\n\n3. Simuler trykkendring i systemet (f.eks. ved å starte/stanse pumper eller åpne/lukke ventiler)\n\n4. Observer at manometeret reagerer med endring i visning\n\n5. Kontroller at manometeret returnerer til normal verdi etter trykkendringen\n\n6. Inspiser manometeret visuelt for skader, lekkasjer eller uriktig visning",
+      "aksept": "1. Manometeret er korrekt montert og systemet går i normal drift\n\n2. Trykkverdien som vises er innenfor forventet område (f.eks. 1,5–3,0 bar) og samsvarer med systemets driftstrykk\n\n3. Ved trykkendring i systemet endres visningen på manometeret i takt med endringen\n\n4. Manometeret reagerer raskt og presist, uten forsinkelse eller hakkete bevegelse\n\n5. Etter trykkendringen returnerer visningen til normal verdi\n\n6. Ingen synlige skader, lekkasjer eller feilvisning på manometeret"
+    },
+    {
+      "navn": "Manometer for trykk (luft)",
+      "test": "1. Sett ventilasjonsanlegget i normal drift og kontroller at manometeret er korrekt montert på luftkanal eller trykkpunkt\n\n2. Les av trykkverdien på manometeret og sammenlign med forventet driftstrykk (f.eks. 100–300 Pa)\n\n3. Simuler trykkendring ved å endre viftehastighet eller fjerne trykkslange\n\n4. Observer at manometeret reagerer med endring i visning.\n\n5. Kontroller at manometeret returnerer til normal verdi etter at systemet stabiliseres.\n\n6. Inspiser manometeret visuelt for skader, lekkasjer eller uriktig visning.",
+      "aksept": "1. Manometeret er korrekt montert og anlegget går i normal drift\n\n2. Trykkverdien som vises er innenfor forventet område og samsvarer med systemets driftstrykk\n\n3. Ved trykkendring i systemet endres visningen på manometeret i takt med endringen\n\n4. Manometeret reagerer raskt og presist, uten forsinkelse eller hakkete bevegelse\n\n5. Etter trykkendringen returnerer visningen til normal verdi\n\n6. Ingen synlige skader, lekkasjer eller feilvisning på manometeret"
+    }
+  ],
+  "RT": [
+    {
+      "navn": "Temperaturføler (generelt)",
+      "test": "1. Koble fra/hold hånden på følerelementet, bruk evt. ispray/ispose på følerelementet",
+      "aksept": "1. Verdiendringer registreres i HMI/SD og endres varm/kaldere enn først registrert. Verifisert riktig føler i HMI/SD."
+    },
+    {
+      "navn": "Temperaturføler (FROST)",
+      "test": "1. Koble fra/hold hånden på følerelementet, bruk evt. ispray/ispose på følerelementet\n\n2. Bruk isspray el., evt. koble fra føler for å indikere at føleren er kald (under innstilt settpunkt for frost), eller ødelagt.",
+      "aksept": "1. Verdiendringer registreres i HMI/SD og endres varm/kaldere enn først registrert. Verifisert riktig føler i HMI/SD.\n\n2. Anlegget slår ut i frostalarm og stanser. Feilmelding vises i HMI/SD. Pumpe skal være i drift og ventilmotor skal være i 100%. \nAnlegget må manulet settes tilbake (reset) når temperaturføler er tilbake til normalt/utenfor alarmkriteriene."
+    },
+    {
+      "navn": "Temperaturføler (temperaturregulerende for varme)",
+      "test": "1. Koble fra/hold hånden på følerelementet, bruk evt. ispray/ispose på følerelementet\n\n2. Kjøle ned føler ved hjelp av isspray/ispose, eller manipulere en verdi via HMI/SD.",
+      "aksept": "1. Verdiendringer registreres i HMI/SD og endres varm/kaldere enn først registrert. Verifisert riktig føler i HMI/SD.\n\n2. Når føler er kaldere enn settpunkt skal regulator for systemet starte varmesekvensen sekvensielt. Verifiser at  varmeorganer i systemet begynner å øke reguleringssignalet (0-100%)."
+    },
+    {
+      "navn": "Temperaturføler (temperaturregulerende for varme og kjøle)",
+      "test": "1. Koble fra/hold hånden på følerelementet, bruk evt. ispray/ispose på følerelementet\n\n2. Varme opp føler ved hjelp av å holde på den, eller manipulere en verdi via HMI/SD.\n\n3. Kjøle ned føler ved hjelp av isspray/ispose, eller manipulere en verdi via HMI/SD.",
+      "aksept": "1. Verdiendringer registreres i HMI/SD og endres varm/kaldere enn først registrert. Verifisert riktig føler i HMI/SD.\n\n2. Når føler er varmere enn settpunkt skal regulator for systemet starte kjølesekvensen. Verifiser at varmeorganer går til 0%, og kjøleorganer i systemet begynner å øke reguleringssignalet (0-100%).\n\n3. Når føler er kaldere enn settpunkt skal regulator for systemet starte varmesekvensen. Verifiser at kjøleorganer går til 0%, og varmeorganer i systemet begynner å øke reguleringssignalet (0-100%)."
+    },
+    {
+      "navn": "Temperaturføler (temperaturregulerende for kjøle)",
+      "test": "1. Koble fra/hold hånden på følerelementet, bruk evt. ispray/ispose på følerelementet\n\n2. Varme opp føler ved hjelp av å holde på den, eller manipulere en verdi via HMI/SD.",
+      "aksept": "1. Verdiendringer registreres i HMI/SD og endres varm/kaldere enn først registrert. Verifisert riktig føler i HMI/SD.\n\n2. Når føler er varmere enn settpunkt skal regulator for systemet starte kjølesekvensen. Verifiser at varmeorganer går til 0%, og kjøleorganer i systemet begynner å øke reguleringssignalet (0-100%)."
+    },
+    {
+      "navn": "Temperaturføler (tappevansregulering)",
+      "test": "1. Koble fra/hold hånden på følerelementet, bruk evt. ispray/ispose på følerelementet\n\n2. Kontroller innstilt verdi på blandeventil for tappevannsystemet",
+      "aksept": "1. Verdiendringer registreres i HMI/SD og endres varm/kaldere enn først registrert. Verifisert riktig føler i HMI/SD.\n\n2. Innstilt verdi er lavere enn maks verdi for bereder, og tilnærmet lik som avlest på manometer"
+    }
+  ],
+  "RY": [
+    {
+      "navn": "Røykmelder",
+      "test": "1. Aktiver systemet og sett det i normal drift\n\n2. Bruk enten røykspray/testknapp på selve røykmelderen for aktivering av alarm\n\n3. Tilbakestill systemet til normal drift",
+      "aksept": "1. Systemet er i normalt drift\n\n2. Systemet er ute av drift  og med aktiv alarm\n\n3. Melder er tilbake til normal, og anlegget er i normal drift"
+    }
+  ],
+  "RZ": [
+    {
+      "navn": "Brannmelder",
+      "test": "1. Test deteksjonsfunksjon med godkjent testutstyr (f.eks. røykgenerator eller varmeelement) – melderen skal utløse alarm ved korrekt påvirkning\n\n2. Observer alarmoverføring – bekreft at alarmen registreres i brannsentral og eventuelt videresendes til 110-sentral eller annet varslingssystem\n(videre til sentral testet i en fullskalatest)",
+      "aksept": "1. Melderen utløser alarm ved test med godkjent metode og innen forventet responstid\n\n2. Alarmen registreres korrekt i brannsentral og overføres til varsling som prosjektert"
+    }
+  ],
+  "SB": [
+    {
+      "navn": "Ventilmotor, varme",
+      "test": "1. Manipuler et høyt varmesettpunkt i temperaturregulering\n\n2. Tilbakestill til normal drift, og verifiser at pådraget på ventilmotor endrer",
+      "aksept": "1.  Ventilmotor får pådrag (0-100%)\n\n2. Ventilmotor returnert til normal drift"
+    },
+    {
+      "navn": "Ventilmotor, kjøle",
+      "test": "1. Manipuler et høyt varmesettpunkt i temperaturregulering\n\n2. Tilbakestill til normal drift, og verifiser at pådraget på ventilmotor endrer",
+      "aksept": "1.  Ventilmotor får pådrag (0-100%)\n\n2. Ventilmotor returnert til normal drift"
+    },
+    {
+      "navn": "Ventilmotor, varme (ventilasjon)",
+      "test": "1. Manipuler et høyt varmesettpunkt i temperaturregulering\n\n2. Tilbakestill til normal drift, og verifiser at pådraget på ventilmotor endrer",
+      "aksept": "1.  Ventilmotor får pådrag (0-100%), først etter at gjenvinner har oppnådd 100%\n\n2. Ventilmotor returnert til normal drift"
+    },
+    {
+      "navn": "Ventilmotor, kjøle (ventilasjon)",
+      "test": "1. Manipuler et høyt varmesettpunkt i temperaturregulering\n\n2. Tilbakestill til normal drift, og verifiser at pådraget på ventilmotor endrer",
+      "aksept": "1.  Ventilmotor får pådrag (0-100%), først etter at gjenvinner er i 0%\n\n2. Ventilmotor returnert til normal drift"
+    }
+  ],
+  "SC": [
+    {
+      "navn": "Stengeventil motorstyrt",
+      "test": "1. Sett anlegget i normal drift og kontroller at ventilen er tilkoblet og har strømforsyning\n\n2. Send et åpningssignal via SD/HMI ved å endre settpunkt, og observer at ventilen åpner\n\n3. Send et stengesignal via SD/HMI ved å endre settpunkt, og observer at ventilen lukker\n\n4. Verifiser at ventilen gir tilbakemelding om posisjon (åpen/lukket) til SD/HMI (om endebrytere er medtatt)\n\n5. Simuler en feiltilstand (f.eks. strømbrudd eller alarm) og kontroller at ventilen går til sikkerhetsposisjon\n(åpen/lukket/mid/siste verdi)\n\n6. Inspiser ventilen visuelt for lekkasjer, støy eller mekaniske feil under drift",
+      "aksept": "1. Ventilen er korrekt tilkoblet og har aktiv strømforsyning\n\n2. Ved åpningssignal åpner ventilen fullstendig, og vannstrøm etableres\n\n3. Ved stengesignal lukker ventilen fullstendig, og vannstrøm stanses\n\n4. Ventilens posisjon (åpen/lukket) vises korrekt i SD/HMI (om endebrytere er medtatt)\n\n5. Ved simulert feil går ventilen til sin sikkerhetsposisjon (åpen/lukket/mid/siste verdi)\n\n6. Ingen lekkasjer, unormal støy eller mekaniske feil observeres under drift"
+    }
+  ],
+  "SG": [
+    {
+      "navn": "Tilbakeslagsventil",
+      "test": "1. Visuell kontroll\n\n2. Kontroller at vannstrømmen ikke returnerer tilbake der den kommer fra over ventilen",
+      "aksept": "1. Ventilen er plassert og fungerer som tiltenkt \n\n2. Vannet strømmer bare i en retning, og ikke tilbake når trykket øker i anlegget (om noe skulle stenge/motarbeide strømretning)"
+    }
+  ],
+  "SJ": [
+    {
+      "navn": "Trykkreduksjonsventil",
+      "test": "1. Visuell kontroll\n\n2. Kontroller at trykket er redusert over ventilen som tiltenkt",
+      "aksept": "1. Ventilen er plassert og fungerer som tiltenkt \n\n2. Trykket er redusert over ventilen (verifiser ved hjelp av omliggende manometre)"
+    }
+  ],
+  "SK": [
+    {
+      "navn": "CAV",
+      "test": "1. Sett ventilasjonsanlegget i normal drift\n\n2. Mål luftmengden levert av CAV-enheten med egnet måleutstyr\n\n3. Sammenlign målt luftmengde med prosjektert verdi (f.eks. 250 m³/h  ±10 %)\n\n4. Simuler trykkendring i kanalsystemet ved å endre viftehastighet eller åpne/lukke spjeld\n\n5. Observer om luftmengden forblir stabil til tross for trykkendringen\n\n6. Inspiser CAV-enheten visuelt for mekaniske skader, feiljustering eller blokkeringer",
+      "aksept": "1. Anlegget går i normal drift\n\n2. Målt luftmengde er innenfor akseptert avvik fra prosjektert verdi\n\n3. Luftmengden samsvarer med systemets krav og er stabil\n\n4. Ved trykkendring i kanalsystemet opprettholder CAV-enheten konstant luftmengde\n\n5. Ingen merkbare variasjoner i luftmengde under simulert trykkendring\n\n6. Ingen synlige skader, blokkeringer eller tegn til feilfunksjon."
+    }
+  ],
+  "SM": [
+    {
+      "navn": "Stengeventil manuell",
+      "test": "1. Visuell kontroll av posisjon\n\n2. Endre posisjon for å se at komponenten fungerer som tiltenkt\n\n3. Plasseres tilbake i posisjonen registrert i pkt. 1",
+      "aksept": "1. Stengeventil er åpen, eller stengt\n\n2. Komponenten har full vandring og stenger/åpner for vannstrømmen\n\n3. Stengeventilen er tilbake til posisjonen i utgangspunktet ved pkt. 1"
+    }
+  ],
+  "SQ": [
+    {
+      "navn": "VAV",
+      "test": "1. Sett ventilasjonsanlegget i normal drift\n\n2. Mål aktuell luftmengde levert av VAV-enheten ved hvert behov (vMin/vMaks) med egnet måleutstyr\n\n3. Simuler endring i rombehov ved å justere temperatur- eller CO₂-settpunkter i romreguleringen\n\n4. Observer endring i luftmengde – VAV-enheten skal regulere luftmengden i henhold til behov\n\n5. Test minimums- og maksimumsgrense ved å trigge full belastning og null belastning\n\n6. Inspiser VAV-enheten visuelt for mekaniske feil, blokkeringer eller feil i aktuator/styring",
+      "aksept": "1. Ventilasjonssystemet er i normal drift\n\n2. Luftmengden ved hvert behov er innenfor prosjektert verdi\n\n3. Ved endring i rombehov regulerer VAV-enheten luftmengden dynamisk og presist\n\n4. Luftmengden endres trinnløst og uten forsinkelse eller hakkete bevegelse\n\n5. Minimums- og maksimumsverdier oppnås ved henholdsvis lav og høy belastning\n\n6. Ingen synlige skader, blokkeringer eller feil i aktuator eller styring"
+    }
+  ],
+  "SS": [
+    {
+      "navn": "Spjeld",
+      "test": "1. Manuell bevegelsestest: Beveg spjeldet forsiktig manuelt (dersom mulig) for å kontrollere at det går lett og uten friksjon, og sett deretter anlegget i normal drift\n\n2. Observer spjeldets stilling ved normal drift – det skal være i åpen posisjon i henhold til systemets behov\n\n3. Simuler driftsendring (f.eks. stans i anlegg) og observer at spjeldet lukker som forventet\n\n4. Kontroller tetthet ved lukket stilling – se etter lysinnslipp eller lekkasje rundt spjeldbladene\n\n5. Inspiser spjeldet visuelt for mekanisk skade, korrosjon, deformasjon eller oppsamling av smuss",
+      "aksept": "1. Spjeldet beveger seg fritt uten unormal motstand eller friksjon, og anlegget er i normal drift\n\n2. Spjeldets posisjon ved normal drift er i henhold til systemets krav.\n\n3. Ved driftsendring reagerer spjeldet korrekt og endrer posisjon som forventet\n\n4. Spjeldet lukker tett uten synlig lekkasje eller lysgjennomgang\n\n5. Ingen synlige skader, korrosjon eller oppsamling av smuss som kan påvirke funksjon"
+    }
+  ],
+  "ST": [
+    {
+      "navn": "VAV - STB, Tilluftsventil med motor",
+      "test": "1. Sett ventilasjonsanlegget i normal drift\n\n2. Mål aktuell luftmengde levert av VAV-enheten ved hvert behov (vMin/vMaks) med egnet måleutstyr\n\n3. Simuler endring i rombehov ved å justere temperatur- eller CO₂-settpunkter i romreguleringen\n\n4. Observer endring i luftmengde – VAV-enheten skal regulere luftmengden i henhold til behov\n\n5. Test minimums- og maksimumsgrense ved å trigge full belastning og null belastning\n\n6. Inspiser VAV-enheten visuelt for mekaniske feil, blokkeringer eller feil i aktuator/styring",
+      "aksept": "1. Ventilasjonssystemet er i normal drift\n\n2. Luftmengden ved hvert behov er innenfor prosjektert verdi\n\n3. Ved endring i rombehov regulerer VAV-enheten luftmengden dynamisk og presist\n\n4. Luftmengden endres trinnløst og uten forsinkelse eller hakkete bevegelse\n\n5. Minimums- og maksimumsverdier oppnås ved henholdsvis lav og høy belastning\n\n6. Ingen synlige skader, blokkeringer eller feil i aktuator eller styring"
+    }
+  ],
+  "SV": [
+    {
+      "navn": "Strupeventil",
+      "test": "1. Sett anlegget i normal drift med vannstrøm gjennom strupeventilen.\n\n2. Kontroller ventilens innstilling – verifiser at den er korrekt justert i henhold til prosjektert mengde (f.eks. via STAD-ventil eller manometer).\n\n3. Mål trykkfall over ventilen ved hjelp av manometre eller differansetrykkmåling.\n\n4. Juster ventilens åpning og observer endring i vannmengde og trykkfall.\n\n5. Verifiser at ventilens innstilling er låst og ikke endres utilsiktet ved drift.",
+      "aksept": "1. Systemet går i normal drift uten feil eller alarmer.\n\n2. Strupeventilen er korrekt innstilt i henhold til prosjektert vannmengde.\n\n3. Trykkfall over ventilen er innenfor forventet område (f.eks. 10–30 kPa).\n\n4. Ved justering endres vannmengde og trykkfall som forventet.\n\n5. Ventilen kan låses i ønsket posisjon og holder innstillingen under drift.\nIngen lekkasjer eller uønsket støy fra ventilen."
+    }
+  ],
+  "SX": [
+    {
+      "navn": "Regulator",
+      "test": "1. Bekreft kommunikasjon med SD-anlegg – regulatoren skal være online, og verdier og status skal oppdateres i SD-anlegget\n\n2. Test inngangssignaler – kontroller at tilkoblede sensorer (f.eks. temperatur, nivå, trykk) gir riktige verdier til regulatoren og vises korrekt i SD-anlegget \n\n3. Test reguleringsrespons – endre settpunkt via SD-anlegget og observer at regulatoren justerer utgangssignal (f.eks. ventil, pumpe, varmeelement) i henhold til kontrollstrategi\n\n4. Simuler avvik eller feil – trigge en unormal tilstand (f.eks. sensorfeil, ekstremverdi) og observer at regulatoren håndterer dette korrekt og sender alarm til SD-anlegget\n\n5. Inspiser regulatoren visuelt – se etter skader, feilindikasjoner, overoppheting eller løs tilkobling",
+      "aksept": "1. Kommunikasjon med SD-anlegget fungerer stabilt og verdier oppdateres korrekt\n\n2. Inngangssignaler registreres nøyaktig og vises korrekt i SD-anlegget\n\n3. Regulatoren responderer korrekt på endringer i settpunkt og styrer utganger som forventet\n\n4. Ved avvik eller feil sender regulatoren riktig alarm til SD-anlegget og håndterer tilstanden i henhold til logikk\n\n5. Ingen synlige skader, feilindikasjoner eller tegn til feilfunksjon"
+    }
+  ],
+  "SZ": [
+    {
+      "navn": "Brannspjeld",
+      "test": "1. Kontroller fysisk montering – spjeldet skal være korrekt installert i henhold til produsentens montasjeanvisning og i samsvar med brannskillet (vegg/dekke)\n\n2. Bekreft brannklassifisering – sjekk ytelsesdeklarasjon (DoP) og merkingen på spjeldet, f.eks. EI60\n\n3. Utfør visuell inspeksjon – se etter deformasjoner, sprekker, korrosjon eller feil i tetningsflater\n\n4. Test lukking manuelt – dersom mulig, kontroller at spjeldet lukker tett og mekanisk fungerer uten friksjon eller blokkering\n\n5. Simuler brannscenario – ved hjelp av brannspjeldsentral eller annet testutstyr, utløses spjeldet og observeres for korrekt lukking\n\n6. Kontroller tetthet og lukking – etter lukking skal spjeldet hindre gjennomtrenging av luft, røyk og varme i henhold til klassifisering",
+      "aksept": "1. Spjeldet er korrekt montert i henhold til produsentens anvisning og brannskillekonstruksjon\n\n2. Spjeldet er tydelig merket med riktig brannklassifisering og samsvarer med prosjekterte krav\n\n3. Ingen synlige skader, deformasjoner eller tegn til slitasje som kan påvirke funksjon \n\n4. Spjeldet lukker mekanisk korrekt og uten hindringer ved manuell test\n\n5. Ved simulert brannscenario lukker spjeldet som forventet og utløses i henhold til spesifikasjon\n\n6. Spjeldet oppnår nødvendig tetthet og hindrer spredning av røyk og varme i henhold til klassifisering (f.eks. EI60S)"
+    }
+  ],
+  "UE": [
+    {
+      "navn": "Stikkontakt",
+      "test": "1. Test spenningsnivå med egnet måleinstrument (f.eks. multimeter) – skal vise korrekt spenning (f.eks. 230 V ±10 %)\n\n2. Test jordforbindelse – kontroller at jord er tilkoblet og fungerer ved måling mellom fase og jord\n\n3. Test med belastning – koble til en elektrisk enhet og observer at kontakten leverer stabil strøm uten varmeutvikling\n\n4. Kontroller merking og samsvar – stikkontakten skal være CE-merket og i henhold til NEK 400 og produsentens spesifikasjoner",
+      "aksept": "1. Spenningsnivå er innenfor tillatt område ved måling\n\n2. Jordforbindelse er tilstede og fungerer som den skal\n\n3. Elektrisk enhet fungerer normalt ved tilkobling – ingen varmeutvikling eller avbrudd\n\n4. Stikkontakten er CE-merket og samsvarer med gjeldende normer og forskrifter (NEK 400)"
+    }
+  ],
+  "UP": [
+    {
+      "navn": "Belysningsarmatur",
+      "test": "1. Sett anlegget i normal drift og slå på armaturen via bryter eller styringssystem\n\n2. Observer lysutbytte – armaturen skal gi jevn og tilstrekkelig belysning uten flimmer\n\n3. Mål lysstyrke/lux ved behov, og sammenlign med prosjektert verdi for rommet eller sonen\n\n4. Test eventuelle funksjoner som dimming, bevegelsessensor eller dagslysstyring dersom aktuelt\n\n5. Inspiser armaturen visuelt for skader, misfarging, løse komponenter eller oppsamling av støv/insekter",
+      "aksept": "1. Armaturen tenner ved aktivering og fungerer som forventet\n\n2. Lysutbytte er jevnt og uten flimmer, blink eller støy\n\n3. Målt lysstyrke er innenfor prosjektert område og dekker rommets behov\n\n4. Eventuelle funksjoner som dimming eller sensorstyring fungerer korrekt\n\n5. Ingen synlige skader, misfarging eller oppsamling av støv som påvirker funksjon eller estetikk"
+    }
+  ],
+  "UZ": [
+    {
+      "navn": "Dyse/Spreder",
+      "test": "1. Test utløsningsmekanisme (kun ved kontroll av testdyse eller simulert test): kontroller at dysen reagerer ved korrekt temperatur og utløser vannstrøm\n\n2. Kontroller dekning og overlapp – bekreft at dysene dekker hele arealet i henhold til fareklasse og designkrav.",
+      "aksept": "1. Utløsningsmekanismen fungerer som forventet ved test eller simulering (testprodukt)\n\n2. Dekningsområde er komplett og i henhold til design – ingen \"skyggeområder\""
+    }
+  ],
+  "XF": [
+    {
+      "navn": "Sikring (ELEKTRO)",
+      "test": "1. Koble inn og koble ut\n\n2. Primærstrøm, isolasjon, kontinuitetstest\n\n3. Termografering",
+      "aksept": "1. Bryter kobler inn og kobles ut, samt kobles ut når manuell testknapp benyttes. Mål at det tilføres strøm, og avbrytes strøm.\n\n2. Gjennomført OK via testapparat\n\n3. Tilfredstillende bilde tatt ved aktiv bryter"
+    }
+  ],
+  "XH": [
+    {
+      "navn": "Signallampe",
+      "test": "1. Sett anlegget i normal drift og observer at lampen lyser (eller er slukket) i henhold til definert normaltilstand\n\n2. Simuler alarmtilstand ved å trigge en feilmelding, brudd eller annen hendelse som skal aktivere lampen\n\n3. Observer respons – lampen skal skifte status (f.eks. fra grønn til rød, eller fra av til på) umiddelbart og tydelig\n\n4. Inspiser lampen visuelt for skader, misfarging, dårlig lysstyrke eller feil fargeindikasjon.",
+      "aksept": "1. Ved simulert alarm skifter lampen status tydelig og umiddelbart\n\n2. Lysstyrke og farge er klart synlig og samsvarer med definert funksjon\n\n3. Ingen forsinkelse, blink eller feilaktig visning ved statusendring\n\n4. Ingen synlige skader, misfarging eller tegn til feilfunksjon4"
+    }
+  ],
+  "XQ": [
+    {
+      "navn": "Effektbryter < 63A (ELEKTRO)",
+      "test": "1. Verifiser justert vern\n\n2. Koble inn og koble ut + manuell test-knapp\n\n3. Primærstrøm, isolasjon, kontinuitetstest\n\n4. Termografering\n\n5. Les av verdier fra energimåler internt i bryteren og i SD-Anlegget",
+      "aksept": "1. Justert etter riktig last\n\n2. Bryter kobler inn og kobles ut, samt kobles ut når manuell testknapp benyttes. Mål at det tilføres strøm, og avbrytes strøm.\n\n3. Gjennomført OK via testapparat\n\n4. Tilfredstillende bilde tatt ved aktiv bryter\n\n5. Verifiser at verdiene i SD-Anlegget samstemmer med øyeblikksbildet (+ X sek. forsinkelse) som er avlest på energimåler. \nVerdisammenstemmelser blir testet under IT-test, i regi av rITB evt. annen stedfortreder (eller om annet avtalt)"
+    },
+    {
+      "navn": "Effektbryter > 63A (ELEKTRO)",
+      "test": "1. Verifiser justert vern\n\n2. Koble inn og koble ut + manuell test-knapp\n\n3. Primærstrøm, isolasjon, kontinuitetstest\n\n4. Termografering\n\n5. Les av verdier fra energimåler eksternt tilkoblet bryteren ved hjelp av måletrafoer og i SD-Anlegget",
+      "aksept": "1. Justert etter riktig last\n\n2. Bryter kobler inn og kobles ut, samt kobles ut når manuell testknapp benyttes. Mål at det tilføres strøm, og avbrytes strøm.\n\n3. Gjennomført OK via testapparat\n\n4. Tilfredstillende bilde tatt ved aktiv bryter\n\n5. Verifiser at verdiene i SD-Anlegget samstemmer med øyeblikksbildet (+ X sek. forsinkelse) som er avlest på energimåler tilknyttet bryteren. \nVerdisammenstemmelser blir testet under IT-test, i regi av rITB evt. annen stedfortreder (eller om annet avtalt)"
+    }
+  ],
+  "XS": [
+    {
+      "navn": "Manuell bryter med AV/PÅ/AUTO",
+      "test": "Av:\nBetjen programvender i Av.\n\nPå:\nBetjen programvender i På.\n\nAuto:\nBetjen programvender i Auto.",
+      "aksept": "Av:\nKontroller at systemet slår seg av på normal måte, og forblir avslått. Systemet påvirkes heller ikke av aktiv brannalarm (se brannalarm for testutførelse).\n\nPå:\nKontroller at systemet går kontinuerlig. \n\nAuto:\nKontroller at anlegget er i drift i henhold til innstilt tidsprogram i SD-Anlegg. Endre mellom start og stopp, og kontroller at anlegget endrer driftsform.\nTidsprogram blir testet under IT-test, i regi av rITB evt. annen stedfortreder (eller om annet avtalt)."
+    },
+    {
+      "navn": "Manuell bryter med AV/AUTO",
+      "test": "Av:\nBetjen programvender i Av.\n\nAuto:\nBetjen programvender i Auto.",
+      "aksept": "Av:\nKontroller at systemet slår seg av på normal måte, og forblir avslått. Systemet påvirkes heller ikke av aktiv brannalarm (se brannalarm for testutførelse).\n\nAuto:\nKontroller at anlegget er i drift i henhold til innstilt tidsprogram i SD-Anlegg. Endre mellom start og stopp, og kontroller at anlegget endrer driftsform.\nTidsprogram blir testet under IT-test, i regi av rITB evt. annen stedfortreder (eller om annet avtalt)."
+    },
+    {
+      "navn": "Manuell bryter med AV/PÅ",
+      "test": "Av:\nBetjen programvender i Av.\n\nPå:\nBetjen programvender i På.",
+      "aksept": "Av:\nKontroller at systemet slår seg av på normal måte, og forblir avslått. Systemet påvirkes heller ikke av aktiv brannalarm (se brannalarm for testutførelse).\n\nPå:\nKontroller at systemet går kontinuerlig."
+    },
+    {
+      "navn": "Effektbryter (Elektro)",
+      "test": "1. Verifiser justert vern\n\n2. Koble inn og koble ut + manuell test-knapp\n\n3. Primærstrøm, isolasjon, kontinuitetstest\n\n4. Termografering",
+      "aksept": "1. Justert etter riktig last\n\n2. Bryter kobler inn og kobles ut, samt kobles ut når manuell testknapp benyttes. Mål at det tilføres strøm, og avbrytes strøm.\n\n3. Gjennomført OK via testapparat\n\n4. Tilfredstillende bilde tatt ved aktiv bryter"
+    }
+  ],
+  "__meta__": {
+    "last_sync_epoch": 1758262459,
+    "last_sync_iso": "2025-09-19T06:14:19Z"
+  }
+}

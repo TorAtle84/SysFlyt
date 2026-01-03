@@ -15,6 +15,7 @@ import {
   PanelRightClose,
   PanelRightOpen,
   FileText,
+  FileSearch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -31,18 +32,25 @@ interface TotpWarning {
 interface AppShellProps {
   children: React.ReactNode;
   sidebar?: React.ReactNode;
+  variant?: "syslink" | "flytlink";
 }
 
-const navItems = [
+const syslinkNavItems = [
   { href: "/syslink/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/syslink/profile", label: "Profil", icon: User },
+];
+
+const flytlinkNavItems = [
+  { href: "/flytlink/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/flytlink/kravsporing", label: "Kravsporing", icon: FileSearch },
+  { href: "/flytlink/profile", label: "Profil", icon: User },
 ];
 
 const adminItems = [
   { href: "/syslink/admin/approvals", label: "Godkjenninger", icon: Shield },
 ];
 
-export function AppShell({ children, sidebar }: AppShellProps) {
+export function AppShell({ children, sidebar, variant = "syslink" }: AppShellProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -54,6 +62,12 @@ export function AppShell({ children, sidebar }: AppShellProps) {
   const [secondarySidebarCollapsed, setSecondarySidebarCollapsed] = useState(false);
 
   const isAdmin = session?.user?.role === "ADMIN";
+  const isFlytLink = variant === "flytlink";
+  const navItems = isFlytLink ? flytlinkNavItems : syslinkNavItems;
+  const appName = isFlytLink ? "FlytLink" : "SysLink";
+  const dashboardHref = isFlytLink ? "/flytlink/dashboard" : "/syslink/dashboard";
+  const accentColor = isFlytLink ? "#7C3AED" : "#20528D"; // Purple for FlytLink, Blue for SysLink
+  const bgColor = isFlytLink ? "#1A0A2E" : "#002346"; // Dark purple for FlytLink, Navy for SysLink
 
   // Load sidebar states from localStorage on mount
   useEffect(() => {
@@ -157,7 +171,7 @@ export function AppShell({ children, sidebar }: AppShellProps) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex flex-col border-r border-[#24314A] bg-[#002346] transition-all duration-300 ease-in-out",
+          "fixed inset-y-0 left-0 z-40 flex flex-col border-r transition-all duration-300 ease-in-out",
           "pb-[env(safe-area-inset-bottom)]",
           // Desktop: show based on collapse state
           leftSidebarCollapsed ? "lg:w-16 overflow-hidden" : "lg:w-64",
@@ -165,14 +179,21 @@ export function AppShell({ children, sidebar }: AppShellProps) {
           "w-[280px] sm:w-64",
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
+        style={{
+          backgroundColor: bgColor,
+          borderColor: isFlytLink ? "#2D1B4E" : "#24314A"
+        }}
       >
-        <div className={cn(
-          "flex h-16 items-center border-b border-[#24314A] transition-all justify-between px-6",
-          leftSidebarCollapsed ? "lg:justify-center lg:px-2" : ""
-        )}>
-          <Link href="/syslink/dashboard" className="flex items-center gap-2">
+        <div
+          className={cn(
+            "flex h-16 items-center border-b transition-all justify-between px-6",
+            leftSidebarCollapsed ? "lg:justify-center lg:px-2" : ""
+          )}
+          style={{ borderColor: isFlytLink ? "#2D1B4E" : "#24314A" }}
+        >
+          <Link href={dashboardHref} className="flex items-center gap-2">
             <span className={cn("text-xl font-bold text-foreground", leftSidebarCollapsed ? "lg:hidden" : "")}>
-              SysLink
+              {appName}
             </span>
             <LayoutDashboard
               size={24}
@@ -189,7 +210,7 @@ export function AppShell({ children, sidebar }: AppShellProps) {
           leftSidebarCollapsed ? "lg:p-2" : ""
         )}>
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link
                 key={item.href}
@@ -199,9 +220,13 @@ export function AppShell({ children, sidebar }: AppShellProps) {
                   "gap-3 px-3 py-2 border-l-2",
                   leftSidebarCollapsed ? "lg:justify-center lg:px-2" : "",
                   isActive
-                    ? "border-[#20528D] bg-[#111A2E] text-white"
-                    : "border-transparent text-[#A8B3C7] hover:bg-[#111A2E] hover:text-white"
+                    ? "text-white"
+                    : "border-transparent text-[#A8B3C7] hover:text-white"
                 )}
+                style={{
+                  borderColor: isActive ? accentColor : "transparent",
+                  backgroundColor: isActive ? (isFlytLink ? "#1E0F35" : "#111A2E") : undefined,
+                }}
                 onClick={() => setMobileMenuOpen(false)}
                 title={leftSidebarCollapsed ? item.label : undefined}
               >
@@ -211,7 +236,7 @@ export function AppShell({ children, sidebar }: AppShellProps) {
             );
           })}
 
-          {isAdmin && (
+          {isAdmin && !isFlytLink && (
             <a
               href="/SysLink-Systematisk-Flyt-for-Byggprosjekter.pdf"
               download

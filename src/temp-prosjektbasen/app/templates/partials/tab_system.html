@@ -1,0 +1,81 @@
+<style>
+.nav-tabs .nav-link {
+  background-color: #f0f4f8;               /* Lys blå-grå bakgrunn */
+  border: 1px solid #cfd8dc;               /* Myk grå kant */
+  margin-right: 5px;
+  color: #000000;
+  border-radius: 6px 6px 0 0;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.nav-tabs .nav-link:hover {
+  background-color: #e1ecf7;               /* Litt mørkere ved hover */
+}
+
+.nav-tabs .nav-link.active {
+  background-color: #d9eaff;               /* Aktiv fane: lysere blå */
+  color: #004085;                          /* Mørk blå tekst for kontrast */
+  border-color: #b8daff #b8daff white;     /* Myk kant, toppen kobles til tab-content */
+  font-weight: 600;
+}
+
+.tab-content {
+  border: 1px solid #b8daff;
+  border-top: none;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 0 6px 6px 6px;
+}
+</style>
+<div class="container my-3">
+  <h4 class="mb-4">Systemoppbygging for {{ project.project_name }}</h4>
+
+  <ul class="nav nav-tabs mb-3" id="systemTab" role="tablist">
+    {% for system, rader in system_grupper.items() %}
+      {% set cleaned_id = system|replace(':', '')|replace('.', '') %}
+      <li class="nav-item" role="presentation">
+        <button class="nav-link {% if loop.first %}active{% endif %}"
+                id="tab-{{ cleaned_id }}-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#tab-{{ cleaned_id }}"
+                type="button"
+                role="tab"
+                aria-controls="tab-{{ cleaned_id }}"
+                aria-selected="{{ 'true' if loop.first else 'false' }}">
+          {{ system }}
+        </button>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <div class="tab-content border rounded p-3 bg-white" id="systemTabContent">
+    {% for system, rader in system_grupper.items() %}
+      {% set cleaned_id = system|replace(':', '')|replace('.', '') %}
+      <div class="tab-pane fade {% if loop.first %}show active{% endif %}"
+           id="tab-{{ cleaned_id }}"
+           role="tabpanel"
+           aria-labelledby="tab-{{ cleaned_id }}-tab">
+        <table class="table table-bordered">
+          <thead class="table-primary">
+            <tr>
+              <th>Full ID</th>
+              <th>Beskrivelse</th>
+              <th>Filer</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for rad in rader %}
+              <tr>
+                <td>{{ rad.full_id }}</td>
+                <td>{{ rad.desc }}</td>
+                <td>{{ rad.files }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+

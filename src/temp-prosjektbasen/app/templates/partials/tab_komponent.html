@@ -1,0 +1,54 @@
+<style>
+.nav-tabs .nav-link {
+  background-color: #f0f4f8;               /* Lys blå-grå bakgrunn */
+  border: 1px solid #cfd8dc;               /* Myk grå kant */
+  margin-right: 5px;
+  color: #000000;
+  border-radius: 6px 6px 0 0;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.nav-tabs .nav-link:hover {
+  background-color: #e1ecf7;               /* Litt mørkere ved hover */
+}
+
+.nav-tabs .nav-link.active {
+  background-color: #d9eaff;               /* Aktiv fane: lysere blå */
+  color: #004085;                          /* Mørk blå tekst for kontrast */
+  border-color: #b8daff #b8daff white;     /* Myk kant, toppen kobles til tab-content */
+  font-weight: 600;
+}
+
+.tab-content {
+  border: 1px solid #b8daff;
+  border-top: none;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 0 6px 6px 6px;
+}
+</style>
+<h4 class="mb-3">Komponentopptelling for {{ project.project_name }}</h4>
+
+<table class="table table-bordered mt-3">
+  <thead>
+    <tr>
+      <th>Komponent</th>
+      <th>Beskrivelse</th>
+      <th>Antall</th>
+      <th>System</th>
+      <th>Filer</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for rad in komponent_rader %}
+      <tr>
+        <td>{{ rad.komponent }}</td>
+        <td>{{ rad.desc }}</td>
+        <td>{{ rad.count }}</td>
+        <td>{{ rad.has_system }}</td>
+        <td>{{ rad.files }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

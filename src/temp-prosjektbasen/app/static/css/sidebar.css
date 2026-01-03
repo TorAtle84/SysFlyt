@@ -1,0 +1,133 @@
+/* === SIDEBAR === */
+#sidebar {
+  width: 240px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: #b2d8d8;
+  overflow-y: auto;
+  z-index: 1000;
+  transition: width 0.3s;
+}
+
+#sidebar.collapsed {
+  width: 80px;  /* bredere for klare ikoner */
+}
+
+/* === HOVEDINNHOLD === */
+#content {
+  margin-left: 240px;               /* Skyv for bred sidebar */
+  padding: 30px 30px 30px 20px;     /* T R B L – ekstra pust til venstre */
+  transition: margin-left 0.3s, padding 0.3s;
+}
+
+#sidebar.collapsed ~ #content {
+  margin-left: 80px;                /* Skyv for smal sidebar */
+  padding-left: 20px;               /* Behold luft */
+}
+
+#sidebar .components li a {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  transition: all 0.3s;
+}
+
+#sidebar.collapsed .components li a {
+  justify-content: center;
+  padding: 12px 0; /* Smal padding i collapsed */
+}
+
+/* IKON: alltid synlig */
+#sidebar .components li a i {
+  font-size: 1.4rem; /* litt større for lesbarhet */
+  margin-right: 12px;
+  transition: margin 0.3s;
+}
+
+/* Fjern margin når collapsed */
+#sidebar.collapsed .components li a i {
+  margin-right: 0;
+}
+
+/* TEKST: fade ut og fjern plass */
+#sidebar .components li a span {
+  transition: opacity 0.3s, width 0.3s;
+  white-space: nowrap;
+}
+
+#sidebar.collapsed .components li a span {
+  display: none; /* skjuler helt — tar null plass! */
+}
+
+
+/* === TOP SECTION: logo + toggle === */
+#sidebar .top-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+}
+
+#sidebar .top-section img {
+  height: 32px;
+  transition: height 0.3s;
+}
+
+#sidebar.collapsed .top-section img {
+  height: 20px;
+}
+
+#sidebar .toggle-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* === LINKER === */
+#sidebar .components {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+}
+
+#sidebar .components li a {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: #003333;
+  text-decoration: none;
+  transition: padding 0.3s, justify-content 0.3s;
+}
+
+#sidebar.collapsed .components li a {
+  justify-content: center; /* SENTRER IKONER! */
+  padding: 12px 0;
+}
+
+#sidebar .components li a i {
+  margin-right: 12px;
+  font-size: 1.2rem;
+  transition: margin 0.3s;
+}
+
+#sidebar.collapsed .components li a i {
+  margin-right: 0;
+}
+
+#sidebar .components li a span {
+  transition: opacity 0.3s;
+}
+
+#sidebar.collapsed .components li a span {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#sidebar .components li a:hover,
+#sidebar .components li a.active {
+  background: #9acccc;
+  color: #000;
+}

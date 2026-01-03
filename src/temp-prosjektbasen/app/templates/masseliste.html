@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% block title %}Masseliste Import{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h1 class="mb-4">
+    <i class="bi bi-table"></i> Masselisteverktøy
+  </h1>
+
+  <!-- Funksjonsvelger -->
+  <div class="mb-4">
+    <label for="funksjon-valg" class="form-label">Velg funksjon:</label>
+    <select id="funksjon-valg" class="form-select" style="max-width: 340px">
+      <option value="masseliste" selected>Søk i masseliste (Excel)</option>
+      <option value="versjon">Versjonssammenligning</option>
+      <option value="ifc">IFC-masseliste (IFC → Excel)</option>
+    </select>
+  </div>
+
+  <!-- Søk i masseliste -->
+  <div id="masseliste-app" class="app-card">
+    <form id="masseliste-form" enctype="multipart/form-data" onsubmit="return false;">
+      <div class="mb-3">
+        <label for="masseliste-fil" class="form-label">Masseliste (Excel)</label>
+        <div id="masseliste-drop" class="dropzone">
+          <input class="form-control file-input" type="file" id="masseliste-fil" accept=".xlsx,.xls,.xlsm" required>
+          <div class="dz-hint">Dra &amp; slipp Excel her, eller klikk for å velge</div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 my-3">
+        <button id="scan-masseliste" type="button" class="btn btn-primary">Skann masseliste</button>
+        <button id="lastned-excel" type="button" class="btn btn-success" disabled>Last ned Excel</button>
+      </div>
+
+      <div id="resultat-wrapper" class="table-responsive">
+        <div id="resultat-tabell" class="small"></div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Versjonssammenligning -->
+  <div id="versjon-card" class="app-card d-none">
+    <form id="versjon-form" enctype="multipart/form-data" method="POST" action="/versjonssammenligning">
+      <div class="mb-3">
+        <label class="form-label">Siste utgave (Excel)</label>
+        <div class="dropzone" id="versjon-drop-ref">
+          <input class="form-control file-input" type="file" name="ref_file" id="ref_file" required>
+          <div class="dz-hint">Dra &amp; slipp her, eller klikk for å velge</div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Tidligere utgave (Excel)</label>
+        <div class="dropzone" id="versjon-drop-orig">
+          <input class="form-control file-input" type="file" name="orig_file" id="orig_file" required>
+          <div class="dz-hint">Dra &amp; slipp her, eller klikk for å velge</div>
+        </div>
+      </div>
+
+      <input type="hidden" name="ref_column" value="0">
+      <input type="hidden" name="orig_column" value="0">
+
+      <div class="mb-3 text-muted">
+        Søker etter unike komponenter og sammenligner disse mellom versjoner
+      </div>
+      <button type="submit" class="btn btn-primary">Start sammenligning</button>
+    </form>
+    <div id="versjon-status" class="mt-3 text-muted d-none">
+      <span id="versjon-status-tekst">Sammenligning pågår...</span>
+    </div>
+  </div>
+
+  <!-- IFC-masseliste -->
+  <div id="ifc-app" class="app-card d-none">
+    <div class="card-body">
+      <h5>Bygg format</h5>
+      <div id="segmenter" class="mb-2">
+        <span class="segment byggnr"    data-placeholder="{byggnr}">+260801A</span>
+        <span class="segment system"    data-placeholder="{system}">=5630.0102</span>
+        <span class="segment komponent" data-placeholder="{komponent}">-SQZ5004</span>
+        <span class="segment typekode"  data-placeholder="{typekode}">%SQZ.0001</span>
+      </div>
+      <textarea id="format-input" class="format-input" rows="1" readonly
+                placeholder="Klikk på segmentene for å bygge formatet"></textarea>
+	  <small id="format-hint" class="text-muted d-block">Ingen format valgt. Skanner uten format.</small>
+      <small class="text-muted d-block">
+        Bruk <code>{byggnr}</code>, <code>{system}</code>, <code>{komponent}</code>, <code>{typekode}</code>
+      </small>
+
+      <hr>
+      <h6>Systemkriterier (valgfritt)</h6>
+      <div id="system-kriterier" class="mb-3">
+        {% for n in range(1,10) %}
+          <span class="sys-btn" data-val="{{ n }}">{{ n }}</span>
+        {% endfor %}
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">IFC-fil</label>
+        <div id="ifc-drop" class="dropzone">
+          <input type="file" id="ifc-file" class="form-control file-input" accept=".ifc" required>
+          <div class="dz-hint">Dra &amp; slipp IFC her, eller klikk for å velge</div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 mb-3">
+        <button id="scan-ifc" class="btn btn-secondary" type="button">Skann IFC</button>
+        <button id="export-ifc" class="btn btn-primary" type="button" disabled>Last ned Excel</button>
+      </div>
+      <div id="ifc-feil" class="text-danger mb-2"></div>
+
+      <div id="ifc-stats" class="mb-3 small text-muted"></div>
+
+      <div class="app-card mb-3">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <h6 class="mb-0">Pset-kolonner for eksport</h6>
+            <div>
+              <label class="me-2"><input type="checkbox" id="pset-select-all" checked> Merk alt</label>
+            </div>
+          </div>
+          <div id="pset-velger" class="pset-grid"></div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table id="ifc-tabell" class="table table-bordered table-sm">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for undersystemvalg (som i Merkeskilt) -->
+<div id="filterModal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 id="modalTitle" class="modal-title">Velg undersystemer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modalCheckboxes"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="modalConfirm" class="btn btn-primary">Bekreft</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Lukk</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Segmenter — identisk look som Merkeskilt */
+#segmenter { display:flex; flex-wrap:wrap; gap:.4rem; }
+#segmenter .segment {
+  display:inline-block; margin:0; padding:.9rem .9rem; border-radius:12px;
+  cursor:pointer; font-weight:600; font-size:.9rem; line-height:1; user-select:none;
+  transition:filter .2s;
+}
+#segmenter .byggnr   { background:#28a745; color:#fff; }
+#segmenter .system   { background:#17a2b8; color:#fff; }
+#segmenter .komponent{ background:#ffc107; color:#000; }
+#segmenter .typekode { background:#6f42c1; color:#fff; }
+#segmenter .segment:hover { filter:brightness(1.1); }
+#segmenter .segment.selected { outline:3px solid rgba(0,0,0,.2); outline-offset:2px; }
+
+.format-input {
+  width:100%; font-family:monospace; padding:.5rem;
+  border:1px solid #ccc; border-radius:4px; margin-bottom:.5rem; font-size:.95rem;
+}
+
+/* Systemknapper */
+.sys-btn {
+  display:inline-block; margin:0 .1rem .3rem 0; padding:.6rem .8rem;
+  border:1.5px solid #ccc; border-radius:.3rem; background-color:#f5f5f5;
+  cursor:pointer; font-weight:600; font-size:.9rem;
+  min-width:2.2rem; height:2.2rem; line-height:1; text-align:center;
+  user-select:none; transition:background-color .2s,border-color .2s;
+}
+.sys-btn:hover   { background:#e0e0e0; }
+.sys-btn.selected{ background:#6f42c1; color:#fff; border-color:#004a9f; }
+
+/* Dropzone */
+.dropzone { position:relative; border:2px dashed #c7c7c7; border-radius:10px; padding:1rem; background:#fafafa; text-align:center }
+.dropzone.dragover { background:#eef6ff; border-color:#5aa1ff }
+.dropzone .file-input { position:relative; z-index:2; opacity:0; width:100%; height:3rem; cursor:pointer }
+.dropzone .dz-hint { position:absolute; left:0; right:0; top:0; bottom:0; display:flex; align-items:center; justify-content:center; color:#666; pointer-events:none }
+
+/* Pset-velger */
+.pset-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:.4rem }
+.pset-grid label { display:flex; gap:.5rem; align-items:flex-start; background:#f7f7f7; border:1px solid #e1e1e1; border-radius:8px; padding:.4rem .6rem }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<!-- Liten fallback for visningsbytte -->
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    var sel  = document.getElementById('funksjon-valg');
+    var mass = document.getElementById('masseliste-app');
+    var vers = document.getElementById('versjon-card');
+    var ifc  = document.getElementById('ifc-app');
+    function sw(){
+      var v = (sel && sel.value) || 'masseliste';
+      mass && mass.classList.toggle('d-none', v !== 'masseliste');
+      vers && vers.classList.toggle('d-none', v !== 'versjon');
+      ifc  && ifc.classList.toggle('d-none',  v !== 'ifc');
+    }
+    sel && sel.addEventListener('change', sw);
+    sw();
+  });
+</script>
+<script src="{{ url_for('static', filename='js/masseliste.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,120 @@
+Målsettingen er å oppnå SFP rundt 1,8 kW/(m³/s) ved ferdig prosjektering.   # målsetting, ikke krav
+Ventilasjonsanlegg kan leveres med VAV-løsninger ved behov.                  # "kan leveres" (opsjon)
+CO2-verdier som nevnes her er kun veiledende og ikke bindende.               # veiledende
+Det bør vurderes varmegjenvinning over 80 %.                                  # "bør" (anbefaling)
+Kapasiteter angitt er eksempler og kan endres i detaljprosjektering.         # eksempel, ikke krav
+Se kapittel 7 for krav til ventilasjon.                                      # henvisning, ikke selve kravet
+Anlegget antas å møte TEK17 ved riktig utførelse.                            # antakelse
+Entreprenøren kan eventuelt tilby SFP<1,8 kW/(m³/s) som alternativ.          # opsjon/tilbud
+VAV omtales i denne delen uten at det stilles minstekrav.                     # omtale
+Temperatur og CO₂ logges normalt, men dette er ikke et krav i denne fasen.   # praksis/beskrivelse
+Trykkfall er diskutert i møte, ingen bindende verdier er fastsatt.            # møtetekst
+Varmegjenvinning nevnes her kun som bakgrunnsinformasjon.                     # bakgrunn
+Rapporten beskriver hva som skal til for å oppnå energiklasse A.
+I forrige fase skulle alle tegninger leveres i BIM.
+Byggherren krever at alle endringer blir loggført." (Dette er en påstand om et krav, ikke selve kravet).
+3.2 Tekniske spesifikasjoner
+Vedlegg B: Tegningsliste
+Møtereferat 14.06.2025
+Prosjektbeskrivelse for rehabilitering
+Generelt...................................................... 5
+Side 12 av 84
+Revisjon B
+Med vennlig hilsen,
+Ola Nordmann
+Prosjektleder
+Sendt: tirsdag 15. juli 2025 14:32
+Emne: Angående fremdrift i prosjektet
+Denne e-posten kan inneholde konfidensiell informasjon.
+Bygget ble opprinnelig reist i 1982.
+Vi hadde et produktivt møte forrige uke.
+Dette er en komplisert problemstilling med mange faktorer.
+Figuren under viser prinsippskissen for anlegget.
+Har dere mottatt de oppdaterte tegningene?
+Hvem er ansvarlig for å bestille de nye pumpene?
+Kan vi få en avklaring på dette innen fredag?
+inkludert, men ikke begrenset til:
+- Kabler
+- Rør
+- Ventiler
+... for mer informasjon.
+Dette dokumentet er kun ment som en veiledning.
+Se vedlagt plantegning for plassering av utstyr.
+Alle verdier er veiledende og kan endres.
+For oversikt over komponenter, se Vedlegg C.
+Oppdatert tabell lastes opp i prosjektportalen.
+Referat fra prosjekteringsmøte 11.06.2025.
+Dette punktet er tidligere diskutert i samordningsmøte.
+Oversikten er utarbeidet av rådgivende ingeniør.
+Ved behov for justering, ta kontakt med prosjekteringsleder.
+Opplysninger i dette dokumentet er basert på beste estimat.
+Kapasitetsbehov er anslått basert på dagens bruk.
+Foreslåtte tiltak vurderes nærmere i neste fase.
+All informasjon er gitt uten ansvar for eventuelle feil.
+Tiltaket forutsetter videre avklaringer.
+Se også kapittel 5.3 for nærmere beskrivelse.
+Denne delen er ikke relevant for elektroentreprenøren.
+Fremdriften ble gjennomgått i møte 08.05.2025.
+Tegningssett oppdatert pr. 13.07.2025 er vedlagt.
+Løsningen er basert på standard prinsipp.
+Vi gjør oppmerksom på at dette er en skisse.
+Forhåndsvarsling ble sendt entreprenøren mandag.
+Ettersendt dokumentasjon mottatt 10. juli.
+Saken er tatt opp i forumet tidligere.
+Dette er et informativt punkt uten forpliktelser.
+Foreløpig versjon – ikke til bygging.
+Se kommentar i høyre marg side 19.
+Foreløpig beslutning – avventer endelig vedtak.
+Forespørsel sendt til leverandør 04.07.2025.
+Antatt oppstart: uke 33, ferdigstillelse uke 38.
+Dette punktet ble ikke behandlet i møtet.
+Tidspunkt for neste møte: torsdag 18. juli kl. 13:00.
+Dette temaet ble omtalt i tidligere korrespondanse.
+Notat utarbeidet av rådgiverteamet.
+Avventer svar fra byggherren før tiltak kan iverksettes.
+Detaljert mengdeoppsett legges frem senere.
+Basert på tilbakemelding fra RIV er tegningene oppdatert.
+Ved endringer skal byggherre informeres.
+Det er ikke krav til dokumentasjon for dette tiltaket.
+Produktvalget er gjort i samråd med RIE.
+Teksten er hentet fra tidligere versjon og ikke gjeldende.
+Tiltaket er fortsatt til vurdering.
+Vi viser til tidligere korrespondanse i saken.
+Tegningene ble sist oppdatert 01.06.2025.
+Dette punktet gjelder kun midlertidige løsninger.
+Basert på innspill fra byggherre er endring foreslått.
+Innholdet skal ikke distribueres uten tillatelse.
+Dette dokumentet er en del av konkurransegrunnlaget.
+Se vedlagt skjema for utfylt egenkontroll.
+Det ble ikke registrert nye avvik i perioden.
+Gjennomgang av status er planlagt i neste møte.
+Oppsummering av diskusjon følger i eget notat.
+Teksten er hentet fra forrige revisjon av dokumentet.
+Eventuelle feil eller mangler må varsles snarest.
+Anmerkningene gjelder kun utkastversjonen.
+Listen over tiltak er ikke uttømmende.
+Ytterligere vurdering er nødvendig før tiltak gjennomføres.
+Tilbakemelding ønskes innen 5 virkedager.
+Endringer skal fremgå tydelig i neste utgave.
+Prosjektgruppen har ikke konkludert i saken.
+Dette punktet ble ikke behandlet grunnet tidshensyn.
+Et oppdatert forslag ble sendt til alle parter.
+Sammenstillingen viser estimert energibruk per måned.
+Forventet levetid er basert på normal drift.
+Sidenummerering er oppdatert ift. revisjon C.
+Spørsmål angående fremdriftsplan sendes prosjektleder.
+Dette er kun et utkast og kan endres.
+Vedleggene må sees i sammenheng med hoveddokumentet.
+Notatet er distribuert til samtlige deltakere.
+Dette er ment som støtteinformasjon.
+Detaljer angitt i vedlegg 3 gjelder kun for prosjekteringsfasen.
+Opplysninger fra leverandør ble ikke bekreftet.
+Gjeldende versjon finnes i prosjektportalen.
+Midlertidig løsning gjelder frem til permanent løsning er etablert.
+Referansen er fjernet da den ikke lenger er gyldig.
+Anslåtte kostnader er kun et grovt estimat.
+Dette inngår ikke som del av leveransen.
+Vi anbefaler at punktet vurderes på nytt.
+Kommentarene er ikke implementert i denne versjonen.
+Vedlagt følger versjon D av kontrollskjema.
+Mottatt dokumentasjon fra entreprenør er ufullstendig.

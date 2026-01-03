@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% block title %}Produksjonsoversikt{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+
+<h1 id="dynamic-heading" class="dynamic-heading">
+  📈&nbsp;Produksjonsoversikt&nbsp;–&nbsp;{{ year }}
+</h1>
+
+  <p>Totalt antall oppgaver: <strong>{{ total }}</strong></p>
+  <p>Utførte oppgaver: <strong>{{ done }}</strong></p>
+  <p>Utført-prosent: <strong>{{ ((done / total) * 100) | round(1) if total > 0 else 0 }}%</strong></p>
+
+  <!-- FILTER + EKSPORT I APP-CARD -->
+  <div class="app-card">
+
+    <!-- FILTER -->
+    <form method="get" action="{{ url_for('produksjon.produksjonsoversikt') }}" class="row gy-3">
+      <div class="col-md-2">
+        <label for="year" class="form-label">År:</label>
+        <select name="year" id="year" class="form-select" onchange="this.form.submit()">
+          {% for y in years %}
+            <option value="{{ y }}" {% if year == y %}selected{% endif %}>{{ y }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label for="status" class="form-label">Status:</label>
+        <select name="status" id="status" class="form-select">
+          <option value="">Alle</option>
+          <option value="aktiv" {% if selected_status == 'aktiv' %}selected{% endif %}>Aktiv</option>
+          <option value="utført" {% if selected_status == 'utført' %}selected{% endif %}>Utført</option>
+          <option value="kansellert" {% if selected_status == 'kansellert' %}selected{% endif %}>Kansellert</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label for="technician" class="form-label">Tekniker:</label>
+        <select name="technician" id="technician" class="form-select">
+          <option value="">Alle</option>
+          {% for t in teknikere %}
+            <option value="{{ t }}" {% if selected_technician == t %}selected{% endif %}>{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label for="location" class="form-label">Lokasjon:</label>
+        <select name="location" id="location" class="form-select">
+          <option value="">Alle</option>
+          {% for loc in locations %}
+            <option value="{{ loc }}" {% if selected_location == loc %}selected{% endif %}>{{ loc }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-2 align-self-end">
+        <button type="submit" class="btn btn-secondary w-100">Filtrer</button>
+      </div>
+
+      <div class="col-md-2 align-self-end">
+        <form method="get" action="{{ url_for('produksjon.export') }}">
+          <input type="hidden" name="year" value="{{ year }}">
+          <input type="hidden" name="status" value="{{ selected_status }}">
+          <input type="hidden" name="technician" value="{{ selected_technician }}">
+          <input type="hidden" name="location" value="{{ selected_location }}">
+          <button type="submit" class="btn btn-outline-success w-100">Last ned som Excel</button>
+        </form>
+      </div>
+    </form>
+
+  </div> <!-- /.app-card -->
+
+  <!-- OPPGAVE-TABELL -->
+  <div class="app-card mt-4 p-0">
+    <div class="table-responsive">
+      <table class="table table-striped mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Ordrenummer</th>
+            <th>Tittel</th>
+            <th>Fag</th>
+            <th>Startdato</th>
+            <th>Sluttdato</th>
+            <th>Status</th>
+            <th>Tekniker</th>
+            <th>Lokasjon</th>
+            <th>Handlinger</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for task in tasks %}
+          <tr>
+            <td>{{ task.order_number }}</td>
+            <td>{{ task.title }}</td>
+            <td>{{ task.fag or '–' }}</td>
+            <td>{{ task.start_date.strftime('%d.%m.%Y') }}</td>
+            <td>{{ task.end_date.strftime('%d.%m.%Y') if task.end_date else '–' }}</td>
+            <td>{{ task.status }}</td>
+            <td style="
+              background-color: {{ color_map[task.technician] if task.technician in color_map else '#fff' }};
+              color: #000;
+            ">
+              {{ task.technician }}
+            </td>
+            <td>{{ task.location }}</td>
+            <td>
+              {% if current_user.is_authenticated and current_user.role == 'admin' %}
+              <form method="post" action="{{ url_for('produksjon.endre_status', id=task.id) }}" class="d-inline">
+                <select name="status" class="form-select form-select-sm d-inline w-auto">
+                  <option value="aktiv" {% if task.status == 'aktiv' %}selected{% endif %}>Aktiv</option>
+                  <option value="utført" {% if task.status == 'utført' %}selected{% endif %}>Utført</option>
+                  <option value="kansellert" {% if task.status == 'kansellert' %}selected{% endif %}>Kansellert</option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-secondary">Oppdater</button>
+              </form>
+              <form method="post" action="{{ url_for('produksjon.slett_oppgave', id=task.id) }}"
+                class="d-inline"
+                onsubmit="return confirm('Vil du virkelig slette oppgaven?');">
+                <button type="submit" class="btn btn-sm btn-danger">Slett</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div> <!-- /.container -->
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const heading = document.getElementById("dynamic-heading");
+    const fullText = heading.textContent.trim();
+    heading.innerHTML = "";
+
+    [...fullText].forEach((char, index) => {
+      const span = document.createElement("span");
+      span.textContent = char;
+      span.style.opacity = 0;
+      span.style.display = "inline-block";
+      span.style.transform = "translateY(-10px)";
+      span.style.transition = "all 1.2s ease";
+      setTimeout(() => {
+        span.style.opacity = 1;
+        span.style.transform = "translateY(0)";
+      }, index * 50);
+      heading.appendChild(span);
+    });
+  });
+</script>
+{% endblock %}

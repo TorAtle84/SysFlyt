@@ -1,0 +1,116 @@
+<style>
+.nav-tabs .nav-link {
+  background-color: #f0f4f8;               /* Lys blå-grå bakgrunn */
+  border: 1px solid #cfd8dc;               /* Myk grå kant */
+  margin-right: 5px;
+  color: #000000;
+  border-radius: 6px 6px 0 0;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.nav-tabs .nav-link:hover {
+  background-color: #e1ecf7;               /* Litt mørkere ved hover */
+}
+
+.nav-tabs .nav-link.active {
+  background-color: #d9eaff;               /* Aktiv fane: lysere blå */
+  color: #004085;                          /* Mørk blå tekst for kontrast */
+  border-color: #b8daff #b8daff white;     /* Myk kant, toppen kobles til tab-content */
+  font-weight: 600;
+}
+
+.tab-content {
+  border: 1px solid #b8daff;
+  border-top: none;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 0 6px 6px 6px;
+}
+</style>
+<div class="d-flex justify-content-end mb-2">
+  <a href="{{ url_for('project_bp.last_ned_merkeskilt') }}?id={{ project.id }}" class="btn btn-outline-success">
+    Last ned Excel
+  </a>
+</div>
+
+<!-- Merkeskilt-tabell -->
+<div class="table-responsive">
+  <table class="table table-bordered table-striped">
+    <thead class="table-primary">
+      <tr>
+        <th>Komponent-ID</th>
+        <th>Beskrivelse</th>
+        <th>Himlings-skilt</th>
+        <th>Stripss-skilt</th>
+        <th>Handling</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for rad in merkeskilt_posts %}
+      <tr data-id="{{ rad.id }}">
+        <td contenteditable="true">{{ rad.komponent_id }}</td>
+        <td contenteditable="true">{{ rad.beskrivelse }}</td>
+        <td>
+          <select class="form-select himling">
+            <option value="True" {% if rad.aktiv %}selected{% endif %}>Ja</option>
+            <option value="False" {% if not rad.aktiv %}selected{% endif %}>Nei</option>
+          </select>
+        </td>
+        <td>
+          <select class="form-select strips">
+            <option value="True" {% if rad.inaktiv %}selected{% endif %}>Ja</option>
+            <option value="False" {% if not rad.inaktiv %}selected{% endif %}>Nei</option>
+          </select>
+        </td>
+        <td>
+          <button class="btn btn-sm btn-primary oppdater-btn">Oppdater</button>
+          <button class="btn btn-sm btn-danger slett-btn ms-1">Slett</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+document.querySelectorAll(".oppdater-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const tr = btn.closest("tr");
+    const id = tr.dataset.id;
+    const data = {
+      id: id,
+      komponent_id: tr.children[0].innerText.trim(),
+      beskrivelse: tr.children[1].innerText.trim(),
+      aktiv: tr.querySelector(".himling").value === "True",
+      inaktiv: tr.querySelector(".strips").value === "True"
+    };
+    fetch("/prosjekt/merkeskilt/oppdater", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(data)
+    }).then(res => res.json()).then(resp => {
+      if (resp.success) alert("✅ Lagret!");
+      else alert("❌ Feil: " + resp.error);
+    });
+  });
+});
+
+document.querySelectorAll(".slett-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    if (!confirm("Er du sikker på at du vil slette denne raden?")) return;
+    const tr = btn.closest("tr");
+    const id = tr.dataset.id;
+    fetch(`/prosjekt/merkeskilt/slett/${id}`, {
+      method: "POST"
+    }).then(res => res.json()).then(resp => {
+      if (resp.success) {
+        tr.remove();
+      } else {
+        alert("❌ Feil: " + resp.error);
+      }
+    });
+  });
+});
+</script>
+

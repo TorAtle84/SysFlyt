@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <title>Kravsporing – Review & Lær-KI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 16px; }
+    header { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    table { border-collapse: collapse; width:100%; margin-top:12px; }
+    th, td { border:1px solid #ddd; padding:6px 8px; vertical-align: top; }
+    th { background:#f6f6f6; position: sticky; top: 0; }
+    input[type="text"] { width: 140px; }
+    .bar { display:flex; gap:8px; align-items:center; margin-top: 8px; flex-wrap:wrap; }
+    .ok { color: #0a0; }
+    .warn { color: #b80; }
+    .err { color: #c00; }
+    .muted { color:#777; }
+    .btn { border:1px solid #888; padding:6px 10px; background:#fff; cursor:pointer; border-radius:6px; }
+    .btn:hover { background:#f2f2f2; }
+    .right { float:right; }
+  </style>
+</head>
+<body>
+  <header>
+    <h2 style="margin:0">Kravsporing – Review</h2>
+    <span class="muted">/api/review/*</span>
+  </header>
+
+  <div class="bar">
+    <label>Run:
+      <select id="runSelect"></select>
+    </label>
+    <button class="btn" id="reloadBtn">Last inn</button>
+    <button class="btn" id="saveBtn">Lagre endringer</button>
+    <button class="btn" id="exportBtn">Eksporter trainset</button>
+    <button class="btn" id="trainBtn">Tren modell</button>
+    <span id="msg" class="muted"></span>
+  </div>
+
+  <table id="tbl">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>keep</th>
+        <th>gruppe</th>
+        <th>label</th>
+        <th>kravtype</th>
+        <th>score</th>
+        <th>short_text</th>
+        <th>text</th>
+        <th>ref</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+<script>
+const API = ""; // tom = samme origin. Hvis proxy/Kors, sett f.eks. "http://127.0.0.1:8000"
+const elRun  = document.getElementById('runSelect');
+const elTbl  = document.getElementById('tbl').querySelector('tbody');
+const elMsg  = document.getElementById('msg');
+const btnReload = document.getElementById('reloadBtn');
+const btnSave   = document.getElementById('saveBtn');
+const btnExport = document.getElementById('exportBtn');
+const btnTrain  = document.getElementById('trainBtn');
+
+let rows = []; // siste items fra API
+
+function msg(txt, cls='muted') {
+  elMsg.className = cls;
+  elMsg.textContent = txt;
+}
+
+async function getJSON(url, opts={}) {
+  const r = await fetch(url, opts);
+  if (!r.ok) throw new Error(await r.text());
+  return await r.json();
+}
+
+async function loadRuns() {
+  const runs = await getJSON(`${API}/api/review/runs`);
+  elRun.innerHTML = "";
+  for (const r of runs) {
+    const opt = document.createElement('option');
+    opt.value = r.run_id;
+    opt.textContent = `${r.run_id} (${r.items ?? "?"})`;
+    elRun.appendChild(opt);
+  }
+}
+
+function render(items) {
+  rows = structuredClone(items);
+  elTbl.innerHTML = "";
+  for (const it of rows) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${it.idx}</td>
+      <td><input type="checkbox" ${it.keep ? "checked" : ""}></td>
+      <td><input type="text" value="${(it.gruppe||"").replaceAll('"','&quot;')}"></td>
+      <td><input type="text" value="${(it.label||"").replaceAll('"','&quot;')}"></td>
+      <td>${it.kravtype||""}</td>
+      <td>${it.score!=null? Math.round(it.score) : ""}</td>
+      <td>${it.short_text||""}</td>
+      <td>${it.text||""}</td>
+      <td>${it.ref||""}</td>
+    `;
+    elTbl.appendChild(tr);
+  }
+}
+
+async function loadItems() {
+  const run = elRun.value;
+  if (!run) return;
+  msg("Laster items…");
+  const items = await getJSON(`${API}/api/review/${encodeURIComponent(run)}/items`);
+  render(items);
+  msg(`Lastet ${items.length} rader.`, 'ok');
+}
+
+async function saveChanges() {
+  const run = elRun.value;
+  if (!run) return;
+  // bygg bulk payload fra tabellen
+  const payload = { items: [] };
+  [...elTbl.rows].forEach((tr, i) => {
+    const keep = tr.cells[1].querySelector('input').checked;
+    const gruppe = tr.cells[2].querySelector('input').value.trim();
+    const label  = tr.cells[3].querySelector('input').value.trim();
+    payload.items.push({ idx:i, keep, gruppe, label });
+  });
+  msg("Lagrer endringer…");
+  await getJSON(`${API}/api/review/${encodeURIComponent(run)}/items/bulk`, {
+    method: 'PATCH',
+    headers: { 'Content-Type':'application/json' },
+    body: JSON.stringify(payload),
+  });
+  msg("Endringer lagret.", 'ok');
+}
+
+async function exportTrainset() {
+  const run = elRun.value;
+  if (!run) return;
+  msg("Eksporterer trainset…");
+  const res = await getJSON(`${API}/api/review/${encodeURIComponent(run)}/export`, { method:'POST' });
+  msg(`Eksport OK (${res.export.count} rader): ${res.export.csv}, ${res.export.json}`, 'ok');
+}
+
+async function trainModel() {
+  const run = elRun.value;
+  if (!run) return;
+  msg("Trener modell…");
+  const body = { run_id: run, algo: "logreg", min_df: 1, ngram_max: 2, lower: true };
+  const res = await getJSON(`${API}/api/train/from-run`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  });
+  msg(`Trening OK – samples: ${res.n_samples}. Lagret til: ${res.saved_to}`, 'ok');
+}
+
+btnReload.onclick = loadItems;
+btnSave.onclick   = saveChanges;
+btnExport.onclick = exportTrainset;
+btnTrain.onclick  = trainModel;
+
+(async function init(){
+  try {
+    await loadRuns();
+    if (elRun.options.length) {
+      elRun.selectedIndex = elRun.options.length-1; // velg siste run
+      await loadItems();
+    }
+  } catch (e) {
+    console.error(e);
+    msg(e.message, 'err');
+  }
+})();
+</script>
+</body>
+</html>

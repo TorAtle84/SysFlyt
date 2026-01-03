@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Registrer ny bruker{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h1 class="mb-4">📝 Registrer ny bruker</h1>
+
+  <div class="app-card">
+    <form method="POST" action="{{ url_for('registrer.registrer') }}">
+      <!-- Email -->
+      <div class="mb-3">
+        <label for="email" class="form-label">E-post</label>
+        <input type="email" class="form-control" id="email" name="email" required>
+      </div>
+
+      <!-- Ansattnummer -->
+      <div class="mb-3">
+        <label for="employee_id" class="form-label">Ansattnummer (bare tall)</label>
+        <input type="text" class="form-control" id="employee_id" name="employee_id" required>
+      </div>
+
+      <!-- Fornavn -->
+      <div class="mb-3">
+        <label for="first_name" class="form-label">Fornavn</label>
+        <input type="text" class="form-control" id="first_name" name="first_name" required>
+      </div>
+
+      <!-- Etternavn -->
+      <div class="mb-3">
+        <label for="last_name" class="form-label">Etternavn</label>
+        <input type="text" class="form-control" id="last_name" name="last_name" required>
+      </div>
+
+      <!-- Passord -->
+      <div class="mb-3">
+        <label for="password" class="form-label">Passord (må inneholde min. en stor bokstav, og et tall</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+      </div>
+
+      <!-- Bekreft passord -->
+      <div class="mb-3">
+        <label for="confirm_password" class="form-label">Bekreft passord</label>
+        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+      </div>
+
+      <!-- Rolle -->
+      <div class="mb-3">
+        <label for="role" class="form-label">Rolle</label>
+        <select class="form-select" id="role" name="role" required>
+          <option value="admin">Admin</option>
+          <option value="tekniker">Tekniker</option>
+          <option value="prosjektleder">Prosjektleder</option>
+          <option value="prosjekteier">Prosjekteier</option>
+		  <option value="prosjekteier">Ingeniør</option>
+		  <option value="prosjekteier">Administrativ leder</option>
+        </select>
+      </div>
+
+      <!-- Fag (NY) -->
+      <div class="mb-3">
+        <label for="fag" class="form-label">Fag</label>
+        <select class="form-select" id="fag" name="fag" required>
+          <option value="">Velg fag</option>
+          <option value="Byggautomasjon">byggautomasjon</option>
+          <option value="Elektro">elektro</option>
+          <option value="Ventilasjon">ventilasjon</option>
+          <option value="Rørlegger">rørlegger</option>
+		  <option value="Rørlegger">kulde</option>
+		  <option value="Rørlegger">administrativ</option>
+        </select>
+      </div>
+
+      <!-- Lokasjon -->
+      <div class="mb-3">
+        <label for="location" class="form-label">Lokasjon</label>
+        <select class="form-select" id="location" name="location" required>
+          <option value="Bergen">Bergen</option>
+          <option value="Oslo">Oslo</option>
+          <option value="Trondheim">Trondheim</option>
+          <option value="Region Vest">Region Vest</option>
+          <option value="Region Nord">Region Nord</option>
+          <option value="Region Sør">Region Sør</option>
+          <option value="Region Øst">Region Øst</option>
+        </select>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="btn btn-primary">Registrer</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

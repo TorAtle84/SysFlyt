@@ -1,0 +1,567 @@
+{% extends 'base.html' %}
+{% block title %}Kravsporing{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+
+  <h1 id="kravsporing-heading" class="mb-2">
+    <span id="magnifier">🔍</span>
+    <span id="kravsporing-text">&nbsp;&nbsp;Kravsporing</span>
+  </h1>
+  <p class="text-muted mb-4">
+    Last opp ett eller flere dokumenter (PDF, Word, TXT, Excel) og angi analyseoppsett.
+  </p>
+
+  <form id="kravsporingForm" class="app-card" method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label class="form-label">Analysemodus:</label>
+      <div class="d-flex flex-wrap gap-3">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="mode" id="mode_keywords_ai" value="keywords_ai" checked>
+          <label class="form-check-label" for="mode_keywords_ai">Nøkkelord + AI</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="mode" id="mode_keywords" value="keywords">
+          <label class="form-check-label" for="mode_keywords">Bare nøkkelord</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="mode" id="mode_ai" value="ai">
+          <label class="form-check-label" for="mode_ai">Bare AI-modell</label>
+        </div>
+      </div>
+      <div class="form-text">AI-modusene kan filtrere på fag og fokusområde (under).</div>
+    </div>
+
+    <div class="mb-4 border rounded p-3" id="ai-controls-wrapper" style="display:none;">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <strong>AI-innstillinger</strong>
+        <span id="ai-status-pill" class="badge bg-secondary">Sjekker modeller…</span>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-12">
+          <label for="fokusomraade" class="form-label">Fokusområde (valgfritt):</label>
+          <textarea id="fokusomraade" name="fokusomraade" class="form-control" rows="2" placeholder="Beskriv hva du ser etter, f.eks. 'krav til brannsikkerhet og rømningsveier' eller 'alt som omhandler energimåling og SD-anlegg'"></textarea>
+          <small class="text-muted">Brukes som semantisk filter. Kun avsnitt som er meningsmessig like blir prioritert.</small>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Velg fag (for AI):</label>
+          <select id="ai_groups" class="form-select" multiple>
+            <option value="__ALL__">Alle fag</option>
+            <option value="elektro">Elektro</option>
+            <option value="ventilasjon">Ventilasjon</option>
+            <option value="rørlegger">Rørlegger</option>
+            <option value="byggautomasjon">Byggautomasjon</option>
+            <option value="prosjektering">Prosjektering</option>
+            <option value="økonomi">Økonomi</option>
+            <option value="byggherre">Byggherre</option>
+            <option value="totalentreprenør">Totalentreprenør</option>
+            <option value="Uspesifisert">Uspesifisert</option>
+          </select>
+          <input type="hidden" id="selected_groups_hidden" name="selected_groups" value="[]">
+          <small class="text-muted">Hold Ctrl/Cmd for fler-valg. Velger du “Alle fag”, ignoreres enkeltvalg.</small>
+        </div>
+
+        <div class="col-md-6">
+          <div class="form-check form-switch mt-4">
+            <input class="form-check-input" type="checkbox" id="use_nb_bert" name="use_nb_bert" checked>
+            <label class="form-check-label" for="use_nb_bert">Bruk NB-BERT (norske embeddings)</label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="use_mnli" name="use_mnli" checked>
+            <label class="form-check-label" for="use_mnli">Bruk NLI (nb-MNLI) for verifisering</label>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <label for="max_semantic_candidates" class="form-label">Top-K semantiske kandidater:</label>
+          <input type="number" class="form-control" id="max_semantic_candidates" name="max_semantic_candidates" value="10" min="1" step="1">
+          <small class="text-muted">Hvor mange toppkandidater fra embeddings som sendes til NLI.</small>
+        </div>
+
+        <div class="col-md-8">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label for="mnli_entailment_min" class="form-label">Entailment ≥</label>
+              <input type="number" class="form-control" id="mnli_entailment_min" name="mnli_entailment_min" value="0.55" min="0" max="1" step="0.01">
+            </div>
+            <div class="col-md-4">
+              <label for="mnli_contradiction_max" class="form-label">Contradiction ≤</label>
+              <input type="number" class="form-control" id="mnli_contradiction_max" name="mnli_contradiction_max" value="0.40" min="0" max="1" step="0.01">
+            </div>
+            <div class="col-md-4">
+              <label for="mnli_neutral_max" class="form-label">Neutral ≤</label>
+              <input type="number" class="form-control" id="mnli_neutral_max" name="mnli_neutral_max" value="0.70" min="0" max="1" step="0.01">
+            </div>
+          </div>
+          <small class="text-muted">Terskler for NLI-verifisering (dekker/motsier/irrelevant).</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="keywords" class="form-label">Søkeord (komma-separert):</label>
+      <input type="text" id="keywords" name="keywords" class="form-control" placeholder="eks: energimåler, hull, krav, luftmengde">
+      <div class="form-text">Søkeord brukes i modus “Nøkkelord + AI” og “Bare nøkkelord”.</div>
+    </div>
+
+    <div id="kwNoProfilesWarning" class="alert alert-warning d-none" role="alert">
+      Kunne ikke laste fagprofiler. Du kan fortsatt skrive egne søkeord manuelt, 
+      men «Nøkkelord etter fag» er midlertidig skjult.
+    </div>
+
+    <div class="mb-3 border rounded p-3" id="kw-by-group">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <strong>Nøkkelord etter fag</strong>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="kwReplaceMode" checked>
+          <label class="form-check-label" for="kwReplaceMode" title="Hvis av, legges fag-ordene til bak eksisterende søkeord.">
+            Erstatt eksisterende søkeord
+          </label>
+        </div>
+      </div>
+      <div class="row g-2" id="kwGroupCheckboxes"></div>
+      <small class="text-muted">Velg ett eller flere fag. Vi henter fagspesifikke nøkkelord fra fagprofilene og fyller søkefeltet automatisk. Klikk «rediger» for å justere per fag.</small>
+    </div>
+
+    <div class="mb-3">
+      <label for="min_score" class="form-label">Minimum treffprosent (0–100):</label>
+      <input type="number" id="min_score" name="min_score" class="form-control" value="85" min="0" max="100" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="ns_standard_selection" class="form-label">Kobling til NS-standard:</label>
+      <select id="ns_standard_selection" name="ns_standard_selection" class="form-select">
+        <option value="Ingen">Ingen kobling</option>
+        <option value="NS8415">Utførelsesentreprise (NS 8415)</option>
+        <option value="NS8417">Totalentreprise (NS 8417)</option>
+      </select>
+    </div>
+
+    <div class="mb-3 d-flex gap-2 flex-wrap">
+      <button type="button" id="openSynonymModal" class="btn btn-secondary">
+        <i class="bi bi-pencil"></i> Synonymer
+      </button>
+      <button type="button" id="openKeywordModal" class="btn btn-secondary">
+        <i class="bi bi-list"></i> Nøkkelord
+      </button>
+    </div>
+
+    <div class="mb-3">
+      <label for="files" class="form-label">Velg filer (flere valgbar):</label>
+      <input type="file" id="files" name="files[]" class="form-control" multiple
+             accept=".pdf,.doc,.docx,.txt,.xlsx">
+      <small class="text-muted">Støttede formater: PDF, DOC/DOCX, TXT, XLSX.</small>
+    </div>
+
+    <button type="button" id="startKravsporingBtn" class="btn btn-primary">
+      <i class="bi bi-play"></i> Kjør kravsporing
+    </button>
+  </form>
+
+  <div id="status-container" class="mt-4" style="display: none;">
+    <h4>Prosessering...</h4>
+    <div class="progress">
+      <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;"></div>
+    </div>
+    <p id="status-text" class="mt-2"></p>
+    <a href="#" id="download-link" class="btn btn-success" style="display: none;">Last ned resultater</a>
+  </div>
+
+  <div id="post-run-actions" style="display: none;"></div>
+  <div id="error-messages" class="alert alert-warning mt-3" style="display: none;" role="alert"></div>
+
+  <!-- Anker for AI/regex fallback-varsel fra JS -->
+  <div id="review-section-anchor"></div>
+
+  <div id="review-prompt-modal" class="mt-4 p-4 app-card" style="display: none;">
+    <h5 class="text-center">Vil du se over og revidere de identifiserte kravene før nedlasting?</h5>
+    <p class="text-center text-muted small">Dette gir deg mulighet til å korrigere feil og forbedre AI-modellen for fremtiden.</p>
+    <div class="d-flex justify-content-center gap-3 mt-3">
+        <button id="review-prompt-yes" class="btn btn-primary">Ja, revider funn</button>
+        <button id="review-prompt-no" class="btn btn-secondary">Nei, last ned direkte</button>
+    </div>
+  </div>
+
+  <div id="review-container" class="mt-4" style="display: none;">
+    <hr class="my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>Revider kravfunn</h2>
+      <button id="add-new-req-btn" class="btn btn-sm btn-outline-primary">
+        <i class="bi bi-plus-circle"></i> Legg til nytt krav
+      </button>
+    </div>
+    <div id="review-table-wrapper" class="table-responsive"></div>
+    <div class="d-flex justify-content-end gap-2 mt-3">
+      <button id="save-changes-btn" class="btn btn-outline-secondary">Lagre endringer</button>
+      <button id="retrain-ai-btn" class="btn btn-info">Lær AI</button>
+      <button id="finish-review-btn" class="btn btn-success">Fullfør og generer ZIP</button>
+    </div>
+  </div>
+
+  <!-- Synonym-modal -->
+  <div class="modal fade" id="synonymModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Rediger Synonymer</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Lukk"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="filterInput" class="form-control mb-3" placeholder="Filtrer baseord eller synonymer...">
+          <table class="table table-bordered" id="synonymTable">
+            <thead>
+              <tr>
+                <th style="width:30%">Baseord</th>
+                <th style="width:60%">Synonymer (komma-separert)</th>
+                <th>Handling</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <button id="addRowBtn" class="btn btn-secondary">➕ Legg til rad</button>
+        </div>
+        <div class="modal-footer">
+          <button id="saveSynonymsBtn" class="btn btn-success">💾 Lagre</button>
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Lukk</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nøkkelord-modal (avansert) -->
+  <div class="modal fade" id="keywordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title d-flex align-items-center gap-2">
+            Administrer nøkkelord
+            <small class="text-muted">(velg fag, merk ord, rediger ved behov)</small>
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Lukk"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Fag:</label>
+            <div id="km-group-chips" class="d-flex flex-wrap gap-2"></div>
+            <small class="text-muted d-block mt-1">Du kan velge flere fag. «Alle fag» viser samlesett.</small>
+          </div>
+          <div class="d-flex flex-wrap justify-content-between align-items-end mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <input type="text" id="km-filter" class="form-control" placeholder="Filtrer nøkkelord …" style="max-width:260px;">
+              <div class="form-check ms-2">
+                <input class="form-check-input" type="checkbox" id="km-select-all">
+                <label class="form-check-label" for="km-select-all">Velg alle synlige</label>
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-secondary btn-sm" id="km-clear-selection">Tøm valg</button>
+              <button class="btn btn-primary btn-sm" id="km-apply-selection">Bruk valgte i søkefeltet</button>
+            </div>
+          </div>
+          <div class="border rounded">
+            <table class="table table-hover align-middle mb-0" id="km-table">
+              <thead class="table-light">
+                <tr>
+                  <th style="width:52px"></th>
+                  <th>Nøkkelord</th>
+                  <th style="width:110px; text-align:center;">Rediger</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="mt-3 p-2 border rounded" id="km-edit-panel" style="display:none;">
+            <div class="d-flex justify-content-between align-items-center">
+              <strong>Rediger nøkkelord for: <span id="km-edit-group"></span></strong>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary" id="km-reset-group">↺ Tilbakestill til profil</button>
+                <button class="btn btn-sm btn-success" id="km-save-group">💾 Lagre</button>
+              </div>
+            </div>
+            <div class="d-flex gap-2 mt-2">
+              <input type="text" id="km-new-word" class="form-control" placeholder="Legg til ord …">
+              <button class="btn btn-success" id="km-add-word" type="button">➕ Legg til</button>
+            </div>
+            <div class="table-responsive mt-2">
+              <table class="table table-sm table-bordered">
+                <thead><tr><th style="width:70%">Nøkkelord</th><th>Handling</th></tr></thead>
+                <tbody id="km-edit-tbody"></tbody>
+              </table>
+            </div>
+            <small class="text-muted">Endringer lagres lokalt i nettleser (per bruker). Backend kan kobles senere.</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="copyKeywordsBtn" class="btn btn-primary">📋 Kopier alle nøkkelord (listevisning)</button>
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Lukk</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- «Rediger nøkkelord per fag»-modal -->
+  <div class="modal fade" id="editGroupKeywordsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            Rediger nøkkelord – <span id="egkTitle"></span>
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Lukk"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex gap-2 mb-2">
+            <input id="egkNewWord" class="form-control" placeholder="Legg til ord …">
+            <button id="egkAddBtn" class="btn btn-success" type="button">➕ Legg til</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered align-middle">
+              <thead><tr><th style="width:70%">Nøkkelord</th><th>Handling</th></tr></thead>
+              <tbody id="egkTableBody"></tbody>
+            </table>
+          </div>
+          <small class="text-muted">Endringer lagres lokalt i nettleseren (per bruker). Backend-lagring kan kobles på senere.</small>
+        </div>
+        <div class="modal-footer">
+          <button id="egkResetBtn" class="btn btn-outline-secondary" type="button">↺ Tilbakestill til profilstandard</button>
+          <button id="egkSaveBtn" class="btn btn-success" type="button">💾 Lagre</button>
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Lukk</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KS-3: Lær KI (minimal UI) -->
+  <section id="learn-ki" style="margin-top:2rem;border-top:1px solid #ddd;padding-top:1rem;">
+    <h3 style="margin:0 0 .5rem 0;">Lær KI</h3>
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+      <label for="learn-temp-id"><strong>Temp folder ID</strong></label>
+      <input id="learn-temp-id" type="text" placeholder="krav_<bruker>_<timestamp>_<rand>" style="min-width:320px;padding:.4rem;">
+      <button id="btn-learn" type="button" style="padding:.45rem .8rem;cursor:pointer;">Send til læring</button>
+      <span id="learn-msg" style="margin-left:.5rem;"></span>
+    </div>
+  </section>
+</div>
+
+<!-- Gjør base-path tilgjengelig for alle inline scripts -->
+<script>
+  window.KS_BASE = "/kravsporing";
+</script>
+
+<!-- Lær KI-knappen (holder vi lokalt) -->
+<script>
+(function(){
+  const elBtn = document.getElementById('btn-learn');
+  const elId  = document.getElementById('learn-temp-id');
+  const elMsg = document.getElementById('learn-msg');
+
+  function setMsg(txt, ok){
+    elMsg.textContent = txt || '';
+    elMsg.style.color = ok ? 'green' : 'crimson';
+  }
+
+  elBtn?.addEventListener('click', async function(){
+    const tempId = (elId?.value || '').trim();
+    if(!tempId){
+      setMsg('Skriv inn temp_folder_id.', false);
+      return;
+    }
+    setMsg('Sender...', true);
+    try{
+      const res = await fetch('/kravsporing/learn_from_review', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'same-origin',
+        body: JSON.stringify({ temp_folder_id: tempId })
+      });
+      const j = await res.json();
+      if(res.ok && j?.ok){
+        setMsg(`Lært fra ${j.source}: ${j.count} krav. (synonyms:${j.result?.synonyms_updated?'oppdatert':'uendret'}, fag:${j.result?.fagprofiler_updated?'oppdatert':'uendret'}, krav.txt:+${j.result?.krav_appended||0})`, true);
+      }else{
+        setMsg(j?.error || 'Feil under læring.', false);
+      }
+    }catch(e){
+      setMsg('Nettverksfeil: ' + (e && e.message ? e.message : e), false);
+    }
+  });
+})();
+</script>
+
+<!-- Nøkkelord/fag-profiler (lokal UI) -->
+<script>
+(function() {
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  {% if fagprofiler is defined %}
+    const EMBEDDED = {{ fagprofiler|tojson|safe }};
+  {% else %}
+    const EMBEDDED = null;
+  {% endif %}
+  const PROFILES_URL = "{{ url_for('kravsporing.serve_fagprofiler_json') }}";
+  const GROUP_ORDER = ["Ventilasjon","Elektro","Rørlegger","Byggautomasjon","Kulde","Prosjektering","Økonomi","Totalentreprenør"];
+  const GROUP_BADGES = {
+    Ventilasjon: "bg-info", Elektro: "bg-warning", Rørlegger: "bg-primary",
+    Byggautomasjon: "bg-secondary", Kulde: "bg-dark", Prosjektering: "bg-success",
+    Økonomi: "bg-light text-dark", Totalentreprenør: "bg-danger"
+  };
+  const LS_KEY = "kravsporing.groupKeywords.v1";
+  let RAW_PROFILES = null;
+  let GROUP_KEYWORDS = {};
+  let CURRENT_EDIT_GROUP = null;
+  const kwInput   = $("#keywords");
+  const kwReplace = $("#kwReplaceMode");
+  const groupBox  = $("#kwGroupCheckboxes");
+
+  function uniqLower(arr) {
+    const out = []; const seen = new Set();
+    for (const x of (arr||[])) {
+      if (!x) continue; const v = String(x).trim(); if (!v) continue;
+      const k = v.toLowerCase(); if (!seen.has(k)) { seen.add(k); out.push(v); }
+    }
+    return out;
+  }
+  function buildGroupKeywordsFromProfile(p) {
+    return uniqLower([...(p?.core_terms||[]), ...(p?.components||[])]);
+  }
+  function loadUserEdits() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY) || "{}"); } catch { return {}; }
+  }
+  function saveUserEdits(edits) {
+    localStorage.setItem(LS_KEY, JSON.stringify(edits||{}));
+  }
+  function getSelectedGroups() {
+    return $$("#kw-by-group input[type=checkbox][data-group]:checked").map(el => el.dataset.group);
+  }
+  function applyGroupsToKeywordInput() {
+    const groups = getSelectedGroups();
+    let words = [];
+    groups.forEach(g => words.push(...(GROUP_KEYWORDS[g] || [])));
+    words = uniqLower(words).sort((a,b)=>a.localeCompare(b,'nb'));
+    if (!words.length) return;
+    const asText = words.join(", ");
+    if (kwReplace.checked || !kwInput.value.trim()) kwInput.value = asText;
+    else {
+      const existing = kwInput.value.split(",").map(s=>s.trim()).filter(Boolean);
+      kwInput.value = uniqLower([...existing, ...words]).join(", ");
+    }
+  }
+  function renderGroupCheckboxes() {
+    const fr = document.createDocumentFragment();
+    GROUP_ORDER.forEach(name => {
+      if (!GROUP_KEYWORDS[name]) return;
+      const col = document.createElement("div");
+      col.className = "col-md-6";
+      col.innerHTML = `
+        <div class="form-check d-flex align-items-start gap-2 p-2 border rounded">
+          <input class="form-check-input mt-1" type="checkbox" id="gchk_${name}" data-group="${name}">
+          <label class="form-check-label flex-grow-1" for="gchk_${name}">
+            <span class="badge ${GROUP_BADGES[name]||'bg-secondary'}">${name}</span>
+            <small class="text-muted ms-2">(${GROUP_KEYWORDS[name].length} ord)</small>
+            <div><a href="#" class="link-secondary small egk-edit-link" data-group="${name}">rediger</a></div>
+          </label>
+        </div>`;
+      fr.appendChild(col);
+    });
+    groupBox.innerHTML = ""; groupBox.appendChild(fr);
+    groupBox.addEventListener("change", e => {
+      if (e.target && e.target.matches("input[type=checkbox][data-group]")) applyGroupsToKeywordInput();
+    });
+    groupBox.addEventListener("click", e => {
+      const a = e.target.closest(".egk-edit-link"); if (!a) return;
+      e.preventDefault(); openEditModal(a.dataset.group);
+    });
+  }
+
+  // Modal for å redigere ord i ett enkelt fag
+  const egkModalEl = $("#editGroupKeywordsModal");
+  const egkTitle = $("#egkTitle");
+  const egkBody = $("#egkTableBody");
+  const egkNew = $("#egkNewWord");
+  const egkAdd = $("#egkAddBtn");
+  const egkSave = $("#egkSaveBtn");
+  const egkReset = $("#egkResetBtn");
+  const egkModal = () => bootstrap.Modal.getOrCreateInstance(egkModalEl);
+
+  function openEditModal(groupName) {
+    CURRENT_EDIT_GROUP = groupName;
+    egkTitle.textContent = groupName;
+    drawEditTable(GROUP_KEYWORDS[groupName] || []);
+    egkNew.value = "";
+    egkModal().show();
+  }
+  function drawEditTable(words) {
+    egkBody.innerHTML = "";
+    (words||[]).forEach((w,i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input class="form-control form-control-sm egk-input" data-idx="${i}" value="${w}"></td>
+        <td class="text-center"><button class="btn btn-sm btn-outline-danger egk-del" data-idx="${i}" type="button">🗑</button></td>`;
+      egkBody.appendChild(tr);
+    });
+  }
+  egkAdd.addEventListener("click", () => {
+    const v = egkNew.value.trim(); if (!v) return;
+    const arr = GROUP_KEYWORDS[CURRENT_EDIT_GROUP] || [];
+    arr.push(v); GROUP_KEYWORDS[CURRENT_EDIT_GROUP] = uniqLower(arr);
+    egkNew.value = ""; drawEditTable(GROUP_KEYWORDS[CURRENT_EDIT_GROUP]);
+  });
+  egkBody.addEventListener("click", e => {
+    const del = e.target.closest(".egk-del"); if (!del) return;
+    const idx = +del.dataset.idx; const arr = GROUP_KEYWORDS[CURRENT_EDIT_GROUP] || [];
+    arr.splice(idx,1); GROUP_KEYWORDS[CURRENT_EDIT_GROUP] = uniqLower(arr);
+    drawEditTable(GROUP_KEYWORDS[CURRENT_EDIT_GROUP]);
+  });
+  egkBody.addEventListener("input", e => {
+    const inp = e.target.closest(".egk-input"); if (!inp) return;
+    const idx = +inp.dataset.idx; const arr = GROUP_KEYWORDS[CURRENT_EDIT_GROUP] || [];
+    arr[idx] = inp.value; GROUP_KEYWORDS[CURRENT_EDIT_GROUP] = uniqLower(arr);
+  });
+  egkSave.addEventListener("click", () => {
+    const edits = loadUserEdits(); edits[CURRENT_EDIT_GROUP] = GROUP_KEYWORDS[CURRENT_EDIT_GROUP]; saveUserEdits(edits);
+    const chip = document.querySelector(`#gchk_${CURRENT_EDIT_GROUP} ~ label small`);
+    if (chip) chip.textContent = `(${GROUP_KEYWORDS[CURRENT_EDIT_GROUP].length} ord)`;
+    if (document.querySelector(`#gchk_${CURRENT_EDIT_GROUP}`)?.checked) applyGroupsToKeywordInput();
+    egkModal().hide();
+  });
+  egkReset.addEventListener("click", () => {
+    const p = RAW_PROFILES?.profiles?.[CURRENT_EDIT_GROUP]; if (!p) return;
+    GROUP_KEYWORDS[CURRENT_EDIT_GROUP] = buildGroupKeywordsFromProfile(p);
+    const edits = loadUserEdits(); delete edits[CURRENT_EDIT_GROUP]; saveUserEdits(edits);
+    drawEditTable(GROUP_KEYWORDS[CURRENT_EDIT_GROUP]);
+  });
+
+  function initFrom(json) {
+    RAW_PROFILES = json;
+    ["Ventilasjon","Elektro","Rørlegger","Byggautomasjon","Kulde","Prosjektering","Økonomi","Totalentreprenør"].forEach(name => {
+      const p = json?.profiles?.[name];
+      if (p) GROUP_KEYWORDS[name] = buildGroupKeywordsFromProfile(p);
+    });
+    const edits = loadUserEdits();
+    Object.keys(edits||{}).forEach(k => { if (GROUP_KEYWORDS[k]) GROUP_KEYWORDS[k] = uniqLower(edits[k]); });
+    renderGroupCheckboxes();
+    const warn = document.getElementById("kwNoProfilesWarning");
+    if (warn) warn.style.display = "none";
+    document.getElementById("kw-by-group").style.removeProperty("display");
+  }
+
+  if (EMBEDDED) {
+    initFrom(EMBEDDED);
+  } else {
+    fetch(PROFILES_URL)
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(initFrom)
+      .catch(() => {
+        const warn = document.getElementById("kwNoProfilesWarning");
+        if (warn) warn.style.removeProperty("display");
+        document.getElementById("kw-by-group").style.display = "none";
+        console.warn("Kunne ikke laste fagprofiler – deaktiverer nøkkelord-UI.");
+      });
+  }
+})();
+</script>
+
+<!-- Viktig: all app-logikk ligger i ekstern JS (inkl. polling, AI-status, review-UI, renderPostRunActions) -->
+<script src="{{ url_for('static', filename='js/kravsporing.js') }}"></script>
+{% endblock %}

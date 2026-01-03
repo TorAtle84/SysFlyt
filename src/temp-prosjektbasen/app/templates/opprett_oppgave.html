@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block title %}Ny Oppgave{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-4">Ny Oppgave</h2>
+
+  {% if teknikere|length == 0 %}
+    <div class="alert alert-danger">❌ Ingen teknikere ble sendt til templaten.</div>
+  {% endif %}
+
+<form method="post" action="/opprett-oppgave">
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="title" class="form-label">Tittel</label>
+      <input type="text" name="title" class="form-control" required>
+    </div>
+    <div class="col-md-6">
+      <label for="order_number" class="form-label">Ordrenummer</label>
+      <input type="text" name="order_number" class="form-control">
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="location" class="form-label">Lokasjon</label>
+      <select name="location" class="form-select" required>
+        <option value="">-- Velg lokasjon --</option>
+        <option>Bergen</option>
+        <option>Oslo</option>
+        <option>Trondheim</option>
+        <option>Region Vest (øvrig)</option>
+        <option>Region Nord (øvrig)</option>
+        <option>Region Sør (øvrig)</option>
+        <option>Region Øst (øvrig)</option>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label for="plassering" class="form-label">Plassering (adresse)</label>
+      <input type="text" name="plassering" class="form-control">
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="start_date" class="form-label">Startdato</label>
+      <input type="date" name="start_date" value="{{ request.args.get('start_date', '') }}" class="form-control">
+    </div>
+    <div class="col-md-6">
+      <label for="start_time" class="form-label">Starttid</label>
+      <input type="text" name="start_time" id="start_time" value="{{ request.args.get('start_time', '') }}" class="form-control" autocomplete="off" inputmode="numeric" pattern="^([01]\\d|2[0-3]):[0-5]\\d$" lang="nb" placeholder="hh:mm">
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="end_date" class="form-label">Sluttdato</label>
+      <input type="date" name="end_date" value="{{ default_end_time }}" required class="form-control">
+    </div>
+    <div class="col-md-6">
+      <label for="end_time" class="form-label">Sluttid</label>
+      <input type="text" name="end_time" id="end_time" value="{{ default_end_time }}" class="form-control" autocomplete="off" inputmode="numeric" pattern="^([01]\\d|2[0-3]):[0-5]\\d$" lang="nb" placeholder="hh:mm">
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="technician" class="form-label">Tekniker</label>
+      <select name="technician" id="technician" class="form-select" required>
+        <option value="">-- Velg tekniker --</option>
+        {% for tekniker in teknikere %}
+        <option value="{{ tekniker.email }}" data-fag="{{ tekniker.fag|e }}">
+          {{ tekniker.first_name }} {{ tekniker.last_name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label for="fag" class="form-label">Fag</label>
+      <input type="text" name="fag" id="fag" class="form-control" readonly>
+    </div>
+  </div>
+
+  <hr>
+
+  <h5 class="mt-4">Kundekontakt</h5>
+
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <label for="customer_name" class="form-label">Navn</label>
+      <input type="text" name="customer_name" class="form-control">
+    </div>
+    <div class="col-md-4">
+      <label for="customer_phone" class="form-label">Telefon</label>
+      <input type="text" name="customer_phone" class="form-control">
+    </div>
+    <div class="col-md-4">
+      <label for="customer_email" class="form-label">E-post</label>
+      <input type="email" name="customer_email" class="form-control">
+    </div>
+  </div>
+
+  <div class="text-end">
+    <button type="submit" class="btn btn-primary">Lagre Oppgave</button>
+  </div>
+</form>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const teknikerSelect = document.getElementById("technician");
+    const fagInput = document.getElementById("fag");
+    if (teknikerSelect && fagInput) {
+      teknikerSelect.addEventListener("change", function () {
+        const valgt = this.options[this.selectedIndex];
+        fagInput.value = valgt?.getAttribute("data-fag") || "";
+      });
+    }
+
+    if (window.flatpickr) {
+      const opts = {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        minuteIncrement: 5,
+        disableMobile: true,
+        locale: window.flatpickr?.l10ns?.no || "no"
+      };
+      const startPicker = flatpickr("#start_time", Object.assign({}, opts, {
+        defaultDate: document.getElementById("start_time")?.value || null
+      }));
+      const endPicker = flatpickr("#end_time", Object.assign({}, opts, {
+        defaultDate: document.getElementById("end_time")?.value || null
+      }));
+      // Sync defaultDate with initial value if provided
+      if (startPicker && document.getElementById("start_time")?.value) {
+        startPicker.setDate(document.getElementById("start_time").value, false, "H:i");
+      }
+      if (endPicker && document.getElementById("end_time")?.value) {
+        endPicker.setDate(document.getElementById("end_time").value, false, "H:i");
+      }
+    }
+  });
+</script>
+{% endblock %}

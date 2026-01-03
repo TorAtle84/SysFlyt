@@ -1,0 +1,385 @@
+{% extends 'base.html' %}
+{% block title %}Kalender{% endblock %}
+
+{% block head_extra %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/fullcalendar.min.css') }}">
+
+<style>
+  :root{
+    --fc-card-bg:#ffffff;
+    --fc-card-border:#e5e7eb;
+    --fc-text:#1f2937;
+    --fc-text-muted:#6b7280;
+    --fc-primary:#6D28D9;
+    --fc-primary-dark:#5B21B6;
+    --fc-green-soft:#ecfdf5;
+    --fc-blue-soft:#eff6ff;
+    --fc-yellow-soft:#fffbeb;
+    --fc-border:#e5e7eb;
+    --fc-weekend-bg:#f3f4f6;
+  }
+
+  /* Mørk modus */
+  @media (prefers-color-scheme: dark){
+    :root{
+      --fc-card-bg:#171717;
+      --fc-card-border:#2a2a2a;
+      --fc-text:#f3f4f6;
+      --fc-text-muted:#9ca3af;
+      --fc-weekend-bg:#1f1f1f;
+      --fc-yellow-soft:#3a300f;
+      --fc-blue-soft:#0f172a;
+      --fc-green-soft:#052e2b;
+      --fc-border:#2a2a2a;
+    }
+    .calendar-card{ box-shadow:none; }
+  }
+
+  /* Container/card rundt kalenderen */
+  .calendar-card{
+    background:var(--fc-card-bg);
+    border:1px solid var(--fc-card-border);
+    border-radius:14px;
+    box-shadow:0 8px 24px rgba(0,0,0,.06);
+    padding:1rem 1rem .5rem;
+  }
+
+  /* Grunnoppsett */
+  #calendar{ width:100%; min-height:600px; margin:0 auto; }
+  .fc{ width:100%; color:var(--fc-text); }
+  .fc-theme-standard td, .fc-theme-standard th{ border-color:var(--fc-border); }
+
+  /* Verktøylinje */
+  .fc .fc-toolbar{ margin-bottom:.75rem; }
+  .fc .fc-toolbar-title{
+    white-space:nowrap;
+    font-weight:700;
+    font-size:1.35rem;
+    color:var(--fc-text);
+  }
+  .fc .fc-button{
+    border-radius:10px;
+    border:1px solid var(--fc-border);
+    background:#f9fafb;
+    color:var(--fc-text);
+    box-shadow:0 1px 0 rgba(0,0,0,.02);
+  }
+  .fc .fc-button:hover{
+    background:#eef2ff;
+    border-color:#e0e7ff;
+  }
+  .fc .fc-button-primary{
+    background:var(--fc-primary);
+    border-color:var(--fc-primary);
+    color:#fff;
+  }
+  .fc .fc-button-primary:hover{
+    background:var(--fc-primary-dark);
+    border-color:var(--fc-primary-dark);
+  }
+  .fc .fc-button-group > .fc-button{
+    border-radius:8px !important;
+    margin-right:6px;
+  }
+
+  /* Grid og dagceller */
+  .fc .fc-day-today{ background:var(--fc-yellow-soft) !important; }
+
+  /* Helg – marker via klasse (settes i JS), legg lag OVER events */
+  .fc-weekend{
+    background: repeating-linear-gradient(
+      45deg,
+      #f0f0f0, #f0f0f0 6px,
+      #e5e5e5 6px, #e5e5e5 12px
+    ) !important;
+    position: relative;
+    z-index: 5;
+  }
+  .fc-weekend::after{
+    content:"";
+    position:absolute; inset:0;
+    background: rgba(240,240,240,.8);
+    z-index:6;
+    pointer-events:none;
+  }
+
+  /* Dagens dato – lilla sirkel */
+  .fc .fc-day-today .fc-daygrid-day-number{
+    position:relative; display:inline-block; padding:3px 6px;
+    border:2px solid var(--fc-primary); border-radius:50%;
+    color:var(--fc-primary-dark); background:var(--fc-card-bg);
+    font-weight:700; box-shadow:0 0 6px rgba(109,40,217,0.25);
+  }
+
+  /* Rutenett-kant */
+  #calendar .fc-scrollgrid{
+    border:1px solid var(--fc-border);
+    border-radius:12px;
+    overflow:hidden;
+  }
+  .fc-daygrid-body table{
+    border-collapse:separate; border-spacing:0; border-radius:12px; overflow:hidden;
+  }
+  .fc .fc-daygrid-day-top{ padding:6px 8px; }
+  .fc .fc-daygrid-day-number{ font-weight:600; color:#111827; }
+  .fc-daygrid-day-frame{ padding:4px; }
+
+  /* Ukenummer-kolonne */
+  .fc .fc-daygrid-week-number{
+    width:3.8rem; text-align:center; background:#fff; font-weight:800;
+    border-right:1px solid var(--fc-border); color:#4682b4;
+  }
+
+  /* Event-stil: "pill chips" */
+  .fc-daygrid-event{
+    border-radius:8px !important; padding:2px 6px !important; border:0 !important;
+    font-size:12px; line-height:1.25; box-shadow:0 1px 0 rgba(0,0,0,.05);
+  }
+  .fc-daygrid-event .fc-event-main{ color:#0f172a; }
+  .event-blue  { background:var(--fc-blue-soft)  !important; }
+  .event-green { background:var(--fc-green-soft) !important; }
+  .event-grey  { background:#f3f4f6 !important; color:#374151 !important; }
+  .event-yellow{ background:#fef9c3 !important; }
+
+  /* Filter-rad */
+  .filter-row .form-label{ margin-bottom:.25rem; color:var(--fc-text-muted); }
+  .filter-row .form-select, .filter-row .btn{ width:100%; }
+  .btn-fit-height{ height:calc(2.25rem + 2px); line-height:1.5; padding:.375rem .75rem; }
+
+  /* Hover-tooltip */
+  .fc-tooltip{
+    position:absolute;
+    z-index:9999 !important;
+    background:var(--fc-card-bg);
+    border:1px solid var(--fc-card-border);
+    padding:6px 10px; border-radius:8px;
+    box-shadow:0 2px 10px rgba(0,0,0,.1);
+    pointer-events:none; font-size:12px; color:var(--fc-text);
+  }
+</style>
+
+
+  <script>
+    window.alleTeknikere     = {{ teknikere|default([])|tojson }};
+    window.alleStatusverdier = {{ statusverdier|default([])|tojson }};
+  </script>
+{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4"><i class="bi bi-calendar3"></i> Kalender for planlegging</h1>
+
+  <div class="row g-3 mb-4 align-items-end filter-row">
+    <div class="col-md-3">
+      <label for="filterLokasjon" class="form-label">Filtrer lokasjon:</label>
+      <select id="filterLokasjon" class="form-select" aria-label="Filtrer kalender på lokasjon">
+        <option value="">Alle</option>
+        {% for loc in lokasjoner %}
+          <option value="{{ loc }}" {% if selected_lokasjon == loc %}selected{% endif %}>{{ loc }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label for="filterFag" class="form-label">Filtrer fag:</label>
+      <select id="filterFag" class="form-select" aria-label="Filtrer kalender på fag">
+        <option value="">Alle</option>
+        {% for f in fag %}
+          <option value="{{ f }}" {% if selected_fag == f %}selected{% endif %}>{{ f }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label d-block">&nbsp;</label>
+      <a href="{{ url_for('oppgaver.ny_oppgave') }}" class="btn btn-primary w-100 btn-fit-height" aria-label="Opprett ny oppgave">
+        <i class="bi bi-plus-circle"></i> Ny oppgave
+      </a>
+    </div>
+    <div class="col-md-3">
+      <label for="downloadIcsBtn" class="form-label">ICS-eksport:</label>
+      <button id="downloadIcsBtn" class="btn btn-success btn-fit-height w-100" aria-label="Last ned ICS-filer for valgte oppgaver">
+        <i class="bi bi-download"></i> Last ned ICS
+      </button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="calendar-card mb-5">
+        <div id="calendar" aria-label="Prosjektkalender"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aktivitetspanel (4c) -->
+  <button id="activityDockToggle" title="Vis logg" aria-label="Åpne aktivitetslogg"><i class="bi bi-activity"></i></button>
+  <div id="activityDock" role="region" aria-label="Aktivitetslogg">
+    <div id="activityDockHeader">Aktivitetslogg
+      <button class="btn btn-sm btn-light" id="activityDockClear" aria-label="Tøm aktivitetslogg">Tøm</button>
+    </div>
+    <div id="activityDockBody"></div>
+  </div>
+
+  {# Oppgave-modal #}
+  <div class="modal fade" id="oppgaveModal" tabindex="-1" aria-labelledby="oppgaveModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg"><div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="oppgaveModalLabel">Oppgave</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Lukk"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="modalTaskId">
+        <div class="mb-3">
+          <label for="modalTitle" class="form-label">Tittel / Ordrenummer</label>
+          <div class="input-group">
+            <input type="text" id="modalTitle" class="form-control" aria-label="Oppgavetittel">
+            <input type="text" id="modalOrderNumber" class="form-control" placeholder="Ordrenr..." readonly aria-label="Ordrenummer">
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="modalLokasjon" class="form-label">Lokasjon</label>
+            <input type="text" id="modalLokasjon" class="form-control" aria-label="Lokasjon">
+          </div>
+          <div class="col-md-6">
+            <label for="modalPlassering" class="form-label">Plassering</label>
+            <input type="text" id="modalPlassering" class="form-control" aria-label="Plassering">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="modalStartDato" class="form-label">Startdato</label>
+            <input type="date" id="modalStartDato" class="form-control" aria-label="Startdato">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="modalStartTid" class="form-label">Starttid</label>
+            <input type="text" id="modalStartTid" class="form-control" aria-label="Starttid" autocomplete="off" inputmode="numeric" lang="nb" placeholder="hh:mm">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="modalEndDato" class="form-label">Sluttdato</label>
+            <input type="date" id="modalEndDato" class="form-control" aria-label="Sluttdato">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="modalEndTid" class="form-label">Sluttid</label>
+            <input type="text" id="modalEndTid" class="form-control" aria-label="Sluttid" autocomplete="off" inputmode="numeric" lang="nb" placeholder="hh:mm">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="modalTekniker" class="form-label">Tekniker</label>
+          <select id="modalTekniker" class="form-select" aria-label="Velg tekniker"></select>
+        </div>
+        <div class="mb-3">
+          <label for="modalStatus" class="form-label">Status</label>
+          <select id="modalStatus" class="form-select" aria-label="Velg status"></select>
+        </div>
+        <div class="mb-3">
+          <label for="modalKommentarProsjektleder" class="form-label">Kommentar (prosjektleder)</label>
+          <textarea id="modalKommentarProsjektleder" class="form-control" aria-label="Kommentar fra prosjektleder"></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="modalKommentarTekniker" class="form-label">Kommentar (tekniker)</label>
+          <textarea id="modalKommentarTekniker" class="form-control" aria-label="Kommentar fra tekniker"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Vedlegg (IKKE I BRUK / UTVIKLES)</label>
+          <ul id="vedleggListe" class="list-group" aria-label="Vedleggsoversikt"></ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btnLagreAlle" class="btn btn-primary" aria-label="Lagre oppgave">Lagre</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Lukk</button>
+      </div>
+    </div></div>
+  </div>
+
+  {# ICS-modal #}
+  <div class="modal fade" id="icsModal" tabindex="-1" aria-labelledby="icsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg"><div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="icsModalLabel">Velg oppgaver for nedlasting</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Lukk"></button>
+      </div>
+      <div class="modal-body">
+        <form id="icsForm"><div id="icsTaskList" class="list-group" aria-label="Liste over oppgaver for ICS-eksport"></div></form>
+      </div>
+      <div class="modal-footer">
+        <button id="downloadIcsConfirmBtn" class="btn btn-primary" aria-label="Bekreft nedlasting av ICS-filer">Last ned valgte ICS-filer</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Lukk</button>
+      </div>
+    </div></div>
+  </div>
+
+  {# Revisjons-modal (valgfritt) #}
+  <div class="modal fade" id="revisionsModal" tabindex="-1" aria-labelledby="revisionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg"><div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="revisionsModalLabel">Revisjoner for: <span id="revisionModalTaskTitle"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Lukk"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="currentRevisionTaskId">
+        <div id="revisionsList" class="list-group" aria-label="Liste over revisjoner">
+          <div class="alert alert-info text-center mt-3" id="noRevisionsMessage" style="display: none;">
+            Ingen tidligere revisjoner funnet for denne oppgaven.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="selectRevisionsBtn" class="btn btn-primary" aria-label="Velg revisjoner">Velg revisjoner</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Lukk</button>
+      </div>
+    </div></div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+
+  <script src="{{ url_for('static', filename='js/fullcalendar.min.js') }}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+  <!-- Globale hjelpere -->
+  <script src="{{ url_for('static', filename='js/calendar/modal-handlers.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/calendar/ics-export.js') }}"></script>
+
+  <!-- Aktivitetspanel & toast helper (4c + 2b) -->
+  <script>
+    (function(){
+      const dock = document.getElementById('activityDock');
+      const body = document.getElementById('activityDockBody');
+      const toggle = document.getElementById('activityDockToggle');
+      const clearBtn = document.getElementById('activityDockClear');
+
+      function ts(){
+        const d = new Date();
+        return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:false});
+      }
+      function add(msg, type='info'){
+        const div=document.createElement('div');
+        div.className='activity-entry '+type;
+        div.innerHTML = `<span class="msg">${msg}</span><span class="ts">• ${ts()}</span>`;
+        body.prepend(div);
+      }
+      toggle.addEventListener('click', ()=>{ dock.style.display = (dock.style.display==='block'?'none':'block'); });
+      clearBtn.addEventListener('click', ()=>{ body.innerHTML=''; });
+
+      // Eksporter global logger
+      window.appLog = { log:add, show:()=>dock.style.display='block', hide:()=>dock.style.display='none' };
+
+      // Toast helper (Bootstrap)
+      window.showToast = function(message, type='info'){
+        appLog.log(message, type);
+        // Hvis du har Bootstrap Toasts globalt kan du trigge de her; vi logger alltid uansett.
+      };
+    })();
+  </script>
+
+  <!-- Init må lastes til slutt (bruker appLog/showToast) -->
+  <script src="{{ url_for('static', filename='js/calendar/calendar-init.js') }}"></script>
+
+  <script>
+    window.currentUser = {
+      email: "{{ current_user.email or '' }}",
+      name: "{{ (current_user.first_name ~ ' ' ~ current_user.last_name)|trim }}"
+    };
+  </script>
+{% endblock %}

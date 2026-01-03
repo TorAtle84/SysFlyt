@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}System & Komponent{% endblock %}
+
+{% block content %}
+
+<style>
+  .segment {
+    display: inline-block;
+    margin: 0 5px;
+    padding: 0.6rem 1.2rem; /* Økt padding her */
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: 600;
+    user-select: none;
+    transition: 0.2s;
+  }
+  .segment:hover { filter: brightness(1.1); }
+  .segment.selected { outline: 3px solid black; }
+
+  .prefix { background: #6c757d; color: #fff; }
+  .system { background: #17a2b8; color: #fff; }
+  .lopenr { background: #ffc107; color: #000; }
+  .byggnr { background: #28a745; color: #fff; }
+  .komponent { background: #ffc107; color: #000; }
+  .typekode { background: #6f42c1; color: #fff; }
+
+  #system-kriterier .sys-btn {
+    display: inline-block;
+    margin: 0 5px;
+    padding: 8px 12px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+  }
+  #system-kriterier .sys-btn.selected {
+    background: #6f42c1;
+    color: #fff;
+    border-color: #333;
+  }
+
+  /* Styles for tabs */
+  .nav-tabs {
+    border-bottom: 1px solid #dee2e6;
+    background-color: #f8f9fa; /* Light grey background for the tab container */
+    border-radius: .25rem .25rem 0 0; /* Rounded top corners */
+    padding-top: .5rem;
+    padding-left: .5rem;
+  }
+
+  .nav-tabs .nav-link {
+    border: 1px solid transparent;
+    border-top-left-radius: .25rem;
+    border-top-right-radius: .25rem;
+    color: #495057;
+    margin-bottom: -1px;
+    background-color: #e9ecef; /* Slightly darker grey for inactive tabs */
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+
+  .nav-tabs .nav-link:hover {
+    border-color: #e9ecef #e9ecef #dee2e6;
+    background-color: #f1f3f5; /* Lighter on hover */
+  }
+
+  .nav-tabs .nav-item.show .nav-link,
+  .nav-tabs .nav-link.active {
+    color: #495057;
+    background-color: #fff; /* White background for active tab */
+    border-color: #dee2e6 #dee2e6 #fff; /* White border at bottom to blend with content */
+  }
+
+  .tab-pane {
+    padding-top: 1rem;
+    border: 1px solid #dee2e6; /* Add border to tab content area */
+    border-top: none; /* Remove top border to blend with active tab */
+    background-color: #fff; /* White background for content */
+    padding: 1rem;
+    border-radius: 0 0 .25rem .25rem; /* Rounded bottom corners */
+  }
+    select.form-select {
+    height: calc(100% - 2px); /* matcher Bootstrap-knapphøyde omtrent */
+  }
+
+  .app-card {
+    background-color: #dde7e7;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #c3d2d2;
+  }
+</style>
+
+<div class="container my-4">
+  <div class="app-card">
+
+  <h2 class="mb-4">Systembygging & Komponentopptelling</h2>
+
+  <div id="format-segmenter" class="mb-3">
+    <span class="segment byggnr" data-placeholder="{byggnr}">+260801A</span>
+    <span class="segment system" data-placeholder="{system}">=5630.0102</span>
+    <span class="segment komponent" data-placeholder="{komponent}">-SQZ5004</span>
+    <span class="segment typekode" data-placeholder="{typekode}">%SQZ.0001</span>
+  </div>
+
+  <textarea id="format-input" class="form-control mb-3" placeholder="Klikk segmenter for å bygge formatet" readonly></textarea>
+  <small class="text-muted">
+    Bruk {byggnr} for «+...», {system} for «=...», {komponent} for «-...» og {typekode} for «%...».
+  </small>
+
+  <hr>
+
+  <label for="system-kriterier" class="form-label">Systemkriterier:</label>
+  <div id="system-kriterier" class="mb-3">
+    {% for i in range(1, 10) %}
+      <span class="sys-btn" data-val="{{ i }}">{{ i }}</span>
+    {% endfor %}
+  </div>
+
+  <select id="funksjonsvalg" class="form-select mb-3">
+    <option value="velg">Velg funksjon</option>
+    <option value="systembygging">Systembygging</option>
+    <option value="komponentopptelling">Komponentopptelling</option>
+  </select>
+
+  <label class="form-label">Last opp dokumenter:</label>
+  <input id="filopplaster" type="file" class="form-control mb-3" multiple accept=".pdf,.docx,.xlsx,.txt">
+
+  <div class="d-flex gap-3 mb-3 align-items-end">
+    <div class="flex-fill">
+      <button id="generer-tabell" class="btn btn-primary w-100">Generer tabell</button>
+    </div>
+    <div class="flex-fill">
+      <button id="lastned-tabell" class="btn btn-success w-100">Last ned tabell</button>
+    </div>
+    <div class="flex-fill">
+      <label for="prosjektvalg" class="form-label">Velg prosjekt:</label>
+      <select id="prosjektvalg" class="form-select">
+        <option value="">-- Velg prosjekt --</option>
+        {% for prosjekt in prosjekter %}
+          <option value="{{ prosjekt.id }}">{{ prosjekt.project_name }} ({{ prosjekt.order_number }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="flex-fill align-self-end">
+      <button id="send-til-prosjekt" class="btn btn-success w-100" style="display: none;">Send til prosjekt</button>
+    </div>
+  </div>
+
+  
+  <div id="status-text" class="text-muted mb-3">Status: Klar</div>
+
+  <div id="fil-filter" class="mb-3"></div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5>Resultat:</h5>
+    <button id="tom-tabell" class="btn btn-sm btn-outline-danger" onclick="window.tomTabell()">Tøm tabell</button>
+  </div>
+
+  <!-- Tab structure for Systembygging -->
+  <ul class="nav nav-tabs" id="systemTabs" role="tablist" style="display: none;">
+    <!-- Tabs will be dynamically generated here by JavaScript -->
+  </ul>
+  <div class="tab-content" id="systemTabContent">
+    <!-- Tab content will be dynamically generated here by JavaScript -->
+  </div>
+  
+  <table id="resultat-tabell" class="table table-bordered">
+    <thead id="table-head">
+      <tr><th>Velg funksjon</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+</div>
+<div id="filterModal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 id="modalTitle" class="modal-title">Velg undersystemer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modalCheckboxes"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="modalConfirm" class="btn btn-primary">Bekreft</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Lukk</button>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/systemkomponent.js') }}"></script>
+
+{% endblock %}

@@ -1,0 +1,342 @@
+﻿ï»¿tekst;fag
+Entreprenør skal i god tid før bestilling av sine leveranser innlede dialog med prosjektets automasjonsleverandør for å avklare forutsetninger og krav, slik at eventuelle feilbestillinger unngås.;byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+Det etableres låsbare servicebrytere foran alt utstyr med elektrisk tilkobling som har skadepotensiale ved drift- og vedlikeholdsaktiviteter pga. sin art, f.eks. pumper, vifter, større utstyr som elektrokjeler, varmepumper, kjølemaskiner mm.;ventilasjon, elektro, rørlegger, totalentreprenør
+Ventilasjonsanlegg [AHU-xx] skal ha SFP â¤ 1,8 kW/(mÂ³/s) ved prosjektert luftmengde. Verifiseres ved måling iht. NS-EN 13053/ISO 5801. Målerapport vedlegges.;ventilasjon
+Varmegjenvinner i [AHU-xx] skal ha temperaturvirkningsgrad â¥ 80 % ved dimensjonerende forhold. Dokumenteres med ytelsesdata/test iht. EN 308/NS-EN 13053.;ventilasjon
+SD-anlegget skal holde rom-COâ â¤ 800 ppm (95-persentil) i kontortid ved normal belastning. Sensorer: nøyaktighet Â±(50 ppm + 3 %). Verifiseres med 14 døgn trendlogg og stikkprøvemåling i felt.;byggautomasjon
+"Alle VAV-soner skal behovsstyres på COâ/temperatur (kaskade) med prosjekterte q_min/q_max pr. sone. Innreguleres og dokumenteres iht. NS-EN 12599; trendlogg â¥ 72 timer viser settpunktoppnåelse.";byggautomasjon
+Møterom [M-xx] skal ha luftmengde q = max(7 l/sÂ·pers, 2,5 mÂ³/mÂ²h) ved fullt belegg ([antall pers]). Toleranse Â±10 %, verifiseres med innreguleringsprotokoll iht. NS-EN 12599.;ventilasjon
+Hovedkanalnett (tilluft/avtrekk) skal ha trykkfall Îp â¤ 150 Pa ved prosjektert luftmengde. Dokumenteres med kanaldimensjonering og feltmåling (tappemålepunkt) iht. NS-EN 12599.;ventilasjon
+"Tilluftfilter i ventilasjonsanlegget skal være min. ePM1 60 % iht. EN ISO 16890; alarmgrense for trykkfall skal oppgis og filterbytte dokumenteres i FDV";ventilasjon
+"Inntak og avkast skal plasseres slik at resirkulasjon unngås; korteste frie avstand skal være â¥ 8 m (hor./vert.) og fremgå målsatt på tegning.";ventilasjon
+"Trapperom skal trykksettes iht. NS-EN 12101-6; differansetrykk mot korridor skal være â¥ 50 Pa (dør lukket) og funksjon verifiseres ved test.";ventilasjon
+Alle VAV-soner skal integreres i SD-anlegget via Modbus/BACnet med overføring av settpunkt, vMin, vMaks, posisjon og alarmer.;byggautomasjon
+"VAV-spjeld skal leveres med Modbus-kommunikasjon og fabrikkalibrert mengdemåling (q); kalibreringsprotokoll skal vedlegges.";ventilasjon
+"Hele kanalnettet (tilluft/avtrekk) skal innreguleres iht. NS-EN 12599; målt luftmengde per uttak skal være innenfor Â±10 % av prosjektert verdi, og innreguleringsprotokoll skal vedlegges.";ventilasjon
+"Kjøkkenavtrekk skal utføres som separat system; hetter i rustfritt stål og egen avkastkanal, uten sammenkobling til øvrige ventilasjonssystemer.";ventilasjon
+Leveransen skal ha oppetid â¥ 99,9 % pr. kalendermåned (planlagt vedlikehold unntatt) og dokumenteres med systemlogg.;byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Lydnivå i kontorareal skal være LA,eq â¤ 35 dB(A) i normal drift; måles iht. NS 8175 (klasse C)/NS-EN ISO 16032 og dokumenteres i målerapport.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Alle gjennomføringer (rør/kanal/kabel) i brannklassifiserte vegger og dekker skal branntettes til påkrevd klasse (min. EI60) med sertifisert system; fotodokumentasjon og produktdatablad skal vedlegges.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Alle kabler skal ha entydig, maskinprintet merking i begge ender og i koblingspunkter, iht. NEK 400 og prosjektets merkeregister; merketekst skal samsvare med tag-/kursnummer i som-bygget dokumentasjon.";elektro
+FDV-dokumentasjon skal leveres komplett og digitalt ved overlevering, strukturert pr. system iht. NS 3456 og inkludere datablader, samsvarserklæringer, service-/vedlikeholdsintervaller, reservedelsliste, serienummer/QR-koder og som-bygget tegninger (PDF/DWG).;kulde
+"Ventilasjonsaggregat [AHU-xx] skal ha temperaturvirkningsgrad â¥ 85 % ved dimensjonerende forhold; dokumenteres med ytelsesdata/test iht. EN 308/NS-EN 13053.";ventilasjon
+"Alle rørgjennomføringer i brannklassifiserte vegger og dekker skal branntettes til påkrevd klasse (min. EI60) med typegodkjent system; montasje etter produsentens anvisning, fotodokumentasjon og sertifikat vedlegges.";rørlegger
+"Totalentreprenør skal sikre at alle underleverandører etterlever SHA-plan, Byggherreforskriften og prosjektets HMS-prosedyrer; krav innarbeides i kontrakter, kontrolleres i vernerunder og loggføres.";totalentreprenør
+"Det skal utarbeides en detaljert fremdriftsplan (WBS, avhengigheter, milepæler, kritisk linje) som oppdateres ukentlig og oversendes byggherre for godkjenning; plan leveres i maskinlesbart format og PDF.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Leveransen skal være fullt kompatibel med eksisterende SD-anlegg via BACnet/IP; nødvendig lisensiering/nettverksoppsett og komplett punkt-/tag-liste skal leveres og FAT/SAT-testes for interoperabilitet.";byggautomasjon
+"Alle hovedmaterialer skal ha tredjepartsverifisert EPD iht. EN 15804; EPD-ID/versjon skal oppgis og legges i FDV før bestilling.";totalentreprenør
+"Leveransen skal inkludere full programmering, I/O-test, funksjons-/integrasjonstest og igangkjøring av tekniske anlegg; testprotokoller og as-built-parametre skal overleveres.";byggautomasjon
+"Entreprenøren skal innhente alle nødvendige offentlige tillatelser/godkjenninger før oppstart (byggesak, netteier, gravemelding, brann, F-gass m.fl.); kopi av vedtak/kvitteringer skal vedlegges.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"All fast belysning skal styres via DALI med gruppe-/scenestyring, dagslysstyring og bevegelsesdeteksjon; adressering/konfigurasjon dokumenteres i as-built og FDV.";byggautomasjon
+"Hovedtavle H-T1 skal ha overspenningsvern (SPD) type 2 iht. NEK 400-534; merke- og testdokumentasjon vedlegges.";elektro
+"Alle sanitærinstallasjoner skal trykkprøves til 1,5 Ã driftstrykk i â¥ 2 timer uten trykkfall; signert trykkprøveprotokoll overleveres rørlegger.";rørlegger
+"Luftmengde per rom skal måles og dokumenteres i egen innreguleringsrapport iht. NS-EN 12599; avvik fra prosjektert verdi â¤ Â±10 %.";ventilasjon
+Bærende stålkonstruksjoner skal brannmales til R60 iht. NS-EN 13501-2 med dokumentert våt-/tørrfilmtykkelse.;totalentreprenør
+"Alt byggeavfall skal kildesorteres iht. prosjektets avfallsplan; sorteringsgrad â¥ 95 % dokumenteres med veiesedler og månedsrapport.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Det skal installeres energimålere for varme og belysning (elektrisitet) i bygget; målerne skal integreres i SD-anlegget for logging og rapportering.";elektro
+"Det skal installeres energimålere for varme, kjøling og elektrisitet i hver hovedsone; målerne skal integreres i SD-anlegget og logges med 15-minutters oppløsning.";byggautomasjon
+"Byggherren skal få full opplæring i drift og vedlikehold av leverte tekniske anlegg før overtakelse; kursplan, deltakerliste og kursmateriell skal overleveres.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+Alle endringer og avvik fra kontraktsdokumentene skal varsles skriftlig og godkjennes skriftlig av byggherrens representant før gjennomføring.;byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Garantitid for utført arbeid og leverte materialer er 5 år fra overtakelsesdato; omfatter feil og mangler på arbeider og leverte produkter; garantiattest og kontaktpunkter overleveres.";kulde
+"Nødlysanlegg skal prosjekteres og utføres iht. NS-EN 1838; krav til belysningsstyrke/jevnhet og autonomitid â¥ 1 h skal oppfylles; funksjons- og varighetstest dokumenteres.";elektro
+"For alle plasstøpte betongkonstruksjoner skal det benyttes lavkarbonbetong klasse A; dokumenteres med leverandørspesifikasjon/EPD ved bestilling og i FDV.";totalentreprenør
+"Alle pumper i varme- og kjøleanlegget skal være utstyrt med frekvensomformere for turtallsregulering; styring etter Îp/temperatur-settpunkter og integrasjon mot SD for start/stopp og alarm.";byggautomasjon
+Alle pumper i varme- og kjøleanlegget må være utstyrt med frekvensomformere for turtallsregulering.;rørlegger
+"Entreprenør skal delta i ukentlige byggemøter og månedlige fremdriftsmøter; faste representanter skal møte, og møtereferat";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Alle tekniske rom skal ha gulvsluk med tilstrekkelig kapasitet; gulv skal ha fall mot sluk (min. 1:100), og sluk tilknyttes avløp med vannlås.";rørlegger
+"Det skal leveres komplett sett Â«som byggetÂ»-tegninger i både PDF og DWG senest ved overtakelse; filene skal speile faktisk utførelse og inkludere revideringslogg og tegningsliste.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Sprinkleranlegget skal utføres som våtanlegg og dekke alle arealer iht. NS-EN 12845; hydraulisk beregning, dekningstegninger, trykk-/alarmprøver og funksjonstest skal dokumenteres.";rørlegger
+"Fasadematerialer skal ha dokumentert forventet levetid â¥ 50 år ved normalt vedlikehold; leverandørens levetidsdokumentasjon/garanti og vedlikeholdsplan skal vedlegges.";totalentreprenør
+"Alle utendørs stikkontakter skal være min. IP44 og beskyttes av jordfeilbryter (RCD) iht. NEK 400; kapslingsgrad og RCD-type skal fremgå av merkingen.";elektro
+"Det skal etableres adgangskontrollsystem for alle ytterdører og tekniske rom; systemet skal støtte kort/ID, hendelseslogg og sentral administrasjon, og dører merkes med sone/tilgangsnivå.";elektro
+"Akustiske tiltak skal sikre at LA,eq â¤ 45 dB(A) i kontorlandskap i drift; prosjekteres og verifiseres iht. NS 8175 (klasse C) med målerapport.";totalentreprenør
+"Alle innendørs materialer skal være dokumentert lavemitterende (f.eks. M1/EC1/klasse A) og ikke avgi skadelige gasser; produktdatablader/sertifikater skal legges i FDV.";totalentreprenør
+"Entreprenøren skal sørge for kontinuerlig renhold av byggeplassen gjennom hele prosjektperioden; daglig opprydding og ukentlig grovrengjøring skal loggføres.";totalentreprenør
+"Alle vinduer og glassdører skal ha U-verdi â¤ 0,80 W/mÂ²K; samsvar dokumenteres med ytelsesdeklarasjon (DoP)/testrapport.";totalentreprenør
+"Entreprenøren skal koordinere eget arbeid med øvrige fag; kollisjonskontroll i BIM gjennomføres før utførelse, og avvik håndteres i avvikslogg før produksjon.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Før overtakelse skal det gjennomføres fullskala integrert funksjonstest (SAT) av alle tekniske systemer med byggherre til stede; testprotokoller, avviksliste og utbedringer skal dokumenteres og være lukket før overtakelse.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Alle installerte komponenter skal være CE-merket; samsvar med gjeldende direktiver/standarder dokumenteres med EU-samsvarserklæring (DoC/DoP), testrapporter og produktdatablader i FDV.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Installasjon skal utføres i henhold til leverandørens montasjeanvisning og prosjektets tekniske beskrivelse; eventuelle avvik skal forhåndsgodkjennes skriftlig, og kontroll-/moment- og funksjonstester dokumenteres i sjekkliste.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Entreprenør skal føre digital fremdrifts- og avvikslogg gjennom hele byggeperioden; loggen oppdateres minst ukentlig og skal angi aktivitet, dato, ansvarlig, status, vedlegg (foto/protokoll), lukketdato og signatur, med mulighet for eksport til PDF/Excel.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Alle dørmiljøer der dette er angitt på tegning skal leveres med dørautomatikk og adgangskontroll; anlegget skal integreres med adgangssystem og brannalarmanlegg (fail-safe opplåsing ved alarm), oppfylle NS-EN 16005 og funksjonstestes ved overlevering.";elektro
+"Det skal benyttes prefabrikkerte rørbøyler med integrerte vibrasjonsdempere i tekniske føringsveier; bæreevne og c/c-avstand skal følge produktblad, korrosjonsklasse â¥ C3, og montasje dokumenteres med moment/lastberegning.";rørlegger
+"Alle tekniske føringer i himling skal koordineres i felles BIM-modell (min. LOD 300) og være kollisjonskontrollert før installasjon; ingen åpne hard-clashes mot bygg/andre fag, fri høyde iht. romprogram, og signert kollisjonsrapport skal foreligge.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Varmeanlegg [V-xx] skal reguleres via romfølere per sone og integreres i SD via BACnet/IP; settpunkt, modus, tur-/returtemperatur og alarmer skal være les/skriv.";byggautomasjon
+"Alt automasjonsutstyr skal dokumenteres med serienummer, firmwareversjon og garantibevis; komplett serienummerliste legges i FDV.";byggautomasjon
+"Det skal leveres målerapport som dokumenterer jordingsresistans â¤ 10 Î©; måling utføres og rapporteres iht. NEK 400.";elektro
+"Alle branntettingsprodukter skal være sertifiserte for påkrevd klasse (min. EI60) og monteres av godkjente installatører; fotodokumentasjon og produktsertifikat vedlegges.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Alle skap og tavler skal ha entydig merking (tag/kursnr.) i dør/front og oppdatert oversiktsdokumentasjon som speiler faktisk utførelse; merking iht. NEK 400 og som-bygget.";byggautomasjon, elektro
+"Ventilasjonskanaler skal isoleres med materiale A2-s1,d0 iht. NS-EN 13501-1; produktsertifikat og montasjeanvisning vedlegges.";ventilasjon
+"Kabelbroer over himling skal monteres med c/c-avstand og lastklasse iht. produktblad; bro og skjøter skal jordes i begge ender og dokumenteres med kontinuitetsmåling.";elektro
+"Før teknisk ferdigstillelse skal alle montasjer, tester og innreguleringer være dokumentert og godkjent; inkluder I/O-test, funksjonstest, innreguleringsprotokoll (NS-EN 12599) og lukket avviksliste.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Alt materiell skal ha tredjeparts EPD iht. EN 15804; ved likeverdige alternativer skal lavest GWP (A1âA3) velges og kortreist leveranse (â¤ 500 km fra byggeplass) benyttes; avvik skal begrunnes skriftlig.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Alt arbeid i høyden (> 2 m) skal utføres iht. Forskrift om utførelse av arbeid; det skal foreligge SJA, plan for arbeid i høyden, godkjent fallsikring/stillas/arbeidsplattform, dokumentert opplæring og daglig kontroll/merking.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Avvik fra plantegning eller spesifikasjon skal ikke utføres uten skriftlig forhåndsgodkjenning fra byggherrens representant; avvik skal beskrives med lokasjon, omfang og konsekvens.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Rom med vanninstallasjoner uten sluk skal ha automatisk vannstopp med lekkasjesensor og stengeventil på tilførsel; alarm og automatisk lukking ved deteksjon, funksjon testet og dokumentert ved overlevering.";rørlegger
+"Varmesentralen skal ha alarmer for temperaturavvik og lekkasje med varsling til SD-anlegg/SMS/epost iht. varslingsmatrise; hendelser skal logges med tidsstempel.";rørlegger
+"Sikkerhetsventilers avblåsningsrør skal føres til egnet oppsamlingspunkt/sluk med synlig drypptrakt; utløp merkes og utføres med fall.";rørlegger
+"Alle skap og installasjoner i fellesareal skal leveres låsbare og inngå i byggets systemnøkkel; nøkkelplan og adgangsnivåer skal dokumenteres.";elektro
+"Gulvvarmeanlegg skal ha separate reguleringssoner per rom; hver sone innreguleres og balanseres før overtakelse og dokumenteres med innreguleringsprotokoll.";rørlegger
+"LED-nødlysarmaturer skal installeres i alle rømningsveier og tekniske rom iht. NS-EN 1838; autonomitid â¥ 1 h og funksjonstest dokumenteres.";elektro
+"Alle motorer > 1,5 kW skal ha frekvensomformer tilpasset last; utstyret skal ha EMC-tilpasning og motorvern, og integreres mot SD for start/stopp og alarm.";byggautomasjon
+"Alle midlertidige anlegg skal demonteres og området ryddes før overtakelse; avfall kildesorteres og ryddesertifikat legges ved.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+Ved ferdigstillelse skal det leveres komplett samsvarserklæring for de elektriske installasjonene iht. FEL/NEK 400, signert av ansvarlig installatør med måleprotokoller vedlagt.;elektro
+"Innvendig luftkvalitet skal dokumenteres med målinger etter igangkjøring; COâ, temperatur, relativ fukt og partikler måles i representativt utvalg av rom og rapporteres mot prosjekterte grenseverdier.";byggautomasjon
+"SD-anlegget skal logge temperatur, relativ fukt og COâ i minimum 14 sammenhengende døgn før overtakelse med oppløsning â¤ 15 min; trendrapporter vedlegges.";byggautomasjon
+"Alle el-tavler skal være tydelig merket og ha oppdatert kursfortegnelse som samsvarer med faktisk utførelse; kursnummer, last og selektivitet skal fremgå.";byggautomasjon
+"Alle føringsveier for elektro/IKT, rør og ventilasjonskanaler skal prosjekteres og utføres med min. 30 % ledig kapasitet for fremtidige utvidelser; reserverte gjennomføringer/hulltak skal etableres og målsattes på tegning.";elektro
+Det skal leveres samsvarserklæring for alt elektrisk arbeid iht. FEL/NEK 400, signert av ansvarlig installatør, med måleprotokoller (isolasjon, jording, kontinuitet) vedlagt.;elektro
+"Entreprenør skal beskytte alle installasjoner mot fukt, støv og mekanisk skade med tildekking/kapsling, tettepropper og emballering; beskyttelsen opprettholdes til overtakelse og kontrolleres i KS-sjekklister.";totalentreprenør
+"Alle systemkomponenter skal ha dokumentert kompatibilitet med valgt SD-plattform (BACnet/IP eller Modbus TCP); BTL-/conformance-dokumentasjon, komplett tag-/I/O-matrise og vellykket FAT/SAT skal foreligge.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+Alle ventiler (inkl. motorventiler/spjeld) skal ha lokal posisjonsindikator (åpen/lukket eller 0â100 %), pil for strømningsretning der relevant, og entydig merking av funksjon/tag som samsvarer med som-bygget og FDV.;byggautomasjon, rørlegger
+Driftssentralen skal være utstyrt med skjerm for visualisering av SD-anlegg og alarmer.;byggautomasjon
+"Prosjekterende skal dokumentere at løsningene oppfyller TEK17 kap. 14 med energiberegning iht. NS 3031; rapport skal vise spesifikt netto energibehov, systemvirkningsgrader, U-verdier, SFP og inndata/antakelser, og etterlevelse bekreftes i samsvarserklæring.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Alle føringsveier over himling skal merkes med systemkode, retning (piler) og mål; merking utføres ved alle gjennomføringer/avgreninger og minst hver 5. meter, og skal samsvare med som-bygget.";elektro
+Entreprenør skal overlevere komplett kontrollskjema for brannisolering av tekniske føringer med lokasjon, produkt-/systemtype, EI-klasse, montør, dato og fotodokumentasjon.;elektro
+"Avfallsplan skal oppdateres månedlig og dokumenteres med veiesedler og sorteringsgrad per fraksjon; månedlig rapport arkiveres.";totalentreprenør
+"Nødstrømsaggregatets funksjonssikkerhet skal fullbelastningstestes (â¥100 % nominell last) før overlevering, inkl. automatisk inn-/utkobling og lastovertak; testprotokoll skal vedlegges.";elektro
+"Prefabrikkerte føringsveier skal benyttes der det er hensiktsmessig for å redusere montasjetid (repetitive strekk/moduler); leveransen skal være BIM-kollisjonskontrollert og inkludere mål, oppheng og utsparinger i tegning.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"All prosjektering skal gjennomføres iht. NS 3935 (teknisk bygganalyse/ITB); forutsetninger, inndata, beregningsmodeller og resultater skal dokumenteres i versjonsstyrt prosjektrapport med tverrfaglig kvalitetssikring og signert samsvarserklæring.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"SHA-planen skal være gjennomgått og signert av alle involverte (TE/UE/BH) før oppstart på byggeplass; signert versjon arkiveres i prosjekthotellet.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Alle ventilasjonskanaler og komponenter skal rengjøres til renhetsklasse M iht. NS-EN 15780 før idriftsettelse; rengjøringsrapport med foto/støvprøver vedlegges.";ventilasjon
+Romkontrollere monteres på innvendig vegg 1,5 m over ferdig gulv (Â±100 mm), uten direkte sol/trekk/varmekilder, i tråd med innredningsplan.;byggautomasjon
+"Kabelbroer skal jordes i begge ender med dokumentert kontinuitet (â¤ 0,5 Î©); måleprotokoll vedlegges.";elektro
+Automatikkentreprenør skal levere komplett I/O- og tag-liste (signaltype, område, enhet, alarmgrenser, adresser) i CSV/XLSX for godkjenning før programmering.;byggautomasjon
+Energiberegning iht. NS 3031 som dokumenterer etterlevelse av TEK17 kap. 14 skal foreligge og godkjennes før igangsettingstillatelse (IG).;totalentreprenør
+"Varmevekslere skal dimensjoneres for maksimalt effektbehov ved â15 Â°C utetemperatur; dokumenter yteevne, ÎT og trykkfall i valg/beregning.";ventilasjon, rørlegger
+"Alle rørføringer gjennom yttervegg skal tettes med typegodkjent mansjett og være dokumentert vanntette; montasje etter produsentens anvisning, fotodokumentasjon og tetthetsprøve vedlegges.";rørlegger
+"Byggherrens krav til universell utforming skal oppfylles i alle fellesarealer iht. NS 11001-1; løsningene dokumenteres i som-bygget, sjekkliste og fotodokumentasjon.";totalentreprenør
+"Hovedtavle skal gjennomgå visuell kontroll og termografering ved â¥ 75 % last, utført av sertifisert termografør (NEK 405-3); rapport leveres og avvik utbedres før overtakelse.";elektro
+"Alle komponenter skal være CE-merket og dokumentert iht. gjeldende normer; DoP/DoC, testrapporter og produktdatablader legges i FDV.";elektro
+"Entreprenør skal stille med kvalifisert driftsassistent i opplæringsperioden etter overtakelse; min. 40 timer on-site første måned, med opplæringsplan og signert deltaker-/feilrettingslogg.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Installasjoner i tekniske sjakter skal utføres med fri servicetilkomst â¥ 600Ã600 mm foran ventiler/spjeld/målere og inspeksjonsluker â¥ 500Ã500 mm; tilkomst og plassering skal fremgå av som-bygget.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Entreprenør skal utarbeide kapasitets- og sonekart for ventilasjonssystemet med VAV-ID, q_min/q_max og sonetilknytning; leveres i DWG/PDF og importeres i SD-grafikk før overtakelse.";ventilasjon
+"Ventilasjonssystemet skal prosjekteres med lavt trykkfall: lufthastighet â¤ 3,0 m/s i hovedkanaler og â¤ 2,0 m/s i grenkanaler; beregnet trykkfall i hovedløp dokumenteres ved q_prosjekt.";ventilasjon
+Det skal benyttes løsninger med lavt trykkfall for å sikre energieffektiv drift.;rørlegger
+"Entreprenør skal sikre at alle leveranser oppfyller spesifikasjoner og kontraktstegninger gjennom ITP/KS-sjekklister; avvik meldes og godkjennes skriftlig før utførelse, og som-bygget skal speile levert løsning.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Alt sikkerhetsrelatert utstyr (heis, brannalarmanlegg, nødlys) skal ha nødstrømsforsyning med ATS â¤ 15 s; kapasitet â¥ 1 h for brann-/nødlys og evakueringskjøring av heis til nærmeste plan; full belastningstest og protokoll vedlegges.";elektro
+"Alle ventiler/spjeld i ventilasjonsanlegget skal ha fri servicetilkomst â¥ 600Ã600 mm (inspeksjonsluke â¥ 500Ã500 mm) og merkes med funksjon/tag og pil for luftretning; merking skal samsvare med som-bygget/FDV.";ventilasjon
+"Hovedkanalnett (tilluft/avtrekk) skal ha trykkfall Îp â¤ 200 Pa ved prosjektert luftmengde; dokumenteres med beregning og feltmåling iht. NS-EN 12599.";ventilasjon
+"Samtlige VAV-spjeld skal ha Modbus (RTU/TCP) for integrasjon mot SD; minimum q_sett, q_mål, posisjon, alarm/status skal overføres; adresse-/registerliste og protokoll vedlegges.";ventilasjon
+"Alle el-tavler skal ha entydig utvendig merking og oppdatert kursfortegnelse samt nødinformasjon (nødfrakobling, kontaktinfo); enkeltlinjeskjema skal være oppslått; utførelse iht. FEL/NEK 400.";elektro, byggautomasjon
+"Kabelbroer over himling skal festes med innfestninger og c/c-avstander iht. produktblad og statiske beregninger; gjennomføringer/innfestninger skal oppfylle prosjekterte brannkrav og dokumenteres.";elektro
+"Kjølerom og teknisk rom for kuldeanlegg skal ha lekkasjevakt for kuldemedium med alarm til SD og automatisk stans iht. varslingsmatrise; funksjonstest dokumenteres.";rørlegger
+"Alle rør skal isoleres med mineralull iht. NS-EN 14303; isolasjonstykkelse iht. beregning og kontinuerlig dampbarriere med tette skjøter der fuktrisiko foreligger; montasje dokumenteres.";rørlegger
+"Ventilasjonskanaler i brannseksjoner skal utføres i stål og utstyres med sertifiserte brannspjeld iht. prosjektert EI-klasse (smeltesikring/automatisk utløsning); montasje etter produsentens anvisning.";ventilasjon
+"Automatikkskap skal leveres ferdig koblet, merket og FAT-testet før montasje; skjema/IO-liste og testprotokoll vedlegges.";byggautomasjon
+"Temperaturfølere til SD-anlegget skal ha nøyaktighet Â±0,5 Â°C; feltkalibreres mot referanse ved idriftsettelse; kalibreringsprotokoll legges i FDV.";byggautomasjon
+"Alle kuldemedier skal oppfylle F-gassforordningen; type, mengde og GWP dokumenteres i f-gass-logg; arbeid utføres av sertifisert personell (kategori I).";kulde
+FDV-dokumentasjonen skal inneholde serviceintervaller per komponent og maler/protokoller for periodiske ettersyn, med ansvar og frekvens angitt.;byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Rør for varme og kjøling skal trykkprøves til 1,5 Ã driftstrykk i â¥ 2 timer uten trykkfall; signert trykkprøveprotokoll leveres.";rørlegger
+"Alle motorventiler skal monteres med unionskoblinger for enkel utskifting uten driftsstans; strømningsretning merkes.";rørlegger
+"Kompressorkrets skal ha sug- og væskeledning med oljeutskiller iht. produsentens anvisning; funksjon dokumenteres.";rørlegger
+"Elektriske installasjoner skal utføres iht. FEL/NEK 400 og kontrolleres/måles (isolasjon, kontinuitet, jording) før spenningssetting; måleprotokoller vedlegges.";elektro
+"Fleksible tilkoblinger til ventilasjonsaggregat skal være ikke-brennbare og tilfredsstille ISO 6944; produktsertifikat og merking dokumenteres.";ventilasjon
+"SD-anlegget skal ha webgrensesnitt på lokalnett for byggherre med rollebasert pålogging og HTTPS; tilgangsoppsett dokumenteres.";byggautomasjon
+"Det skal installeres temperatursensor i hver sone og kobles til SD for behovsstyrt regulering; sensorplassering og kalibrering dokumenteres.";byggautomasjon
+"Ved oppstart skal kuldeanlegget innreguleres og igangkjøres av F-gass sertifisert kjølemontør; protokoll og parameterliste vedlegges.";kulde
+"Testrapporter for isolasjonsmotstand, jordmotstand og spenningsfall skal leveres før overtakelse; målinger iht. NEK 400.";elektro
+FDV-manualen skal inkludere anbefalte reservedeler (art.nr., antall, ledetid) og kontaktinformasjon til kritiske leverandører.;rørlegger
+Alle tekniske data for SD-komponenter skal registreres i anleggets database med entydig tag/ID, adresse, enhet, skala og alarmgrenser.;byggautomasjon
+"Rørføring gjennom yttervegg skal varmeisoleres og lufttettes med typegodkjent mansjett for å unngå kuldebro; fotodokumentasjon vedlegges.";rørlegger
+"Avkastkanaler skal avsluttes â¥ 2,0 m over tak og plasseres i le av inntak; avstand og plassering målsattes på tegning.";ventilasjon
+"Alle fordelingstavler skal ha dedikert overspenningsvern og automatsikringer tydelig merket med kursnummer; samsvar iht. NEK 400-534.";elektro
+"Kuldemediefylling skal utføres med godkjent utstyr av sertifisert personell; type, mengde og GWP loggføres iht. F-gasskrav.";kulde
+"Ventilasjonens bypass-spjeld skal funksjonstestes i både normaldrift og nødmodus; testprotokoll med posisjon/reaksjonstid vedlegges.";ventilasjon
+SD-anleggets alarmlogger skal kunne eksporteres til Excel/CSV med tid, tag, prioritet og kvittering.;byggautomasjon
+"Kursfortegnelse for tavler skal speile faktisk utførelse og være oppdatert før overlevering; utskrift/plansje skal være oppslått i hver tavle.";elektro
+"Samtlige ventilasjonsfilter skal merkes med filterklasse og utskiftningsintervall; filterbytter og Îp loggføres i FDV.";ventilasjon
+"Alle tilkoblinger i el-tavler skal momentdras iht. produsent/NEK 400 og termograferes ved â¥ 75 % last før idriftsettelse; protokoll vedlegges.";elektro
+"Tekniske rom for kuldeanlegg skal ha automatisk ventilasjon med gassdeteksjon og tvangsstyrt avtrekk ved alarm iht. NS-EN 378; funksjon integreres i SD og testes.";ventilasjon
+"Alle tappevannsledninger skal isoleres â¥ 30 mm mineralull med kontinuerlig dampbarriere der fuktrisiko foreligger; tykkelse dokumenteres.";rørlegger
+"Alle vanninntak skal ha tilbakestrømssikring (min. EA/BA) iht. VA-norm/NS-EN 1717; plassering merkes på tegning og kontrolleres.";rørlegger
+"Varmesentralen skal utstyres med sikkerhetsventil, ekspansjonskar og manometer, dimensjonert for anleggets volum/trykk; innstillinger dokumenteres.";rørlegger
+"Kjøkkenavløp skal tilknyttes fettutskiller i samsvar med kommunale krav; dimensjonering og funksjonstest dokumenteres.";rørlegger
+"Rør i våtrom skal legges med fall mot sluk (min. 1:100) og ha tilgjengelige inspeksjonspunkter; utførelse dokumenteres.";rørlegger
+"Avløpsrør skal være av støydempet materiale og opphengt med vibrasjonsdempere iht. produktblad; lydkrav iht. NS 8175 skal oppfylles.";rørlegger
+"Kobberrør i fordelingsnettet skal benytte pressfittingsystem (M/V-profil) med sertifisert verktøy; skjøter merkes og trykkprøves.";rørlegger
+"Gulvvarmeanlegg skal reguleres med termostat per rom/sone og balanseres før overtakelse; innreguleringsprotokoll vedlegges.";rørlegger
+"Kaldtvannsinstallasjoner skal utføres med legionellaforebyggende tiltak (unngå dødtlegger, riktig gjennomspyling/hygieneplan); tiltak dokumenteres.";rørlegger
+"Sprinkleropplegg skal føres separat fra øvrige rør og merkes tydelig (rød) med systemkode/retning; plan vises på tegning.";rørlegger
+"Alle tilluftsventiler skal ha justerbare spjeld og plasseres â¥ 2,1 m over gulv; innregulering dokumenteres.";ventilasjon
+"Avtrekksluft skal føres via lydfeller før aggregat for å redusere støy; type og innsetting dokumenteres med datablad.";ventilasjon
+"Ventilasjonskanaler over himling skal ha inspeksjonsluker for rengjøring ved forgreininger/retningsendringer og maks 10 m mellomrom; plassering vises på tegning.";ventilasjon
+Kanalføringer i tekniske rom skal være i galvanisert stål og merkes iht. NS 3940 med systemkode, retning og mål.;ventilasjon
+"Ventilasjonsaggregat/romstyring i undervisningsarealer skal ha integrert COâ-basert behovsstyring med prosjektert settpunkt; signaler integreres i SD og trendes.";ventilasjon
+"Alle kanalgjennomføringer i brannskiller skal tettes med sertifiserte tetningssystemer til prosjektert EI-klasse; fotodokumentasjon vedlegges.";ventilasjon
+"Datasentral skal tilføres luftmengde tilsvarende min. 6 luftvekslinger/time; beregning og måling dokumenteres.";ventilasjon
+"Våtrom og kjøkken skal ha separat balansert ventilasjon med egen avkast; lukt-/smittespredning mellom soner skal hindres.";ventilasjon
+"Tilluftfilter skal være min. ePM1 60 % iht. EN ISO 16890; alarmgrense for Îp oppgis og bytter loggføres i FDV.";ventilasjon
+"Ventilasjonskanaler skal trykktestes og lekkasjemåles iht. NS-EN 12599 (min. lekkasjeklasse B); protokoll vedlegges.";ventilasjon
+"Alle stikkontakter skal ha barnesikring og være utført iht. NEK 400; type og plassering dokumenteres.";elektro
+"IT-utstyr i kontorlandskap skal ha separate kurser med dedikerte vern/merkede uttak; kursfortegnelse oppdateres.";elektro
+Belysning i fellesarealer skal styres med bevegelsessensor og dagslysstyring (DALI) med etterlystid og minimumsnivå satt i as-built.;byggautomasjon, elektro
+"Alle underfordelinger skal ha overspenningsvern (SPD) type 2 iht. NEK 400-534; koordinert med evt. type 1 i hovedfordeling, merket og dokumentert.";elektro
+"Kabler gjennom brannskiller skal branntettes med sertifisert system til min. EI60; montasje etter systemgodkjenning og fotodokumentasjon vedlegges.";elektro
+Alle kurser med stikkontakter skal ha selektiv jordfeilbryter (RCD) med IÎn â¤ 30 mA og dokumentert selektivitet mot oppstrøms vern.;elektro
+"Føringsveier skal utføres i perforert kabelstige med oppheng c/c iht. produktblad, og utjevningsjordes i begge ender; kontinuitet dokumenteres.";elektro
+"Det skal monteres utvendig stikkontakt ved hovedinngang og bakside; min. IP44 med RCD-beskyttelse, montert 0,8â1,2 m over terreng.";elektro
+"Alle tavler skal ha tydelig merkeskjema med tilkoblingsoversikt; enkeltlinjeskjema og oppdatert kursfortegnelse skal være oppslått.";elektro
+"Hvert rom skal ha minst Ã©n 16 A stikkontakt på egen kurs; kursnummer angis i kursfortegnelse og på utstyr.";elektro
+"Kjølemediet skal være naturlig med lav GWP i tråd med F-gassforordningen; type og mengde dokumenteres i f-gass-logg.";kulde
+"Alle kjølerør skal isoleres med diffusjonstett cellegummi for å hindre kondens og energitap; tykkelse iht. beregning, skjøter limes og tapes.";kulde
+Fordamper i kjølerom skal ha automatisk avriming og dryppanne med avløp ført til sluk med fall â¥ 1:100 og vannlås.;kulde
+"Kjøleaggregat skal monteres på vibrasjonsdempere og ha støydempet kapsling i tråd med prosjekterte lydkrav; montasje dokumenteres.";kulde
+"Kuldeanlegg skal ha lekkasjealarm med automatisk stans ved grenseverdi og alarm til SD; funksjonstest og hendelseslogg vedlegges.";rørlegger
+"Kuldemedierør skal være av kobber iht. EN 12735 og sertifisert for prosjektert trykk; loddeforbindelser utføres av sertifisert personell.";kulde
+"Kjøleanlegg skal trykktestes med tørt nitrogen, vakuumeres til < 500 mikron og lekkasjekontrolleres iht. F-gass før igangkjøring; protokoll leveres.";kulde
+"Regulator skal logge driftstemperatur og alarmhistorikk med tidsstempel; logger skal kunne eksporteres (CSV/Excel).";byggautomasjon
+Isvannssystemet skal ha nødstoppsystem (lokal E-STOP/SD) og sirkulasjonspumpe med variabel hastighet (VFD) med ÎT/Îp-styring.;rørlegger
+Automatisk påfyllingssystem for frostvæske skal leveres inkl. konsentrasjonskontroll og tilbakestrømssikring.;rørlegger
+"Alle tekniske anlegg skal integreres i SD via åpen protokoll (BACnet/IP eller Modbus TCP); komplett tag-/I/O-liste og trendoppsett skal leveres.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"SD-anlegget skal ha grafisk brukergrensesnitt tilpasset byggherrens behov; prosessbilder, alarmliste med kvittering, trendbilder og rapporter skal inngå.";byggautomasjon
+"Alle alarmer fra tekniske systemer skal vises i SD-anlegget med prioritet, tidsstempel og kvitteringslogg; eskalering iht. varslingsmatrise og loggopphold â¥ 12 mnd.";byggautomasjon
+Alle signaler fra teknisk utstyr skal ha komplett tag-liste/IO-matrise (adresse, enhet, skala, retning, alarmgrenser, trend) levert i CSV/XLSX.;byggautomasjon
+"Det skal leveres automatisk trendlogging av inneklima- og energidata (T, RF, COâ, kWh) med oppløsning â¤ 15 min og lagring â¥ 12 mnd; data skal kunne eksporteres.";byggautomasjon
+SD-server skal ha automatisk sikkerhetskopi minst ukentlig med lagring â¥ 3 måneder og dokumentert test-gjenoppretting.;byggautomasjon
+SD-skjermen skal ha touch-panel og være veggmontert i teknisk rom.;byggautomasjon
+Alle logger (trend, alarm, hendelse) skal kunne eksporteres til CSV/XLSX for valgte tidsrom.;byggautomasjon
+Alle regulatorer (DDC) i SD-anlegget skal være fritt programmerbare og støtte åpen protokoll (BACnet/Modbus).;byggautomasjon
+Anlegget skal kunne fjernstyres via VPN med MFA, kryptert forbindelse og audit-logg for pålogging/handlinger.;byggautomasjon
+FDV-dokumentasjon skal leveres digitalt iht. NS 3456 og omfatte DoP/DoC, datablad, O&M, serviceintervaller, reservedelsliste, serienummer/QR-koder og som-bygget (PDF/DWG).;ventilasjon
+Vedlikeholdsintervaller for alle komponenter skal spesifiseres med frekvens, omfang og ansvar og inngå i FDV-plan.;elektro
+Alle produktdatablader skal oppgi energiklasse/effektivitet og forventet levetid (timer/år) samt garanti.;rørlegger
+FDV skal inkludere garantier, komplett leverandøroversikt med kontaktinformasjon og installasjonstegninger (as-built / som bygget).;byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+"Brukerveiledning for driftspersonell skal leveres på norsk i PDF og redigerbart format, og dekke daglig drift, vedlikehold, alarmhåndtering og feilsøking; versjonsnummer og dato skal fremgå.";byggautomasjon
+"Systemansvarlige skal gis opplæring (min. 8 timer) i vedlikehold, alarmhåndtering og rapportering i SD; kursplan, deltakerliste og signert gjennomføringsprotokoll skal overleveres.";byggautomasjon
+"Alle komponenter skal ha unik tag/ID som samsvarer med merking og FDV-register; samme ID skal brukes i tegninger, IO-/tag-liste, alarmer og trender.";byggautomasjon
+"Hver teknisk komponent skal ha bestandig QR-kode som lenker til FDV-side med datablad, manual, reservedeler og serviceintervaller; QR/URL skal inkludere komponentens unik ID.";byggautomasjon, ventilasjon, elektro, rørlegger, totalentreprenør
+FDV-dokumentasjon skal kunne oppdateres løpende i byggeiers system, være versjonsstyrt og strukturert per system/komponent (DoC/DoP, datablad, service, reservedeler, serienummer/QR).;totalentreprenør
+"Bygget skal dokumentere energiklasse A iht. NS 3700/NS 3701; beregning gjennomføres etter NS 3031 med komplett inndatarapport.";totalentreprenør
+"Det skal installeres energimålere på alle vannbårne varme- og kjølekretser; målere integreres i SD og logges med â¤ 15 min oppløsning.";byggautomasjon
+Energiforbruk skal overvåkes via SD-anlegget med rapporter og eksport til CSV/Excel for valgte perioder.;byggautomasjon
+Bygget skal oppnå spesifikt netto energibehov â¤ 95 kWh/mÂ²Â·år dokumentert etter NS 3031.;totalentreprenør
+All belysning skal være LED med DALI-2 lysstyring (dagslys + bevegelse) og dokumenterte innstillinger i as-built.;elektro
+"Oppvarming skal i hovedsak baseres på fjernvarme eller varmepumpe med dokumentert COP/SCOP; prioriteringslogikk skal beskrives.";rørlegger
+Solavskjerming skal styres automatisk etter solinnstråling og romtemperatur med integrasjon mot SD og justerbare settpunkter.;byggautomasjon
+Ventilasjonsaggregat skal ha varmegjenvinner med temperaturvirkningsgrad â¥ 85 % iht. EN 308/NS-EN 13053.;ventilasjon
+Korridorer og fellesarealer skal ha bevegelsessensorer for belysning med etterlystid/min-nivå definert og dokumentert.;byggautomasjon
+"Alt elektrisk utstyr skal være merket med energiklasse A eller bedre der energimerkeordning gjelder; dokumentasjon legges i FDV.";byggautomasjon
+"Minst 10 % av årlig energibehov skal dekkes av lokal fornybar energi (f.eks. solceller); beregnet produksjon og måledata dokumenteres.";totalentreprenør
+"Bygget skal ha automatisk nattsenking av temperatur i lavlastperioder; settpunkt og tidsplan skal være lagt inn i SD.";byggautomasjon
+"Varmeisolasjon i klimaskallet skal tilfredsstille passivhusstandard; U-verdier og tykkelser dokumenteres i energiberegning/tegningsgrunnlag.";totalentreprenør
+Energibruk skal dokumenteres iht. TEK17 Â§ 14-2 med periodiske rapporter fra SD og sammenstilling mot budsjett.;totalentreprenør
+"Kjøleanlegg skal ha frikjølingsfunksjon der utetemperatur/kilder gjør det hensiktsmessig; styringskriterier beskrives og testes.";rørlegger
+"Tappevannsoppvarming skal primært skje via varmepumpe eller solfangere der dette er mulig; dekningsgrad og temperaturregime dokumenteres.";rørlegger
+Automatiske avlesere for strøm, varme og vann skal gi månedlige rapporter og historikktilgang (CSV/Excel) via SD.;byggautomasjon
+Prosjektet skal levere en Energioppfølgingsplan (EOP) med KPI-er, roller, rapportfrekvens, alarmgrenser og avviksbehandling.;totalentreprenør
+"Energibudsjett skal utarbeides og oppdateres gjennom hele prosjektet; månedlige avvik mot faktisk forbruk skal analyseres og loggføres.";totalentreprenør
+Tiltak for å redusere transmisjonstap (U-verdier, kuldebroer, tetthet) skal dokumenteres i energiberegningen med referanse til benyttede løsninger.;totalentreprenør
+Varmepumpens årsvarmefaktor (SCOP) skal være minimum 4,2 for gjennomsnittlig klima.;kulde
+Kjølemaskinens energieffektivitetsforhold (EER) skal være minst 3,1 ved nominelle forhold.;kulde
+For DX-anlegg skal sesongbasert energieffektivitet (SEER) tilfredsstille energiklasse A++.;kulde
+Varmepumpens ytelseskoeffisient (COP) for varmedrift skal dokumenteres ved A7/W35.;kulde
+Kjølekapasiteten skal være tilstrekkelig for å dekke et beregnet effektbehov på minimum 50 kW.;kulde
+Kuldemedium som benyttes skal ha en GWP-verdi (Global Warming Potential) på under 750.;kulde
+Alt arbeid på kuldekretsen skal utføres av F-gass sertifisert personell kategori I.;kulde
+Maskinrom for kjølemaskin skal utstyres med lekkasjevarsling for kuldemedium i henhold til NS-EN 378.;kulde
+Det skal føres et komplett f-gass regnskap for anlegget, som overleveres byggherre ved ferdigstillelse.;kulde
+Kjølemaskin skal trykktestes med tørt nitrogen før fylling av kuldemedium.;kulde
+Støynivå fra utendørs plassert kondensator skal ikke overstige 45 dBA ved nabogrense.;kulde
+Alle kuldemedierør skal isoleres med diffusjonstett cellegummi for å forhindre kondens.;kulde
+Kondensvann fra fordamper og fan coils skal føres til nærmeste sluk med tilstrekkelig fall.;kulde
+Det skal benyttes scroll-kompressorer for å sikre energieffektiv og stillegående drift.;kulde
+Anlegget skal vakuumeres til under 500 mikron før fylling for å fjerne fuktighet fra kretsen.;kulde
+Kjøleanlegget skal ha mulighet for frikjøling via tørrkjøler når utetemperaturen er lav nok.;kulde
+Start/stopp-signal og overordnet settpunkt for kjølemaskinen skal kunne styres fra SD-anlegget.;kulde
+For varmepumper skal det installeres automatisk avrimingsfunksjon for utedelen.;kulde
+Det skal leveres komplett FDV-dokumentasjon for kjøleanlegget, inkludert datablader for alle hovedkomponenter.;kulde
+Protokoll fra trykktesting og vakuumering av kjølesystemet skal inkluderes i overleveringsdokumentasjonen.;kulde
+Totalentreprenør er ansvarlig for at krav til luftlydisolasjon og trinnlydnivå er i samsvar med NS 8175, klasse C.;totalentreprenør
+Byggets bæresystem skal være dimensjonert for en generell nyttelast på minimum 3 kN/mÂ² i alle kontorarealer.;totalentreprenør
+Skallsikring av byggets ytre avgrensning, inkludert vegger og vinduer, skal tilfredsstille kravene i FG-klasse 2.;totalentreprenør
+Det skal dokumenteres at radonnivå i bygget er under tiltaksgrensen på 100 Bq/mÂ³.;totalentreprenør
+Prinsippene for universell utforming i henhold til NS 11001 skal legges til grunn for alle adkomstveier og fellesarealer.;totalentreprenør
+Alle innervegger som skiller mellom ulike romtyper skal oppfylle de spesifiserte R'w-lydkravene i lydrapporten.;totalentreprenør
+Totalentreprenør skal lede og dokumentere tverrfaglig kollisjonskontroll i BIM-modell før utførelse.;totalentreprenør
+Byggets tetthet mot luftlekkasjer skal måles og dokumenteres til å være i henhold til kravene i TEK17.;totalentreprenør
+Fasadesystemet, inkludert vinduer og utvendig solavskjerming, skal være montert for å motstå lokale vind- og snølaster.;totalentreprenør
+Kjølemaskin skal monteres på vibrasjonsdempere for å forhindre overføring av støy til bygningskonstruksjonen.;kulde
+Isvannskretsen skal behandles med glykol og korrosjonsinhibitor for å beskytte varmevekslere og rør.;kulde
+Platevarmeveksler mellom kuldekrets og isvannskrets skal være i syrefast stål (AISI 316).;kulde
+krav til oppfølging/service av anlegg og utstyr angitt i FDV-dokumentasjon (fra leverandør/ entreprenør).Summen skal ikke inngå i tilbudssummen.;Uspesifisert
+360.0004 betjener i hovedsak urene arealer i plan3.GENERELLE KRAVDokumentasjon i form av sertifikater, monteringsanvisning, drifts- og vedlikeholdsinstruks skal innngå som en del av FDV-dokumentasjonen.;Ventilasjon
+Videre skal det kun benyttesfabrikkproduserte deler som bend, T-rør, avgreninger,dimensjonsendringer ol.;Rørlegger
+Bygningsmessig tilluftsenhet [fabrikat/type] levert av annen entreprenør Kanal, type og dimensjon:;Ventilasjon
+362 Kanalnett for luftbehandling er gjeldende, og ivaretagelse av disse skal medregnes.36.362.22.1Fancoil Kanal, type og dimensjon.;Ventilasjon
+Transportkontainervask steriliseringsdel [fabrikat/type] levert av annen entreprenør Kanal, type og dimensjon:;Totalentreprenør
+Avtrekksrist for montasje i rektangulær kanal med demonterbar front for rengjøring. Leveres med hvit lakkering som standard.;Uspesifisert
+Leveres med bryter på arm med signal til motorspjeld (se egen post) og videre signal til SD om aktivert spjeld/bryter.;Ventilasjon
+Leveres med bryter på arm med signal til motorspjeld (se egen post) og videre signal til SD om aktivert spjeld/bryter. Punktavsuget skal være robust og av høy kvalitet med hygenisk design.;Ventilasjon
+For å unngå fuktig luft ut i arealet skal ventil utformes konisk (kanalovergang kan benyttes) og avsluttes med rist.;Ventilasjon
+ut SD anlegget og kobler display mot aggregat/vifte.- Funksjonen er at hvis SD anlegget er ute av drift så skal man kunne styre kritiske ventilasjonsaggregat/vifter lokalt.;Ventilasjon
+anlegget og kobler display mot aggregat/vifte.- Funksjonen er at hvis SD anlegget er ute av drift så skal man kunne styre kritiske ventilasjonsaggregat/vifter lokalt.;Uspesifisert
+Man kobler evt. ut SD anlegget og kobler display mot aggregat/vifte.-;Uspesifisert
+Leveres komplett med overganger til sirkulære kanaler.;Ventilasjon
+a)Omfang og prisgrunnlag Kanalmontert vifte med EC-motor for dampavkast fra vaskeproosess.;Ventilasjon
+Vifte skal ha BUS/Modus kommunikasjon, dvs.;Ventilasjon
+Viffteleverandør skal levere med display/handkontroller/tablet (til lokal styring av vifte).;Ventilasjon
+Denne skal plasseres i automasjonstavlen.;Ventilasjon
+Man kobler evt. ut SD anlegget og kobler display mot vifte. Funksjonen er at hvis SD anlegget er ute av drift så skal man kunne styre kritiske vifter lokalt fra display.;Ventilasjon
+Vifte startes ved røykdeteksjon i sjakt.;Ventilasjon
+a)Omfang og prisgrunnlag Kanalmontert vifte med EC-motor.;Ventilasjon
+Rør og lameller skal være epoksylakkerte. Varmebatteriet skal forberedes for montasje av temperaturgiver for frostvernsfunksjon som skal måle returvannstemperaturen i et av lamellrørene.;Rørlegger
+Rør og lameller skal være epoksylakkerte. Batteriene skal være spylbare og ha oppsamlings- og avløpsmulighet ved rengjøring.;Rørlegger
+#NAVN?;Ventilasjon
+- Modulene for inspeksjon skal ha hengslede dører med håndtak, inspeksjonsvinduer med minimumstørrelse.;Ventilasjon
+Spjeld komplett med motor36.364.41.1TFM-kode.;Ventilasjon
+Spjeld komplett med motor36.364.55.1TFM-kode.;Ventilasjon
+Spjeld komplett med motor36.364.63.1TFM-kode.;Ventilasjon
+Utførelse Aggregat/vifteleverandør skal levere med display/handkontroller/tablet (til lokal styring av aggregat).;Ventilasjon
+Utførelse Det skal taes hensyn til overlapp på mellom 5 og 10cm der isolasjonslamellen fjernes.;Ventilasjon
+Overlappen skal stiftes med 10-15cm avstand.;Ventilasjon
+Alle skjøter skal tapes med diffusjonstett aluminiumstape.;Ventilasjon
+Utførelse Alle skjøter skal limes med produsentens spesiallim.;Ventilasjon
+Isolering skal utføres ihht.;Uspesifisert
+FOR VENTILASJONKlasse: e PM1-60%Type:;Ventilasjon
+KANALNETT FOR LUFTBEHANDLINGKANALNETTKanalnettet skal utføres iht.;Ventilasjon
+Ventilasjonsentreprenør leverer ogmonterer alt påfølgende utstyr i henhold tilnedenstående spesifikasjoner og produsentensmontasjeanvisning.;Ventilasjon
+skal man kunne styre kritiske ventilasjonsaggregat/vifter lokalt.;Ventilasjon
+a)Omfang og prisgrunnlag Skal kunne sende signal til SD-anlegg med drift/feil.;Ventilasjon
+Det skal være med hjelpemann og iverksettes nødvendige tiltak ved inn/avkjørsel fra Jonas Lies Vei iht.;Uspesifisert
+Krav og bruk av trafikkvakter skal ENT medta i sitt tilbud.;Uspesifisert
+Med plenumskammer, spjeld og måleuttak.;Ventilasjon
+Ventillfront med variable kastelengde. Leveres med hvit lakkering som standard.;Ventilasjon
+12/17Â°CEtterkjølebatteri for montasje i kanal som skal dekke temperatursenking av tilluften til ønsket temperatur.;Ventilasjon
+Med teleskopisk arm montert i tak/dekke, med 3 justerbare friksjonsledd.;Uspesifisert
+Leveres komplett med skjerm og takkonsoll for innfesting og tilkobling av kanal.;Ventilasjon
+Leveres med bryter på arm med signal til motorspjeld (se egen post) og videre signal til SD om aktivert (AV/PÃ) spjeld/bryter.;Ventilasjon
+Leveres med bryter på arm med signal til motorspjeld (se egen post) og videre signal til SD om aktivert (AV/PÃ) spjeld/bryter. Punktavsuget skal være robust og av høy kvalitet med hygenisk design.;Ventilasjon
+Rist med liggende lameller;Ventilasjon
+Tilluftsventil for åpen montasje med demonterbar front for rengjøring. Leveres med hvit lakkering som standard.;Ventilasjon
+Med plenumskammer og spjeld;Ventilasjon
+Kondensavfukter med varmepumpe og kjøleflate Kapsling:;Ventilasjon
+Med flenser mot vegg;Ventilasjon
+Luftmengde: 100 mÂ³/h Dimensjon på tilluftsenhet:;Ventilasjon
+Luftmengde: 5700 mÂ³/h Temperaturvirkningsgrad: 70%Temperatur/relativ fuktighet før gjenvinner (avtrekksluft):;Ventilasjon
+Sentralstøvsuger GENERELLE KRAVDokumentasjon i form av sertifikater, monteringsanvisning, drifts- og vedlikeholdsinstruks skal innngå som en del av FDV-dokumentasjonen.;Ventilasjon
+Kanalmontert med tilslutning i topp.;Ventilasjon
+Tilluftsventil for montasje i systemhimling med demonterbar front for rengjøring.;Ventilasjon
+Tilluftventil for montasje i vegg/skjørt med demonterbar front for rengjøring.;Ventilasjon
+anlegget ved en kontakt.;Ventilasjon
+Anmeldelser Alle nødvendige anmeldelser til kontrollmyndighetene påhviler entreprenøren, og anlegget skal være godkjent av kontrollmyndighetene før det blir fremlagt til overlevering.;Uspesifisert
+Dokumentasjon av tilbud Alle fabrikater/typer skal oppgis og det må på oppfordring kunne oversendes datablader som dokumenterer utstyr og komponenter komplett.;Uspesifisert
+Hele bygget Andel av kanalmassen som skal prøves.;Ventilasjon
+Hele bygget Løs masse for prøving og måling.;Totalentreprenør
+a)Omfang og prisgrunnlag Hulltaking, slissing i støpte/bærendekonstruksjoner samt tetting/branntetting inngår iannen entreprise.;Uspesifisert
+a)Omfang og prisgrunnlag Skal kunne måle ned til 0,1 m/s.;Ventilasjon
+K501 automasjonsentreprenør skal motta signaler fra følere/givere.;Byggautomasjon
+Sensor skal være analog 4-20m A, alternativt kan det benyttes sensor med kommunikasjon.;Uspesifisert
+a)Omfang og prisgrunnlag Leveres med kullfilter.;Ventilasjon
+Det skal leveres fire stk. nye ventilasjonanlegg som skal ivareta grunnventilasjon, samt en rekke mindre anlegg som skal ivareta. avtrekk fra prosessanlegg og lokal kjøling.;Ventilasjon
+Tilluftsventil for renrom med terminalfilter type;Ventilasjon
+Rektangulære kanaler skal trykkprøves separat.;Ventilasjon
+Tetthetsprøving skal utføres etter NS3420-V.Dersom kravet til spesifisert trykklasse ikke oppnåsplikter entreprenøren for egen regning å utbedre/tettelekkasjen.;Ventilasjon
+Tetthetsprøving skal utføres etter NS3420-V.Dersom kravet til spesifisert trykklasse ikke oppnåsplikter entreprenøren for egen regning å utbedre/tette lekkasjen.;Ventilasjon
+Størrelse på plenumskamre kontrolleres opp mot plass iteknisk rom og størrelse på tegninger førbestilling/produksjon igangsettes.;Ventilasjon
+Merking på kanaler og rør skal alltid foretas minimum hver 15 meter.;Uspesifisert
+Eksempelvis skal det henges opp brukanvisninger/veiledere for.;Uspesifisert
+ï·lysstyringï·temperaturstyringï·styring av ventilasjonï·bruk av tøy- og bossug I tekniske rom skal det henges opp informasjonsplansjer som forteller hvordan de ulike systemene fungerer.;Uspesifisert
+Eksempelvis skal det på hvert enkelt ventilasjonsaggregat henges opp en plakat med minimum følgende orientering.;Ventilasjon
+ï·TFM-nummerï·Dekningsområdeï·Fabrikatï·Leverandør av aggregat og automatikkï·Luftmengderï·Trykkï·Innstillinger på frekvensomformerï·Hva aggregatet består av inkl. eventuelle kapasiteter I hoved- og underfordelinger skal følgende henges opp. o Enlinjeskjemao Tavleskjemao Styrestrømsskjema I hovedfordelinger skal det i tillegg henges opp.;Ventilasjon
+Eksempel på komponenter som skal merkes med denne teksten som er pumper, tanker, ekspansjonskar, batterier, fancoiler, fordampere, filtre, følere, termostater, spjeld, spjeldmotorer og aggregatdeler.;Uspesifisert

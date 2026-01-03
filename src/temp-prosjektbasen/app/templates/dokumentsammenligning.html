@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+{% block title %}Dokumentsammenligning{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="mb-0">📄 Dokumentsammenligning</h1>
+    <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#helpModal">?</button>
+  </div>
+
+  <!-- Søkemodus-velger -->
+  <div class="mb-3">
+    <label for="sokemodus" class="form-label">Søkemodus</label>
+    <select id="sokemodus" class="form-select">
+      <option value="syntaktisk" selected>Syntaktisk</option>
+      <option value="kombinert">Kombinert søk</option>
+      <option value="diff">Diff-sjekk</option>
+    </select>
+  </div>
+
+  <p class="text-muted">
+    <strong>Syntaktisk</strong> kan gjøre både <em>Søk</em> (regex i mange dokumenter) og <em>Differanse</em> (som før).
+    <strong>Kombinert</strong> matcher limt inn tabell mot dokumenter.
+    <strong>Diff</strong> viser forskjeller mellom to dokumenter.
+  </p>
+
+  <!-- Syntaktisk -->
+  <div id="syntaktisk-oppsett">
+    <form method="POST" enctype="multipart/form-data" class="app-card" id="dokumentsammenligning-form" action="/dokumentsammenligning">
+      <div class="mb-2">
+        <label class="form-label">Handling</label>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="syntaktisk_action" id="syn_sok" value="search" checked>
+          <label class="form-check-label" for="syn_sok">Søk (alle komponenter)</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="syntaktisk_action" id="syn_diff" value="diff">
+          <label class="form-check-label" for="syn_diff">Differanse (forskjeller mellom komponenter)</label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="keyword_pattern" class="form-label">Nøkkelord-mønster (regex)</label>
+        <input type="text" class="form-control" id="keyword_pattern" name="keyword_pattern"
+               placeholder="f.eks. (JP501, JPA5001)" required>
+      </div>
+
+      <div class="mb-3" id="hoveddokument-row">
+        <label for="hoveddokument_file" class="form-label">Hoveddokument (kun nødvendig for differanse)</label>
+
+        <!-- DROPZONE: hoveddokument (enkeltfil) -->
+        <div class="dropzone" data-for="hoveddokument_file" data-multiple="false">
+          Slipp hoveddokument her eller klikk for å velge
+        </div>
+
+        <input type="file" class="form-control" id="hoveddokument_file" name="hoveddokument_file" accept=".pdf,.docx,.txt">
+        <div class="form-text">For <em>Differanse</em> må du velge et hoveddokument her.</div>
+      </div>
+
+      <div class="mb-3" id="sammenligningsfiler-row">
+        <label for="sammenligningsfiler" class="form-label">Filer</label>
+
+        <!-- DROPZONE: sammenligningsfiler (flere) -->
+        <div class="dropzone" data-for="sammenligningsfiler" data-multiple="true">
+          Slipp filer her (PDF/DOCX/TXT/XLSX/XLS) eller klikk for å velge
+        </div>
+
+        <input type="file" class="form-control" id="sammenligningsfiler" name="sammenligningsfiler" accept=".pdf,.docx,.txt,.xlsx,.xls" multiple>
+        <div class="form-text">
+          For <em>Søk</em>: last opp én eller flere filer. For <em>Differanse</em>: last opp sammenligningsfiler (i tillegg til hoveddokument).
+        </div>
+      </div>
+
+      <div class="form-check mb-3" id="only-hoveddokument-row">
+        <input class="form-check-input" type="checkbox" id="use_hoveddokument_keywords_only" name="use_hoveddokument_keywords_only">
+        <label class="form-check-label" for="use_hoveddokument_keywords_only">
+          Bruk kun nøkkelord fra hoveddokumentet (gjelder differanse)
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary">
+        🚀 Kjør
+      </button>
+    </form>
+  </div>
+
+  <!-- Kombinert søk -->
+  <div id="kombinert-oppsett" style="display:none;">
+    <form class="app-card" id="kombinert-form" onsubmit="return false;">
+      <div class="mb-2">
+        <label class="form-label">Tabell (fra Excel)</label>
+        <div class="table-responsive">
+          <table id="kombinert-tabell" class="table table-bordered align-middle">
+            <thead>
+              <tr id="kombinert-header-row">
+                <th>Kolonne 1</th>
+                <th>Kolonne 2</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="d-flex gap-2">
+          <button id="legg-til-rad" class="btn btn-sm btn-outline-secondary">+ Legg til rad</button>
+          <button id="legg-til-kolonne" class="btn btn-sm btn-outline-secondary">+ Legg til kolonne</button>
+        </div>
+        <small class="text-muted d-block mt-2">Tips: Lim inn rader (Ctrl+V) direkte fra Excel.</small>
+      </div>
+    </form>
+
+    <div class="mb-3">
+      <label for="kombinert_filer" class="form-label">Filer å sammenligne mot (inkl. Excel)</label>
+
+      <!-- DROPZONE: kombinert (flere) -->
+      <div class="dropzone" data-for="kombinert_filer" data-multiple="true">
+        Slipp filer her (inkl. Excel) eller klikk for å velge
+      </div>
+
+      <input type="file" class="form-control" id="kombinert_filer" name="kombinert_filer" accept=".pdf,.docx,.txt,.xlsx,.xls" multiple required>
+    </div>
+    <button id="kombinert_sok_btn" class="btn btn-primary">🔍 Start kombinert søk</button>
+  </div>
+
+  <!-- Diff-sjekk -->
+  <div id="diff-oppsett" style="display:none;">
+    <form class="app-card" id="diff-form" onsubmit="return false;">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Dokument A</label>
+
+          <!-- DROPZONE: diff A (enkeltfil) -->
+          <div class="dropzone" data-for="filA" data-multiple="false">
+            Slipp dokument A her eller klikk for å velge
+          </div>
+
+          <input type="file" class="form-control" name="filA" id="filA" accept=".pdf,.docx,.txt" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Dokument B</label>
+
+          <!-- DROPZONE: diff B (enkeltfil) -->
+          <div class="dropzone" data-for="filB" data-multiple="false">
+            Slipp dokument B her eller klikk for å velge
+          </div>
+
+          <input type="file" class="form-control" name="filB" id="filB" accept=".pdf,.docx,.txt" required>
+        </div>
+      </div>
+
+      <div class="row g-3 mt-2">
+        <div class="col-auto form-check">
+          <input class="form-check-input" type="checkbox" id="ignore_case" name="ignore_case">
+          <label class="form-check-label" for="ignore_case">Ignorer store/små</label>
+        </div>
+        <div class="col-auto form-check">
+          <input class="form-check-input" type="checkbox" id="ignore_ws" name="ignore_ws" checked>
+          <label class="form-check-label" for="ignore_ws">Kompakter whitespace</label>
+        </div>
+        <div class="col-auto form-check">
+          <input class="form-check-input" type="checkbox" id="ignore_digits" name="ignore_digits">
+          <label class="form-check-label" for="ignore_digits">Ignorer tall</label>
+        </div>
+        <div class="col-auto form-check">
+          <input class="form-check-input" type="checkbox" id="use_ocr" name="use_ocr">
+          <label class="form-check-label" for="use_ocr">Bruk OCR ved behov (PDF)</label>
+        </div>
+      </div>
+
+      <div class="mt-3 d-flex gap-2">
+        <button id="diff-run" class="btn btn-primary">🧪 Kjør diff</button>
+        <button id="diff-download-excel" class="btn btn-outline-success" type="button">⬇️ Last ned Excel</button>
+        <button id="diff-download-json" class="btn btn-outline-secondary" type="button">⬇️ Last ned JSON</button>
+      </div>
+    </form>
+
+    <ul class="nav nav-tabs mt-3" role="tablist">
+      <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-side" type="button">Side‑om‑side</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-inline" type="button">Inline</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-summary" type="button">Oppsummering</button></li>
+    </ul>
+    <div class="tab-content border border-top-0 p-3">
+      <div id="tab-side" class="tab-pane fade show active" role="tabpanel">
+        <div class="row">
+          <div class="col-md-6">
+            <div id="diff-sideA" class="diff-panel"></div>
+          </div>
+          <div class="col-md-6">
+            <div id="diff-sideB" class="diff-panel"></div>
+          </div>
+        </div>
+      </div>
+      <div id="tab-inline" class="tab-pane fade" role="tabpanel">
+        <div id="diff-inline" class="diff-panel"></div>
+      </div>
+      <div id="tab-summary" class="tab-pane fade" role="tabpanel">
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered">
+            <thead>
+              <tr>
+                <th>Endringstype</th>
+                <th>Posisjon A</th>
+                <th>Tekst A</th>
+                <th>Posisjon B</th>
+                <th>Tekst B</th>
+              </tr>
+            </thead>
+            <tbody id="diff-summary-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="dokumentsammenligning-status" class="mt-3"></div>
+</div>
+
+<!-- Hjelp-modal -->
+<div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 id="helpModalLabel" class="modal-title">Hva kan jeg gjøre her?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Lukk"></button>
+      </div>
+      <div class="modal-body">
+        <h6>1) Syntaktisk – Søk</h6>
+        <p>
+          Søk etter regex-mønstre i mange dokumenter samtidig. Resultatet blir en Excel
+          med <strong>Filnavn</strong>, <strong>Komplett navn</strong> (f.eks. <code>360.001-JP501</code>),
+          <strong>Regex-treff</strong> og <strong>Komponenttekst (TFM)</strong>.
+        </p>
+        <ul>
+          <li><strong>Hvordan:</strong> Velg “Søk”, skriv regex, last opp én eller flere filer, og kjør.</li>
+          <li><strong>Fordeler:</strong> Raskt oversiktsbilde på tvers av filer; automatisk TFM-klassifisering.</li>
+        </ul>
+        <hr>
+
+        <h6>2) Syntaktisk – Differanse</h6>
+        <p>
+          Sammenlign ett hoveddokument med flere andre ved hjelp av regex (som tidligere).
+          Returnerer Excel-rapport over forskjeller/treff per dokument.
+        </p>
+        <ul>
+          <li><strong>Hvordan:</strong> Velg “Differanse”, skriv regex, last opp <em>hoveddokument</em> + sammenligningsfiler.</li>
+          <li><strong>Fordeler:</strong> Samme etablerte arbeidsflyt, nå lett tilgjengelig under Syntaktisk.</li>
+        </ul>
+        <hr>
+
+        <h6>3) Kombinert søk</h6>
+        <p>
+          Lim inn en tabell fra Excel (f.eks. “Komponent-ID, Rom”), og kryssjekk rad for rad mot dokumenter.
+          Rapporten viser <em>Komplett/Delvis/Ingen treff</em> med fargekoding.
+        </p>
+
+        <hr>
+        <h6>4) Diff‑sjekk</h6>
+        <p>
+          Se nøyaktige forskjeller mellom to dokumenter (side‑om‑side, inline og oppsummering).
+          Last ned resultat som Excel eller JSON.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Lukk</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  .app-card { background: var(--bs-body-bg); border: 1px solid var(--bs-border-color); border-radius: .5rem; padding: 1rem; }
+  .diff-panel { max-height: 60vh; overflow: auto; background: var(--bs-body-bg); border: 1px solid var(--bs-border-color); border-radius: .5rem; padding: .75rem; }
+  .blk { margin-bottom: .5rem; padding: .25rem .5rem; border-radius: .25rem; }
+  .blk.eq { background: transparent; }
+  .blk.ins { background: #e8f5e9; }
+  .blk.del { background: #fdecea; }
+  .blk.rep { background: #fff8e1; }
+  .blk .loc { font-size: .8rem; color: var(--bs-secondary-color); margin-bottom: .25rem; }
+  .blk.empty pre { min-height: 1.2rem; }
+  pre { white-space: pre-wrap; margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+  .diff-ins { background: #c8e6c9; }
+  .diff-del { background: #ffcdd2; text-decoration: line-through; }
+
+  /* Dropzones */
+  .dropzone{
+    border: 2px dashed var(--bs-border-color);
+    border-radius: .5rem;
+    padding: .9rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    color: var(--bs-secondary-color);
+    transition: background-color .15s, border-color .15s;
+    margin-bottom: .5rem;
+    user-select: none;
+  }
+  .dropzone:hover{ border-color: var(--bs-primary); }
+  .dropzone.is-dragover{
+    background: rgba(13,110,253,.06);
+    border-color: var(--bs-primary);
+    color: var(--bs-body-color);
+  }
+  .dropzone .dz-files{
+    margin-top: .5rem;
+    font-size: .9rem;
+    text-align: left;
+    max-height: 9rem; overflow: auto;
+  }
+    .app-card { background: var(--bs-body-bg); border: 1px solid var(--bs-border-color); border-radius: .5rem; padding: 1rem; }
+  .diff-panel { max-height: 60vh; overflow: auto; background: var(--bs-body-bg); border: 1px solid var(--bs-border-color); border-radius: .5rem; padding: .75rem; }
+
+  .blk { margin-bottom: .5rem; padding: .5rem .75rem; border-radius: .375rem; }
+  .blk pre { white-space: pre-wrap; margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+  /* Pastell farger */
+  .blk.ins { background: #e9f7ef; }  /* grønn (i høyre/B) */
+  .blk.del { background: #fdecea; }  /* rød (i venstre/A) */
+  .blk.rep { background: #fdf7e3; }  /* mild gul for "replace"-kontekst */
+
+  /* Inline markering i "replace" */
+  .diff-ins { background: #cdeedb; padding: 0 .1rem; border-radius: .2rem; }
+  .diff-del { background: #ffdde0; text-decoration: line-through; padding: 0 .1rem; border-radius: .2rem; }
+
+  /* Ingen lokasjonslinjer ("Avsnitt X") */
+  .blk .loc { display: none; }
+</style>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='js/dokumentsammenligning.js') }}"></script>
+{% endblock %}

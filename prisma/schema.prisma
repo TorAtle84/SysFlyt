@@ -145,6 +145,10 @@ model User {
   // Multi-App access
   appAccess          UserAppAccess[]
   appAccessApprovals UserAppAccess[] @relation("AppAccessApprover")
+
+  // FlytLink API Keys (encrypted)
+  geminiApiKey       String?
+  openaiApiKey       String?
 }
 
 model Project {

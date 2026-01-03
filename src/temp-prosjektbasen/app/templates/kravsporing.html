@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+{% block title %}Kravsporing{% endblock %}
+
+{% block head %}
+  {{ super() }}
+<style>
+  :root{
+    --card-bg:#ffffff;
+    --card-bg-hover:#faf7ff;
+    --card-bg-selected:#f3f6ff;
+    --card-border:#d9dee7;
+    --card-border-strong:#7da2ff;
+    --card-accent:#2563eb;
+    --card-shadow:0 6px 18px rgba(20,20,40,.08);
+    --card-shadow-hover:0 10px 24px rgba(20,20,40,.10);
+
+    /* Nye variabler for “ring” og aksent */
+    --ring-opacity:.65;
+    --ring-size:2px;
+  }
+
+  /* Container-scope (unngå konflikt med Bootstrap) */
+  .app-card #fag-grid { row-gap:12px; }
+
+  /* Basekort */
+  .app-card #fag-grid .fag-card{
+    position:relative;
+    cursor:pointer;
+    border:1px solid var(--card-border);
+    border-radius:1rem; /* litt rundere */
+    background:linear-gradient(145deg,#ffffff,#f8f9ff);
+    padding:16px 18px; /* litt mer luft */
+    transition:
+      transform .18s ease,
+      box-shadow .18s ease,
+      border-color .18s ease,
+      background-color .18s ease,
+      filter .18s ease;
+    box-shadow:var(--card-shadow);
+    overflow:hidden; /* nødvendig for ring-maskeringen */
+  }
+
+  /* “Ring” rundt kortet i normal/partial-tilstand (bruker ::after når IKKE selected) */
+  .app-card #fag-grid .fag-card:not(.selected)::after{
+    content:"";
+    position:absolute; inset:0;
+    border-radius:inherit;
+    padding:var(--ring-size);
+    background:linear-gradient(120deg,#4f46e5,#9333ea,#06b6d4);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;
+            mask-composite:exclude;
+    opacity:var(--ring-opacity);
+    pointer-events:none;
+  }
+
+  .app-card #fag-grid .fag-card:hover{
+    transform:translateY(-3px);
+    background:linear-gradient(145deg,#f9faff,#eef2ff);
+    box-shadow:0 10px 28px rgba(37,99,235,.20);
+    border-color:#b9c6ff;
+    filter:saturate(1.02);
+  }
+
+  /* Tilstander: none / partial / selected */
+  .app-card #fag-grid .fag-card.selected{
+    background:var(--card-bg-selected);
+    border-color:var(--card-border-strong);
+    box-shadow:0 0 0 4px rgba(37,99,235,.16), 0 8px 22px rgba(37,99,235,.20);
+  }
+  .app-card #fag-grid .fag-card.partial{
+    background:var(--card-bg-hover);
+    border-color:var(--card-border-strong);
+    box-shadow:0 0 0 2px rgba(13,110,253,.10);
+  }
+
+  /* Venstre aksentstripe og “check” kun når helt valgt (beholder eksisterende) */
+  .app-card #fag-grid .fag-card.selected::before{
+    content:"";
+    position:absolute; left:-1px; top:-1px; bottom:-1px; width:6px;
+    background:var(--card-accent);
+    border-radius:1rem 0 0 1rem;
+  }
+  .app-card #fag-grid .fag-card.selected::after{
+    content:"✓";
+    position:absolute; top:8px; right:10px;
+    font-weight:700; color:var(--card-accent);
+    text-shadow:0 1px 0 rgba(255,255,255,.9);
+  }
+
+  /* Typografi og badges i kortet */
+  .app-card #fag-grid .fag-card h5{ font-size:1rem; margin:0; letter-spacing:.005em; color:#1e293b; }
+  .app-card #fag-grid .fag-card .sub{ color:#6b7280; font-size:.83rem; margin:2px 0 0; }
+  .app-card #fag-grid .fag-card .badge{ font-size:.68rem; background:#eef2ff; color:#334155; margin-left:.35rem; }
+  .app-card #fag-grid .fag-card .selchip{ font-size:.72rem; }
+
+  /* Modal – kompakt accordion (uendret) */
+  .app-card #fag-modal .accordion-button { background:#f8fafc; }
+  .app-card #fag-modal .accordion-button:not(.collapsed){ background:#eef6ff; box-shadow:none; }
+  .app-card #fag-modal .accordion-item { border:1px solid #e5e7eb; border-radius:.5rem; overflow:hidden; }
+  .app-card #fag-modal .accordion-item + .accordion-item { margin-top:.5rem; }
+  .app-card #fag-modal .badge { font-size:.7rem; }
+  .app-card #fag-modal .accordion-button .bi { transition: transform .15s ease; }
+  .app-card #fag-modal .accordion-button[aria-expanded="true"] .bi { transform: rotate(180deg); }
+
+  /* --- Fargeprofiler per fag via data-fag (valgfritt, faller tilbake til blå) --- */
+  .app-card #fag-grid .fag-card[data-fag="ventilasjon"]{
+    --card-accent:#10b981;
+  }
+  .app-card #fag-grid .fag-card[data-fag="ventilasjon"]:not(.selected)::after{
+    background:linear-gradient(120deg,#22c55e,#0ea5e9);
+  }
+
+  .app-card #fag-grid .fag-card[data-fag="elektro"]{
+    --card-accent:#f59e0b;
+  }
+  .app-card #fag-grid .fag-card[data-fag="elektro"]:not(.selected)::after{
+    background:linear-gradient(120deg,#f59e0b,#ef4444);
+  }
+
+  .app-card #fag-grid .fag-card[data-fag="rørlegger"]{
+    --card-accent:#0ea5e9;
+  }
+  .app-card #fag-grid .fag-card[data-fag="rørlegger"]:not(.selected)::after{
+    background:linear-gradient(120deg,#3b82f6,#14b8a6);
+  }
+
+  .app-card #fag-grid .fag-card[data-fag="byggautomasjon"]{
+    --card-accent:#7c3aed;
+  }
+  .app-card #fag-grid .fag-card[data-fag="byggautomasjon"]:not(.selected)::after{
+    background:linear-gradient(120deg,#9333ea,#4f46e5);
+  }
+
+  .app-card #fag-grid .fag-card[data-fag="økonomi"]{
+    --card-accent:#06b6d4;
+  }
+  .app-card #fag-grid .fag-card[data-fag="økonomi"]:not(.selected)::after{
+    background:linear-gradient(120deg,#06b6d4,#10b981);
+  }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+
+  <h1 id="kravsporing-heading" class="mb-2">
+    <span id="magnifier">🔍</span>
+    <span id="kravsporing-text">&nbsp;&nbsp;Kravsporing</span>
+  </h1>
+  <p class="text-muted mb-4">
+    Last opp ett eller flere dokumenter (PDF, Word, TXT, Excel, MSG) og angi analyseoppsett.
+  </p>
+
+  <form id="kravsporingForm" class="app-card" method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label class="form-label">Analysemodus:</label>
+      <div class="d-flex flex-wrap gap-3">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="mode" id="mode_keywords_ai" value="keywords_ai" checked>
+          <label class="form-check-label" for="mode_keywords_ai">Nøkkelord + AI</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="mode" id="mode_keywords" value="keywords">
+          <label class="form-check-label" for="mode_keywords">Bare nøkkelord</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="mode" id="mode_ai" value="ai">
+          <label class="form-check-label" for="mode_ai">Bare AI-modell</label>
+        </div>
+      </div>
+    </div>
+    
+    <select id="function-group-select" name="selected_function_groups[]" multiple hidden></select>
+
+    <input type="hidden" id="selected_groups_json" name="selected_groups" value="[]">
+
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+      <strong>Velg fag/funksjoner</strong>
+      <span class="badge bg-primary" id="valgt-counter">0 valgt</span>
+    </div>
+    
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-2" id="fag-grid"></div>
+
+    <div class="modal fade" id="fag-modal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="fag-modal-title">Velg funksjoner</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Lukk"></button>
+          </div>
+          <div class="modal-body" id="fag-modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-sm btn-outline-secondary"
+                    data-bs-toggle="modal" data-bs-target="#nokkelord-editor-modal"
+                    onclick="setTimeout(()=>{const el = document.getElementById('fag-modal');const inst = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);inst.hide();},150)">
+              Rediger nøkkelordsamling
+            </button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Ferdig</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mb-4 border rounded p-3" id="ai-controls-wrapper" style="display:none;">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <strong>AI-innstillinger</strong>
+        <span id="ai-status-pill" class="badge bg-secondary">Sjekker modeller…</span>
+      </div>
+       <div class="row g-3">
+         <div class="col-12">
+           <label for="fokusomraade" class="form-label">Fokusområde (valgfritt):</label>
+           <textarea id="fokusomraade" name="fokusomraade" class="form-control" rows="2" placeholder="Beskriv hva du ser etter, f.eks. 'krav til brannsikkerhet'"></textarea>
+         </div>
+       </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label for="min_score" class="form-label">Minimum treffprosent (0–100):</label>
+        <input type="number" id="min_score" name="min_score" class="form-control" value="85" min="0" max="100" required>
+      </div>
+      <div class="col-md-6">
+        <label for="ns_standard_selection" class="form-label">Kobling til NS-standard:</label>
+        <select id="ns_standard_selection" name="ns_standard_selection" class="form-select">
+          <option value="Ingen">Ingen kobling</option>
+          <option value="NS8415">Utførelsesentreprise (NS 8415)</option>
+          <option value="NS8417">Totalentreprise (NS 8417)</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="mb-3">
+      <label for="files" class="form-label">Velg filer (flere valgbar):</label>
+      <input type="file" id="files" name="files[]" class="form-control" multiple accept=".pdf,.doc,.docx,.txt,.xlsx,.msg">
+      <small class="text-muted">Støttede formater: PDF, DOC/DOCX, TXT, XLSX, MSG.</small>
+    </div>
+
+    <button type="button" id="startKravsporingBtn" class="btn btn-primary">
+      <i class="bi bi-play"></i> Kjør kravsporing
+    </button>
+  </form>
+
+  <div id="status-container" class="mt-4" hidden>
+    <h4>Prosessering...</h4>
+    <div class="progress">
+      <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;"></div>
+    </div>
+    <p id="status-text" class="mt-2"></p>
+    <a href="#" id="download-link" class="btn btn-success" hidden>Last ned resultater</a>
+  </div>
+
+  <div id="error-messages" class="alert alert-warning mt-3" hidden role="alert"></div>
+
+  <div class="alert alert-info mt-3">
+    <strong>Kvalitetssikring:</strong> Aktiver <em>Vis usikre funn</em> for å se treff under hovedterskel.
+    Når vi oppdaterer tabellen vil hver rad også få <em>Forklaring</em> (kw/sem/ai/fokus) og <em>Topp fag</em>.
+  </div>
+  <div class="form-check form-switch my-2">
+    <input class="form-check-input" type="checkbox" id="toggle-uncertain" checked>
+    <label class="form-check-label" for="toggle-uncertain">Vis usikre funn i gjennomgang</label>
+  </div>
+
+  <div id="review-prompt-modal" class="mt-4 p-4 app-card" style="display: none;">
+    <h5 class="text-center">Vil du se over og revidere de identifiserte kravene før nedlasting?</h5>
+    <div class="d-flex justify-content-center gap-3 mt-3">
+      <button id="review-prompt-yes" class="btn btn-primary">Ja, revider funn</button>
+      <button id="review-prompt-no" class="btn btn-secondary">Nei, last ned direkte</button>
+    </div>
+  </div>
+
+  <div id="review-container" class="mt-4" hidden>
+    <hr class="my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>Revider kravfunn</h2>
+      <button id="add-new-req-btn" class="btn btn-sm btn-outline-primary">
+        <i class="bi bi-plus-circle"></i> Legg til nytt krav
+      </button>
+    </div>
+    <div id="review-table-wrapper" class="table-responsive"></div>
+    <div class="d-flex justify-content-end gap-2 mt-3">
+      <button id="save-changes-btn" class="btn btn-outline-secondary">Lagre endringer</button>
+      <button id="retrain-ai-btn" class="btn btn-info">Lær AI</button>
+      <button id="finish-review-btn" class="btn btn-success">Fullfør og generer ZIP</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="nokkelord-editor-modal" tabindex="-1" aria-labelledby="nokkelord-editor-label" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="nokkelord-editor-label">Rediger nøkkelordsamling</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Lukk"></button>
+      </div>
+      <div class="modal-body">
+        <div id="nokkelord-editor-tabs-container" class="d-flex align-items-center border-bottom mb-3">
+            <ul class="nav nav-tabs" id="nokkelord-editor-tabs" role="tablist"></ul>
+            <button id="add-fag-btn" class="btn btn-sm btn-outline-success ms-3 mb-2" title="Legg til nytt fagområde">+</button>
+        </div>
+        <div class="tab-content" id="nokkelord-editor-content"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Lukk</button>
+        <button type="button" class="btn btn-primary" id="save-nokkelord-btn">Lagre endringer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>window.KS_BASE = "/kravsporing";</script>
+<script src="{{ url_for('static', filename='js/kravsporing.js') }}?v=2025-10-29-1"></script>
+{% endblock %}

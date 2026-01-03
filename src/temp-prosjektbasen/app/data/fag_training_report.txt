@@ -1,0 +1,12 @@
+                precision    recall  f1-score   support
+
+byggautomasjon      0.600     0.643     0.621        28
+       elektro      0.680     0.723     0.701        47
+        felles      0.783     0.720     0.750        25
+ prosjektering      0.917     0.733     0.815        15
+     rørlegger      0.604     0.696     0.646        46
+   ventilasjon      0.650     0.481     0.553        27
+
+      accuracy                          0.670       188
+     macro avg      0.706     0.666     0.681       188
+  weighted avg      0.678     0.670     0.670       188

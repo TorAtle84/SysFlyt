@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}SluPlan{% endblock %}
+
+{% block head_extra %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename='sluplan/dist/assets/index.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+  <div id="root"></div>
+  <noscript>
+    <div class="container py-4">
+      <div class="alert alert-warning">
+        SluPlan krever at JavaScript er aktivert for å fungere.
+      </div>
+    </div>
+  </noscript>
+{% endblock %}
+
+{% block scripts %}
+  <script type="module" src="{{ url_for('static', filename='sluplan/dist/assets/index.js') }}"></script>
+{% endblock %}

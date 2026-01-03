@@ -1,0 +1,33 @@
+{
+  "brannmotstand": [
+    "brannsikkerhet",
+    "brannklasse",
+    "EI60",
+    "EI30"
+  ],
+  "vanntett": [
+    "vannbestandig",
+    "vannavvisende",
+    "vanntetthet"
+  ],
+  "garanti": [
+    "garantitid",
+    "reklamasjonsrett"
+  ],
+  "isolasjon": [
+    "isolert",
+    "isolasjonsevne",
+    "varmeisolasjon"
+  ],
+  "ventilasjon": [
+    "luftbehandling",
+    "avtrekk",
+    "tilluft",
+    "luftmengde"
+  ],
+  "energieffektiv": [
+    "lavt energiforbruk",
+    "høy energieffektivitet",
+    "energibesparende"
+  ]
+}

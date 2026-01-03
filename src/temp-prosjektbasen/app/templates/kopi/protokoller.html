@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+
+{% block title %}Protokollverktøy{% endblock %}
+
+{% block content %}
+
+<style>
+    .app-card {
+        background-color: #dde7e7;
+        border: 1px solid #c0d3e0;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
+
+    .main-content-area {
+        width: 100%;
+        padding: 0 2.5%;
+        box-sizing: border-box;
+    }
+
+    .main-content-area table {
+        width: 100%;
+        table-layout: auto;
+        word-break: break-word;
+    }
+
+    .tab-pane {
+        padding: 1rem;
+    }
+
+    .main-content-area table td {
+        vertical-align: top;
+    }
+    .segment {
+        display: inline-block;
+        margin: 0 5px;
+        padding: 0.6rem 1.2rem;
+        border-radius: 15px;
+        cursor: pointer;
+        font-weight: 600;
+        user-select: none;
+        transition: 0.2s;
+    }
+    .segment:hover { filter: brightness(1.1); }
+    .segment.selected { outline: 3px solid black; }
+
+    .prefix { background: #6c757d; color: #fff; }
+    .system { background: #17a2b8; color: #fff; }
+    .lopenr { background: #ffc107; color: #000; }
+    .byggnr { background: #28a745; color: #fff; }
+    .komponent { background: #ffc107; color: #000; }
+    .typekode { background: #6f42c1; color: #fff; }
+
+    #system-kriterier .sys-btn {
+        display: inline-block;
+        margin: 0 5px;
+        padding: 8px 12px;
+        border: 2px solid #ccc;
+        border-radius: 6px;
+        cursor: pointer;
+        user-select: none;
+    }
+    #system-kriterier .sys-btn.selected {
+        background: #6f42c1;
+        color: #fff;
+        border-color: #333;
+    }
+
+    .nav-tabs {
+        border-bottom: 1px solid #dee2e6;
+        background-color: #f8f9fa;
+        border-radius: .25rem .25rem 0 0;
+        padding-top: .5rem;
+        padding-left: .5rem;
+    }
+
+    .nav-tabs .nav-link {
+        border: 1px solid transparent;
+        border-top-left-radius: .25rem;
+        border-top-right-radius: .25rem;
+        color: #495057;
+        margin-bottom: -1px;
+        background-color: #e9ecef;
+        transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .nav-tabs .nav-link:hover {
+        border-color: #e9ecef #e9ecef #dee2e6;
+        background-color: #f1f3f5;
+    }
+
+    .nav-tabs .nav-item.show .nav-link,
+    .nav-tabs .nav-link.active {
+        color: #495057;
+        background-color: #fff;
+        border-color: #dee2e6 #dee2e6 #fff;
+    }
+
+    .tab-pane {
+        padding-top: 1rem;
+        border: 1px solid #dee2e6;
+        border-top: none;
+        background-color: #fff;
+        padding: 1rem;
+        border-radius: 0 0 .25rem .25rem;
+    }
+</style>
+
+<div class="main-content-area my-4"><div class="app-card">
+    <h2 class="mb-4"><i class="bi bi-file-earmark-text"></i> Protokollverktøy</h2>
+
+    <div id="format-segmenter" class="mb-3">
+		<span class="segment byggnr" data-placeholder="{byggnr}">+260801A</span>
+		<span class="segment system" data-placeholder="{system}">=5630.0102</span>
+		<span class="segment komponent" data-placeholder="{komponent}">-SQZ5004</span>
+		<span class="segment typekode" data-placeholder="{typekode}">%SQZ.0001</span>
+    </div>
+
+    <textarea id="format-input" class="form-control mb-3" placeholder="Klikk segmenter for å bygge formatet" readonly></textarea>
+    <small class="text-muted">
+        Bruk {byggnr} for «+...», {system} for «=...», {komponent} for «-...» og {typekode} for «%...».
+    </small>
+
+    <hr>
+
+    <label for="system-kriterier" class="form-label">Systemkriterier:</label>
+    <div id="system-kriterier" class="mb-3">
+        {% for i in range(1, 10) %}
+        <span class="sys-btn" data-val="{{ i }}">{{ i }}</span>
+        {% endfor %}
+        <button id="tfm-popup-btn" class="btn btn-secondary" style="display:none;">TFM</button>
+    </div>
+
+    <label for="funksjonsvalg" class="form-label">Velg funksjon:</label>
+    <select id="funksjonsvalg" class="form-select mb-3 w-100">
+		<option value="" selected disabled>Velg funksjon</option>
+        <option value="MC">MC-Dokumentasjon</option>
+        <option value="FUNKSJONSTEST">Funksjonstestprotokoll</option>
+        <option value="INNREGULERING">Innreguleringsprotokoll (ventilasjon)</option>
+    </select>
+
+    <label id="fileUploadLabel" class="form-label">Last opp dokumenter:</label>
+    <input id="filopplaster" type="file" class="form-control mb-3" multiple accept=".pdf,.docx,.xlsx,.txt">
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <button id="generate-data-btn" class="btn btn-primary w-100">Generer underlag</button>
+        </div>
+        <div class="col-md-6">
+            <button id="download-protocol-btn" class="btn btn-success w-100" disabled>Last ned protokoll</button>
+        </div>
+    </div>
+
+	<div id="status-text" class="text-muted mb-3">Status: Klar</div>
+
+	<div id="fileFilterContainer" class="mb-3"></div>
+
+	<div class="d-flex justify-content-between align-items-center mb-3">
+		<h5>Resultat:</h5>
+		<button id="clear-table-btn" class="btn btn-sm btn-outline-danger">Tøm tabell</button>
+	</div>
+
+    <div id="system-filter-container" class="mb-3" style="display: none;">
+        </div>
+
+    <ul id="systemTabs" class="nav nav-tabs"></ul>
+    <div id="systemTabContent" class="tab-content"></div>
+
+    <table id="protocol-table" class="table table-bordered">
+        <thead id="table-head">
+            <tr>
+                <th>Montasjestatus</th>
+                <th>Kablet og koblet</th>
+                <th>Merket</th>
+                <th>Komponentnavn</th>
+                <th>Beskrivelse</th>
+                <th>Tilordnet til</th>
+                <th>Utført av</th>
+                <th>Dato utført</th>
+                <th>Kommentar</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+            <tr>
+                <td>✔️Utført</td>
+                <td>✔️Utført</td>
+                <td>✔️Utført</td>
+                <td>+100=3601.0001-JPA4001</td>
+                <td>Gjør dette:</td>
+                <td>Dette skal hende:</td>
+                <td>Per T. Ansvar</td>
+                <td>Dato</td>
+                <td>...</td>
+            </tr>
+        </tbody>
+    </table>
+</div></div>
+
+<div class="modal fade" id="tfmModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">TFM Komponentfilter</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table id="tfmTable" class="table table-bordered">
+                    <thead><tr><th>TFM-kode</th><th>Beskrivelse</th><th>Status</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button id="lagre-tfm-btn" class="btn btn-primary">Lagre valg</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="filterModal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header">
+      <h5 id="modalTitle" class="modal-title"></h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+      <div id="modalCheckboxes"></div>
+    </div>
+    <div class="modal-footer">
+      <button id="modalConfirm" class="btn btn-primary">Bekreft</button>
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Lukk</button>
+    </div>
+  </div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/protokoller.js" type="module"></script>
+{% endblock %}

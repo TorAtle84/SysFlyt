@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Prosjektdetaljer{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h2 class="mb-4">Prosjektdetaljer &ndash; {{ project.project_name }}</h2>
+
+  <!-- Prosjektinfo-kort -->
+  <div class="card shadow-sm p-4 border-0" style="background-color: #f8f9fa;">
+    <div class="row">
+      <div class="col-md-6">
+        <p class="mb-2"><strong>Ordrenummer:</strong> {{ project.order_number }}</p>
+        <p class="mb-2"><strong>Lokasjon:</strong> {{ project.location }}</p>
+        <p class="mb-2"><strong>Prosjektleder:</strong>
+          {% if project.project_leader %}
+            {{ project.project_leader.first_name }} {{ project.project_leader.last_name }}
+          {% else %}
+            <span class="text-muted">Ikke angitt</span>
+          {% endif %}
+        </p>
+        <p class="mb-0"><strong>Prosjektsjef:</strong>
+          {% if project.project_manager %}
+            {{ project.project_manager.first_name }} {{ project.project_manager.last_name }}
+          {% else %}
+            <span class="text-muted">Ikke angitt</span>
+          {% endif %}
+        </p>
+      </div>
+      <div class="col-md-6">
+        <label class="fw-semibold mb-1">Beskrivelse:</label>
+        <div class="border rounded p-3 bg-white" style="min-height: 120px; white-space: pre-wrap;">
+          {{ project.description or "Ingen beskrivelse angitt." }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fanevalg -->
+  <ul class="nav nav-tabs mb-3 mt-4">
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'systembygging' %}active{% endif %}"
+         href="{{ url_for('project_bp.vis_prosjekt', id=project.id, tab='systembygging') }}">
+         Systemoppbygging
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'komponentopptelling' %}active{% endif %}"
+         href="{{ url_for('project_bp.vis_prosjekt', id=project.id, tab='komponentopptelling') }}">
+         Komponentopptelling
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'merkeskilt' %}active{% endif %}"
+         href="{{ url_for('project_bp.vis_prosjekt', id=project.id, tab='merkeskilt') }}">
+         Merkeskilt
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'tidsbruk' %}active{% endif %}"
+         href="{{ url_for('project_bp.vis_prosjekt', id=project.id, tab='tidsbruk') }}">
+         Tidsbruk
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link disabled">Kravsporing</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link disabled">Oppgaver</a>
+    </li>
+  </ul>
+
+  <!-- Dynamisk innhold basert på valgt fane -->
+  {% if active_tab == 'systembygging' %}
+    {% include 'partials/tab_system.html' %}
+  {% elif active_tab == 'komponentopptelling' %}
+    {% include 'partials/tab_komponent.html' %}
+  {% elif active_tab == 'merkeskilt' %}
+    {% include 'partials/tab_merkeskilt.html' %}
+  {% elif active_tab == 'tidsbruk' %}
+    {% include 'partials/tab_tidsbruk.html' %}
+  {% else %}
+    <div class="alert alert-info">Velg en fane for å se innhold.</div>
+  {% endif %}
+</div>
+{% endblock %}

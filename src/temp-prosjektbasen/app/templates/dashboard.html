@@ -1,0 +1,592 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background-color: #F7F5FC; /* Lys pastell lilla */
+  }
+
+  .main-app-display {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+    background: linear-gradient(to bottom, #F7F5FC 0%, #e9e3f9 100%);
+  }
+
+  #app-name-display {
+    height: 20%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 20px;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 700;
+    color: #5e35b1;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.15);
+    transform: scale(0);
+    opacity: 0;
+    transition: transform 0.7s ease-out, opacity 0.7s ease-out;
+  }
+
+  #description-display {
+    height: 30%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 40px;
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    color: #4a3f63;
+    max-width: 800px;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: transform 0.7s ease-out, opacity 0.7s ease-out;
+  }
+
+  #icon-display-area {
+    height: 50%;
+    width: 100%;
+    position: relative;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #dde7e7;
+    border-top: 1px solid #d0c6ea;
+    border-bottom: 1px solid #d0c6ea;
+  }
+
+  .app-icon-main {
+    font-size: 45vh;
+    color: #7e57c2;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform-style: preserve-3d;
+    display: block;
+  }
+
+  .app-icon-preview {
+    font-size: 25vh;
+    color: #b39ddb;
+    opacity: 0.5;
+    transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+    display: block;
+  }
+
+  .nav-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(94, 53, 177, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 2.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 100;
+  }
+
+  .nav-button:hover {
+    background-color: #5e35b1;
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  .nav-button:active {
+    transform: translateY(-50%) scale(0.95);
+  }
+
+  .info-box {
+    position: absolute;
+    bottom: 2%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(126, 87, 194, 0.9);
+    color: white;
+    padding: 0.8rem 1.2rem;
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    z-index: 20;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+</style>
+
+<div id="main-app-display" class="main-app-display">
+
+    <!-- Toppseksjon: Applikasjonsnavn (20% høyde) -->
+    <div id="app-name-display" style="height: 20%; width: 100%; display: flex; justify-content: center; align-items: center; text-align: center; padding: 0 20px; box-sizing: border-box;
+                                      font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 700; color: #1a202c; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+                                      transform: scale(0); opacity: 0; transition: transform 0.7s ease-out, opacity 0.7s ease-out;">
+        <!-- Applikasjonsnavn vises her -->
+    </div>
+
+    <!-- Midtseksjon: Hovedikon og forhåndsvisning (50% høyde) -->
+    <div id="icon-display-area" style="height: 50%; width: 100%; position: relative; cursor: grab; display: flex; align-items: center; justify-content: center; overflow: hidden; /* DEBUG: border: 2px solid green; */">
+        
+        <!-- Spor for ikonene: holder prev, current, next ikoner -->
+        <div id="icon-carousel-track" style="display: flex; position: absolute; height: 100%; width: 300%; 
+                                            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Jevn slide */
+                                            transform: translateX(-33.3333%); /* Start med midterste ikon sentrert */
+                                            /* DEBUG: border: 2px solid blue; */">
+            
+            <!-- Forrige applikasjons-ikon (forhåndsvisning) -->
+            <div class="icon-item-wrapper" data-slot="prev">
+                <i class="app-icon-preview"></i>
+            </div>
+            
+            <!-- Nåværende applikasjons-ikon (sentrert og stort) -->
+            <div class="icon-item-wrapper" data-slot="current">
+                <!-- Ikonet inni lenken -->
+                <!-- Ikonet rendres av JS, så <a>-taggen vil bli satt her -->
+            </div>
+            
+            <!-- Neste applikasjons-ikon (forhåndsvisning) -->
+            <div class="icon-item-wrapper" data-slot="next">
+                <i class="app-icon-preview"></i>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bunnseksjon: Beskrivelse (30% høyde) -->
+    <div id="description-display" style="height: 30%; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 40px; box-sizing: border-box;
+                                        font-size: clamp(1rem, 2.5vw, 1.4rem); color: #4a5568; line-height: 1.6; max-width: 800px; /* Begrens bredden for lesbarhet */
+                                        transform: translateY(20px); opacity: 0; transition: transform 0.7s ease-out, opacity 0.7s ease-out;">
+        <!-- Beskrivelsestekst vises her -->
+    </div>
+
+    <!-- Navigasjonsknapper (absolutt posisjonert over innholdet) -->
+    <button id="prevBtn" class="nav-button" style="left: 2rem;">&lt;</button>
+    <button id="nextBtn" class="nav-button" style="right: 2rem;">&gt;</button>
+
+    <!-- Info-boks (valgfritt, nederst i vinduet) -->
+    <div class="info-box" style="position: absolute; bottom: 2%; left: 50%; transform: translateX(-50%); background-color: rgba(0, 0, 0, 0.6); color: white; padding: 0.8rem 1.2rem; border-radius: 0.75rem; font-size: 0.9rem; z-index: 20; white-space: nowrap;">Dra ikonet for å navigere eller bruk piltastene.</div>
+</div>
+<!-- SLUTT: Hovedvisning for enkelt applikasjon -->
+
+<style>
+    /* Generelle body-stiler for å unngå scrollbars og sette font */
+    body {
+        margin: 0;
+        overflow: hidden; /* Forhindrer scrollbars på body */
+        font-family: 'Inter', sans-serif; /* Forutsatt at Inter-font er inkludert i base.html */
+    }
+
+    /* CSS for spinning-animasjonen (på hovedikonet) */
+    @keyframes subtle-spin {
+        from { transform: rotateY(0deg); }
+        to { transform: rotateY(360deg); }
+    }
+    .app-icon-main.is-spinning {
+        animation: subtle-spin 8s linear infinite; /* Saktere spinn for en diskret effekt */
+    }
+
+    /* Stiler for det store ikonet i midten (hovedikonet) */
+    .app-icon-main {
+        font-size: 45vh; /* Økt til 45vh for å være større */
+        color: #333;
+        transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transform-style: preserve-3d;
+        line-height: 1;
+        display: block;
+        object-fit: contain;
+    }
+
+    /* Stiler for forhåndsvisningsikonene (prev/next) */
+    .app-icon-preview {
+        font-size: 25vh; /* Økt til 25vh for å være tydeligere */
+        color: #666;
+        opacity: 0.6;
+        transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+        line-height: 1;
+        display: block;
+        object-fit: contain;
+    }
+    /* Justeringer for icon-item-wrapper for å sikre vertikal sentrering og justering */
+    .icon-item-wrapper {
+        display: flex;
+        width: 33.3333%; /* Bruker mer presis verdi for 1/3 */
+        height: 100%; 
+        align-items: center; /* Senter vertikalt */
+        padding: 0; /* Nullstilt padding her */
+        box-sizing: border-box; /* Inkluder padding i bredden */
+        /* DEBUG: border: 1px solid purple; */
+    }
+    .icon-item-wrapper[data-slot="prev"] {
+        justify-content: flex-end; /* Juster prev-ikon til høyre i sin slot */
+        padding-right: 5vw; /* Gir rom til å titte frem */
+    }
+    .icon-item-wrapper[data-slot="current"] {
+        justify-content: center; /* Senter current-ikon i sin slot */
+    }
+    .icon-item-wrapper[data-slot="next"] {
+        justify-content: flex-start; /* Juster next-ikon til venstre i sin slot */
+        padding-left: 5vw; /* Gir rom til å titte frem */
+    }
+
+    /* Stil for navigasjonsknapper */
+    .nav-button {
+        position: absolute; /* Absolutt posisjonering i forhold til #main-app-display */
+        top: 50%; /* Sentrer vertikalt */
+        transform: translateY(-50%); /* Juster for sentrering */
+        background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent bakgrunn */
+        color: white; /* Hvit tekst/pil */
+        border: none; /* Ingen kantlinje */
+        border-radius: 50%; /* Rund form */
+        width: 60px; /* Størrelse */
+        height: 60px;
+        font-size: 2.5rem; /* Størrelse på pil-ikonet */
+        cursor: pointer; /* Vis at den kan klikkes */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s ease, transform 0.2s ease; /* Animasjon ved hover/active */
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Subtil skygge */
+        z-index: 100; /* Sikrer at knappene er over ikonene */
+    }
+
+    .nav-button:hover {
+        background-color: rgba(0, 0, 0, 0.7); /* Mørkere ved hover */
+        transform: translateY(-50%) scale(1.1); /* Liten zoom ved hover */
+    }
+    .nav-button:active {
+        transform: translateY(-50%) scale(0.95); /* Liten "trykk-effekt" */
+    }
+</style>
+
+<script>
+    // Data for ikonene og deres beskrivelser
+    const iconData = [
+        { name: "Prosjektbase", iconClass: "bi bi-folder", description: "Administrer alle dine prosjekter og relaterte dokumentasjon her.", link: "/project_base" },
+        { name: "Kravsporing", iconClass: "bi bi-search", description: "Last opp filer, spor krav, sikre din leveranse på få minutter!", link: "/kravsporing" },
+        { name: "Dokumentsammenligning", iconClass: "bi bi-files", description: "Sammenlign innholdet av dokumenter raskt og effektivt", link: "/dokumentsammenligning" },
+        { name: "Merkeskilt", iconClass: "bi bi-tag", description: "Opprett data for merkeskilt", link: "/merkeskilt_mc" },
+        { name: "System og komponent", iconClass: "bi bi-gear", description: "Bygg sytemlister og komponentopptelling for prosjektet ditt", link: "/system_komponent" },
+        { name: "Masseliste", iconClass: "bi bi-table", description: "Vis og rediger store datamengder i en oversiktlig tabell.", link: "/masseliste" },
+        { name: "Protokollverktøy", iconClass: "bi bi-file-earmark-text", description: "Opprett, rediger og administrer protokoller på et øyeblikk!", link: "/protokollverktøy" },
+        { name: "Kalender", iconClass: "bi bi-calendar-event", description: "Hold oversikt over viktige datoer, oppgaver og hendelser.", link: "/kalender" },
+        { name: "Tidsbruk", iconClass: "bi bi-clock", description: "Estimer tidsbruk på prosjekter og oppgaver.", link: "/tidsbruk" },
+        { name: "Produksjon", iconClass: "bi bi-graph-up", description: "Følg med på produksjonsstatistikk og fremdrift av oppgaver i sanntid.", link: "/produksjon" },
+        { name: "Logg ut", iconClass: "bi bi-box-arrow-right", description: "Logg ut av applikasjonen trygt og sikkert.", link: "/logout" }
+    ];
+
+    // Hent referanser til HTML-elementene
+    const mainAppDisplay = document.getElementById('main-app-display');
+    const appNameDisplay = document.getElementById('app-name-display');
+    const iconDisplayArea = document.getElementById('icon-display-area');
+    const descriptionDisplay = document.getElementById('description-display');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const iconCarouselTrack = document.getElementById('icon-carousel-track');
+
+    // Referanser til icon-wrapper slottene
+    const prevAppSlot = iconCarouselTrack.querySelector('[data-slot="prev"]');
+    const currentAppSlot = iconCarouselTrack.querySelector('[data-slot="current"]');
+    const nextAppSlot = iconCarouselTrack.querySelector('[data-slot="next"]');
+
+    // Global tilstand for gjeldende aktivt ikon
+    let currentIndex = 0;
+
+    // Variabler for dra-funksjonalitet
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragOffset = 0; // Akkumulert forskyvning under drag i piksler
+    const slotWidthPercent = 0; // Bredde på hver slot i prosent (mer presis)
+    const initialTrackTransformPercent = -slotWidthPercent; // Start for å sentrere 'current' slotten
+
+    // Variabler for kantescrolling
+    let scrollEdgeInterval = null; // Interval-ID for auto-rulling ved kantene
+    let isClickPrevented = false; // For å forhindre klikk etter drag
+
+    /**
+     * Fyller ut ikon-slotene (prev, current, next) med riktig ikon og data.
+     * Denne funksjonen oppdaterer innholdet i de tre forhåndsdefinerte slotene.
+     * @param {number} centerIndex Indeksen til ikonet som skal være i 'current' slotten.
+     */
+    function populateIconSlots(centerIndex) {
+        console.log(`populateIconSlots called with centerIndex=${centerIndex}`);
+        const numItems = iconData.length;
+
+        // Beregn indeksene for forrige og neste ikon med syklisk looping
+        const prevIndex = (centerIndex - 1 + numItems) % numItems;
+        const nextIndex = (centerIndex + 1) % numItems;
+
+        console.log(`  Prev Index: ${prevIndex} (${iconData[prevIndex].name})`);
+        console.log(`  Current Index: ${centerIndex} (${iconData[centerIndex].name})`);
+        console.log(`  Next Index: ${nextIndex} (${iconData[nextIndex].name})`);
+
+        // Fyll ut forrige ikon (preview)
+        prevAppSlot.innerHTML = `<i class="${iconData[prevIndex].iconClass} app-icon-preview"></i>`;
+        
+        // Fyll ut nåværende ikon (hovedikon, spinner) med en lenke
+        const currentIconLink = document.createElement('a');
+        currentIconLink.href = iconData[centerIndex].link;
+        currentIconLink.className = 'current-icon-link'; // For å styre styling/interaksjon om nødvendig
+        currentIconLink.onclick = (e) => {
+            if (isClickPrevented) {
+                e.preventDefault(); // Forhindre navigasjon hvis det var et drag
+                isClickPrevented = false; // Tilbakestill
+                console.log("Click prevented after drag.");
+            }
+        };
+        currentIconLink.innerHTML = `<i class="${iconData[centerIndex].iconClass} app-icon-main is-spinning"></i>`;
+        currentAppSlot.innerHTML = ''; // Tøm slotten først
+        currentAppSlot.appendChild(currentIconLink); // Legg til lenken med ikonet
+
+        // Fyll ut neste ikon (preview)
+        nextAppSlot.innerHTML = `<i class="${iconData[nextIndex].iconClass} app-icon-preview"></i>`;
+
+        // Sikre at kun hovedikonet spinner, og at de andre ikke gjør det
+        currentAppSlot.querySelector('.app-icon-main').classList.add('is-spinning');
+        if (prevAppSlot.querySelector('.app-icon-preview')) prevAppSlot.querySelector('.app-icon-preview').classList.remove('is-spinning');
+        if (nextAppSlot.querySelector('.app-icon-preview')) nextAppSlot.querySelector('.app-icon-preview').classList.remove('is-spinning');
+    }
+
+
+    /**
+     * Oppdaterer visningen med data for det gitte indekset og animerer overgangen.
+     * @param {number} targetIndex Indeksen til applikasjonen som skal vises.
+     * @param {number} direction Retningen av navigasjonen (-1 for venstre/forrige, 1 for høyre/neste, 0 for ingen slide).
+     */
+    function updateDisplay(targetIndex, direction = 0) {
+        console.log(`updateDisplay called: targetIndex=${targetIndex}, direction=${direction}`);
+        // Sikrer at indeksen er innenfor gyldig område og "looper" rundt
+        targetIndex = (targetIndex + iconData.length) % iconData.length;
+
+        // Først animer ut det gamle navnet og beskrivelsen
+        appNameDisplay.style.transform = 'scale(0.8)';
+        appNameDisplay.style.opacity = '0';
+        descriptionDisplay.style.transform = 'translateY(20px)';
+        descriptionDisplay.style.opacity = '0';
+
+        let trackSlideTargetTransform;
+        let animationDuration = 800; // Varigheten av ikonsliden
+        let contentUpdateDelay = animationDuration; // Når innholdet skal oppdateres
+
+        if (direction === -1) { // Går til forrige ikon
+            trackSlideTargetTransform = 0; // Sporet skyves mot høyre for å vise venstre slot
+        } else if (direction === 1) { // Går til neste ikon
+            trackSlideTargetTransform = 0; // Sporet skyves mot venstre for å vise høyre slot
+        } else { // Initial lasting eller snap-back etter drag
+            // Ved initial lasting, sett karusellen direkte til midten uten animasjon
+            iconCarouselTrack.style.transition = 'none';
+            iconCarouselTrack.style.transform = `translateX(${initialTrackTransformPercent}%)`;
+            populateIconSlots(targetIndex); // Fyll ikonene umiddelbart
+            
+            // Re-aktiver transition for fremtidige slides
+            requestAnimationFrame(() => {
+                iconCarouselTrack.style.transition = 'transform 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            });
+
+            animationDuration = 0; // Ingen animasjon
+            contentUpdateDelay = 0; // Oppdater innhold umiddelbart
+        }
+
+        // Animer tracken hvis det ikke er initial lasting/snap
+        if (direction !== 0) {
+            iconCarouselTrack.style.transform = `translateX(${trackSlideTargetTransform}%)`;
+        }
+        console.log(`  Track sliding to: ${trackSlideTargetTransform}%`);
+
+        // Vent til slide-animasjonen er ferdig før du oppdaterer innholdet og animerer inn
+        setTimeout(() => {
+            // Hvis det var en faktisk slide, flytt tracken tilbake til midten og oppdater ikoner
+            if (direction !== 0) {
+                iconCarouselTrack.style.transition = 'none'; // Slå av transition for snap-back
+                iconCarouselTrack.style.transform = `translateX(${initialTrackTransformPercent}%)`; // Snap tilbake
+                populateIconSlots(targetIndex); // Fyll inn nye ikoner
+                
+                requestAnimationFrame(() => { // Re-aktiver transition for neste animasjon
+                    iconCarouselTrack.style.transition = 'transform 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                });
+            }
+
+            currentIndex = targetIndex; // Oppdater global indeks
+            console.log(`  Animation complete, new currentIndex: ${currentIndex}`);
+            
+            // Animer inn ny info (navn og beskrivelse)
+            appNameDisplay.textContent = iconData[currentIndex].name.toUpperCase();
+            appNameDisplay.style.transform = 'scale(1.2)';
+            appNameDisplay.style.opacity = '1';
+
+            descriptionDisplay.textContent = iconData[currentIndex].description;
+            descriptionDisplay.style.transform = 'translateY(0)';
+            descriptionDisplay.style.opacity = '1';
+
+            dragOffset = 0; // Nullstill dragOffset her
+        }, contentUpdateDelay); // Bruk contentUpdateDelay
+    }
+
+    /**
+     * Initialiserer eventlyttere og den første visningen.
+     */
+    function initAppDisplay() {
+        // Initial visning (ingen slide-animasjon ved start)
+        updateDisplay(currentIndex, 0);
+
+        // Navigasjonsknapper
+        prevBtn.addEventListener('click', () => updateDisplay(currentIndex - 1, -1));
+        nextBtn.addEventListener('click', () => updateDisplay(currentIndex + 1, 1));
+
+        // Dra-funktionalitet på ikon-området
+        iconDisplayArea.addEventListener('mousedown', onDragStart);
+        iconDisplayArea.addEventListener('mousemove', onDragging);
+        iconDisplayArea.addEventListener('mouseup', onDragEnd);
+        iconDisplayArea.addEventListener('mouseleave', onDragEnd); // Avslutt drag hvis musen forlater containeren
+
+        // Touch for mobil
+        iconDisplayArea.addEventListener('touchstart', onDragStart);
+        iconDisplayArea.addEventListener('touchmove', onDragging);
+        iconDisplayArea.addEventListener('touchend', onDragEnd);
+
+        // Tastatur-navigasjon (piltaster)
+        document.addEventListener('keydown', handleKeydown);
+
+        // Kantescrolling (musbevegelse over hele #main-app-display)
+        mainAppDisplay.addEventListener('mousemove', handleEdgeScroll);
+        mainAppDisplay.addEventListener('mouseleave', stopEdgeEdgeInterval); // Stop rulling når musen forlater seksjonen // Endret her
+    }
+
+    /**
+     * Håndterer auto-navigasjon ved kantene av vinduet.
+     */
+    function handleEdgeScroll(event) {
+        if (isDragging) return; // Ikke auto-naviger ved manuell dragging
+
+        const rect = mainAppDisplay.getBoundingClientRect(); // Få main-displayets posisjon
+        const mouseX = event.clientX; // Musens X-posisjon i viewport
+
+        const edgeSize = rect.width * 0.20; // 20% av bredden for kantesonen
+        const navigationInterval = 4500; // Millisekunder mellom navigasjoner
+
+        let direction = 0;
+
+        // Høyre kantsone
+        if (mouseX > rect.right - edgeSize && mouseX < rect.right) {
+            direction = 1;
+        } 
+        // Venstre kantsone
+        else if (mouseX < rect.left + edgeSize && mouseX > rect.left) {
+            direction = -1;
+        }
+
+        if (direction !== 0 && scrollEdgeInterval === null) {
+            // Start auto-navigasjon hvis i sone og ikke allerede ruller
+            scrollEdgeInterval = setInterval(() => {
+                updateDisplay(currentIndex + direction, direction);
+            }, navigationInterval);
+        } else if (direction === 0 && scrollEdgeInterval !== null) {
+            // Stopp auto-navigasjon hvis utenfor sone og ruller
+            stopEdgeEdgeInterval();
+        }
+    }
+
+    /**
+     * Stopper auto-navigasjon ved kantene.
+     */
+    function stopEdgeEdgeInterval() { // Feilen er her: funksjonsnavnet var "stopEdgeEdgeInterval", men kalt som "stopEdgeInterval"
+        if (scrollEdgeInterval !== null) {
+            clearInterval(scrollEdgeInterval);
+            scrollEdgeInterval = null;
+        }
+    }
+
+    /**
+     * Start dra-operasjon.
+     */
+    function onDragStart(e) {
+        isDragging = true;
+        dragStartX = e.clientX || e.touches[0].clientX;
+        iconCarouselTrack.style.transition = 'none'; // Slår av overgang under drag
+        stopEdgeEdgeInterval(); // Stopp kantescrolling ved manuell drag // Endret her
+        e.preventDefault(); // Forhindrer standard nettleser-oppførsel (f.eks. bilde-dra)
+
+        // Midlertidig skjuler tekst for smoothere drag
+        appNameDisplay.style.opacity = '0';
+        descriptionDisplay.style.opacity = '0';
+    }
+
+    /**
+     * Utfører dragging.
+     */
+    function onDragging(e) {
+        if (!isDragging) return;
+        const currentX = e.clientX || e.touches[0].clientX;
+        const diffX = currentX - dragStartX; // Forskjell i piksler fra start
+
+        // Beregn ny dragOffset (i piksler)
+        dragOffset = diffX;
+
+        // Konverter piksel-offset til prosent for track transform
+        // Juster drag-følsomheten: 100% tilsvarer bredden av iconDisplayArea
+        const percentOffset = (dragOffset / iconDisplayArea.clientWidth) * slotWidthPercent; // Skaler til slot-bredde
+        
+        // Begrens drag for å unngå at sporet går for langt
+        const maxDragPercent = slotWidthPercent * 0.8; // F.eks. tillat 80% av en slot å dra
+        const limitedPercentOffset = Math.max(-maxDragPercent, Math.min(maxDragPercent, percentOffset));
+
+        iconCarouselTrack.style.transform = `translateX(${initialTrackTransformPercent + limitedPercentOffset}%)`;
+    }
+
+    /**
+     * Avslutter dra-operasjon og oppdaterer visningen basert på drag.
+     */
+    function onDragEnd(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        iconDisplayArea.style.cursor = 'grab';
+        iconCarouselTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)'; // Slå på overgang igjen
+
+        const dragThresholdPercent = slotWidthPercent * 0.15; // 15% av en slot-bredde for å trigge bytte
+
+        if (dragOffset > dragThresholdPercent) { // Dra til høyre (naviger til forrige)
+            updateDisplay(currentIndex - 1, -1);
+        } else if (dragOffset < -dragThresholdPercent) { // Dra til venstre (naviger til neste)
+            updateDisplay(currentIndex + 1, 1);
+        } else {
+            // Hvis ikke nok drag, returner sporet til midterste posisjon og vis info igjen for nåværende ikon
+            updateDisplay(currentIndex, 0); 
+        }
+        dragOffset = 0; // Nullstill drag-offset for neste drag
+        // Aktiver forhindring av klikk etter et drag for en kort stund
+        isClickPrevented = true;
+        setTimeout(() => {
+            isClickPrevented = false;
+        }, 100); // 100ms bør være nok
+    }
+
+    /**
+     * Håndterer tastaturtrykk for navigasjon.
+     */
+    function handleKeydown(event) {
+        if (event.key === 'ArrowLeft') {
+            updateDisplay(currentIndex - 1, -1);
+        } else if (event.key === 'ArrowRight') {
+            updateDisplay(currentIndex + 1, 1);
+        }
+    }
+
+    // Start app-visningen når DOM er lastet
+    document.addEventListener('DOMContentLoaded', initAppDisplay);
+</script>
+{% endblock %}

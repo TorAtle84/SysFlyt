@@ -1,0 +1,28 @@
+{
+  "mode": "keywords_ai",
+  "groups": [
+    "Funksjoner og Overvåkning",
+    "Systemarkitektur",
+    "Belysning",
+    "Kraftforsyning",
+    "Sikkerhetssystemer",
+    "Sikring og Vern",
+    "Tele og Data",
+    "Kontrakt og Leveranse",
+    "Krav og Standarder",
+    "Prosjekteringsgrunnlag",
+    "Byggherre",
+    "Rådgivende Ingeniør (RIB, RIV, RIE etc.)",
+    "Totalentreprenør",
+    "Brannslokkesystemer",
+    "Vann- og Avløpssystemer",
+    "Varme- og Kjølesystemer",
+    "Komponenter",
+    "Prinsipper og Systemer",
+    "Reguleringsfunksjoner",
+    "Sikkerhetsfunksjoner"
+  ],
+  "min_score": 60.0,
+  "ns_selection": "Ingen",
+  "fokus": ""
+}

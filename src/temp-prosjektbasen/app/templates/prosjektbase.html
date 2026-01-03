@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5" style="max-width: 900px;">
+  <h2 class="mb-4">
+    <i class="bi bi-folder2-open me-2"></i>Prosjektbase
+  </h2>
+
+  <!-- Naviger til prosjekt -->
+  <div class="card shadow-sm rounded mb-4 bg-success bg-opacity-10">
+    <div class="card-body">
+      <!-- Lokasjonsfilter -->
+      <form method="GET" action="{{ url_for('project_bp.prosjektbase') }}">
+        <label for="location-filter" class="form-label fw-semibold">Filtrer på lokasjon</label>
+        <select class="form-select mb-3" id="location-filter" name="location" onchange="this.form.submit()">
+          <option value="">Alle lokasjoner</option>
+          {% for loc in locations %}
+            <option value="{{ loc }}" {% if loc == selected_location %}selected{% endif %}>{{ loc }}</option>
+          {% endfor %}
+        </select>
+      </form>
+
+      <!-- Prosjektvelger -->
+      <form method="GET" action="{{ url_for('project_bp.vis_prosjekt') }}">
+        <label for="project_id" class="form-label fw-semibold">Velg prosjekt</label>
+        <div class="input-group mb-3">
+          <select class="form-select" id="project_id" name="id" required>
+            {% for p in projects %}
+              <option value="{{ p.id }}">{{ p.project_name }} ({{ p.order_number }})</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="btn btn-success">Gå til prosjekt</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Opprett nytt prosjekt -->
+  <div class="card shadow-sm rounded bg-light">
+    <div class="card-header fw-semibold bg-white border-bottom">
+      Opprett nytt prosjekt
+    </div>
+    <div class="card-body">
+      <form method="POST" action="/opprett-prosjekt">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="project_name" class="form-label">Prosjektnavn</label>
+            <input type="text" class="form-control" id="project_name" name="project_name" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="order_number" class="form-label">Ordrenummer</label>
+            <input type="text" class="form-control" id="order_number" name="order_number" required>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="location-opprett" class="form-label">Lokasjon</label>
+            <select class="form-select" id="location-opprett" name="location" required>
+              {% for loc in locations %}
+                <option value="{{ loc }}">{{ loc }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="project_leader_id" class="form-label">Prosjektleder <small>(skriv navn, eller etternavn)</small></label>
+            <input type="text" class="form-control" id="project_leader_id" name="project_leader_id" list="project_leader_list" required>
+            <datalist id="project_leader_list"></datalist>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="project_manager_id" class="form-label">Prosjekteier <small>(skriv navn, eller etternavn)</small></label>
+            <input type="text" class="form-control" id="project_manager_id" name="project_manager_id" list="project_manager_list">
+            <datalist id="project_manager_list"></datalist>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="description" class="form-label">Beskrivelse</label>
+          <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Opprett prosjekt</button>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="mb-4"></div>
+<!-- JavaScript: Autocomplete-brukere og lokasjonsoppdatering -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const locationSelect = document.getElementById("location-opprett");
+
+  // === Last inn alle lokasjoner (ekstra trygghet) ===
+  fetch("/api/lokasjoner")
+    .then(res => res.json())
+    .then(lokasjoner => {
+      lokasjoner.forEach(loc => {
+        if (![...locationSelect.options].some(opt => opt.value === loc)) {
+          const option = new Option(loc, loc);
+          locationSelect.appendChild(option);
+        }
+      });
+    })
+    .catch(err => console.error("Feil ved lasting av lokasjoner:", err));
+
+  // === Autocomplete for brukere (prosjektleder og eier)
+  function initUserAutocomplete(inputId, datalistId) {
+    const input = document.getElementById(inputId);
+    const datalist = document.getElementById(datalistId);
+
+    function fetchAndPopulate(query) {
+      const lokasjon = locationSelect.value;
+      fetch(`/api/brukere?q=${encodeURIComponent(query)}&lokasjon=${encodeURIComponent(lokasjon)}`)
+        .then(res => res.json())
+        .then(data => {
+          datalist.innerHTML = "";
+          data.forEach(bruker => {
+            const option = document.createElement("option");
+            option.value = bruker.navn;
+            datalist.appendChild(option);
+          });
+        })
+        .catch(err => console.error("Feil ved lasting av brukere:", err));
+    }
+
+    input.addEventListener("input", () => {
+      clearTimeout(input._debounce);
+      const query = input.value.trim();
+      input._debounce = setTimeout(() => {
+        if (query.length > 0) fetchAndPopulate(query);
+      }, 300);
+    });
+
+    input.addEventListener("focus", () => {
+      if (input.value.trim() === "") {
+        fetchAndPopulate(""); // vis forslag
+      }
+    });
+  }
+
+  initUserAutocomplete("project_leader_id", "project_leader_list");
+  initUserAutocomplete("project_manager_id", "project_manager_list");
+});
+</script>
+{% endblock %}

@@ -1,0 +1,149 @@
+*** original/calendar_custom.js
+--- revised/calendar_custom.js
+***************
+*** 5757,5764 ****
+-  // --- Tekniker ---
+-  fetch('/api/teknikere')
++  // --- Tekniker ---
++  // NB: bruk samme path som i «opprett oppgave»-skjemaet
++  // (fjern eventuelt «/api» hvis ruta er definert rett under roten)
++  fetch('/teknikere', { credentials: 'include' })
+   .then(r => r.json())
+   .then(techs => {
+     const sel = document.getElementById("modalTekniker");
+     sel.innerHTML = "";
+     techs.forEach(t => {
+       const opt = document.createElement("option")
+       opt.value = t.id;
+       opt.text  = t.navn;
+       sel.append(opt);
+     });
+-    sel.value = e.extendedProps.tekniker || "";
++    sel.value = e.extendedProps.tekniker || "";
+   });
+*** 6161,6168 ****
+-  // --- Status ---
+-  fetch('/api/statusverdier')
++  // --- Status ---
++  // NB: bruk samme path som i «opprett oppgave»-skjemaet
++  fetch('/statusverdier', { credentials: 'include' })
+   .then(r => r.json())
+   .then(stats => {
+     const sel = document.getElementById("modalStatus");
+     sel.innerHTML = "";
+     stats.forEach(s => {
+       const opt = document.createElement("option")
+       opt.value = s.kode;
+       opt.text  = s.navn;
+       sel.append(opt);
+     });
+-    sel.value = e.extendedProps.status || "";
++    sel.value = e.extendedProps.status || "";
+   });
+*** 6245,6254 ****
+-    if (e.endStr) {
+-      const [endDate, endTime] = e.endStr.split("T");
+-      setValue("modalSluttDato", endDate);   // merk ID
+-      setValue("modalSluttTid",   endTime?.substr(0,5));
+-    }
++    if (e.endStr) {
++      const [endDate, endTime] = e.endStr.split("T");
++      // Merk: HTML‐feltene heter modalEndDato / modalEndTid
++      setValue("modalEndDato", endDate);
++      setValue("modalEndTid",  endTime?.substr(0,5));
++    }
+*** 12520,12528 ****
+- function lastNedVedlegg(taskId) {
+-   fetch(`/api/vedlegg/${taskId}`)
++ function lastNedVedlegg(taskId) {
++   console.log("Henter vedlegg for taskId:", taskId);
++   if (!taskId) return;
++   // Fjern evt. «/api» hvis ruta ligger rett under roten
++   fetch(`/vedlegg/${taskId}`, { credentials: 'include' })
+     .then(res => res.json())
+     .then(files => {
+       const liste = document.getElementById("vedleggListe");
+       liste.innerHTML = ""; // Rens tidligere
+*** Ende of patch coordinates around lastNedVedlegg ***
+
+**I tillegg** legger du til _én_ ny blokk _helt nederst_ i filen (rett før siste `});`) som håndterer:
+- lagring av `ordreNummer` fra `eventClick`
+- prepend på fil-input
+- to .ics‐knapper med CANCEL/REQUEST‐metode
+
+---- legg inn etter siste `function lastNedVedlegg` og _før_ `});` ----
+```js
+  // ─────────────────────────────────────────────────────────────────
+  // ➊ GLOBAL VAR FOR ORDRE‐NUMMER (settes i eventClick)
+  let currentOrderNumber = null;
+
+  // ➋ FIL‐INPUT: prepend Ordrenummer-prefix
+  document.getElementById("vedleggInput")
+    .addEventListener("change", function(ev) {
+      const ordre = currentOrderNumber || "UkjentOrdre";
+      const files = Array.from(ev.target.files).map(f =>
+        new File([f], `${ordre}-${f.name}`, { type: f.type })
+      );
+      const dt = new DataTransfer();
+      files.forEach(f => dt.items.add(f));
+      this.files = dt.files;
+    });
+
+  // ─────────────────────────────────────────────────────────────────
+  // ➌ ICS‐GENERERING med CANCEL & REQUEST
+  function formatICSDate(d) {
+    const pad = n => n.toString().padStart(2,'0');
+    return d.getUTCFullYear()
+         + pad(d.getUTCMonth()+1)
+         + pad(d.getUTCDate())
+         + 'T'
+         + pad(d.getUTCHours())
+         + pad(d.getUTCMinutes())
+         + pad(d.getUTCSeconds())
+         + 'Z';
+  }
+
+  function buildICS(evt, method) {
+    return [
+      'BEGIN:VCALENDAR',
+      'PRODID:-//DittFirma//DinApp//EN',
+      'VERSION:2.0',
+      `METHOD:${method}`,
+      'BEGIN:VEVENT',
+      `UID:${evt.id}@dittdomene`,
+      `DTSTAMP:${formatICSDate(new Date())}`,
+      `DTSTART:${formatICSDate(evt.start)}`,
+      `DTEND:${formatICSDate(evt.end)}`,
+      `SUMMARY:${evt.title}`,
+      `LOCATION:${evt.extendedProps.location||''}`,
+      (evt.extendedProps.status ? `STATUS:${evt.extendedProps.status}` : ''),
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].filter(Boolean).join('\r\n');
+  }
+
+  function downloadICS(content, filename) {
+    const blob = new Blob([content], {type:'text/calendar;charset=utf-8'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ➍ KNYTT NEDLASTING TIL TO KNAPPER i modal‐footer
+  document.getElementById('btnCancelIcs')
+    .addEventListener('click', () => {
+      const id = document.getElementById("modalTaskId").value;
+      const evt = calendar.getEventById(id);
+      downloadICS(buildICS(evt, 'CANCEL'), 'avlys-event.ics');
+    });
+
+  document.getElementById('btnNewIcs')
+    .addEventListener('click', () => {
+      const id = document.getElementById("modalTaskId").value;
+      const evt = calendar.getEventById(id);
+      downloadICS(buildICS(evt, 'REQUEST'), 'ny-event.ics');
+    });
+  // ─────────────────────────────────────────────────────────────────

@@ -1,0 +1,75 @@
+.app-card {
+  background: #fff;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+h1, h2, h3 {
+  font-weight: 600;
+}
+
+.table thead th {
+  background: #4682B4;
+  color: #fff;
+}
+
+.btn {
+  border-radius: 0.25rem;
+}
+.app-card {
+  background: #f2f2f2; /* Lys og nøytral grå */
+  border-radius: 0.5rem;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.section-card {
+  background: #f2f2f2;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 1.5rem;
+}
+
+.dynamic-heading span {
+  opacity: 0;
+  display: inline-block;
+  transform: translateY(-10px);
+  animation: appear 0.4s forwards;
+}
+
+@keyframes appear {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.dynamic-heading span {
+  /* fallback om du ikke bruker inline style */
+  opacity: 0;
+  display: inline-block;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+}
+.move-up, .move-down {
+  margin: 0 2px;
+  padding: 2px 6px;
+}
+#kravsporing-heading {
+  position: relative;
+  display: inline-block;
+  font-size: 3rem; /* 📌 Større tekst */
+}
+
+#magnifier {
+  position: absolute;
+  left: 0;
+  top: 10;
+  font-size: 0.8em;
+  transform: translateX(0);
+}
+
+#kravsporing-text {
+  padding-left: 2rem; /* plass til ikon foran */
+}

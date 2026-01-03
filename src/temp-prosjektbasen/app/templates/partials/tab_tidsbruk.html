@@ -1,0 +1,91 @@
+<style>
+.nav-tabs .nav-link {
+  background-color: #f0f4f8;               /* Lys blå-grå bakgrunn */
+  border: 1px solid #cfd8dc;               /* Myk grå kant */
+  margin-right: 5px;
+  color: #000000;                          
+  border-radius: 6px 6px 0 0;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.nav-tabs .nav-link:hover {
+  background-color: #e1ecf7;               /* Litt mørkere ved hover */
+}
+
+.nav-tabs .nav-link.active {
+  background-color: #d9eaff;               /* Aktiv fane: lysere blå */
+  color: #004085;                          /* Mørk blå tekst for kontrast */
+  border-color: #b8daff #b8daff white;     /* Myk kant, toppen kobles til tab-content */
+  font-weight: 600;
+}
+
+.tab-content {
+  border: 1px solid #b8daff;
+  border-top: none;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 0 6px 6px 6px;
+}
+</style>
+<div class="container my-4">
+  <h2 class="mb-4"><i class="bi bi-clock-history"></i> Tidskalkulator – Prosjektdata</h2>
+
+  {% if project.time_usage %}
+    {% for g in project.time_usage.get("grupper", []) %}
+      <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+          <strong>{{ g.name }}</strong>
+        </div>
+        <div class="card-body p-0">
+          <table class="table mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Underpunkt</th>
+                <th>Antall</th>
+                <th>Tid pr. stk</th>
+                <th>Total tid</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in g.underpunkter %}
+                <tr>
+                  <td>{{ u.name }}</td>
+                  <td>{{ u.default_count }}</td>
+                  <td>{{ u.default_time }}</td>
+                  <td>{{ (u.default_count * u.default_time) | round(2) }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endfor %}
+
+    <div class="card bg-light">
+      <div class="card-body">
+        <h5 class="card-title">Oppsummering</h5>
+        <table class="table mb-0">
+          <tr>
+            <th>Total før risiko:</th>
+            <td>{{ project.time_usage.total_before }} t</td>
+          </tr>
+          <tr>
+            <th>Ekstra risiko:</th>
+            <td>{{ project.time_usage.risk_extra }} t</td>
+          </tr>
+          <tr>
+            <th>Total etter risiko:</th>
+            <td>{{ project.time_usage.total_after }} t</td>
+          </tr>
+          <tr>
+            <th>Rundet opp:</th>
+            <td>{{ project.time_usage.rounded }} dager</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-warning">Ingen tidskalkulator-data er lagret for dette prosjektet.</div>
+  {% endif %}
+</div>

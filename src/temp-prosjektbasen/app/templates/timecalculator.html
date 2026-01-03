@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+
+{% block title %}Tidsbrukskalkulator{% endblock %}
+
+{% block head_extra %}
+  <style>
+    /* ──────────────────────────────────────────────────────────────────── */
+    /* 1) Seksjons‐overskrift blir grønn med hvit tekst */
+    .section-header {
+      background-color: #2E8B57;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem 0.25rem 0 0;
+      margin-bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .section-header h2 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+    .section-header .section-total {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    /* 2) “Legg til underpunkt”–knapp i blå Bootstrap‐farge (kode #0d6efd) */
+    .btn-leggtil {
+      background-color: #0d6efd;
+      border-color:   #0d6efd;
+      color: white;
+    }
+    .btn-leggtil:hover {
+      background-color: #0b5ed7;
+      border-color:   #0b5ed7;
+      color: white;
+    }
+
+    /* 3) Tabell‐overskrift hvit tekst på grønn bakgrunn */
+    .table.section-table thead th {
+      background-color: #4682B4;
+      color: white;
+      vertical-align: middle;
+      text-align: center;
+      border-color: #005a32;
+    }
+    /* 4) Tabell‐body: inntastings‐celler hvite med svart tekst */
+    .table.section-table tbody td input {
+      background-color: #ffffff;
+      color: #000000;
+      border: 1px solid #ced4da;
+      border-radius: 0.25rem;
+    }
+    .table.section-table tbody td {
+      vertical-align: middle;
+    }
+
+    /* 5) “Risiko”‐feltet */
+    .risk-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .risk-container label {
+      margin: 0;
+      font-weight: 500;
+    }
+    .risk-container input[type="number"] {
+      width: 100px;
+      text-align: right;
+    }
+
+    /* 6) Den lille “resultat‐tabellen” nederst (Sum total tid + Rundet opp) */
+    .result-table {
+      width: auto;
+      margin-top: 1rem;
+      border: 2px solid #006741;
+      border-radius: 0.25rem;
+      background-color: #ffffff;
+    }
+    .result-table th {
+      background-color: #006741;
+      color: white;
+      padding: 0.5rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid #005a32;
+    }
+    .result-table td {
+      padding: 0.5rem 1rem;
+      text-align: left;
+    }
+
+    /* 7) Knappene nederst */
+    .btn-group-bottom {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    /* Lar underpunktene strekkes ut i en hel rad */
+    .table-responsive {
+      margin-bottom: 2rem;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <!-- ─── Seksjon “Dokumentasjon” ─────────────────────────────────────── -->
+    <div class="section-header">
+      <h2>Dokumentasjon:</h2>
+      <span class="section-total" id="total-Dokumentasjon">0.00 t</span>
+    </div>
+    <!-- “Legg til underpunkt”-knapp (vis kun for admin) -->
+    {% raw %}
+    <div class="mb-2">
+      <button class="btn btn-leggtil btn-sm"
+              id="btn-add-Dokumentasjon"
+              style="display: none;">
+        Legg til underpunkt
+      </button>
+    </div>
+    {% endraw %}
+
+    <div class="table-responsive">
+      <table class="table section-table" id="table-Dokumentasjon">
+        <thead>
+          <tr>
+            <th>Underpunkt</th>
+            <th style="width:100px;">Antall</th>
+            <th style="width:120px;">Tid pr. stk (t)</th>
+            <th style="width:120px;">Total tid (t)</th>
+            <th style="width:60px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rader legges til dynamisk av JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ─── Seksjon “Oppstart” ─────────────────────────────────────────── -->
+    <div class="section-header">
+      <h2>Oppstart:</h2>
+      <span class="section-total" id="total-Oppstart">0.00 t</span>
+    </div>
+    <div class="mb-2">
+      <button class="btn btn-leggtil btn-sm" id="btn-add-Oppstart" style="display: none;">
+        Legg til underpunkt
+      </button>
+    </div>
+    <div class="table-responsive">
+      <table class="table section-table" id="table-Oppstart">
+        <thead>
+          <tr>
+            <th>Underpunkt</th>
+            <th style="width:100px;">Antall</th>
+            <th style="width:120px;">Tid pr. stk (t)</th>
+            <th style="width:120px;">Total tid (t)</th>
+            <th style="width:60px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rader legges til dynamisk av JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ─── Seksjon “Teknisk utstyr” ─────────────────────────────────────── -->
+    <div class="section-header">
+      <h2>Teknisk utstyr og transport:</h2>
+      <span class="section-total" id="total-Teknisk_utstyr">0.00 t</span>
+    </div>
+    <div class="mb-2">
+      <button class="btn btn-leggtil btn-sm" id="btn-add-Teknisk_utstyr" style="display: none;">
+        Legg til underpunkt
+      </button>
+    </div>
+    <div class="table-responsive">
+      <table class="table section-table" id="table-Teknisk_utstyr">
+        <thead>
+          <tr>
+            <th>Underpunkt</th>
+            <th style="width:100px;">Antall</th>
+            <th style="width:120px;">Tid pr. stk (t)</th>
+            <th style="width:120px;">Total tid (t)</th>
+            <th style="width:60px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rader legges til dynamisk av JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ─── Seksjon “Risiko” ─────────────────────────────────────────────── -->
+    <div class="section-header" style="border-radius:0;">
+      <h2>Risiko:</h2>
+      <!-- Ingen seksjons‐total her, her regner vi separat under -->
+    </div>
+    <div class="risk-container">
+      <label for="input-risk-percent">Prosentpåslag:</label>
+      <input type="number" min="0" id="input-risk-percent" value="0" /> %
+    </div>
+    <div class="mb-4">
+      <table class="result-table">
+        <thead>
+          <tr><th colspan="2">Resultat</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Total tid før risiko:</td>
+            <td><span id="risk-total-before">0.00 t</span></td>
+          </tr>
+          <tr>
+            <td>Ekstra tid risiko:</td>
+            <td><span id="risk-extra">0.00 t</span></td>
+          </tr>
+          <tr>
+            <td>Sum total tid:</td>
+            <td><span id="risk-total-after">0.00 t</span></td>
+          </tr>
+          <tr>
+            <td>Rundet opp:</td>
+            <td><span id="risk-rounded">0 dager eller 0 t</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ─── Knapper nederst: “Beregne”, “Eksporter til Excel”, “Lagre mal” ─── -->
+    <div class="btn-group-bottom">
+      <button class="btn btn-secondary" id="btn-calc">Beregne</button>
+      <button class="btn btn-outline-primary" id="btn-export">Eksporter til Excel</button>
+      {% raw %}
+      <button class="btn btn-success" id="btn-save-template" style="display: none;">
+        Lagre mal
+      </button>
+      {% endraw %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='js/timecalculator.js') }}"></script>
+{% endblock %}

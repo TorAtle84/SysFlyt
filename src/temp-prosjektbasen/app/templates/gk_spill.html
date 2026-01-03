@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}GK-Spillet{% endblock %}
+
+{% block head_extra %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename='gk_spill/styles.css') }}">
+{% endblock %}
+
+{% block content %}
+  <main class="container-fluid py-4" id="gk-spill-container" aria-labelledby="gk-spill-heading">
+    <header class="text-center">
+      <h1 id="gk-spill-heading" class="display-5 fw-semibold mb-2">GK-Spillet</h1>
+      <p class="lead text-muted mb-0">
+        Start et nytt løp og unngå hindringene for å sikre høyeste poengsum!
+      </p>
+    </header>
+    <section id="gk-spill-canvas-wrapper" aria-live="polite">
+      <canvas id="gk-spill-canvas" role="img" aria-label="Spillflate for GK-Spillet"></canvas>
+    </section>
+  </main>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script type="module" src="{{ url_for('static', filename='gk_spill/game.js') }}"></script>
+{% endblock %}

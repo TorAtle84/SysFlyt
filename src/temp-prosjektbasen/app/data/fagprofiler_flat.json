@@ -1,0 +1,26 @@
+{
+  "Ventilasjon": "ventilasjon ventilasjonsanlegg tilluft avtrekk overstrøm VAV CAV DCV SFP s f p kW/(m³/s) k W/(m ³ / s) W/(m³/s) m³/s m3/s m ³ / s m³/m²h m3/m2h m³/m²/t m3/m2/t l/s per person l/s pr person CO2 CO₂ ppm Pa kPa trykkdifferanse differansetrykk undertrykk overtrykk trykksetting trykksatt trykksettes DUT dimensjonerende utetemperatur utetemperatur maks tilluftstemperatur tilluftstemperatur romtemperatur operativ temperatur varmegjenvinning temperaturvirkningsgrad bypass-spjeld lydfelle innregulering NS-EN 12599 NS-EN 16798 røykspjeld avkast inntak sluse sluser toalettsoner operasjonsrom isoleringsrom trapperom SFP under 1,8 kW/(m³/s) temperaturvirkningsgrad minst 80 % CO2 nivå under 700 ppm trykkfall i kanaler maks 150 Pa innreguleres i henhold til NS-EN 12599 undertrykk .* Pa i toalettsoner overtrykk .* Pa i sluser trykkdifferanse .* Pa mellom rom trapperom trykksettes .* Pa DUT .* -?\\d+ °C maks tilluftstemperatur .* \\d+ °C min(imum)? utetemperatur .* -?\\d+ °C filterklasse ePM1 60 %",
+  "Elektro": "elektro el strøm belysning lys brannalarm nødlys adgang IK IP NEK 400 kurs gruppe vern RCD RCBO jordfeil SPD hovedtavle underfordeling TN-S IT nett IP20 IP44 IP65 IK07 IK10 lux lumen W kW kVA Hz V kV A kA Ω ohm brannalarm detektorer møtevarsling nødlys ledelys adgangskontroll kortleser porttelefon fiber nettverk UPS belysningsnivå minst 500 lux selektivitet mellom vern kortslutningsytelse Ik jordfeilbryter type A detektorplassering i henhold til NS kabler halogenfri LSZH",
+  "Rørlegger": "rør rørlegger sanitær VVS sprinkler brannslokking vann avløp spillvann gråvann fettutskiller rør-i-rør skap fordeler PEX CU trykktest tetthetsprøve legionella bereder sirkulasjon varmtvann blandearmatur sprinkler ventil alarm sprinklersentral pumpe sirkulasjonspumpe tilbakestrømssikring l/s l/min m³/h bar kPa °C trykktest 10 bar i 30 minutter vannmengde minst 7 l/min tilbakestrømssikring kategori 4 sprinklerdekning i henhold til NS-EN 12845 legionellakrav i henhold til veileder varmtvannstemperatur minst 70 °C",
+  "Byggautomasjon": "byggautomasjon BAS BMS SD SD anlegg BACnet Modbus KNX LonWorks OPC UA MQTT trendlogg historikk alarmer hendelser setpunkt romkontroller I/O DI DO AI AO PID regulator sekvensstyring energioppfølging forbrukslogg °C % ppm alle regulatorer skal ha BACnet/IP trend for settpunkt og avvik alarmhåndtering med kvittering integrasjon mot VAV regulator energi rapportering per sone tilgangskontroll med roller",
+  "Kulde": "kulde kjøling chiller DX varmepumpe f-gass F-gass kuldemedium R32 R410A R1234ze R290 kompressor kondensator fordamper ekspansjonsventil kondensvann brine glykol COP EER SEER SCOP kW kjølekapasitet kW varmeeffekt ΔT °C plassert utendørs kondensatorvifter COP minst 3,5 ved A7/W35 EER minst 3,0 ved +35 °C SEER over 5,0 tetthetskontroll i henhold til F gass forordningen kuldemedium lekkasjetest",
+  "Totalentreprenør": "totalentreprenør TE entreprenør hovedentreprenør NS 8407 framdriftsplan SHA plan kvalitetssystem as built FDV overtakelse prøvedrift endringsordre tilleggsarbeid rigg og drift kontrollplan avviksbehandling BAS og HMS overtakelse etter ferdig prøvedrift FDV leveres komplett etter NS endringsordre håndteres skriftlig framdriftsplan oppdateres ukentlig kontrollplan iht. kravspesifikasjon",
+  "Byggherre": "byggherre BH oppdragsgiver prosjekteier kravdokument funksjonskrav romprogram brukerutstyr arealprogram beslutningspunkt overtakelsesprotokoll tilvalg opsjon møtereferat endringshåndtering byggherren skal godkjenne funksjonskrav gjelder romprogram skal følges tilvalg avtales skriftlig opsjoner prises separat",
+  "Økonomi": "økonomi kontrakt kostnad betaling pris dagmulkt vederlag opsjon opsjonspris indeksregulering NS 3420 fakturaplan enhetspris timepris endringsordre kontraktssum prisoverslag tilbudssum dagmulkt ved forsinkelse vederlag reguleres etter indeks opsjoner prises separat endringsordre skal være avtalt fakturaplan per milepæl",
+  "fdv": {
+    "fag": "Uspesifisert",
+    "kravtype": "dokumentasjon"
+  },
+  "rør": {
+    "fag": "Uspesifisert",
+    "kravtype": "krav"
+  },
+  "ventil": {
+    "fag": "Uspesifisert",
+    "kravtype": "krav"
+  },
+  "ventilasjon": {
+    "fag": "Uspesifisert",
+    "kravtype": "krav"
+  }
+}

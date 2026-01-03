@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% block title %}Brukeradministrasjon{% endblock %}
+
+{% block content %}
+
+<div class="container my-5">
+  <h1 class="mb-4">👥 Brukeradministrasjon</h1>
+
+  <div class="app-card">
+    <div class="table-responsive">
+      <table class="table table-striped align-middle mb-0">
+        <thead class="table-light sticky-top">
+          <tr>
+            <th>ID</th>
+            <th>Fornavn</th>
+            <th>Etternavn</th>
+            <th>E-post</th>
+            <th>Ansattnummer</th>
+            <th>Rolle</th>
+            <th>Farge</th>
+            <th>Fag</th>
+            <th>Lokasjon</th>
+            <th>Admin-delegat</th>
+            <th>Status</th>
+            <th>Handling</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for bruker in brukere %}
+          <tr>
+            <form method="post" action="{{ url_for('admin.oppdater_bruker', bruker_id=bruker.id) }}">
+              <td>{{ bruker.id }}</td>
+              <td><input type="text" name="first_name" value="{{ bruker.first_name }}" class="form-control form-control-sm" required></td>
+              <td><input type="text" name="last_name" value="{{ bruker.last_name }}" class="form-control form-control-sm" required></td>
+              <td><input type="email" name="email" value="{{ bruker.email }}" class="form-control form-control-sm" required></td>
+              <td><input type="text" name="employee_id" value="{{ bruker.employee_id }}" class="form-control form-control-sm" required></td>
+              <td>
+                <select name="role" class="form-select form-select-sm">
+                  {% for r in roller %}
+                    <option value="{{ r.lower() }}" {% if bruker.role == r.lower() %}selected{% endif %}>{{ r }}</option>
+                  {% endfor %}
+                </select>
+              </td>
+              <td>
+                <input type="color" name="color" value="{{ bruker.color or '#cccccc' }}" class="form-control form-control-color">
+              </td>
+              <td>
+                <select name="fag" class="form-select form-select-sm">
+                  {% for f in fager %}
+                    <option value="{{ f }}" {% if bruker.fag == f %}selected{% endif %}>{{ f }}</option>
+                  {% endfor %}
+                </select>
+              </td>
+              <td>
+                <select name="location" class="form-select form-select-sm">
+                  {% for l in lokasjoner %}
+                    <option value="{{ l }}" {% if bruker.location == l %}selected{% endif %}>{{ l }}</option>
+                  {% endfor %}
+                </select>
+              </td>
+              <td>
+                <select name="is_admin_delegate" class="form-select form-select-sm">
+                  <option value="0" {% if not bruker.is_admin_delegate %}selected{% endif %}>Nei</option>
+                  <option value="1" {% if bruker.is_admin_delegate %}selected{% endif %}>Ja</option>
+                </select>
+              </td>
+              <td>
+                <select name="approved" class="form-select form-select-sm">
+                  <option value="1" {% if bruker.approved %}selected{% endif %}>Aktiv</option>
+                  <option value="0" {% if not bruker.approved %}selected{% endif %}>Deaktivert</option>
+                </select>
+              </td>
+              <td class="text-nowrap">
+                <button type="submit" class="btn btn-sm btn-primary">Oppdater</button>
+                {% if current_user.id != bruker.id %}
+                <button type="submit" formaction="{{ url_for('admin.slett_bruker', bruker_id=bruker.id) }}"
+                        class="btn btn-sm btn-danger mt-1"
+                        onclick="return confirm('Er du sikker på at du vil slette denne brukeren?')">
+                  Slett
+                </button>
+                {% else %}
+                <span class="text-muted ms-1">🔒</span>
+                {% endif %}
+              </td>
+            </form>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+<!-- Prosjektadministrasjon -->
+<div class="app-card mt-5">
+  <h3 class="mb-4">🏗️ Prosjektadministrasjon</h3>
+
+  <div class="table-responsive">
+    <table class="table table-striped align-middle mb-0">
+      <thead class="table-light sticky-top">
+        <tr>
+          <th>ID</th>
+          <th>Prosjektnavn</th>
+          <th>Prosjektleder</th>
+          <th>Prosjekteier</th>
+          <th>Handling</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for prosjekt in prosjekter %}
+        <tr>
+          <form method="post" action="{{ url_for('admin.oppdater_prosjekt', prosjekt_id=prosjekt.id) }}">
+            <td>{{ prosjekt.id }}</td>
+
+            <td>
+              <input type="text" name="project_name" value="{{ prosjekt.project_name }}" class="form-control form-control-sm" required>
+            </td>
+
+            <td>
+              <input type="text" class="form-control form-control-sm"
+                     name="project_leader_id"
+                     id="leader_input_{{ prosjekt.id }}"
+                     list="leader_list_{{ prosjekt.id }}"
+                     value="{% if prosjekt.project_leader %}{{ prosjekt.project_leader.first_name }} {{ prosjekt.project_leader.last_name }}{% endif %}"
+                     autocomplete="off">
+              <datalist id="leader_list_{{ prosjekt.id }}">
+                {% for bruker in brukere %}
+                  <option value="{{ bruker.first_name }} {{ bruker.last_name }}"></option>
+                {% endfor %}
+              </datalist>
+            </td>
+
+            <td>
+              <input type="text" class="form-control form-control-sm"
+                     name="project_manager_id"
+                     id="manager_input_{{ prosjekt.id }}"
+                     list="manager_list_{{ prosjekt.id }}"
+                     value="{% if prosjekt.project_manager %}{{ prosjekt.project_manager.first_name }} {{ prosjekt.project_manager.last_name }}{% endif %}"
+                     autocomplete="off">
+              <datalist id="manager_list_{{ prosjekt.id }}">
+                {% for bruker in brukere %}
+                  <option value="{{ bruker.first_name }} {{ bruker.last_name }}"></option>
+                {% endfor %}
+              </datalist>
+            </td>
+
+            <td class="text-nowrap">
+              <button type="submit" class="btn btn-sm btn-primary">Oppdater</button>
+              <button type="submit" formaction="{{ url_for('admin.slett_prosjekt', prosjekt_id=prosjekt.id) }}"
+                      class="btn btn-sm btn-danger mt-1"
+                      onclick="return confirm('Er du sikker på at du vil slette dette prosjektet?')">
+                Slett
+              </button>
+            </td>
+          </form>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+  <!-- Backup og gjenoppretting -->
+  <div class="app-card mt-5 text-center">
+    <h3 class="mb-3">💾 Backup og gjenoppretting</h3>
+
+    <div class="d-flex flex-wrap justify-content-center gap-3">
+      <form method="post" action="{{ url_for('admin.last_ned_backup') }}">
+        <button type="submit" class="btn btn-success">Last ned backup (.zip)</button>
+      </form>
+
+      <form method="post" action="{{ url_for('admin.last_opp_backup') }}" enctype="multipart/form-data"
+            onsubmit="return confirm('Er du sikker på at du vil erstatte databasen med en backup? Dette kan ikke angres.');">
+        <div class="input-group">
+          <input type="file" name="backup_file" accept=".db" class="form-control" required>
+          <button type="submit" class="btn btn-warning">Last opp</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
