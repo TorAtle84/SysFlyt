@@ -21,11 +21,8 @@ interface LinkDogContextType {
 
 const LinkDogContext = createContext<LinkDogContextType | null>(null);
 
-export function useLinkDog() {
+export function useLinkDog(): LinkDogContextType | null {
     const context = useContext(LinkDogContext);
-    if (!context) {
-        throw new Error("useLinkDog must be used within LinkDogProvider");
-    }
     return context;
 }
 

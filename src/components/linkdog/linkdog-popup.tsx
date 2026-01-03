@@ -19,7 +19,7 @@ interface Message {
 }
 
 export function LinkDogPopup() {
-    const { isOpen, toggleOpen, currentPage, currentApp, settings } = useLinkDog();
+    const linkdog = useLinkDog();
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -28,6 +28,13 @@ export function LinkDogPopup() {
 
     const inputRef = useRef<HTMLInputElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
+
+    // Return early if no context (during SSG or when not in provider)
+    const isOpen = linkdog?.isOpen ?? false;
+    const toggleOpen = linkdog?.toggleOpen ?? (() => { });
+    const currentPage = linkdog?.currentPage ?? '';
+    const currentApp = linkdog?.currentApp ?? 'syslink';
+    const settings = linkdog?.settings;
 
     // Auto-focus input when opened
     useEffect(() => {
@@ -142,7 +149,8 @@ export function LinkDogPopup() {
         isAdmin: false
     });
 
-    if (!settings?.enabled) return null;
+    // Return null if not in context or not enabled
+    if (!linkdog || !settings?.enabled) return null;
 
     return (
         <>
