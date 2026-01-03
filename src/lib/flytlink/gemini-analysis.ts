@@ -43,8 +43,11 @@ export interface DisciplineAssignment {
 }
 
 export interface ApiUsage {
-    tokensUsed: number;
+    inputTokens: number;
+    outputTokens: number;
     costUsd: number;
+    model: string;
+    provider: "gemini" | "openai";
 }
 
 // Pricing per 1M tokens (as of 2024)
