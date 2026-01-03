@@ -491,7 +491,7 @@ function MatrixCellItem({ rowId, columnId, values, onValuesChange, color, projec
                                     <Badge
                                         key={v}
                                         variant="outline"
-                                        className="text-xs px-2.5 py-1 font-medium border-0 shadow-sm leading-tight text-neutral-900"
+                                        className="text-xs px-2.5 py-1 font-medium border-0 shadow-sm leading-tight !text-black"
                                         style={{ backgroundColor: color }}
                                     >
                                         {v}
