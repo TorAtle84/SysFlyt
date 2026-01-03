@@ -295,7 +295,7 @@ export function LinkDogPopup() {
                                     Start ny samtale
                                 </Button>
                             ) : (
-                                <div className="flex gap-2">
+                                <div className="flex items-center gap-2">
                                     <Input
                                         ref={inputRef}
                                         value={input}
@@ -303,12 +303,13 @@ export function LinkDogPopup() {
                                         onKeyDown={handleKeyDown}
                                         placeholder="Skriv en melding..."
                                         disabled={isLoading}
-                                        className="flex-1"
+                                        className="flex-1 min-w-0"
                                     />
                                     <Button
                                         onClick={sendMessage}
                                         disabled={!input.trim() || isLoading}
                                         size="icon"
+                                        className="shrink-0"
                                     >
                                         <Send className="h-4 w-4" />
                                     </Button>

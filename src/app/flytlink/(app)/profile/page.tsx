@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { ProfileForm } from "@/components/pages/profile/profile-form";
 import { PasswordChange } from "@/components/pages/profile/password-change";
 import { TotpSetup } from "@/components/pages/profile/totp-setup";
-import { ApiKeysForm } from "@/components/pages/flytlink/api-keys-form";
+import { LinkDogSettings } from "@/components/linkdog";
 
 export default async function FlytLinkProfilePage() {
     const session = await getServerSession(authOptions);
@@ -33,8 +33,6 @@ export default async function FlytLinkProfilePage() {
             role: true,
             status: true,
             totpEnabled: true,
-            geminiApiKey: true,
-            openaiApiKey: true,
         }
     });
     if (!user) redirect("/flytlink/login");
@@ -42,10 +40,7 @@ export default async function FlytLinkProfilePage() {
     return (
         <div className="space-y-6">
             <ProfileForm user={user} />
-            <ApiKeysForm
-                hasGeminiKey={!!user.geminiApiKey}
-                hasOpenaiKey={!!user.openaiApiKey}
-            />
+            <LinkDogSettings />
             <div className="grid gap-6 lg:grid-cols-2">
                 <PasswordChange />
                 <TotpSetup totpEnabled={user.totpEnabled} />
@@ -53,3 +48,4 @@ export default async function FlytLinkProfilePage() {
         </div>
     );
 }
+

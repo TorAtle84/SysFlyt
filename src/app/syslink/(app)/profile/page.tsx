@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { ProfileForm } from "@/components/pages/profile/profile-form";
 import { PasswordChange } from "@/components/pages/profile/password-change";
 import { TotpSetup } from "@/components/pages/profile/totp-setup";
+import { LinkDogSettings } from "@/components/linkdog";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -41,6 +42,7 @@ export default async function ProfilePage() {
     <AppShell>
       <div className="space-y-6">
         <ProfileForm user={user} />
+        <LinkDogSettings />
         <div className="grid gap-6 lg:grid-cols-2">
           <PasswordChange />
           <TotpSetup totpEnabled={user.totpEnabled} />
@@ -49,4 +51,5 @@ export default async function ProfilePage() {
     </AppShell>
   );
 }
+
 
