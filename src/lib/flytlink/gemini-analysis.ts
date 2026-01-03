@@ -56,6 +56,30 @@ const GEMINI_PRICING = {
 // USD to NOK exchange rate (approximate)
 const USD_TO_NOK = 10.5;
 
+// Decryption for API keys (must match encryption in api-keys route)
+const ENCRYPTION_KEY = process.env.API_KEY_ENCRYPTION_KEY || "default-32-char-encryption-key!!";
+
+function decryptApiKey(encryptedText: string): string {
+    try {
+        const crypto = require("crypto");
+        const parts = encryptedText.split(":");
+        if (parts.length < 2) {
+            // Not encrypted, return as-is
+            return encryptedText;
+        }
+        const iv = Buffer.from(parts.shift()!, "hex");
+        const encrypted = Buffer.from(parts.join(":"), "hex");
+        const decipher = crypto.createDecipheriv("aes-256-cbc", Buffer.from(ENCRYPTION_KEY.slice(0, 32)), iv);
+        let decrypted = decipher.update(encrypted);
+        decrypted = Buffer.concat([decrypted, decipher.final()]);
+        return decrypted.toString();
+    } catch (error) {
+        console.error("Error decrypting API key:", error);
+        // Return as-is if decryption fails (might not be encrypted)
+        return encryptedText;
+    }
+}
+
 /**
  * Get user's Gemini API key (decrypted)
  */
@@ -69,7 +93,8 @@ export async function getUserGeminiKey(userId: string): Promise<string | null> {
         return null;
     }
 
-    return user.geminiApiKey;
+    // Decrypt the API key
+    return decryptApiKey(user.geminiApiKey);
 }
 
 /**
