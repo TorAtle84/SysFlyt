@@ -4,10 +4,13 @@ WORKDIR /app
 
 FROM base AS deps
 COPY package.json package-lock.json* ./
+COPY prisma ./prisma
 RUN npm ci --ignore-scripts
+RUN npx prisma generate
 
 FROM deps AS builder
 COPY . .
+RUN cp .env.example .env
 # Disable Turbopack in Docker build to avoid port binding issues in build environment
 ARG NEXT_DISABLE_TURBOPACK=1
 ENV NEXT_DISABLE_TURBOPACK=${NEXT_DISABLE_TURBOPACK}
