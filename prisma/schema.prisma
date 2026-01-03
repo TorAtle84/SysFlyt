@@ -183,6 +183,10 @@ model Project {
   // Quality Assurance
   tfmComparisons TfmComparison[]
   interfaceMatrix InterfaceMatrix?
+  
+  // Cross-App Linking (FlytLink)
+  linkedKravsporingProjectId String?               @unique
+  linkedKravsporingProject   KravsporingProject?   @relation("ProjectToKravsporing", fields: [linkedKravsporingProjectId], references: [id])
 }
 
 model ProjectMember {
@@ -978,8 +982,16 @@ model TfmComparison {
 // Interface Matrix (Grensesnittmatrise)
 model InterfaceMatrix {
   id        String   @id @default(cuid())
-  projectId String   @unique // One matrix per project
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String?  @unique // One matrix per project (now optional for FlytLink)
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  // FlytLink support
+  kravsporingProjectId String?              @unique
+  kravsporingProject   KravsporingProject?  @relation("KravsporingInterfaceMatrix", fields: [kravsporingProjectId], references: [id], onDelete: Cascade)
+  
+  // Sync Metadata
+  lastSyncedAt    DateTime?
+  lastSyncedFrom  String?   // "SYSLINK" or "FLYTLINK"
   
   rows      InterfaceMatrixRow[]
   columns   InterfaceMatrixColumn[]
@@ -994,6 +1006,7 @@ model InterfaceMatrixRow {
   systemCode      String   // The unique system (e.g., 360.001)
   description     String?  // Editable text under the system code
   sortOrder       Int      @default(0)
+  sourceApp       String?  // "SYSLINK" or "FLYTLINK" - tracks origin
   
   matrix          InterfaceMatrix @relation(fields: [matrixId], references: [id], onDelete: Cascade)
   cells           InterfaceMatrixCell[]
@@ -1079,6 +1092,12 @@ model KravsporingProject {
   
   disciplines KravsporingDiscipline[]
   analyses    KravsporingAnalysis[]
+  
+  // Cross-App Linking (SysLink)
+  linkedProject   Project?  @relation("ProjectToKravsporing")
+  
+  // Interface Matrix (for FlytLink or shared when linked)
+  interfaceMatrix InterfaceMatrix? @relation("KravsporingInterfaceMatrix")
   
   @@index([userId])
 }
