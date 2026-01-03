@@ -991,7 +991,7 @@ export function ModelViewerModal({
 
       const data = (await res.json()) as { protocolId: string; itemId: string };
       onOpenChange(false);
-      router.push(`/projects/${projectId}/protocols/${data.protocolId}?item=${encodeURIComponent(data.itemId)}`);
+      router.push(`/syslink/projects/${projectId}/protocols/${data.protocolId}?item=${encodeURIComponent(data.itemId)}`);
     } catch (err) {
       console.error(err);
       toast.error(err instanceof Error ? err.message : "Kunne ikke åpne protokoll");
@@ -1070,9 +1070,8 @@ export function ModelViewerModal({
           <div className="text-sm text-muted-foreground mt-1">
             {loading ? "Laster..." : model?.status === "READY" ? `${components.length} komponenter` : null}
             {model?.status === "CONVERTING"
-              ? `Konverterer...${model.progressPercent != null ? ` ${model.progressPercent}%` : ""}${
-                  model.progressStage ? ` • ${model.progressStage}` : ""
-                }`
+              ? `Konverterer...${model.progressPercent != null ? ` ${model.progressPercent}%` : ""}${model.progressStage ? ` • ${model.progressStage}` : ""
+              }`
               : null}
             {model?.status === "UPLOADING" ? "Laster opp..." : null}
             {model?.status === "ERROR" ? `Feil: ${model.errorMessage || "Ukjent feil"}` : null}
@@ -1204,123 +1203,123 @@ export function ModelViewerModal({
             </div>
           </div>
 
-              {!sidebarCollapsed ? (
+          {!sidebarCollapsed ? (
             <aside className="hidden lg:block w-[320px] border-l border-border bg-card">
               <div className="p-5 space-y-5">
-              <div className="space-y-2">
-                <div className="text-sm font-semibold">Etasjer</div>
-                <div className="space-y-2 max-h-[200px] overflow-auto pr-2">
-                  <label className="flex items-center gap-2 text-sm">
-                    <Checkbox
-                      checked={
-                        floors.length === 0
-                          ? true
-                          : floors.every((f) => floorSelection[f] ?? true)
+                <div className="space-y-2">
+                  <div className="text-sm font-semibold">Etasjer</div>
+                  <div className="space-y-2 max-h-[200px] overflow-auto pr-2">
+                    <label className="flex items-center gap-2 text-sm">
+                      <Checkbox
+                        checked={
+                          floors.length === 0
                             ? true
-                            : floors.some((f) => floorSelection[f] ?? true)
-                              ? "indeterminate"
-                              : false
-                      }
-                      disabled={sessionRole === "participant" || floors.length === 0}
-                      onCheckedChange={(checked) => {
-                        const nextValue = checked === true;
-                        setFloorSelection(() => {
-                          const next: Record<string, boolean> = {};
-                          for (const f of floors) next[f] = nextValue;
-                          return next;
-                        });
-                      }}
-                    />
-                    <span className="truncate">Alle</span>
-                  </label>
-
-                  {floors.map((floor) => (
-                    <label key={floor} className="flex items-center gap-2 text-sm">
-                      <Checkbox
-                        checked={floorSelection[floor] ?? true}
-                        disabled={sessionRole === "participant"}
-                        onCheckedChange={(checked) =>
-                          setFloorSelection((prev) => ({ ...prev, [floor]: Boolean(checked) }))
+                            : floors.every((f) => floorSelection[f] ?? true)
+                              ? true
+                              : floors.some((f) => floorSelection[f] ?? true)
+                                ? "indeterminate"
+                                : false
                         }
+                        disabled={sessionRole === "participant" || floors.length === 0}
+                        onCheckedChange={(checked) => {
+                          const nextValue = checked === true;
+                          setFloorSelection(() => {
+                            const next: Record<string, boolean> = {};
+                            for (const f of floors) next[f] = nextValue;
+                            return next;
+                          });
+                        }}
                       />
-                      <span className="truncate">{floor}</span>
+                      <span className="truncate">Alle</span>
                     </label>
-                  ))}
 
-                  {floors.length === 0 ? (
-                    <div className="text-xs text-muted-foreground mt-2">
-                      Etasjefilter kommer når IFC-metadata støtter nivåer.
-                    </div>
-                  ) : null}
+                    {floors.map((floor) => (
+                      <label key={floor} className="flex items-center gap-2 text-sm">
+                        <Checkbox
+                          checked={floorSelection[floor] ?? true}
+                          disabled={sessionRole === "participant"}
+                          onCheckedChange={(checked) =>
+                            setFloorSelection((prev) => ({ ...prev, [floor]: Boolean(checked) }))
+                          }
+                        />
+                        <span className="truncate">{floor}</span>
+                      </label>
+                    ))}
+
+                    {floors.length === 0 ? (
+                      <div className="text-xs text-muted-foreground mt-2">
+                        Etasjefilter kommer når IFC-metadata støtter nivåer.
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <div className="text-sm font-semibold">Systemer</div>
-                <div className="space-y-2 max-h-[240px] overflow-auto pr-2">
-                  {systems.map((system) => (
-                    <label key={system} className="flex items-center gap-2 text-sm">
-                      <Checkbox
-                        checked={systemSelection[system] ?? true}
-                        disabled={sessionRole === "participant"}
-                        onCheckedChange={(checked) =>
-                          setSystemSelection((prev) => ({ ...prev, [system]: Boolean(checked) }))
-                        }
-                      />
-                      <span className="truncate">{system}</span>
-                    </label>
-                  ))}
-                  {systems.length === 0 && (
-                    <div className="text-xs text-muted-foreground">Ingen systemer funnet</div>
+                <div className="space-y-2">
+                  <div className="text-sm font-semibold">Systemer</div>
+                  <div className="space-y-2 max-h-[240px] overflow-auto pr-2">
+                    {systems.map((system) => (
+                      <label key={system} className="flex items-center gap-2 text-sm">
+                        <Checkbox
+                          checked={systemSelection[system] ?? true}
+                          disabled={sessionRole === "participant"}
+                          onCheckedChange={(checked) =>
+                            setSystemSelection((prev) => ({ ...prev, [system]: Boolean(checked) }))
+                          }
+                        />
+                        <span className="truncate">{system}</span>
+                      </label>
+                    ))}
+                    {systems.length === 0 && (
+                      <div className="text-xs text-muted-foreground">Ingen systemer funnet</div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="text-sm font-semibold">Valgt komponent</div>
+                  {selectedComponent ? (
+                    <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm space-y-2">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="text-xs text-muted-foreground">Tag</div>
+                          <div className="text-xs font-medium truncate">{selectedComponent.componentTag || "Ukjent"}</div>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="text-xs text-muted-foreground">System</div>
+                          <div className="text-xs font-medium truncate">{selectedComponent.systemCode || "Ukjent"}</div>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="text-xs text-muted-foreground">Type</div>
+                          <div className="text-xs font-medium truncate">{selectedComponent.ifcType || "Ukjent"}</div>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="text-xs text-muted-foreground">Etasje</div>
+                          <div className="text-xs font-medium truncate">{selectedComponent.floor || "—"}</div>
+                        </div>
+                      </div>
+
+                      {selectedComponent.name ? (
+                        <div className="text-xs text-muted-foreground truncate">{selectedComponent.name}</div>
+                      ) : null}
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={handleGoToProtocol}
+                        disabled={!selectedComponent.fullTag || jumpingToProtocol}
+                      >
+                        {jumpingToProtocol ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : null}
+                        Gå til protokoll
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-muted-foreground">
+                      Klikk på en komponent i modellen for detaljer.
+                    </div>
                   )}
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <div className="text-sm font-semibold">Valgt komponent</div>
-                {selectedComponent ? (
-                  <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm space-y-2">
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="text-xs text-muted-foreground">Tag</div>
-                        <div className="text-xs font-medium truncate">{selectedComponent.componentTag || "Ukjent"}</div>
-                      </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="text-xs text-muted-foreground">System</div>
-                        <div className="text-xs font-medium truncate">{selectedComponent.systemCode || "Ukjent"}</div>
-                      </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="text-xs text-muted-foreground">Type</div>
-                        <div className="text-xs font-medium truncate">{selectedComponent.ifcType || "Ukjent"}</div>
-                      </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="text-xs text-muted-foreground">Etasje</div>
-                        <div className="text-xs font-medium truncate">{selectedComponent.floor || "—"}</div>
-                      </div>
-                    </div>
-
-                    {selectedComponent.name ? (
-                      <div className="text-xs text-muted-foreground truncate">{selectedComponent.name}</div>
-                    ) : null}
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={handleGoToProtocol}
-                      disabled={!selectedComponent.fullTag || jumpingToProtocol}
-                    >
-                      {jumpingToProtocol ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : null}
-                      Gå til protokoll
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="text-xs text-muted-foreground">
-                    Klikk på en komponent i modellen for detaljer.
-                  </div>
-                )}
-              </div>
-            </div>
             </aside>
           ) : null}
         </div>

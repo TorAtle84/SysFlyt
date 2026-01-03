@@ -204,7 +204,7 @@ export function ProtocolsContent({
               className="cursor-pointer transition-all hover:border-primary/50 hover:shadow-sm"
               onClick={() =>
                 router.push(
-                  `/projects/${project.id}/protocols/${protocol.id}`
+                  `/syslink/projects/${project.id}/protocols/${protocol.id}`
                 )
               }
             >

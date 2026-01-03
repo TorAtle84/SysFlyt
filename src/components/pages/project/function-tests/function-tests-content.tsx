@@ -292,7 +292,7 @@ export function FunctionTestsContent({
               key={t.id}
               className="cursor-pointer transition-all hover:shadow-md"
               onClick={() =>
-                router.push(`/projects/${project.id}/protocols/function-tests/${t.id}`)
+                router.push(`/syslink/projects/${project.id}/protocols/function-tests/${t.id}`)
               }
             >
               <CardHeader className="space-y-3">

@@ -2437,7 +2437,7 @@ export function FunctionTestDetail({ project, functionTest, members, userId, isA
     <div className="space-y-6">
       <div className="flex flex-col gap-3">
         <Link
-          href={`/projects/${project.id}/protocols/function-tests`}
+          href={`/syslink/projects/${project.id}/protocols/function-tests`}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ChevronLeft className="h-4 w-4" />

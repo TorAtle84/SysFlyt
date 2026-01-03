@@ -57,7 +57,7 @@ export async function GET(
                 startDate: p.startTime?.toISOString() || null,
                 endDate: p.endTime?.toISOString() || null,
                 status: p.status,
-                href: `/projects/${projectId}/protocols/${p.id}`,
+                href: `/syslink/projects/${projectId}/protocols/${p.id}`,
             });
         }
 
@@ -136,7 +136,7 @@ export async function GET(
                                 startDate: startDate.toISOString(),
                                 endDate: endDate ? endDate.toISOString() : null,
                                 status,
-                                href: `/projects/${projectId}/protocols/function-tests/${ft.id}`,
+                                href: `/syslink/projects/${projectId}/protocols/function-tests/${ft.id}`,
                             });
                             hasEmitted = true;
                         }
@@ -166,7 +166,7 @@ export async function GET(
                     startDate: null,
                     endDate: null,
                     status,
-                    href: `/projects/${projectId}/protocols/function-tests/${ft.id}`,
+                    href: `/syslink/projects/${projectId}/protocols/function-tests/${ft.id}`,
                 });
             }
 
@@ -187,7 +187,7 @@ export async function GET(
                     startDate: programansvarligDate.toISOString(),
                     endDate: programansvarligDate.toISOString(),
                     status: "NOT_STARTED",
-                    href: `/projects/${projectId}/protocols/function-tests/${ft.id}`,
+                    href: `/syslink/projects/${projectId}/protocols/function-tests/${ft.id}`,
                     isMilestone: true,
                     milestoneType: "programansvarlig",
                 });

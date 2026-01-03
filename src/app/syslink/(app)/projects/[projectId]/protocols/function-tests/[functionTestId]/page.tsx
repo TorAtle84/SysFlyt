@@ -52,7 +52,7 @@ export default async function FunctionTestDetailPage({
   });
 
   if (!functionTest) {
-    redirect(`/projects/${projectId}/protocols/function-tests`);
+    redirect(`/syslink/projects/${projectId}/protocols/function-tests`);
   }
 
   const projectMembers = await prisma.projectMember.findMany({

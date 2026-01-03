@@ -142,7 +142,7 @@ export async function POST(
                 [item?.massList?.system, item?.massList?.component].filter(Boolean).join("-") ||
                 "komponent";
 
-            const link = `/projects/${projectId}/protocols/${protocolId}?item=${itemId}&notes=1&comment=${comment.id}`;
+            const link = `/syslink/projects/${projectId}/protocols/${protocolId}?item=${itemId}&notes=1&comment=${comment.id}`;
             const messagePreview = String(content).trim().slice(0, 140);
 
             await prisma.notification.createMany({
