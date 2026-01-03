@@ -12,10 +12,11 @@ import { Loader2, Eye, EyeOff, Trash2, Check } from "lucide-react";
 
 interface LinkDogSettingsData {
     enabled: boolean;
-    provider: 'gemini' | 'claude';
+    provider: 'gemini' | 'claude' | 'openai';
     keys: {
         gemini: { configured: boolean; masked: string | null };
         claude: { configured: boolean; masked: string | null };
+        openai: { configured: boolean; masked: string | null };
     };
 }
 
@@ -26,10 +27,13 @@ export function LinkDogSettings() {
 
     const [showGeminiInput, setShowGeminiInput] = useState(false);
     const [showClaudeInput, setShowClaudeInput] = useState(false);
+    const [showOpenaiInput, setShowOpenaiInput] = useState(false);
     const [geminiKey, setGeminiKey] = useState("");
     const [claudeKey, setClaudeKey] = useState("");
+    const [openaiKey, setOpenaiKey] = useState("");
     const [showGeminiKey, setShowGeminiKey] = useState(false);
     const [showClaudeKey, setShowClaudeKey] = useState(false);
+    const [showOpenaiKey, setShowOpenaiKey] = useState(false);
 
     useEffect(() => {
         fetchSettings();
@@ -48,7 +52,7 @@ export function LinkDogSettings() {
         }
     }
 
-    async function updateSettings(updates: Partial<{ enabled: boolean; provider: string; geminiApiKey: string; claudeApiKey: string }>) {
+    async function updateSettings(updates: Partial<{ enabled: boolean; provider: string; geminiApiKey: string; claudeApiKey: string; openaiApiKey: string }>) {
         setSaving(true);
         try {
             const res = await fetch('/api/linkdog/settings', {
@@ -68,8 +72,10 @@ export function LinkDogSettings() {
             // Reset input states
             setShowGeminiInput(false);
             setShowClaudeInput(false);
+            setShowOpenaiInput(false);
             setGeminiKey("");
             setClaudeKey("");
+            setOpenaiKey("");
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Kunne ikke oppdatere");
         } finally {
@@ -77,7 +83,7 @@ export function LinkDogSettings() {
         }
     }
 
-    async function deleteKey(provider: 'gemini' | 'claude') {
+    async function deleteKey(provider: 'gemini' | 'claude' | 'openai') {
         setSaving(true);
         try {
             const res = await fetch(`/api/linkdog/settings?provider=${provider}`, {
@@ -160,6 +166,15 @@ export function LinkDogSettings() {
                                 Anthropic Claude
                             </Label>
                             {settings.keys.claude.configured && (
+                                <Check className="h-4 w-4 text-green-500" />
+                            )}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="openai" id="openai" />
+                            <Label htmlFor="openai" className="font-normal cursor-pointer">
+                                OpenAI
+                            </Label>
+                            {settings.keys.openai.configured && (
                                 <Check className="h-4 w-4 text-green-500" />
                             )}
                         </div>
@@ -311,6 +326,76 @@ export function LinkDogSettings() {
                             </Button>
                         )}
                     </div>
+
+                    {/* OpenAI Key */}
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">OpenAI API-nøkkel</span>
+                            {settings.keys.openai.configured && !showOpenaiInput && (
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-muted-foreground font-mono">
+                                        {settings.keys.openai.masked}
+                                    </span>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-destructive"
+                                        onClick={() => deleteKey('openai')}
+                                        disabled={saving}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+
+                        {!settings.keys.openai.configured || showOpenaiInput ? (
+                            <div className="flex gap-2">
+                                <div className="relative flex-1">
+                                    <Input
+                                        type={showOpenaiKey ? "text" : "password"}
+                                        value={openaiKey}
+                                        onChange={(e) => setOpenaiKey(e.target.value)}
+                                        placeholder="sk-..."
+                                        disabled={saving}
+                                    />
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="absolute right-0 top-0 h-full"
+                                        onClick={() => setShowOpenaiKey(!showOpenaiKey)}
+                                    >
+                                        {showOpenaiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </Button>
+                                </div>
+                                <Button
+                                    onClick={() => updateSettings({ openaiApiKey: openaiKey })}
+                                    disabled={!openaiKey || saving}
+                                >
+                                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Lagre"}
+                                </Button>
+                                {showOpenaiInput && (
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setShowOpenaiInput(false);
+                                            setOpenaiKey("");
+                                        }}
+                                    >
+                                        Avbryt
+                                    </Button>
+                                )}
+                            </div>
+                        ) : (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setShowOpenaiInput(true)}
+                            >
+                                Endre nøkkel
+                            </Button>
+                        )}
+                    </div>
                 </div>
 
                 <p className="text-xs text-muted-foreground">
@@ -318,10 +403,12 @@ export function LinkDogSettings() {
                     Få nøkler fra{" "}
                     <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                         Google AI Studio
-                    </a>{" "}
-                    eller{" "}
+                    </a>,{" "}
                     <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                         Anthropic Console
+                    </a>, eller{" "}
+                    <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                        OpenAI Platform
                     </a>.
                 </p>
             </CardContent>

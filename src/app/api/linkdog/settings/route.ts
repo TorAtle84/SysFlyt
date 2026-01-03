@@ -21,6 +21,7 @@ export async function GET() {
                 linkdogProvider: true,
                 geminiApiKey: true,
                 claudeApiKey: true,
+                openaiApiKey: true,
             }
         });
 
@@ -40,6 +41,10 @@ export async function GET() {
                 claude: {
                     configured: !!user.claudeApiKey,
                     masked: user.claudeApiKey ? maskApiKey(decrypt(user.claudeApiKey)) : null
+                },
+                openai: {
+                    configured: !!user.openaiApiKey,
+                    masked: user.openaiApiKey ? maskApiKey(decrypt(user.openaiApiKey)) : null
                 }
             }
         });
@@ -74,7 +79,7 @@ export async function PUT(req: NextRequest) {
         }
 
         // Update provider
-        if (provider && ['gemini', 'claude'].includes(provider)) {
+        if (provider && ['gemini', 'claude', 'openai'].includes(provider)) {
             updateData.linkdogProvider = provider;
         }
 
@@ -105,6 +110,21 @@ export async function PUT(req: NextRequest) {
             } else {
                 return NextResponse.json(
                     { error: "Ugyldig Claude API-nøkkel (må starte med 'sk-ant-')" },
+                    { status: 400 }
+                );
+            }
+        }
+
+        // Update OpenAI API key
+        const { openaiApiKey } = body;
+        if (openaiApiKey !== undefined) {
+            if (openaiApiKey === null || openaiApiKey === '') {
+                updateData.openaiApiKey = null;
+            } else if (isValidApiKey(openaiApiKey, 'openai')) {
+                updateData.openaiApiKey = encrypt(openaiApiKey);
+            } else {
+                return NextResponse.json(
+                    { error: "Ugyldig OpenAI API-nøkkel (må starte med 'sk-')" },
                     { status: 400 }
                 );
             }
@@ -143,7 +163,7 @@ export async function DELETE(req: NextRequest) {
         const { searchParams } = new URL(req.url);
         const provider = searchParams.get('provider');
 
-        if (!provider || !['gemini', 'claude'].includes(provider)) {
+        if (!provider || !['gemini', 'claude', 'openai'].includes(provider)) {
             return NextResponse.json({ error: "Ugyldig provider" }, { status: 400 });
         }
 
@@ -151,8 +171,10 @@ export async function DELETE(req: NextRequest) {
 
         if (provider === 'gemini') {
             updateData.geminiApiKey = null;
-        } else {
+        } else if (provider === 'claude') {
             updateData.claudeApiKey = null;
+        } else {
+            updateData.openaiApiKey = null;
         }
 
         await prisma.user.update({

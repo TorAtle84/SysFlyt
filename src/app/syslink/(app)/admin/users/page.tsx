@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { AppShell } from "@/components/layout/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -281,308 +282,312 @@ export default function AdminUsersPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
+            <AppShell>
+                <div className="flex items-center justify-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            </AppShell>
         );
     }
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                        <Users className="h-6 w-6" />
-                        Brukere
-                    </h1>
-                    <p className="text-muted-foreground">
-                        Administrer alle brukere i systemet
-                    </p>
+        <AppShell>
+            <div className="space-y-6">
+                {/* Header */}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                            <Users className="h-6 w-6" />
+                            Brukere
+                        </h1>
+                        <p className="text-muted-foreground">
+                            Administrer alle brukere i systemet
+                        </p>
+                    </div>
                 </div>
-            </div>
 
-            {/* Search and Tabs */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
-                    <TabsList>
-                        <TabsTrigger value="all">Alle ({users.length})</TabsTrigger>
-                        <TabsTrigger value="active">
-                            Aktive ({users.filter(u => u.status === "ACTIVE").length})
-                        </TabsTrigger>
-                        <TabsTrigger value="pending">
-                            Ventende ({users.filter(u => u.status === "PENDING").length})
-                        </TabsTrigger>
-                        <TabsTrigger value="suspended">
-                            Suspendert ({users.filter(u => u.status === "SUSPENDED").length})
-                        </TabsTrigger>
-                    </TabsList>
-                </Tabs>
+                {/* Search and Tabs */}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
+                        <TabsList>
+                            <TabsTrigger value="all">Alle ({users.length})</TabsTrigger>
+                            <TabsTrigger value="active">
+                                Aktive ({users.filter(u => u.status === "ACTIVE").length})
+                            </TabsTrigger>
+                            <TabsTrigger value="pending">
+                                Ventende ({users.filter(u => u.status === "PENDING").length})
+                            </TabsTrigger>
+                            <TabsTrigger value="suspended">
+                                Suspendert ({users.filter(u => u.status === "SUSPENDED").length})
+                            </TabsTrigger>
+                        </TabsList>
+                    </Tabs>
 
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Søk etter bruker..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-9 w-full sm:w-64"
-                    />
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Søk etter bruker..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-9 w-full sm:w-64"
+                        />
+                    </div>
                 </div>
-            </div>
 
-            {/* Users Table */}
-            <Card>
-                <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Bruker</TableHead>
-                                <TableHead>Selskap</TableHead>
-                                <TableHead>Rolle</TableHead>
-                                <TableHead>Apps</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>2FA</TableHead>
-                                <TableHead>Registrert</TableHead>
-                                <TableHead className="w-[100px]">Handlinger</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredUsers.length === 0 ? (
+                {/* Users Table */}
+                <Card>
+                    <CardContent className="p-0">
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                                        Ingen brukere funnet
-                                    </TableCell>
+                                    <TableHead>Bruker</TableHead>
+                                    <TableHead>Selskap</TableHead>
+                                    <TableHead>Rolle</TableHead>
+                                    <TableHead>Apps</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>2FA</TableHead>
+                                    <TableHead>Registrert</TableHead>
+                                    <TableHead className="w-[100px]">Handlinger</TableHead>
                                 </TableRow>
-                            ) : (
-                                filteredUsers.map((user) => (
-                                    <TableRow key={user.id}>
-                                        <TableCell>
-                                            <div>
-                                                <p className="font-medium">{user.firstName} {user.lastName}</p>
-                                                <p className="text-sm text-muted-foreground">{user.email}</p>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-muted-foreground">
-                                            {user.company || "-"}
-                                        </TableCell>
-                                        <TableCell>{getRoleBadge(user.role)}</TableCell>
-                                        <TableCell>
-                                            <div className="flex gap-1">
-                                                {user.appAccess
-                                                    .filter(a => a.status === "APPROVED")
-                                                    .map(a => (
-                                                        <Badge key={a.application.code} variant="secondary" className="text-xs">
-                                                            {a.application.code === "SYSLINK" ? "S" : "F"}
-                                                        </Badge>
-                                                    ))}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>{getStatusBadge(user.status)}</TableCell>
-                                        <TableCell>
-                                            {user.totpEnabled ? (
-                                                <Shield className="h-4 w-4 text-green-500" />
-                                            ) : (
-                                                <span className="text-muted-foreground">-</span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell className="text-muted-foreground text-sm">
-                                            {format(new Date(user.createdAt), "d. MMM yyyy", { locale: nb })}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex gap-1">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => openEditDialog(user)}
-                                                >
-                                                    <Pencil className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                                    onClick={() => {
-                                                        setDeleteUser(user);
-                                                        setDeleteDialogOpen(true);
-                                                    }}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredUsers.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                                            Ingen brukere funnet
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+                                ) : (
+                                    filteredUsers.map((user) => (
+                                        <TableRow key={user.id}>
+                                            <TableCell>
+                                                <div>
+                                                    <p className="font-medium">{user.firstName} {user.lastName}</p>
+                                                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground">
+                                                {user.company || "-"}
+                                            </TableCell>
+                                            <TableCell>{getRoleBadge(user.role)}</TableCell>
+                                            <TableCell>
+                                                <div className="flex gap-1">
+                                                    {user.appAccess
+                                                        .filter(a => a.status === "APPROVED")
+                                                        .map(a => (
+                                                            <Badge key={a.application.code} variant="secondary" className="text-xs">
+                                                                {a.application.code === "SYSLINK" ? "S" : "F"}
+                                                            </Badge>
+                                                        ))}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>{getStatusBadge(user.status)}</TableCell>
+                                            <TableCell>
+                                                {user.totpEnabled ? (
+                                                    <Shield className="h-4 w-4 text-green-500" />
+                                                ) : (
+                                                    <span className="text-muted-foreground">-</span>
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground text-sm">
+                                                {format(new Date(user.createdAt), "d. MMM yyyy", { locale: nb })}
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex gap-1">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => openEditDialog(user)}
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                        onClick={() => {
+                                                            setDeleteUser(user);
+                                                            setDeleteDialogOpen(true);
+                                                        }}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
 
-            {/* Edit Dialog */}
-            <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-                <DialogContent className="max-w-lg">
-                    <DialogHeader>
-                        <DialogTitle>Rediger bruker</DialogTitle>
-                        <DialogDescription>
-                            E-postadressen kan ikke endres
-                        </DialogDescription>
-                    </DialogHeader>
+                {/* Edit Dialog */}
+                <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                    <DialogContent className="max-w-lg">
+                        <DialogHeader>
+                            <DialogTitle>Rediger bruker</DialogTitle>
+                            <DialogDescription>
+                                E-postadressen kan ikke endres
+                            </DialogDescription>
+                        </DialogHeader>
 
-                    <div className="space-y-4 py-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>Fornavn</Label>
-                                <Input
-                                    value={editForm.firstName}
-                                    onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
-                                />
+                        <div className="space-y-4 py-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Fornavn</Label>
+                                    <Input
+                                        value={editForm.firstName}
+                                        onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Etternavn</Label>
+                                    <Input
+                                        value={editForm.lastName}
+                                        onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                                    />
+                                </div>
                             </div>
+
                             <div className="space-y-2">
-                                <Label>Etternavn</Label>
-                                <Input
-                                    value={editForm.lastName}
-                                    onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
-                                />
+                                <Label>E-post (kan ikke endres)</Label>
+                                <Input value={editUser?.email || ""} disabled className="bg-muted" />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Telefon</Label>
+                                    <Input
+                                        value={editForm.phone}
+                                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Selskap</Label>
+                                    <Input
+                                        value={editForm.company}
+                                        onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Tittel</Label>
+                                    <Input
+                                        value={editForm.title}
+                                        onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Fag/Disiplin</Label>
+                                    <Input
+                                        value={editForm.discipline}
+                                        onChange={(e) => setEditForm({ ...editForm, discipline: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Rolle</Label>
+                                    <Select
+                                        value={editForm.role}
+                                        onValueChange={(value) => setEditForm({ ...editForm, role: value })}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {ROLES.map((role) => (
+                                                <SelectItem key={role.value} value={role.value}>
+                                                    {role.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Status</Label>
+                                    <Select
+                                        value={editForm.status}
+                                        onValueChange={(value) => setEditForm({ ...editForm, status: value })}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {STATUSES.map((status) => (
+                                                <SelectItem key={status.value} value={status.value}>
+                                                    {status.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Applikasjonstilgang</Label>
+                                <div className="flex gap-4 pt-2">
+                                    {applications.map((app) => (
+                                        <div key={app.code} className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id={`app-${app.code}`}
+                                                checked={editForm.apps.includes(app.code)}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setEditForm({ ...editForm, apps: [...editForm.apps, app.code] });
+                                                    } else {
+                                                        setEditForm({ ...editForm, apps: editForm.apps.filter(c => c !== app.code) });
+                                                    }
+                                                }}
+                                            />
+                                            <Label htmlFor={`app-${app.code}`} className="font-normal cursor-pointer">
+                                                {app.name}
+                                            </Label>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label>E-post (kan ikke endres)</Label>
-                            <Input value={editUser?.email || ""} disabled className="bg-muted" />
-                        </div>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                                Avbryt
+                            </Button>
+                            <Button onClick={handleSaveUser} disabled={saving}>
+                                {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                                Lagre endringer
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>Telefon</Label>
-                                <Input
-                                    value={editForm.phone}
-                                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Selskap</Label>
-                                <Input
-                                    value={editForm.company}
-                                    onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>Tittel</Label>
-                                <Input
-                                    value={editForm.title}
-                                    onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Fag/Disiplin</Label>
-                                <Input
-                                    value={editForm.discipline}
-                                    onChange={(e) => setEditForm({ ...editForm, discipline: e.target.value })}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>Rolle</Label>
-                                <Select
-                                    value={editForm.role}
-                                    onValueChange={(value) => setEditForm({ ...editForm, role: value })}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {ROLES.map((role) => (
-                                            <SelectItem key={role.value} value={role.value}>
-                                                {role.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Status</Label>
-                                <Select
-                                    value={editForm.status}
-                                    onValueChange={(value) => setEditForm({ ...editForm, status: value })}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {STATUSES.map((status) => (
-                                            <SelectItem key={status.value} value={status.value}>
-                                                {status.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label>Applikasjonstilgang</Label>
-                            <div className="flex gap-4 pt-2">
-                                {applications.map((app) => (
-                                    <div key={app.code} className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id={`app-${app.code}`}
-                                            checked={editForm.apps.includes(app.code)}
-                                            onCheckedChange={(checked) => {
-                                                if (checked) {
-                                                    setEditForm({ ...editForm, apps: [...editForm.apps, app.code] });
-                                                } else {
-                                                    setEditForm({ ...editForm, apps: editForm.apps.filter(c => c !== app.code) });
-                                                }
-                                            }}
-                                        />
-                                        <Label htmlFor={`app-${app.code}`} className="font-normal cursor-pointer">
-                                            {app.name}
-                                        </Label>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-                            Avbryt
-                        </Button>
-                        <Button onClick={handleSaveUser} disabled={saving}>
-                            {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                            Lagre endringer
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-
-            {/* Delete Confirmation */}
-            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Slett bruker?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Er du sikker på at du vil slette bruker {deleteUser?.firstName} {deleteUser?.lastName}?
-                            Denne handlingen kan ikke angres.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleDeleteUser}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                            {deleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                            Slett bruker
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-        </div>
+                {/* Delete Confirmation */}
+                <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Slett bruker?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Er du sikker på at du vil slette bruker {deleteUser?.firstName} {deleteUser?.lastName}?
+                                Denne handlingen kan ikke angres.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={handleDeleteUser}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                                {deleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                                Slett bruker
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </div>
+        </AppShell>
     );
 }
