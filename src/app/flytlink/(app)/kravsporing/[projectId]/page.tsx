@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RequirementsTable } from "@/components/pages/flytlink/requirements-table";
+import { AnalysisSummary } from "@/components/pages/flytlink/analysis-summary";
 
 const ACCEPTED_TYPES = {
     "application/pdf": [".pdf"],
@@ -114,6 +115,8 @@ export default function KravsporingProjectPage() {
         activeKeys?: string;
     } | null>(null);
     const [currentAnalysisId, setCurrentAnalysisId] = useState<string | null>(null);
+    const [selectedAnalysis, setSelectedAnalysis] = useState<Analysis | null>(null);
+    const [summaryOpen, setSummaryOpen] = useState(false);
 
     useEffect(() => {
         loadProject();
@@ -217,6 +220,24 @@ export default function KravsporingProjectPage() {
                             setAnalyzing(false);
                             setAnalyzing(false);
                             setCurrentAnalysisId(null);
+
+                            // Load fresh data and show summary
+                            loadProject(); // This updates the analyses list
+                            loadRequirements();
+
+                            // We need to fetch the specific analysis details or find it in the refreshed project list
+                            // Ideally, we'd wait for loadProject to finish, but for now we can just use the completed event info
+                            // or better, fetch the single analysis to show summary
+                            fetch(`/api/flytlink/kravsporing/projects/${projectId}/analyze?analysisId=${analysisId}`)
+                                .then(r => r.json())
+                                .then(d => {
+                                    if (d.analysis) {
+                                        setSelectedAnalysis(d.analysis);
+                                        setSummaryOpen(true);
+                                    }
+                                });
+
+                        } else if (analysis.status === "FAILED") {
                         } else if (analysis.status === "FAILED") {
                             clearInterval(pollInterval);
                             toast.error(analysis.errorMessage || "Analyse feilet");
@@ -524,7 +545,14 @@ export default function KravsporingProjectPage() {
                     ) : (
                         <div className="space-y-3">
                             {project.analyses.map((analysis) => (
-                                <Card key={analysis.id}>
+                                <Card
+                                    key={analysis.id}
+                                    className="cursor-pointer hover:border-primary/50 transition-colors"
+                                    onClick={() => {
+                                        setSelectedAnalysis(analysis);
+                                        setSummaryOpen(true);
+                                    }}
+                                >
                                     <CardContent className="flex items-center justify-between p-4">
                                         <div className="flex items-center gap-4">
                                             <div className={cn(
@@ -642,6 +670,12 @@ export default function KravsporingProjectPage() {
                     </Card>
                 </TabsContent>
             </Tabs>
+
+            <AnalysisSummary
+                open={summaryOpen}
+                onOpenChange={setSummaryOpen}
+                analysis={selectedAnalysis}
+            />
         </div>
     );
 }
