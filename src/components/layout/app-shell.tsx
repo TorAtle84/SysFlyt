@@ -316,7 +316,7 @@ export function AppShell({ children, sidebar, variant = "syslink" }: AppShellPro
               "w-full justify-start gap-2",
               leftSidebarCollapsed ? "lg:justify-center lg:p-2" : ""
             )}
-            onClick={() => signOut({ callbackUrl: "/syslink/login" })}
+            onClick={() => signOut({ callbackUrl: "/" })}
             title={leftSidebarCollapsed ? "Logg ut" : undefined}
           >
             <LogOut size={20} />

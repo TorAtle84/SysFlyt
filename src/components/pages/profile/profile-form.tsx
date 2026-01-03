@@ -25,6 +25,14 @@ interface ProfileFormProps {
     reportsAsMemberEnabled: boolean;
     role: string;
     status: string;
+    appAccess?: {
+      status: string;
+      application: {
+        code: string;
+        name: string;
+        logoUrl: string | null;
+      };
+    }[];
   };
 }
 

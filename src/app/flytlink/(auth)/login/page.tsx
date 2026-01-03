@@ -138,6 +138,21 @@ export default function FlytLinkLoginPage() {
                     {showTotp ? "Verifiser" : "Logg inn"}
                 </Button>
             </form>
+
+            {
+                !showTotp && (
+                    <p className="text-sm text-muted-foreground text-center">
+                        Har du ikke bruker?{" "}
+                        <Link href="/flytlink/register" className="font-semibold text-info underline-offset-4 hover:underline">
+                            Opprett konto
+                        </Link>
+                        {" • "}
+                        <Link href="/flytlink/reset" className="font-semibold text-info underline-offset-4 hover:underline">
+                            Glemt passord?
+                        </Link>
+                    </p>
+                )
+            }
             <Link
                 href="/"
                 className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
@@ -145,6 +160,6 @@ export default function FlytLinkLoginPage() {
                 <ArrowLeft className="h-4 w-4" />
                 Tilbake til startsiden
             </Link>
-        </div>
+        </div >
     );
 }

@@ -26,6 +26,7 @@ const registerSchema = z.object({
   discipline: z.string().optional(),
   other: z.string().optional(),
   password: z.string().min(8, "Passord må ha minst 8 tegn"),
+  apps: z.array(z.string()).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -71,8 +72,35 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Handle App Access Requests
+    if (data.apps && Array.isArray(data.apps) && data.apps.length > 0) {
+      // Find application IDs for the requested codes
+      // We assume codes match the AppCode enum (SYSLINK, FLYTLINK)
+      const appCodes = data.apps.map((app: string) => app.toUpperCase());
+
+      const applications = await prisma.application.findMany({
+        where: {
+          code: {
+            in: appCodes as any
+          }
+        }
+      });
+
+      // Create access requests
+      if (applications.length > 0) {
+        await prisma.userAppAccess.createMany({
+          data: applications.map((app: { id: string }) => ({
+            userId: user.id,
+            applicationId: app.id,
+            status: "PENDING"
+          }))
+        });
+      }
+    }
+
     // If not admin, send verification email
     if (!isAdmin) {
+      // ... rest of email logic ...
       // Create verification token
       const token = randomBytes(32).toString("hex");
       const expires = new Date();

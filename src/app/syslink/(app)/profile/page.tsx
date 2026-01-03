@@ -25,6 +25,11 @@ export default async function ProfilePage() {
       discipline: true,
       reportsAsProjectLeaderEnabled: true,
       reportsAsMemberEnabled: true,
+      appAccess: {
+        include: {
+          application: true
+        }
+      },
       role: true,
       status: true,
       totpEnabled: true,

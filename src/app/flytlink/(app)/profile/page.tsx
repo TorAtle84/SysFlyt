@@ -25,6 +25,11 @@ export default async function FlytLinkProfilePage() {
             discipline: true,
             reportsAsProjectLeaderEnabled: true,
             reportsAsMemberEnabled: true,
+            appAccess: {
+                include: {
+                    application: true
+                }
+            },
             role: true,
             status: true,
             totpEnabled: true,
