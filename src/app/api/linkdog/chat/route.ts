@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
                 linkdogProvider: true,
                 geminiApiKey: true,
                 claudeApiKey: true,
+                openaiApiKey: true,
                 appAccess: {
                     where: { status: "APPROVED" },
                     select: {
@@ -99,12 +100,15 @@ export async function POST(req: NextRequest) {
             apiKey = user.geminiApiKey;
         } else if (provider === 'claude') {
             apiKey = user.claudeApiKey;
+        } else if (provider === 'openai') {
+            apiKey = user.openaiApiKey;
         }
 
         if (!apiKey) {
+            const providerName = provider === 'gemini' ? 'Gemini' : provider === 'claude' ? 'Claude' : 'OpenAI';
             return NextResponse.json({
                 response: "",
-                error: `Du har ikke konfigurert en ${provider === 'gemini' ? 'Gemini' : 'Claude'} API-nøkkel. Gå til [Profil](/syslink/profile) for å legge den til! 🐕`,
+                error: `Du har ikke konfigurert en ${providerName} API-nøkkel. Gå til [Profil](/syslink/profile) for å legge den til! 🐕`,
                 shouldEnd: false
             });
         }

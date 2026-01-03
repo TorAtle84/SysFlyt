@@ -6,7 +6,7 @@
 import { decrypt } from '@/lib/encryption';
 import { buildSystemPrompt, filterResponse, type LinkDogContext } from './system-prompt';
 
-export type AIProvider = 'gemini' | 'claude';
+export type AIProvider = 'gemini' | 'claude' | 'openai';
 
 interface ChatMessage {
     role: 'user' | 'assistant';
@@ -42,6 +42,8 @@ export async function chat(
 
         if (provider === 'gemini') {
             return await chatWithGemini(message, systemPrompt, apiKey, conversationHistory);
+        } else if (provider === 'openai') {
+            return await chatWithOpenAI(message, systemPrompt, apiKey, conversationHistory);
         } else {
             return await chatWithClaude(message, systemPrompt, apiKey, conversationHistory);
         }
@@ -207,6 +209,82 @@ async function chatWithClaude(
     }
 
     const rawResponse = data.content[0]?.text || '';
+    const filteredResponse = filterResponse(rawResponse);
+
+    return { response: filteredResponse };
+}
+
+/**
+ * Chat with OpenAI
+ */
+async function chatWithOpenAI(
+    message: string,
+    systemPrompt: string,
+    apiKey: string,
+    history: ChatMessage[]
+): Promise<ChatResponse> {
+    const url = 'https://api.openai.com/v1/chat/completions';
+
+    // Build messages array
+    const messages = [
+        { role: 'system', content: systemPrompt }
+    ];
+
+    // Add history
+    for (const msg of history) {
+        messages.push({
+            role: msg.role,
+            content: msg.content
+        });
+    }
+
+    // Add current message
+    messages.push({
+        role: 'user',
+        content: message
+    });
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            max_tokens: 500,
+            temperature: 0.7,
+            messages,
+        }),
+    });
+
+    if (!response.ok) {
+        const error = await response.text();
+        console.error('OpenAI API error:', error);
+
+        if (response.status === 401) {
+            return {
+                response: '',
+                error: 'API-nøkkelen er ugyldig. Sjekk innstillingene dine! 🐕'
+            };
+        }
+
+        return {
+            response: '',
+            error: 'Kunne ikke kontakte AI-tjenesten. Prøv igjen! 🐕'
+        };
+    }
+
+    const data = await response.json();
+
+    if (!data.choices || data.choices.length === 0) {
+        return {
+            response: '',
+            error: 'Ingen respons fra AI. Prøv å omformulere spørsmålet! 🐕'
+        };
+    }
+
+    const rawResponse = data.choices[0]?.message?.content || '';
     const filteredResponse = filterResponse(rawResponse);
 
     return { response: filteredResponse };
