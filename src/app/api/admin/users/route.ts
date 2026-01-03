@@ -104,6 +104,40 @@ export async function PATCH(req: NextRequest) {
     },
   });
 
+  // Update App Access if provided
+  // Expects apps to be an array of AppCode strings ['SYSLINK', 'FLYTLINK']
+  // If provided, it sets these to APPROVED and removes access to others
+  if (body.apps && Array.isArray(body.apps)) {
+    const allApps = await prisma.application.findMany();
+    const selectedCodes = new Set(body.apps);
+
+    for (const app of allApps) {
+      if (selectedCodes.has(app.code)) {
+        // Approve/Grant
+        await prisma.userAppAccess.upsert({
+          where: { userId_applicationId: { userId, applicationId: app.id } },
+          create: {
+            userId,
+            applicationId: app.id,
+            status: "APPROVED",
+            approvedById: authResult.user.id,
+            approvedAt: new Date(),
+          },
+          update: {
+            status: "APPROVED",
+            approvedById: authResult.user.id,
+            approvedAt: new Date(),
+          },
+        });
+      } else {
+        // Revoke/Delete
+        await prisma.userAppAccess.deleteMany({
+          where: { userId, applicationId: app.id },
+        });
+      }
+    }
+  }
+
   // Send activation email if user was activated
   if (isActivating) {
     const baseUrl = buildBaseUrl(req);

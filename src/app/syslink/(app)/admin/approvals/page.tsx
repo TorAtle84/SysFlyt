@@ -14,6 +14,10 @@ export default async function ApprovalsPage() {
   const user = await prisma.user.findUnique({ where: { email: session.user.email } });
   if (!user || user.role !== Role.ADMIN) redirect("/syslink/dashboard");
 
+  const applications = await prisma.application.findMany({
+    select: { id: true, code: true, name: true }
+  });
+
   const pending = await prisma.user.findMany({
     where: { status: UserStatus.PENDING },
     select: {
@@ -25,13 +29,19 @@ export default async function ApprovalsPage() {
       title: true,
       createdAt: true,
       role: true,
+      appAccess: {
+        select: {
+          application: { select: { code: true, name: true } },
+          status: true
+        }
+      }
     },
     orderBy: { createdAt: "asc" },
   });
 
   return (
     <AppShell>
-      <ApprovalPanel initialUsers={pending} />
+      <ApprovalPanel initialUsers={pending} applications={applications} />
     </AppShell>
   );
 }
