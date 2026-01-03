@@ -261,7 +261,7 @@ export default function FdvCollectionPage() {
           </CardHeader>
           <CardContent className="flex items-center justify-between">
             <div className="text-2xl font-semibold">{summary.componentsWithFDV}</div>
-            <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-100">OK</Badge>
+            <Badge className="!bg-emerald-100 !text-emerald-800 !border-emerald-200 hover:!bg-emerald-100">OK</Badge>
           </CardContent>
         </Card>
         <Card>
@@ -272,7 +272,7 @@ export default function FdvCollectionPage() {
           </CardHeader>
           <CardContent className="flex items-center justify-between">
             <div className="text-2xl font-semibold">{summary.componentsMissingFDV}</div>
-            <Badge className={hasMissing ? "bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-100" : "bg-muted/20 text-muted-foreground border-transparent"}>Mangler</Badge>
+            <Badge className={hasMissing ? "!bg-orange-100 !text-orange-800 !border-orange-200 hover:!bg-orange-100" : "bg-muted/20 text-muted-foreground border-transparent"}>Mangler</Badge>
           </CardContent>
         </Card>
         <Card>
@@ -413,8 +413,8 @@ export default function FdvCollectionPage() {
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge className={component.hasFdv
-                          ? "bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-100"
-                          : "bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-100"
+                          ? "!bg-emerald-100 !text-emerald-800 !border-emerald-200 hover:!bg-emerald-100"
+                          : "!bg-orange-100 !text-orange-800 !border-orange-200 hover:!bg-orange-100"
                         }>
                           {component.hasFdv ? "OK" : "Mangler"}
                         </Badge>
