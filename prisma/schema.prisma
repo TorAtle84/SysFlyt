@@ -1115,6 +1115,16 @@ model KravsporingAnalysis {
   apiCostUsd     Float    @default(0)
   apiCostNok     Float    @default(0)
   
+  // Provider breakdown
+  geminiTokens   Int      @default(0)
+  geminiCostUsd  Float    @default(0)
+  
+  openaiTokens   Int      @default(0)
+  openaiCostUsd  Float    @default(0)
+  
+  // Key status snapshot (what was used/active during this analysis)
+  activeKeys     String?  // JSON string e.g. { "gemini": true, "openai": false }
+  
   projectId   String
   project     KravsporingProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
   

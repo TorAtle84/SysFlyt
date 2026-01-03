@@ -171,7 +171,13 @@ async function callGemini(
 
     return {
         text: data.candidates[0]?.content?.parts[0]?.text || "",
-        usage: { tokensUsed, costUsd },
+        usage: {
+            inputTokens: promptTokens,
+            outputTokens,
+            costUsd,
+            model,
+            provider: "gemini",
+        },
     };
 }
 
@@ -180,16 +186,45 @@ export class UsageTracker {
     private totalTokens = 0;
     private totalCostUsd = 0;
 
+    // Provider specific tracking
+    private geminiTokens = 0;
+    private geminiCostUsd = 0;
+
+    private openaiTokens = 0;
+    private openaiCostUsd = 0;
+
+    // Active keys tracking
+    private activeProviders: Set<string> = new Set();
+
     add(usage: ApiUsage) {
-        this.totalTokens += usage.tokensUsed;
+        this.totalTokens += usage.inputTokens + usage.outputTokens;
         this.totalCostUsd += usage.costUsd;
+        this.activeProviders.add(usage.provider);
+
+        if (usage.provider === "gemini") {
+            this.geminiTokens += usage.inputTokens + usage.outputTokens;
+            this.geminiCostUsd += usage.costUsd;
+        } else if (usage.provider === "openai") {
+            this.openaiTokens += usage.inputTokens + usage.outputTokens;
+            this.openaiCostUsd += usage.costUsd;
+        }
     }
 
     get totals() {
         return {
-            tokensUsed: this.totalTokens,
+            totalTokens: this.totalTokens,
             apiCostUsd: this.totalCostUsd,
             apiCostNok: this.totalCostUsd * USD_TO_NOK,
+
+            // Provider breakdown
+            geminiTokens: this.geminiTokens,
+            geminiCostUsd: this.geminiCostUsd,
+
+            openaiTokens: this.openaiTokens,
+            openaiCostUsd: this.openaiCostUsd,
+
+            // Active keys (snapshot)
+            activeKeys: JSON.stringify(Array.from(this.activeProviders)),
         };
     }
 }

@@ -232,25 +232,33 @@ export async function runAnalysisPipeline(
             })),
         });
 
-        // Get final costs
-        const { tokensUsed, apiCostUsd, apiCostNok } = tracker.totals;
+        // Create update object with correct types from tracker
+        const totals = tracker.totals;
+        const updateData = {
+            status: "COMPLETED",
+            completedAt: new Date(),
+            tokensUsed: totals.totalTokens,
+            apiCostUsd: totals.apiCostUsd,
+            apiCostNok: totals.apiCostNok,
+            // Provider breakdown
+            geminiTokens: totals.geminiTokens,
+            geminiCostUsd: totals.geminiCostUsd,
+            openaiTokens: totals.openaiTokens,
+            openaiCostUsd: totals.openaiCostUsd,
+            // Active keys snapshot
+            activeKeys: totals.activeKeys,
+        };
 
-        // Mark analysis as completed with costs
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await prisma.kravsporingAnalysis.update({
             where: { id: analysisId },
-            data: {
-                status: "COMPLETED",
-                completedAt: new Date(),
-                tokensUsed,
-                apiCostUsd,
-                apiCostNok,
-            },
+            data: updateData as any,
         });
 
         report({
             stage: "completed",
             progress: 100,
-            message: `Analyse fullført! ${requirementsToSave.length} krav lagret. Kostnad: ${apiCostNok.toFixed(2)} NOK`,
+            message: `Analyse fullført! ${requirementsToSave.length} krav lagret. Kostnad: ${totals.apiCostNok.toFixed(2)} NOK`,
             requirementsValidated: requirementsToSave.length,
         });
 
@@ -258,18 +266,26 @@ export async function runAnalysisPipeline(
         console.error("Analysis pipeline error:", error);
 
         // Get costs even on failure
-        const { tokensUsed, apiCostUsd, apiCostNok } = tracker.totals;
+        const totals = tracker.totals;
 
         // Mark analysis as failed with costs
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await prisma.kravsporingAnalysis.update({
             where: { id: analysisId },
             data: {
                 status: "FAILED",
                 errorMessage: error instanceof Error ? error.message : "Ukjent feil",
-                tokensUsed,
-                apiCostUsd,
-                apiCostNok,
-            },
+                tokensUsed: totals.totalTokens,
+                apiCostUsd: totals.apiCostUsd,
+                apiCostNok: totals.apiCostNok,
+                // Provider breakdown
+                geminiTokens: totals.geminiTokens,
+                geminiCostUsd: totals.geminiCostUsd,
+                openaiTokens: totals.openaiTokens,
+                openaiCostUsd: totals.openaiCostUsd,
+                // Active keys snapshot
+                activeKeys: totals.activeKeys,
+            } as any,
         });
 
         report({

@@ -23,6 +23,7 @@ import {
     Settings,
     Play,
     AlertCircle,
+    Key,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RequirementsTable } from "@/components/pages/flytlink/requirements-table";
@@ -50,6 +51,9 @@ interface Analysis {
     completedAt: string | null;
     tokensUsed: number;
     apiCostNok: number;
+    geminiCostUsd: number;
+    openaiCostUsd: number;
+    activeKeys: string | null; // JSON string of active keys
     _count: {
         files: number;
         requirements: number;
@@ -106,6 +110,7 @@ export default function KravsporingProjectPage() {
         candidatesFound?: number;
         requirementsValidated?: number;
         costNok?: number;
+        activeKeys?: string;
     } | null>(null);
 
     useEffect(() => {
@@ -223,6 +228,7 @@ export default function KravsporingProjectPage() {
                                     candidatesFound: analysis.candidatesFound,
                                     requirementsValidated: analysis.requirementsValidated,
                                     costNok: analysis.apiCostNok,
+                                    activeKeys: analysis.activeKeys,
                                 });
                             }
                         }
@@ -423,6 +429,13 @@ export default function KravsporingProjectPage() {
                                                 {analysisStatus.costNok !== undefined && analysisStatus.costNok > 0 && (
                                                     <span>Kostnad: <strong>{analysisStatus.costNok.toFixed(2)} NOK</strong></span>
                                                 )}
+                                                {analysisStatus.activeKeys && (
+                                                    <span className="flex items-center gap-1">
+                                                        <Key className="h-3 w-3" />
+                                                        {JSON.parse(analysisStatus.activeKeys).includes("gemini") && <span className="text-green-500">Gemini</span>}
+                                                        {JSON.parse(analysisStatus.activeKeys).includes("openai") && <span className="text-green-500 bg-green-500/10 px-1 rounded">OpenAI</span>}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     )}
@@ -495,8 +508,18 @@ export default function KravsporingProjectPage() {
                                                 </p>
                                                 <p className="text-sm text-muted-foreground">
                                                     {analysis._count.files} filer · {analysis._count.requirements} krav
-                                                    {analysis.apiCostNok > 0 && ` · ${analysis.apiCostNok.toFixed(2)} NOK`}
                                                 </p>
+                                                {analysis.apiCostNok > 0 && (
+                                                    <div className="flex items-center gap-2 mt-1 text-xs">
+                                                        <span className="font-medium bg-green-500/10 text-green-600 px-1.5 py-0.5 rounded">
+                                                            {analysis.apiCostNok.toFixed(2)} NOK
+                                                        </span>
+                                                        <span className="text-muted-foreground flex gap-2">
+                                                            <span title="Gemini Cost">G: ${analysis.geminiCostUsd?.toFixed(3) ?? "0.000"}</span>
+                                                            <span title="OpenAI Cost" className="border-l pl-2">O: ${analysis.openaiCostUsd?.toFixed(3) ?? "0.000"}</span>
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                         <Badge variant={
