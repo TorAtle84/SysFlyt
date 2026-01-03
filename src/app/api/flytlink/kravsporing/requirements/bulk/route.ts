@@ -17,12 +17,13 @@ export async function PATCH(request: Request) {
             return NextResponse.json({ error: "Ingen krav-ID-er oppgitt" }, { status: 400 });
         }
 
-        const updateData: { disciplineId?: string | null; status?: string } = {};
+        // Build update data object
+        const updateData: Record<string, unknown> = {};
 
         if (disciplineId !== undefined) {
             updateData.disciplineId = disciplineId;
         }
-        if (status) {
+        if (status && ["ACTIVE", "INACTIVE", "DUPLICATE"].includes(status)) {
             updateData.status = status;
         }
 
@@ -31,10 +32,9 @@ export async function PATCH(request: Request) {
         }
 
         await prisma.kravsporingRequirement.updateMany({
-            where: {
-                id: { in: ids },
-            },
-            data: updateData,
+            where: { id: { in: ids } },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            data: updateData as any,
         });
 
         return NextResponse.json({ success: true, updated: ids.length });
@@ -43,3 +43,4 @@ export async function PATCH(request: Request) {
         return NextResponse.json({ error: "Kunne ikke oppdatere krav" }, { status: 500 });
     }
 }
+
