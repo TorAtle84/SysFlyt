@@ -7,15 +7,6 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 
 const applications = [
   {
-    code: "syslink",
-    name: "SysLink",
-    description: "Kvalitetssikring og dokumenthåndtering i byggefasen",
-    logo: "/SysLinkText.png",
-    color: "from-blue-500 to-cyan-500",
-    href: "/syslink/login",
-    features: ["MC-protokoller", "Funksjonstester", "Dokumentkontroll", "Avviksregistrering"],
-  },
-  {
     code: "flytlink",
     name: "FlytLink",
     description: "Kravsporing og planlegging før byggefasen",
@@ -24,6 +15,15 @@ const applications = [
     href: "/flytlink/login",
     features: ["Kravsporing", "Grensesnittmatrise", "Prosjektplanlegging"],
     comingSoon: true,
+  },
+  {
+    code: "syslink",
+    name: "SysLink",
+    description: "Kvalitetssikring og dokumenthåndtering i byggefasen",
+    logo: "/SysLinkText.png",
+    color: "from-blue-500 to-cyan-500",
+    href: "/syslink/login",
+    features: ["MC-protokoller", "Funksjonstester", "Dokumentkontroll", "Avviksregistrering"],
   },
 ];
 
@@ -38,8 +38,8 @@ export default function LandingPage() {
               <Image
                 src="/flytlinklogo.png"
                 alt="FlytLink"
-                width={40}
-                height={40}
+                width={52}
+                height={52}
                 className="rounded-xl"
               />
               <div>
@@ -84,12 +84,12 @@ export default function LandingPage() {
                 )}
 
                 {/* Logo */}
-                <div className="mb-6 h-14 flex items-center">
+                <div className="mb-6 h-24 flex items-center">
                   <Image
                     src={app.logo}
                     alt={app.name}
-                    width={app.code === "syslink" ? 180 : 56}
-                    height={56}
+                    width={app.code === "syslink" ? 225 : 200}
+                    height={80}
                     className="object-contain"
                   />
                 </div>
