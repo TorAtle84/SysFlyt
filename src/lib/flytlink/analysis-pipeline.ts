@@ -145,12 +145,26 @@ export async function runAnalysisPipeline(
             // It has huge context, but we want to avoid timeout on generation
             const chunks = splitIntoChunks(content, 12000);
 
-            // Parallelize chunk analysis to avoid timeouts
-            const chunkPromises = chunks.map(chunk =>
-                analyzeRequirementsUnified(apiKey, chunk, fileName, disciplines, tracker)
-            );
+            // Process chunks in batches to balance speed vs. rate limits
+            // Gemini Free Tier has strict RPM limits. Batch size of 3 is a safe middle ground.
+            const BATCH_SIZE = 3;
+            const chunksResults = [];
 
-            const chunksResults = await Promise.all(chunkPromises);
+            for (let j = 0; j < chunks.length; j += BATCH_SIZE) {
+                const batch = chunks.slice(j, j + BATCH_SIZE);
+                const batchPromises = batch.map(chunk =>
+                    analyzeRequirementsUnified(apiKey, chunk, fileName, disciplines, tracker)
+                );
+
+                // Wait for this batch to complete before starting the next
+                const batchResults = await Promise.all(batchPromises);
+                chunksResults.push(...batchResults);
+
+                // Small delay between batches to be nice to the API
+                if (j + BATCH_SIZE < chunks.length) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
 
             for (const results of chunksResults) {
                 for (const res of results) {
