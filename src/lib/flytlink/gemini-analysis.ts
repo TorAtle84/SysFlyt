@@ -64,17 +64,35 @@ const USD_TO_NOK = 10.5;
  * Get user's Gemini API key (decrypted)
  */
 export async function getUserGeminiKey(userId: string): Promise<string | null> {
+    console.log('[Kravsporing] Fetching Gemini API key for user:', userId);
+
     const user = await prisma.user.findUnique({
         where: { id: userId },
         select: { geminiApiKey: true },
     });
 
-    if (!user?.geminiApiKey) {
+    if (!user) {
+        console.error('[Kravsporing] User not found:', userId);
         return null;
     }
 
-    // Decrypt the API key using the central encryption module
-    return decrypt(user.geminiApiKey);
+    if (!user.geminiApiKey) {
+        console.error('[Kravsporing] No Gemini API key found in database for user:', userId);
+        return null;
+    }
+
+    console.log('[Kravsporing] Encrypted key length:', user.geminiApiKey.length);
+    console.log('[Kravsporing] Encrypted key format check - has colons:', user.geminiApiKey.includes(':'));
+
+    try {
+        // Decrypt the API key using the central encryption module
+        const decryptedKey = decrypt(user.geminiApiKey);
+        console.log('[Kravsporing] Successfully decrypted Gemini API key, length:', decryptedKey.length);
+        return decryptedKey;
+    } catch (error) {
+        console.error('[Kravsporing] Failed to decrypt Gemini API key:', error);
+        return null;
+    }
 }
 
 /**

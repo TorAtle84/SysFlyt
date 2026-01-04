@@ -59,11 +59,15 @@ export function encrypt(text: string): string {
  * @returns Decrypted plaintext
  */
 export function decrypt(encryptedText: string): string {
-    if (!encryptedText) return '';
+    if (!encryptedText) {
+        console.warn('[Encryption] Attempted to decrypt empty text');
+        return '';
+    }
 
     try {
         const parts = encryptedText.split(':');
         if (parts.length !== 3) {
+            console.error('[Encryption] Invalid format - expected 3 parts (iv:authTag:data), got:', parts.length);
             throw new Error('Invalid encrypted text format');
         }
 
@@ -81,10 +85,14 @@ export function decrypt(encryptedText: string): string {
             decipher.final()
         ]);
 
-        return decrypted.toString('utf8');
+        const result = decrypted.toString('utf8');
+        console.log('[Encryption] Successfully decrypted text of length:', result.length);
+        return result;
     } catch (error) {
-        console.error('Decryption failed:', error);
-        return '';
+        console.error('[Encryption] Decryption failed:', error instanceof Error ? error.message : error);
+        console.error('[Encryption] Encrypted text length:', encryptedText.length);
+        console.error('[Encryption] ENCRYPTION_KEY set:', !!process.env.ENCRYPTION_KEY);
+        throw new Error('Failed to decrypt: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
 }
 

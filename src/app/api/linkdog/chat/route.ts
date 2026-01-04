@@ -94,17 +94,23 @@ export async function POST(req: NextRequest) {
 
         // Determine which API key to use
         const provider = (user.linkdogProvider as AIProvider) || 'gemini';
+        console.log('[LinkDog] Selected provider:', provider);
+
         let apiKey: string | null = null;
 
         if (provider === 'gemini') {
             apiKey = user.geminiApiKey;
+            console.log('[LinkDog] Gemini key configured:', !!apiKey, 'length:', apiKey?.length || 0);
         } else if (provider === 'claude') {
             apiKey = user.claudeApiKey;
+            console.log('[LinkDog] Claude key configured:', !!apiKey, 'length:', apiKey?.length || 0);
         } else if (provider === 'openai') {
             apiKey = user.openaiApiKey;
+            console.log('[LinkDog] OpenAI key configured:', !!apiKey, 'length:', apiKey?.length || 0);
         }
 
         if (!apiKey) {
+            console.error('[LinkDog] No API key found for provider:', provider);
             const providerName = provider === 'gemini' ? 'Gemini' : provider === 'claude' ? 'Claude' : 'OpenAI';
             return NextResponse.json({
                 response: "",
@@ -112,6 +118,8 @@ export async function POST(req: NextRequest) {
                 shouldEnd: false
             });
         }
+
+        console.log('[LinkDog] API key found, format check - has colons:', apiKey.includes(':'));
 
         // Build context
         const linkdogContext: LinkDogContext = {
