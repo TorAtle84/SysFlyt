@@ -15,9 +15,27 @@ interface ChatMessage {
     content: string;
 }
 
+// LinkDog Pricing (Duplicate of flytlink/gemini-analysis.ts for now to keep modules separate)
+const GEMINI_PRICING: Record<string, { input: number; output: number }> = {
+    "gemini-1.5-flash": { input: 0.075, output: 0.30 },
+    "gemini-1.5-pro": { input: 1.25, output: 5.00 },
+    "gemini-1.5-flash-latest": { input: 0.075, output: 0.30 },
+    "gemini-1.5-pro-latest": { input: 1.25, output: 5.00 },
+    "gemini-2.5-flash": { input: 0.075, output: 0.30 },
+};
+
+export interface ApiUsage {
+    inputTokens: number;
+    outputTokens: number;
+    costUsd: number;
+    model: string;
+    provider: 'gemini' | 'claude' | 'openai';
+}
+
 interface ChatResponse {
     response: string;
     error?: string;
+    usage?: ApiUsage;
 }
 
 /**
@@ -137,7 +155,25 @@ async function chatWithGemini(
     const rawResponse = data.candidates[0]?.content?.parts?.[0]?.text || '';
     const filteredResponse = filterResponse(rawResponse);
 
-    return { response: filteredResponse };
+    // Usage tracking
+    let usage: ApiUsage | undefined;
+    if (data.usageMetadata) {
+        const inputTokens = data.usageMetadata.promptTokenCount || 0;
+        const outputTokens = data.usageMetadata.candidatesTokenCount || 0;
+        const model = 'gemini-2.5-flash';
+        const pricing = GEMINI_PRICING[model] || { input: 0, output: 0 };
+        const costUsd = ((inputTokens / 1_000_000) * pricing.input) + ((outputTokens / 1_000_000) * pricing.output);
+
+        usage = {
+            inputTokens,
+            outputTokens,
+            costUsd,
+            model,
+            provider: 'gemini'
+        };
+    }
+
+    return { response: filteredResponse, usage };
 }
 
 /**

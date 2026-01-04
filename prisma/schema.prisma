@@ -157,6 +157,9 @@ model User {
   
   // FlytLink Kravsporing
   kravsporingProjects KravsporingProject[]
+
+  // LinkDog Usage Stats
+  linkdogUsage       LinkDogUsage[]
 }
 
 model Project {
@@ -798,6 +801,28 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// ==========================================
+// LinkDog Usage Tracking
+// ==========================================
+
+model LinkDogUsage {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  provider     String   // "gemini" | "claude" | "openai"
+  model        String   // "gemini-2.5-flash", etc.
+  
+  inputTokens  Int
+  outputTokens Int
+  costUsd      Float    // Estimated cost in USD
+  
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
 }
 
 model SystemAnnotation {

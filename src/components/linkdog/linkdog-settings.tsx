@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { Loader2, Eye, EyeOff, Trash2, Check } from "lucide-react";
+import { LinkDogStats } from "./linkdog-stats";
 
 interface LinkDogSettingsData {
     enabled: boolean;
@@ -411,7 +412,17 @@ export function LinkDogSettings() {
                         OpenAI Platform
                     </a>.
                 </p>
-            </CardContent>
-        </Card>
+            </p>
+
+            <hr />
+
+            {/* Usage Stats - Only show if enabled */}
+            {settings.enabled && (
+                <div className="pt-2">
+                    <LinkDogStats />
+                </div>
+            )}
+        </CardContent>
+        </Card >
     );
 }

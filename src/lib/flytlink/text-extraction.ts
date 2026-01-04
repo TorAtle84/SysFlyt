@@ -24,7 +24,11 @@ export async function extractPdfText(buffer: Buffer, fileName: string): Promise<
         };
     } catch (error) {
         console.error("Error extracting PDF text:", error);
-        throw new Error(`Kunne ikke lese PDF: ${fileName}`);
+        // Log stack trace if available for debugging
+        if (error instanceof Error) {
+            console.error("Stack:", error.stack);
+        }
+        throw new Error(`Kunne ikke lese PDF (${fileName}): ${error instanceof Error ? error.message : "Ukjent feil"}`);
     }
 }
 

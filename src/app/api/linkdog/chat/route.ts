@@ -156,6 +156,27 @@ export async function POST(req: NextRequest) {
             });
         }
 
+        // Save usage stats if available
+        if (result.usage && user.id) {
+            // Run asynchronously to not block response? 
+            // Vercel serverless might kill it. We should await it.
+            // It's a fast write.
+            try {
+                await prisma.linkDogUsage.create({
+                    data: {
+                        userId: user.id,
+                        provider: result.usage.provider,
+                        model: result.usage.model,
+                        inputTokens: result.usage.inputTokens,
+                        outputTokens: result.usage.outputTokens,
+                        costUsd: result.usage.costUsd
+                    }
+                });
+            } catch (statsError) {
+                console.error("[LinkDog] Failed to save usage stats:", statsError);
+                // Don't fail the request just because stats failed
+            }
+        }
 
         return NextResponse.json({
             response: result.response,
