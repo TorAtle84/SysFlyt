@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
-import { Loader2, Eye, EyeOff, Trash2, Check } from "lucide-react";
+import { Loader2, Eye, EyeOff, Trash2, Check, ChevronDown, ChevronRight } from "lucide-react";
 import { LinkDogStats } from "./linkdog-stats";
 
 interface LinkDogSettingsData {
@@ -35,6 +35,7 @@ export function LinkDogSettings() {
     const [showGeminiKey, setShowGeminiKey] = useState(false);
     const [showClaudeKey, setShowClaudeKey] = useState(false);
     const [showOpenaiKey, setShowOpenaiKey] = useState(false);
+    const [showStats, setShowStats] = useState(false);
 
     useEffect(() => {
         fetchSettings();
@@ -141,6 +142,25 @@ export function LinkDogSettings() {
                         disabled={saving}
                     />
                 </div>
+
+                {/* Stats Collapsible - Only show if enabled */}
+                {settings.enabled && (
+                    <div className="border rounded-lg p-2 bg-muted/30 mt-2">
+                        <button
+                            onClick={() => setShowStats(!showStats)}
+                            className="flex items-center gap-2 text-sm font-medium w-full text-left p-2 hover:bg-muted/50 rounded transition-colors"
+                        >
+                            {showStats ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                            Vis forbruk og kostnader
+                        </button>
+
+                        {showStats && (
+                            <div className="mt-2 pt-2 border-t">
+                                <LinkDogStats />
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 <hr />
 
@@ -415,12 +435,7 @@ export function LinkDogSettings() {
 
                 <hr />
 
-                {/* Usage Stats - Only show if enabled */}
-                {settings.enabled && (
-                    <div className="pt-2">
-                        <LinkDogStats />
-                    </div>
-                )}
+
             </CardContent>
         </Card>
     );
