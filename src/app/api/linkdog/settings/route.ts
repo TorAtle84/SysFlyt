@@ -29,6 +29,17 @@ export async function GET() {
             return NextResponse.json({ error: "Bruker ikke funnet" }, { status: 404 });
         }
 
+        // Helper to safely decrypt and mask
+        const safeDecryptAndMask = (encryptedKey: string | null): string | null => {
+            if (!encryptedKey) return null;
+            try {
+                return maskApiKey(decrypt(encryptedKey));
+            } catch (e) {
+                console.warn("Failed to decrypt API key (likely invalid format), treating as unconfigured:", e);
+                return null;
+            }
+        };
+
         // Return settings with masked API keys
         return NextResponse.json({
             enabled: user.linkdogEnabled,
@@ -36,15 +47,15 @@ export async function GET() {
             keys: {
                 gemini: {
                     configured: !!user.geminiApiKey,
-                    masked: user.geminiApiKey ? maskApiKey(decrypt(user.geminiApiKey)) : null
+                    masked: safeDecryptAndMask(user.geminiApiKey)
                 },
                 claude: {
                     configured: !!user.claudeApiKey,
-                    masked: user.claudeApiKey ? maskApiKey(decrypt(user.claudeApiKey)) : null
+                    masked: safeDecryptAndMask(user.claudeApiKey)
                 },
                 openai: {
                     configured: !!user.openaiApiKey,
-                    masked: user.openaiApiKey ? maskApiKey(decrypt(user.openaiApiKey)) : null
+                    masked: safeDecryptAndMask(user.openaiApiKey)
                 }
             }
         });

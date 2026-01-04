@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { chat, isIrrelevantMessage, getExitMessage, type AIProvider } from "@/lib/linkdog/ai-client";
+import { decrypt } from "@/lib/encryption";
 import type { LinkDogContext } from "@/lib/linkdog/system-prompt";
 
 interface ChatRequestBody {
@@ -119,7 +120,19 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        console.log('[LinkDog] API key found, format check - has colons:', apiKey.includes(':'));
+        // Check if key is in valid encrypted format and decrypt it
+        let decryptedKey = '';
+        try {
+            decryptedKey = decrypt(apiKey);
+        } catch (e) {
+            console.error('[LinkDog] Failed to decrypt API key:', e);
+            const providerName = provider === 'gemini' ? 'Gemini' : provider === 'claude' ? 'Claude' : 'OpenAI';
+            return NextResponse.json({
+                response: "",
+                error: `Din ${providerName} API-nøkkel er ugyldig (feil kryptering). Gå til [Profil](/syslink/profile) og legg den inn på nytt! 🐕`,
+                shouldEnd: false
+            });
+        }
 
         // Build context
         const linkdogContext: LinkDogContext = {
@@ -133,7 +146,7 @@ export async function POST(req: NextRequest) {
         };
 
         // Get AI response
-        const result = await chat(message, linkdogContext, provider, apiKey);
+        const result = await chat(message, linkdogContext, provider, decryptedKey);
 
         if (result.error) {
             return NextResponse.json({
@@ -142,6 +155,7 @@ export async function POST(req: NextRequest) {
                 shouldEnd: false
             });
         }
+
 
         return NextResponse.json({
             response: result.response,
