@@ -57,6 +57,7 @@ const GEMINI_PRICING: Record<string, { input: number; output: number }> = {
     "gemini-1.5-pro": { input: 1.25, output: 5.00 },
     "gemini-1.5-flash-latest": { input: 0.075, output: 0.30 },
     "gemini-1.5-pro-latest": { input: 1.25, output: 5.00 },
+    "gemini-2.5-flash": { input: 0.075, output: 0.30 },
 };
 
 // USD to NOK exchange rate (approximate)
@@ -273,7 +274,7 @@ Returner JSON i dette formatet:
 
 Confidence skal være mellom 0.0 og 1.0 basert på hvor sannsynlig det er at dette er et krav.`;
 
-    const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-flash-latest", prompt, systemInstruction);
+    const { text: result, usage } = await callGemini(apiKey, "gemini-2.5-flash", prompt, systemInstruction);
     tracker?.add(usage);
     const candidates = JSON.parse(result) as RequirementCandidate[];
     return candidates.map(c => ({ ...c, source: fileName }));
@@ -394,7 +395,7 @@ Returner JSON:
 
 Hvis kravet ikke passer noen fag, bruk disciplineName: null`;
 
-    const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-flash-latest", prompt);
+    const { text: result, usage } = await callGemini(apiKey, "gemini-2.5-flash", prompt);
     tracker?.add(usage);
     const assignment = JSON.parse(result);
     const discipline = disciplines.find(d => d.name === assignment.disciplineName);

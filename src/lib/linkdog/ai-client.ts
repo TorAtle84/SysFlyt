@@ -65,8 +65,8 @@ async function chatWithGemini(
     apiKey: string,
     history: ChatMessage[]
 ): Promise<ChatResponse> {
-    // Use gemini-1.5-flash-latest which is the stable alias
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+    // Use gemini-2.5-flash based on user debug output
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
     // Build conversation contents
     const contents = [];
