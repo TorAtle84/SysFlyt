@@ -118,7 +118,7 @@ export function LinkDogSettings() {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <span className="text-2xl">🐕</span>
-                    LinkDog Innstillinger
+                    API og LinkDog-innstillinger
                 </CardTitle>
                 <CardDescription>
                     Din AI-assistent som hjelper deg med å navigere i applikasjonen

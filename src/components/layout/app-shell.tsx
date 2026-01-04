@@ -17,6 +17,7 @@ import {
   FileText,
   FileSearch,
   Users,
+  ArrowRightLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -63,6 +64,7 @@ export function AppShell({ children, sidebar, variant = "syslink" }: AppShellPro
   // Collapsible sidebar states with localStorage persistence
   const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(false);
   const [secondarySidebarCollapsed, setSecondarySidebarCollapsed] = useState(false);
+  const [userAppAccess, setUserAppAccess] = useState<string[]>([]);
 
   const isAdmin = session?.user?.role === "ADMIN";
   const isFlytLink = variant === "flytlink";
@@ -110,6 +112,24 @@ export function AppShell({ children, sidebar, variant = "syslink" }: AppShellPro
 
     if (session?.user) {
       checkTotpStatus();
+    }
+  }, [session?.user]);
+
+  // Fetch user's app access
+  useEffect(() => {
+    async function fetchAppAccess() {
+      try {
+        const res = await fetch("/api/user/app-access");
+        if (res.ok) {
+          const data = await res.json();
+          setUserAppAccess(data.apps || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch app access:", error);
+      }
+    }
+    if (session?.user) {
+      fetchAppAccess();
     }
   }, [session?.user]);
 
@@ -290,6 +310,29 @@ export function AppShell({ children, sidebar, variant = "syslink" }: AppShellPro
                   </Link>
                 );
               })}
+            </>
+          )}
+
+          {/* App Switch Section */}
+          {((isFlytLink && userAppAccess.includes("SYSLINK")) || (!isFlytLink && userAppAccess.includes("FLYTLINK"))) && (
+            <>
+              <div className="my-4 border-t border-border" />
+              <Link
+                href={isFlytLink ? "/syslink/dashboard" : "/flytlink/dashboard"}
+                className={cn(
+                  "flex min-h-[44px] items-center rounded-lg text-sm font-medium transition-colors touch-manipulation",
+                  "gap-3 px-3 py-2",
+                  leftSidebarCollapsed ? "lg:justify-center lg:px-2" : "",
+                  "text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted/80"
+                )}
+                onClick={() => setMobileMenuOpen(false)}
+                title={leftSidebarCollapsed ? (isFlytLink ? "Gå til SysLink" : "Gå til FlytLink") : undefined}
+              >
+                <ArrowRightLeft size={20} />
+                <span className={cn(leftSidebarCollapsed ? "lg:hidden" : "")}>
+                  {isFlytLink ? "Gå til SysLink" : "Gå til FlytLink"}
+                </span>
+              </Link>
             </>
           )}
         </nav>
