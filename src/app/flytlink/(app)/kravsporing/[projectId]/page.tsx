@@ -193,8 +193,18 @@ export default function KravsporingProjectPage() {
             });
 
             if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.error || "Kunne ikke starte analyse");
+                const text = await res.text();
+                try {
+                    const data = JSON.parse(text);
+                    throw new Error(data.error || "Kunne ikke starte analyse");
+                } catch (e) {
+                    if (res.status === 504) {
+                        throw new Error("Analysen tok for lang tid (Timeout). Dette skyldes antagelig Vercel Hobby-grensen på 10 sekunder. Prøv færre/mindre filer, eller oppgrader til Vercel Pro.");
+                    }
+                    // If JSON parse is the error (e is likely SyntaxError), use the text
+                    const errorMessage = text.length < 200 ? text : `Server Error (${res.status})`;
+                    throw new Error(errorMessage.replace(/<[^>]*>?/gm, '')); // Strip HTML tags if any
+                }
             }
 
             const { analysisId } = await res.json();

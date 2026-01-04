@@ -145,9 +145,14 @@ export async function runAnalysisPipeline(
             // It has huge context, but we want to avoid timeout on generation
             const chunks = splitIntoChunks(content, 12000);
 
-            for (const chunk of chunks) {
-                const results = await analyzeRequirementsUnified(apiKey, chunk, fileName, disciplines, tracker);
+            // Parallelize chunk analysis to avoid timeouts
+            const chunkPromises = chunks.map(chunk =>
+                analyzeRequirementsUnified(apiKey, chunk, fileName, disciplines, tracker)
+            );
 
+            const chunksResults = await Promise.all(chunkPromises);
+
+            for (const results of chunksResults) {
                 for (const res of results) {
                     if (res.isRequirement && res.confidence > 0.4) {
                         const disc = disciplines.find(d => d.name === res.disciplineName);
@@ -161,10 +166,10 @@ export async function runAnalysisPipeline(
                         });
                     }
                 }
-
-                // Check cancellation after each chunk
-                await checkCancellation();
             }
+
+            // Check cancellation after file is processed
+            await checkCancellation();
 
             report({
                 stage: "finding",
