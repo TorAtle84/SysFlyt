@@ -221,7 +221,6 @@ export async function GET(
                 id: true,
                 name: true,
                 description: true,
-                createdBy: { select: { name: true, email: true } }
             },
             orderBy: { name: "asc" },
         });

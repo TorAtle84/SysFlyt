@@ -75,7 +75,6 @@ export async function GET(
                 id: true,
                 name: true,
                 description: true,
-                user: { select: { name: true, email: true } }
             },
             orderBy: { name: "asc" },
         });

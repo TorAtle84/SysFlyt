@@ -30,6 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 import { RequirementsTable } from "@/components/pages/flytlink/requirements-table";
 import { AnalysisSummary } from "@/components/pages/flytlink/analysis-summary";
+import { InterfaceMatrixPanel } from "@/components/pages/flytlink/interface-matrix-panel";
 
 const ACCEPTED_TYPES = {
     "application/pdf": [".pdf"],
@@ -397,11 +398,9 @@ export default function KravsporingProjectPage() {
                         <List className="h-4 w-4" />
                         Krav
                     </TabsTrigger>
-                    <TabsTrigger value="interface-matrix" className="gap-2" asChild>
-                        <Link href={`/flytlink/kravsporing/${projectId}/interface-matrix`}>
-                            <Grid3X3 className="h-4 w-4" />
-                            Grensesnittmatrise
-                        </Link>
+                    <TabsTrigger value="interface-matrix" className="gap-2">
+                        <Grid3X3 className="h-4 w-4" />
+                        Grensesnittmatrise
                     </TabsTrigger>
                     <TabsTrigger value="settings" className="gap-2">
                         <Settings className="h-4 w-4" />
@@ -668,6 +667,11 @@ export default function KravsporingProjectPage() {
                             onUpdate={loadRequirements}
                         />
                     )}
+                </TabsContent>
+
+                {/* Interface Matrix Tab */}
+                <TabsContent value="interface-matrix">
+                    <InterfaceMatrixPanel projectId={projectId} />
                 </TabsContent>
 
                 {/* Settings Tab */}
