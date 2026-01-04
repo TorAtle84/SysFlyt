@@ -52,9 +52,11 @@ export interface ApiUsage {
 }
 
 // Pricing per 1M tokens (as of 2024)
-const GEMINI_PRICING = {
+const GEMINI_PRICING: Record<string, { input: number; output: number }> = {
     "gemini-1.5-flash": { input: 0.075, output: 0.30 },
     "gemini-1.5-pro": { input: 1.25, output: 5.00 },
+    "gemini-1.5-flash-latest": { input: 0.075, output: 0.30 },
+    "gemini-1.5-pro-latest": { input: 1.25, output: 5.00 },
 };
 
 // USD to NOK exchange rate (approximate)
@@ -95,11 +97,11 @@ export async function getUserGeminiKey(userId: string): Promise<string | null> {
  * Calculate cost from tokens
  */
 function calculateCost(
-    model: "gemini-1.5-flash" | "gemini-1.5-pro",
+    model: string,
     promptTokens: number,
     outputTokens: number
 ): number {
-    const pricing = GEMINI_PRICING[model];
+    const pricing = GEMINI_PRICING[model] || { input: 0, output: 0 };
     const inputCost = (promptTokens / 1_000_000) * pricing.input;
     const outputCost = (outputTokens / 1_000_000) * pricing.output;
     return inputCost + outputCost;
@@ -110,7 +112,7 @@ function calculateCost(
  */
 async function callGemini(
     apiKey: string,
-    model: "gemini-1.5-flash" | "gemini-1.5-pro",
+    model: string,
     prompt: string,
     systemInstruction?: string
 ): Promise<{ text: string; usage: ApiUsage }> {
@@ -271,7 +273,7 @@ Returner JSON i dette formatet:
 
 Confidence skal være mellom 0.0 og 1.0 basert på hvor sannsynlig det er at dette er et krav.`;
 
-    const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-flash", prompt, systemInstruction);
+    const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-flash-latest", prompt, systemInstruction);
     tracker?.add(usage);
     const candidates = JSON.parse(result) as RequirementCandidate[];
     return candidates.map(c => ({ ...c, source: fileName }));
@@ -316,7 +318,7 @@ For hver kandidat, returner:
 
 Type kan være: FUNCTION, PERFORMANCE, DESIGN, OTHER`;
 
-    const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-pro", prompt, systemInstruction);
+    const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-pro-latest", prompt, systemInstruction);
     tracker?.add(usage);
     return JSON.parse(result) as ValidatedRequirement[];
 }
@@ -392,7 +394,7 @@ Returner JSON:
 
 Hvis kravet ikke passer noen fag, bruk disciplineName: null`;
 
-    const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-flash", prompt);
+    const { text: result, usage } = await callGemini(apiKey, "gemini-1.5-flash-latest", prompt);
     tracker?.add(usage);
     const assignment = JSON.parse(result);
     const discipline = disciplines.find(d => d.name === assignment.disciplineName);

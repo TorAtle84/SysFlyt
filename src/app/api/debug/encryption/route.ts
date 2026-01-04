@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
+
 
 /**
  * GET - Debug endpoint to check encryption configuration
@@ -49,7 +51,8 @@ export async function GET() {
                 gemini: {
                     configured: !!userData?.geminiApiKey,
                     encryptedLength: userData?.geminiApiKey?.length || 0,
-                    hasColons: userData?.geminiApiKey?.includes(':') || false
+                    hasColons: userData?.geminiApiKey?.includes(':') || false,
+                    connectionCheck: userData?.geminiApiKey ? await checkGeminiConnection(decrypt(userData.geminiApiKey)) : 'skipped'
                 },
                 claude: {
                     configured: !!userData?.claudeApiKey,
@@ -74,5 +77,32 @@ export async function GET() {
             { error: "Debug check failed", details: error instanceof Error ? error.message : 'Unknown error' },
             { status: 500 }
         );
+    }
+}
+
+async function checkGeminiConnection(apiKey: string): Promise<any> {
+    try {
+        if (!apiKey) return { success: false, error: 'Empty key' };
+        // List models to verify access
+        const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey.trim()}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!res.ok) {
+            return { success: false, status: res.status, error: data };
+        }
+
+        // Check if flash model exists
+        const models = data.models || [];
+        const flashModel = models.find((m: any) => m.name.includes('flash'));
+
+        return {
+            success: true,
+            modelCount: models.length,
+            hasFlash: !!flashModel,
+            flashModelName: flashModel?.name
+        };
+    } catch (e) {
+        return { success: false, error: e instanceof Error ? e.message : 'Unknown error' };
     }
 }

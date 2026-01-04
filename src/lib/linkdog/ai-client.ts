@@ -3,6 +3,8 @@
  * Supports both Google Gemini and Anthropic Claude
  */
 
+import { authOptions } from "@/lib/auth";
+import prisma from "@/lib/db";
 import { decrypt } from '@/lib/encryption';
 import { buildSystemPrompt, filterResponse, type LinkDogContext } from './system-prompt';
 
@@ -63,7 +65,8 @@ async function chatWithGemini(
     apiKey: string,
     history: ChatMessage[]
 ): Promise<ChatResponse> {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Use gemini-1.5-flash-latest which is the stable alias
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
 
     // Build conversation contents
     const contents = [];
