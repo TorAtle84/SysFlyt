@@ -191,24 +191,37 @@ export async function GET(
         });
 
         // Get available (unlinked) SysLink projects
-        // User must be a member or creator of these projects
+        // For regular users: projects created by users with same email domain
+        // For admins: all projects
         const user = await prisma.user.findUnique({
             where: { email: session.user.email },
+            select: { id: true, email: true, role: true },
         });
+
+        if (!user) {
+            return NextResponse.json({ error: "Bruker ikke funnet" }, { status: 404 });
+        }
+
+        // Extract email domain for filtering
+        const emailDomain = user.email.split("@")[1];
+        const isAdmin = user.role === "ADMIN";
 
         const availableProjects = await prisma.project.findMany({
             where: {
                 linkedKravsporingProjectId: null,
                 status: "ACTIVE",
-                OR: [
-                    { createdById: user?.id },
-                    { members: { some: { userId: user?.id } } },
-                ],
+                // For non-admins, filter by same email domain
+                ...(isAdmin ? {} : {
+                    createdBy: {
+                        email: { endsWith: `@${emailDomain}` }
+                    }
+                })
             },
             select: {
                 id: true,
                 name: true,
                 description: true,
+                createdBy: { select: { name: true, email: true } }
             },
             orderBy: { name: "asc" },
         });

@@ -36,30 +36,46 @@ export async function GET(
             return NextResponse.json({ error: "Prosjekt ikke funnet" }, { status: 404 });
         }
 
-        // Get user to find their FlytLink projects
+        // Get user to find their role and email domain
         const user = await prisma.user.findUnique({
             where: { email: session.user.email },
+            select: { id: true, email: true, role: true },
         });
 
-        // Get available (unlinked) FlytLink projects owned by this user
+        if (!user) {
+            return NextResponse.json({ error: "Bruker ikke funnet" }, { status: 404 });
+        }
+
+        // Extract email domain for filtering
+        const emailDomain = user.email.split("@")[1];
+        const isAdmin = user.role === "ADMIN";
+
+        // Get already linked FlytLink project IDs to exclude
+        const linkedIds = (await prisma.project.findMany({
+            where: { linkedKravsporingProjectId: { not: null } },
+            select: { linkedKravsporingProjectId: true }
+        })).map(p => p.linkedKravsporingProjectId!).filter(Boolean);
+
+        // Get available (unlinked) FlytLink projects
+        // For regular users: only projects owned by users with same email domain
+        // For admins: all projects
         const availableFlytLinkProjects = await prisma.kravsporingProject.findMany({
             where: {
-                userId: user?.id,
                 deletedAt: null,
                 // Not already linked to another SysLink project
-                NOT: {
-                    id: {
-                        in: (await prisma.project.findMany({
-                            where: { linkedKravsporingProjectId: { not: null } },
-                            select: { linkedKravsporingProjectId: true }
-                        })).map(p => p.linkedKravsporingProjectId!).filter(Boolean)
+                NOT: { id: { in: linkedIds } },
+                // For non-admins, filter by same email domain
+                ...(isAdmin ? {} : {
+                    user: {
+                        email: { endsWith: `@${emailDomain}` }
                     }
-                }
+                })
             },
             select: {
                 id: true,
                 name: true,
                 description: true,
+                user: { select: { name: true, email: true } }
             },
             orderBy: { name: "asc" },
         });
