@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, ArrowDownToLine, Pencil, CheckCircle2, XCircle, FileDown, Plus, Trash2, MoreHorizontal, Info } from "lucide-react";
+import { Loader2, ArrowDownToLine, Pencil, CheckCircle2, XCircle, FileDown, Plus, Trash2, MoreHorizontal, Info, Link2, Unlink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -103,8 +103,16 @@ export function InterfaceMatrixView() {
     const [newColName, setNewColName] = useState("");
     const [newColColor, setNewColColor] = useState(PASTEL_COLORS[0]);
 
+    // FlytLink Linking State
+    const [linkedProject, setLinkedProject] = useState<{ id: string; name: string } | null>(null);
+    const [availableFlytLinkProjects, setAvailableFlytLinkProjects] = useState<{ id: string; name: string; description: string | null }[]>([]);
+    const [isLinking, setIsLinking] = useState(false);
+    const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+    const [selectedFlytLinkProject, setSelectedFlytLinkProject] = useState("");
+
     useEffect(() => {
         fetchMatrix();
+        fetchLinkStatus();
     }, [projectId]);
 
     async function fetchMatrix() {
@@ -117,6 +125,63 @@ export function InterfaceMatrixView() {
             toast.error("Kunne ikke laste grensesnittmatrise");
         } finally {
             setIsLoading(false);
+        }
+    }
+
+    async function fetchLinkStatus() {
+        try {
+            const res = await fetch(`/api/projects/${projectId}/interface-matrix/link`);
+            if (!res.ok) return;
+            const data = await res.json();
+            setLinkedProject(data.linkedProject);
+            setAvailableFlytLinkProjects(data.availableProjects || []);
+        } catch (error) {
+            console.error("Error fetching link status:", error);
+        }
+    }
+
+    async function handleLinkToFlytLink() {
+        if (!selectedFlytLinkProject) {
+            toast.error("Velg et FlytLink-prosjekt");
+            return;
+        }
+        setIsLinking(true);
+        try {
+            const res = await fetch(`/api/projects/${projectId}/interface-matrix/link`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ flytLinkProjectId: selectedFlytLinkProject }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            toast.success(data.message || "Koblet til FlytLink");
+            setLinkDialogOpen(false);
+            setSelectedFlytLinkProject("");
+            fetchLinkStatus();
+            fetchMatrix();
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Kobling feilet");
+        } finally {
+            setIsLinking(false);
+        }
+    }
+
+    async function handleUnlinkFlytLink() {
+        if (!confirm("Er du sikker på at du vil fjerne koblingen til FlytLink?")) return;
+        setIsLinking(true);
+        try {
+            const res = await fetch(`/api/projects/${projectId}/interface-matrix/link`, {
+                method: "DELETE",
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            toast.success(data.message || "Kobling fjernet");
+            setLinkedProject(null);
+            fetchLinkStatus();
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Fjerning feilet");
+        } finally {
+            setIsLinking(false);
         }
     }
 
@@ -260,6 +325,71 @@ export function InterfaceMatrixView() {
                             {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowDownToLine className="mr-2 h-4 w-4" />}
                             Importer fra MC
                         </Button>
+
+                        {/* FlytLink Linking */}
+                        {linkedProject ? (
+                            <Badge variant="outline" className="gap-1.5 py-1.5 px-3 h-9">
+                                <Link2 className="h-3.5 w-3.5 text-purple-500" />
+                                FlytLink: {linkedProject.name}
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-5 w-5 ml-1 hover:bg-destructive/20"
+                                    onClick={handleUnlinkFlytLink}
+                                    disabled={isLinking}
+                                >
+                                    <Unlink className="h-3 w-3" />
+                                </Button>
+                            </Badge>
+                        ) : (
+                            <Popover open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" size="sm" className="h-9">
+                                        <Link2 className="mr-2 h-4 w-4" />
+                                        Koble til FlytLink
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80">
+                                    <div className="grid gap-4">
+                                        <div className="space-y-2">
+                                            <h4 className="font-medium leading-none">Koble til FlytLink</h4>
+                                            <p className="text-sm text-muted-foreground">
+                                                Synkroniser matrisen med et FlytLink-prosjekt
+                                            </p>
+                                        </div>
+                                        {availableFlytLinkProjects.length === 0 ? (
+                                            <p className="text-sm text-muted-foreground">
+                                                Ingen tilgjengelige FlytLink-prosjekter
+                                            </p>
+                                        ) : (
+                                            <div className="grid gap-2">
+                                                <Label>FlytLink-prosjekt</Label>
+                                                <select
+                                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors"
+                                                    value={selectedFlytLinkProject}
+                                                    onChange={(e) => setSelectedFlytLinkProject(e.target.value)}
+                                                >
+                                                    <option value="">Velg prosjekt...</option>
+                                                    {availableFlytLinkProjects.map((p) => (
+                                                        <option key={p.id} value={p.id}>
+                                                            {p.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+                                        <Button
+                                            onClick={handleLinkToFlytLink}
+                                            disabled={isLinking || !selectedFlytLinkProject}
+                                            size="sm"
+                                        >
+                                            {isLinking && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                            Koble prosjekter
+                                        </Button>
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
+                        )}
                     </div>
                 </div>
 

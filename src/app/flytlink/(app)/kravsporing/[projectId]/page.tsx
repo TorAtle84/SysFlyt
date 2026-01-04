@@ -25,6 +25,7 @@ import {
     AlertCircle,
     Key,
     XCircle,
+    Grid3X3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RequirementsTable } from "@/components/pages/flytlink/requirements-table";
@@ -395,6 +396,12 @@ export default function KravsporingProjectPage() {
                     <TabsTrigger value="requirements" className="gap-2">
                         <List className="h-4 w-4" />
                         Krav
+                    </TabsTrigger>
+                    <TabsTrigger value="interface-matrix" className="gap-2" asChild>
+                        <Link href={`/flytlink/kravsporing/${projectId}/interface-matrix`}>
+                            <Grid3X3 className="h-4 w-4" />
+                            Grensesnittmatrise
+                        </Link>
                     </TabsTrigger>
                     <TabsTrigger value="settings" className="gap-2">
                         <Settings className="h-4 w-4" />
