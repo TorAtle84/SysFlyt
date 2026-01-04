@@ -25,12 +25,10 @@ export async function chat(
     message: string,
     context: LinkDogContext,
     provider: AIProvider,
-    encryptedApiKey: string,
+    apiKey: string,
     conversationHistory: ChatMessage[] = []
 ): Promise<ChatResponse> {
     try {
-        const apiKey = decrypt(encryptedApiKey);
-
         if (!apiKey) {
             return {
                 response: '',
