@@ -66,28 +66,24 @@ const USD_TO_NOK = 10.5;
 export async function getUserGeminiKey(userId: string): Promise<string | null> {
     console.log('[Kravsporing] Fetching Gemini API key for user:', userId);
 
+    // Check cache first (if we had one, but we don't here)
+
     const user = await prisma.user.findUnique({
         where: { id: userId },
         select: { geminiApiKey: true },
     });
 
-    if (!user) {
-        console.error('[Kravsporing] User not found:', userId);
+    if (!user?.geminiApiKey) {
         return null;
     }
-
-    if (!user.geminiApiKey) {
-        console.error('[Kravsporing] No Gemini API key found in database for user:', userId);
-        return null;
-    }
-
-    console.log('[Kravsporing] Encrypted key length:', user.geminiApiKey.length);
-    console.log('[Kravsporing] Encrypted key format check - has colons:', user.geminiApiKey.includes(':'));
 
     try {
         // Decrypt the API key using the central encryption module
         const decryptedKey = decrypt(user.geminiApiKey);
-        console.log('[Kravsporing] Successfully decrypted Gemini API key, length:', decryptedKey.length);
+        if (!decryptedKey || decryptedKey.length < 20) {
+            console.error('[Kravsporing] Decrypted key seems invalid (too short)');
+            return null;
+        }
         return decryptedKey;
     } catch (error) {
         console.error('[Kravsporing] Failed to decrypt Gemini API key:', error);
@@ -118,7 +114,12 @@ async function callGemini(
     prompt: string,
     systemInstruction?: string
 ): Promise<{ text: string; usage: ApiUsage }> {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    // Use v1beta as before, but ensure key is clean
+    const cleanKey = apiKey.trim();
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${cleanKey}`;
+
+    // Log URL for debug (hide key)
+    console.log(`[Gemini API] Calling URL: https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=...`);
 
     const body: {
         contents: GeminiMessage[];
@@ -148,35 +149,40 @@ async function callGemini(
         };
     }
 
-    const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-    });
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
 
-    if (!response.ok) {
-        const error = await response.text();
-        console.error("Gemini API error:", error);
-        throw new Error(`Gemini API feilet: ${response.status}`);
-    }
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`[Gemini API] Error ${response.status}:`, errorText);
+            throw new Error(`Gemini API feilet: ${response.status} - ${errorText.substring(0, 100)}...`);
+        }
 
-    const data: GeminiResponse = await response.json();
+        const data: GeminiResponse = await response.json();
 
-    const tokensUsed = data.usageMetadata?.totalTokenCount || 0;
-    const promptTokens = data.usageMetadata?.promptTokenCount || 0;
-    const outputTokens = data.usageMetadata?.candidatesTokenCount || 0;
-    const costUsd = calculateCost(model, promptTokens, outputTokens);
+        const promptTokens = data.usageMetadata?.promptTokenCount || 0;
+        const outputTokens = data.usageMetadata?.candidatesTokenCount || 0;
+        const costUsd = calculateCost(model, promptTokens, outputTokens);
+        const outputText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-    return {
-        text: data.candidates[0]?.content?.parts[0]?.text || "",
-        usage: {
+        const usage: ApiUsage = {
             inputTokens: promptTokens,
-            outputTokens,
-            costUsd,
-            model,
+            outputTokens: outputTokens,
+            costUsd: costUsd,
+            model: model,
             provider: "gemini",
-        },
-    };
+        };
+
+        return { text: outputText, usage };
+
+    } catch (e) {
+        console.error('[Gemini API] Fetch failed:', e);
+        throw e;
+    }
 }
 
 // Accumulator for tracking total usage across calls
