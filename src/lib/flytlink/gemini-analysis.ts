@@ -43,6 +43,16 @@ export interface DisciplineAssignment {
     reasoning?: string;
 }
 
+export interface UnifiedRequirementResult {
+    text: string;
+    shortText: string;
+    type: "FUNCTION" | "PERFORMANCE" | "DESIGN" | "OTHER";
+    disciplineName: string | null;
+    confidence: number;
+    isRequirement: boolean;
+    reasoning?: string;
+}
+
 export interface ApiUsage {
     inputTokens: number;
     outputTokens: number;
@@ -435,3 +445,60 @@ export const DEFAULT_DISCIPLINE_KEYWORDS: Record<string, string[]> = {
         "garanti", "testing", "igangkjøring", "opplæring", "overlevering"
     ],
 };
+
+/**
+ * Stage 1+2+3: Unified analysis for speed optimization
+ */
+export async function analyzeRequirementsUnified(
+    apiKey: string,
+    text: string,
+    fileName: string,
+    disciplines: { id: string; name: string; keywords: string[] }[],
+    tracker?: UsageTracker
+): Promise<UnifiedRequirementResult[]> {
+    const disciplineList = disciplines.map(d => d.name).join(", ");
+
+    const systemInstruction = `Du er en ekspert på kravsporing i byggebransjen.
+Din jobb er å analysere tekst og trekke ut GELDIGE krav, validere dem, og tilegne dem et fagområde.
+
+Du skal gjøre 3 ting for hvert potensielle krav du finner:
+1. IDENTIFISERING: Se etter setninger med "skal", "må", "bør", "kreves".
+2. VALIDERING: Er dette et testbart/verifiserbart krav? (Ignorer generell info).
+3. FAG-TILDELING: Hvilket fag tilhører dette? Velg fra listen: ${disciplineList}.
+
+Returner KUN et JSON-array med objekter.`;
+
+    const prompt = `Analyser teksten fra "${fileName}" og finn alle krav.
+
+Tekst:
+---
+${text}
+---
+
+Fagområder: ${disciplineList}
+
+Format:
+[
+  {
+    "text": "Full setning",
+    "shortText": "Kort tittel",
+    "type": "FUNCTION" | "PERFORMANCE" | "DESIGN" | "OTHER",
+    "disciplineName": "Navn fra listen" eller null,
+    "confidence": 0.0-1.0,
+    "isRequirement": true (hvis det er et ekte krav),
+    "reasoning": "Kort begrunnelse for valg av fag"
+  }
+]`;
+
+    const { text: result, usage } = await callGemini(apiKey, "gemini-2.5-flash", prompt, systemInstruction);
+    tracker?.add(usage);
+
+    try {
+        const raw = JSON.parse(result);
+        // Ensure array
+        return Array.isArray(raw) ? raw : [];
+    } catch (e) {
+        console.error("Failed to parse JSON from Gemini:", result);
+        return [];
+    }
+}

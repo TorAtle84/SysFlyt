@@ -1,12 +1,8 @@
 import { extractText, splitIntoChunks } from "./text-extraction";
 import {
-    findRequirementCandidates,
-    validateRequirements,
-    matchDisciplineByKeywords,
-    assignDisciplineWithAI,
+    analyzeRequirementsUnified,
     getUserGeminiKey,
-    RequirementCandidate,
-    ValidatedRequirement,
+    UnifiedRequirementResult,
     DEFAULT_DISCIPLINE_KEYWORDS,
     UsageTracker,
 } from "./gemini-analysis";
@@ -131,82 +127,9 @@ export async function runAnalysisPipeline(
         }
 
         // =========================================
-        // Stage 1: Find requirement candidates
+        // Stage 1: Unified Analysis (Find -> Validate -> Assign)
         // =========================================
-        report({ stage: "finding", progress: 20, message: "Søker etter krav-kandidater..." });
-
-        const allCandidates: RequirementCandidate[] = [];
-
-        for (let i = 0; i < extractedTexts.length; i++) {
-            const { fileName, content } = extractedTexts[i];
-            const chunks = splitIntoChunks(content, 4000);
-
-            for (const chunk of chunks) {
-                const candidates = await findRequirementCandidates(apiKey, chunk, fileName, tracker);
-                allCandidates.push(...candidates);
-            }
-
-            report({
-                stage: "finding",
-                progress: 10 + (i / extractedTexts.length) * 35,
-                message: `Analysert ${i + 1} av ${extractedTexts.length} dokumenter`,
-                candidatesFound: allCandidates.length,
-            });
-
-            await checkCancellation();
-        }
-
-        report({
-            stage: "finding",
-            progress: 45,
-            message: `Fant ${allCandidates.length} kandidater`,
-            candidatesFound: allCandidates.length,
-        });
-
-        // =========================================
-        // Stage 2: Validate requirements
-        // =========================================
-        report({ stage: "validating", progress: 50, message: "Validerer krav..." });
-
-        // Process in batches to avoid token limits
-        const batchSize = 10;
-        const validatedRequirements: (ValidatedRequirement & { source?: string })[] = [];
-
-        for (let i = 0; i < allCandidates.length; i += batchSize) {
-            const batch = allCandidates.slice(i, i + batchSize);
-            const validated = await validateRequirements(apiKey, batch, tracker);
-
-            // Match validated results with original candidates to preserve source
-            for (let j = 0; j < validated.length; j++) {
-                if (validated[j].isRequirement) {
-                    validatedRequirements.push({
-                        ...validated[j],
-                        source: batch[j]?.source,
-                    });
-                }
-            }
-
-            report({
-                stage: "validating",
-                progress: 50 + (i / allCandidates.length) * 20,
-                message: `Validert ${i + validated.length} av ${allCandidates.length} kandidater`,
-                requirementsValidated: validatedRequirements.length,
-            });
-
-            await checkCancellation();
-        }
-
-        report({
-            stage: "validating",
-            progress: 70,
-            message: `${validatedRequirements.length} gyldige krav identifisert`,
-            requirementsValidated: validatedRequirements.length,
-        });
-
-        // =========================================
-        // Stage 3: Assign disciplines
-        // =========================================
-        report({ stage: "assigning", progress: 75, message: "Tildeler fag..." });
+        report({ stage: "finding", progress: 20, message: "Analyserer dokumenter med AI (Unified)..." });
 
         const requirementsToSave: {
             text: string;
@@ -216,32 +139,39 @@ export async function runAnalysisPipeline(
             disciplineId: string | null;
         }[] = [];
 
-        for (let i = 0; i < validatedRequirements.length; i++) {
-            const req = validatedRequirements[i];
+        for (let i = 0; i < extractedTexts.length; i++) {
+            const { fileName, content } = extractedTexts[i];
+            // Use larger chunks for 2.5 Flash (approx 12k chars ~ 3000 tokens)
+            // It has huge context, but we want to avoid timeout on generation
+            const chunks = splitIntoChunks(content, 12000);
 
-            // First try keyword matching
-            let assignment = matchDisciplineByKeywords(req.text, disciplines);
+            for (const chunk of chunks) {
+                const results = await analyzeRequirementsUnified(apiKey, chunk, fileName, disciplines, tracker);
 
-            // If low confidence, use AI
-            if (assignment.confidence < 0.6) {
-                assignment = await assignDisciplineWithAI(apiKey, req.text, disciplines, tracker);
+                for (const res of results) {
+                    if (res.isRequirement && res.confidence > 0.4) {
+                        const disc = disciplines.find(d => d.name === res.disciplineName);
+
+                        requirementsToSave.push({
+                            text: res.text,
+                            shortText: res.shortText || null,
+                            score: res.confidence,
+                            source: fileName,
+                            disciplineId: disc?.id || null,
+                        });
+                    }
+                }
+
+                // Check cancellation after each chunk
+                await checkCancellation();
             }
 
-            requirementsToSave.push({
-                text: req.text,
-                shortText: req.shortText || null,
-                score: req.confidence,
-                source: req.source || null,
-                disciplineId: assignment.disciplineId,
+            report({
+                stage: "finding",
+                progress: 20 + ((i + 1) / extractedTexts.length) * 70, // Map to range 20-90%
+                message: `Analysert ${i + 1} av ${extractedTexts.length} dokumenter. Fant ${requirementsToSave.length} krav hittil.`,
+                candidatesFound: requirementsToSave.length,
             });
-
-            if (i % 5 === 0) {
-                report({
-                    stage: "assigning",
-                    progress: 75 + (i / validatedRequirements.length) * 20,
-                    message: `Tildelt fag til ${i + 1} av ${validatedRequirements.length} krav`,
-                });
-            }
         }
 
         // =========================================

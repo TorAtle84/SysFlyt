@@ -111,6 +111,8 @@ model User {
   comments     Comment[]
   annotations  Annotation[]
   notifications Notification[] @relation("NotificationRecipient")
+  feedbackSubmitted Feedback[] @relation("FeedbackReporter")
+  feedbackAssigned  Feedback[] @relation("FeedbackAssignee")
   systemAnnotations SystemAnnotation[]
   
   // MC Protocol relations
@@ -569,6 +571,28 @@ enum NCRStatus {
   COMPLETED
 }
 
+enum FeedbackCategory {
+  BUG
+  SUGGESTION
+  UI
+  PERFORMANCE
+  OTHER
+}
+
+enum FeedbackStatus {
+  REGISTERED
+  IN_PROGRESS
+  FIXED
+  REJECTED
+}
+
+enum FeedbackPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 // ==========================================
 // Function Tests (Funksjonstest)
 // ==========================================
@@ -740,6 +764,28 @@ model Notification {
   comment    Comment?   @relation(fields: [commentId], references: [id], onDelete: Cascade)
   annotation Annotation? @relation(fields: [annotationId], references: [id], onDelete: Cascade)
   systemAnnotation SystemAnnotation? @relation(fields: [systemAnnotationId], references: [id], onDelete: Cascade)
+}
+
+model Feedback {
+  id            String           @id @default(cuid())
+  userId        String
+  category      FeedbackCategory
+  message       String
+  attachments   Json?
+  priority      FeedbackPriority @default(MEDIUM)
+  status        FeedbackStatus   @default(REGISTERED)
+  assignedToId  String?
+  warningMessage String?
+  warningSentAt DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  user        User  @relation("FeedbackReporter", fields: [userId], references: [id], onDelete: Cascade)
+  assignedTo  User? @relation("FeedbackAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([priority])
+  @@index([category])
 }
 
 model DocumentComponent {
