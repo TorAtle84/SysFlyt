@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
     Dialog,
     DialogContent,
@@ -16,6 +17,11 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 import {
     Select,
     SelectContent,
@@ -34,10 +40,21 @@ import {
     RefreshCcw,
     Clock,
     Loader2,
-    Trash2
+    Trash2,
+    Pencil,
+    CheckCircle2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { nb } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+
+const AVAILABLE_TAGS = ["Montasje", "Leveranse", "Merking", "Systemeier", "Delansvarlig", "Kabling og kobling", "Programvareansvarlig"];
+const MANDATORY_TAGS = ["Montasje", "Leveranse", "Merking", "Systemeier", "Delansvarlig", "Kabling og kobling"];
+const PASTEL_COLORS = [
+    "#FCA5A5", "#FDBA74", "#FEF08A", "#86EFAC",
+    "#93C5FD", "#C4B5FD", "#F9A8D4", "#E2E8F0",
+    "#FEF9C3", "#E9D5FF", "#DCFCE7", "#DBEAFE"
+];
 
 interface MatrixRow {
     id: string;
@@ -97,6 +114,11 @@ export default function FlytLinkInterfaceMatrixPage() {
     const [linkDialogOpen, setLinkDialogOpen] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
     const [selectedProjectToLink, setSelectedProjectToLink] = useState<string>("");
+
+    // Column adding state
+    const [addColumnOpen, setAddColumnOpen] = useState(false);
+    const [newColName, setNewColName] = useState("");
+    const [newColColor, setNewColColor] = useState(PASTEL_COLORS[0]);
 
     const fetchMatrix = useCallback(async () => {
         try {
@@ -226,6 +248,58 @@ export default function FlytLinkInterfaceMatrixPage() {
         }
     }
 
+    async function handleAddColumn() {
+        if (!newColName.trim()) {
+            toast.error("Fagnavn er påkrevd");
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/flytlink/kravsporing/projects/${projectId}/interface-matrix/column`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ label: newColName, color: newColColor }),
+            });
+
+            if (!res.ok) throw new Error("Feilet");
+
+            toast.success("Fag lagt til");
+            setNewColName("");
+            setAddColumnOpen(false);
+            fetchMatrix();
+        } catch (error) {
+            toast.error("Kunne ikke legge til fag");
+        }
+    }
+
+    async function handleDeleteRow(rowId: string) {
+        if (!confirm("Er du sikker på at du vil slette denne raden?")) return;
+
+        try {
+            const res = await fetch(`/api/flytlink/kravsporing/projects/${projectId}/interface-matrix/row?rowId=${rowId}`, {
+                method: "DELETE",
+            });
+
+            if (!res.ok) throw new Error("Sletting feilet");
+            toast.success("Rad slettet");
+            fetchMatrix();
+        } catch (error) {
+            toast.error("Kunne ikke slette rad");
+        }
+    }
+
+    async function handleUpdateCell(rowId: string, columnId: string, values: string[]) {
+        try {
+            await fetch(`/api/flytlink/kravsporing/projects/${projectId}/interface-matrix/cell`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ rowId, columnId, values }),
+            });
+        } catch (error) {
+            toast.error("Kunne ikke oppdatere celle");
+        }
+    }
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -316,6 +390,54 @@ export default function FlytLinkInterfaceMatrixPage() {
                     )}
 
                     {/* Import Button */}
+                    <Popover open={addColumnOpen} onOpenChange={setAddColumnOpen}>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" size="sm">
+                                <Plus className="h-4 w-4 mr-2" />
+                                Nytt Fag
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80">
+                            <div className="grid gap-4">
+                                <div className="space-y-2">
+                                    <h4 className="font-medium leading-none">Nytt Fag / Motpart</h4>
+                                    <p className="text-sm text-muted-foreground">
+                                        Legg til en ny kolonne i matrisen.
+                                    </p>
+                                </div>
+                                <div className="grid gap-2">
+                                    <div className="grid grid-cols-3 items-center gap-4">
+                                        <Label htmlFor="colName">Navn</Label>
+                                        <Input
+                                            id="colName"
+                                            value={newColName}
+                                            onChange={(e) => setNewColName(e.target.value)}
+                                            className="col-span-2 h-8"
+                                            placeholder="F.eks. LÅS"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-3 items-center gap-4">
+                                        <Label>Farge</Label>
+                                        <div className="col-span-2 flex flex-wrap gap-1.5">
+                                            {PASTEL_COLORS.map(c => (
+                                                <div
+                                                    key={c}
+                                                    className={cn(
+                                                        "w-6 h-6 rounded-full cursor-pointer border-2 transition-all hover:scale-110",
+                                                        newColColor === c ? 'border-primary shadow-sm' : 'border-transparent'
+                                                    )}
+                                                    style={{ backgroundColor: c }}
+                                                    onClick={() => setNewColColor(c)}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                <Button onClick={handleAddColumn} size="sm">Lagre</Button>
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+
                     <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
                         <DialogTrigger asChild>
                             <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
@@ -394,49 +516,65 @@ export default function FlytLinkInterfaceMatrixPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {matrix.rows.map((row) => (
-                                    <tr key={row.id} className="border-b hover:bg-muted/30">
-                                        <td className="p-4">
-                                            <div className="flex items-center gap-2">
-                                                {row.sourceApp && (
-                                                    <Badge variant="outline" className="text-xs">
-                                                        {row.sourceApp === "FLYTLINK" ? "F" : "S"}
-                                                    </Badge>
-                                                )}
-                                                <div>
-                                                    <p className="font-mono font-medium">{row.systemCode}</p>
-                                                    {row.description && (
-                                                        <p className="text-sm text-muted-foreground">{row.description}</p>
+                                {matrix.rows.map((row) => {
+                                    // Calculate row completeness
+                                    const allTags = new Set<string>();
+                                    row.cells.forEach(c => {
+                                        (c.values as string[]).forEach(v => allTags.add(v));
+                                    });
+                                    const isComplete = MANDATORY_TAGS.every(tag => allTags.has(tag));
+
+                                    return (
+                                        <tr key={row.id} className="border-b hover:bg-muted/30">
+                                            <td className="p-4">
+                                                <div className="flex items-center gap-2">
+                                                    {isComplete ? (
+                                                        <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-shrink-0" />
+                                                    ) : (
+                                                        <div className="h-4 w-4 rounded-full border border-destructive/50 flex items-center justify-center flex-shrink-0">
+                                                            <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
+                                                        </div>
                                                     )}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        {matrix.columns.map((col) => {
-                                            const cell = row.cells.find((c) => c.columnId === col.id);
-                                            const values = (cell?.values as string[]) || [];
-                                            return (
-                                                <td
-                                                    key={col.id}
-                                                    className="p-2 text-center"
-                                                    style={{ backgroundColor: col.color + "20" }}
-                                                >
-                                                    <div className="flex flex-wrap gap-1 justify-center">
-                                                        {values.map((v, i) => (
-                                                            <Badge key={i} variant="secondary" className="text-xs">
-                                                                {v}
-                                                            </Badge>
-                                                        ))}
+                                                    {row.sourceApp && (
+                                                        <Badge variant="outline" className="text-xs">
+                                                            {row.sourceApp === "FLYTLINK" ? "F" : "S"}
+                                                        </Badge>
+                                                    )}
+                                                    <div>
+                                                        <p className="font-mono font-medium">{row.systemCode}</p>
+                                                        {row.description && (
+                                                            <p className="text-sm text-muted-foreground">{row.description}</p>
+                                                        )}
                                                     </div>
-                                                </td>
-                                            );
-                                        })}
-                                        <td className="p-2">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))}
+                                                </div>
+                                            </td>
+                                            {matrix.columns.map((col) => {
+                                                const cell = row.cells.find((c) => c.columnId === col.id);
+                                                const values = (cell?.values as string[]) || [];
+                                                return (
+                                                    <EditableCell
+                                                        key={col.id}
+                                                        rowId={row.id}
+                                                        columnId={col.id}
+                                                        values={values}
+                                                        color={col.color}
+                                                        onUpdate={(newValues) => handleUpdateCell(row.id, col.id, newValues)}
+                                                    />
+                                                );
+                                            })}
+                                            <td className="p-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                                    onClick={() => handleDeleteRow(row.id)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     ) : (
@@ -451,5 +589,93 @@ export default function FlytLinkInterfaceMatrixPage() {
                 </CardContent>
             </Card>
         </div>
+    );
+}
+
+// Editable cell component for tag selection
+function EditableCell({
+    rowId,
+    columnId,
+    values,
+    color,
+    onUpdate
+}: {
+    rowId: string;
+    columnId: string;
+    values: string[];
+    color: string;
+    onUpdate: (newValues: string[]) => void;
+}) {
+    const [open, setOpen] = useState(false);
+    const [localValues, setLocalValues] = useState<string[]>(values);
+
+    function handleToggle(tag: string) {
+        const newValues = localValues.includes(tag)
+            ? localValues.filter(v => v !== tag)
+            : [...localValues, tag];
+        setLocalValues(newValues);
+    }
+
+    function handleSave() {
+        onUpdate(localValues);
+        setOpen(false);
+    }
+
+    return (
+        <td className="p-2 text-center" style={{ backgroundColor: color + "20" }}>
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                    <button
+                        className={cn(
+                            "w-full min-h-[40px] rounded-md border border-transparent hover:border-primary/50 transition-colors cursor-pointer p-1",
+                            values.length === 0 && "hover:bg-primary/5"
+                        )}
+                    >
+                        <div className="flex flex-wrap gap-1 justify-center">
+                            {values.length === 0 ? (
+                                <span className="text-xs text-muted-foreground/50">+</span>
+                            ) : (
+                                values.map((v, i) => (
+                                    <Badge key={i} variant="secondary" className="text-xs">
+                                        {v}
+                                    </Badge>
+                                ))
+                            )}
+                        </div>
+                    </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56">
+                    <div className="space-y-3">
+                        <h4 className="font-medium text-sm">Velg ansvar</h4>
+                        <div className="space-y-2">
+                            {AVAILABLE_TAGS.map((tag) => (
+                                <div key={tag} className="flex items-center gap-2">
+                                    <Checkbox
+                                        id={`${rowId}-${columnId}-${tag}`}
+                                        checked={localValues.includes(tag)}
+                                        onCheckedChange={() => handleToggle(tag)}
+                                    />
+                                    <label
+                                        htmlFor={`${rowId}-${columnId}-${tag}`}
+                                        className={cn(
+                                            "text-sm cursor-pointer",
+                                            MANDATORY_TAGS.includes(tag) && "font-medium"
+                                        )}
+                                    >
+                                        {tag}
+                                        {MANDATORY_TAGS.includes(tag) && (
+                                            <span className="text-destructive ml-0.5">*</span>
+                                        )}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
+                        <Button onClick={handleSave} size="sm" className="w-full">
+                            Lagre
+                        </Button>
+                    </div>
+                </PopoverContent>
+            </Popover>
+        </td>
     );
 }
