@@ -412,17 +412,16 @@ export function LinkDogSettings() {
                         OpenAI Platform
                     </a>.
                 </p>
-            </p>
 
-            <hr />
+                <hr />
 
-            {/* Usage Stats - Only show if enabled */}
-            {settings.enabled && (
-                <div className="pt-2">
-                    <LinkDogStats />
-                </div>
-            )}
-        </CardContent>
-        </Card >
+                {/* Usage Stats - Only show if enabled */}
+                {settings.enabled && (
+                    <div className="pt-2">
+                        <LinkDogStats />
+                    </div>
+                )}
+            </CardContent>
+        </Card>
     );
 }
