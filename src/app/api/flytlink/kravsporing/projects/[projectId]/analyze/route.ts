@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
-import { runAnalysisPipeline } from "@/lib/flytlink/analysis-pipeline";
+import { prepareAnalysis } from "@/lib/flytlink/analysis-pipeline";
 
 export const maxDuration = 60; // Allow up to 60 seconds (Vercel Hobby limit 10s usually, Pro 60s/300s)
 export const dynamic = 'force-dynamic';
@@ -63,27 +63,20 @@ export async function POST(
             return NextResponse.json({ error: "Ingen filer lastet opp" }, { status: 400 });
         }
 
-        // Create analysis record
-        const analysis = await prisma.kravsporingAnalysis.create({
-            data: {
-                projectId,
-                status: "PROCESSING",
-            },
-        });
-
-        // Run analysis synchronously (blocking) to ensure it finishes on Vercel
-        // Note: For large files/production, this should be offloaded to a background job queue (e.g. Inngest)
-        await runAnalysisPipeline(analysis.id, files, user.id);
+        // Call PREPARE stage (returns chunks)
+        // This is fast enough for Vercel (< 10s usually)
+        const result = await prepareAnalysis(files, user.id, projectId);
 
         return NextResponse.json({
-            analysisId: analysis.id,
-            message: "Analyse startet",
+            analysisId: result.analysisId,
+            chunks: result.chunks,
+            message: "Analyse forberedt. Starter prosessering...",
         });
 
     } catch (error) {
         console.error("Error starting analysis:", error);
         return NextResponse.json(
-            { error: "Kunne ikke starte analyse" },
+            { error: "Kunne ikke starte analyse: " + (error as Error).message },
             { status: 500 }
         );
     }

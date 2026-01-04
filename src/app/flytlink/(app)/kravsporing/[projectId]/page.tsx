@@ -177,16 +177,15 @@ export default function KravsporingProjectPage() {
 
         setAnalyzing(true);
         setProgress(0);
-        setAnalysisStatus({ stage: "starting", message: "Starter analyse..." });
+        setAnalysisStatus({ stage: "starting", message: "Forbereder analyse..." });
 
         try {
-            // Create FormData with files
+            // 1. Prepare Analysis (Stage 1)
             const formData = new FormData();
             files.forEach((file, index) => {
                 formData.append(`file${index}`, file);
             });
 
-            // Start analysis
             const res = await fetch(`/api/flytlink/kravsporing/projects/${projectId}/analyze`, {
                 method: "POST",
                 body: formData,
@@ -194,103 +193,100 @@ export default function KravsporingProjectPage() {
 
             if (!res.ok) {
                 const text = await res.text();
-                try {
-                    const data = JSON.parse(text);
-                    throw new Error(data.error || "Kunne ikke starte analyse");
-                } catch (e) {
-                    if (res.status === 504) {
-                        throw new Error("Analysen tok for lang tid (Timeout). Dette skyldes antagelig Vercel Hobby-grensen på 10 sekunder. Prøv færre/mindre filer, eller oppgrader til Vercel Pro.");
-                    }
-                    // If JSON parse is the error (e is likely SyntaxError), use the text
-                    const errorMessage = text.length < 200 ? text : `Server Error (${res.status})`;
-                    throw new Error(errorMessage.replace(/<[^>]*>?/gm, '')); // Strip HTML tags if any
-                }
+                throw new Error(`Feil ved oppstart: ${text}`);
             }
 
-            const { analysisId } = await res.json();
+            const { analysisId, chunks, message } = await res.json();
             setCurrentAnalysisId(analysisId);
-            toast.success("Analyse startet!");
+            toast.success("Analyse startet! Behandler " + chunks.length + " deler...");
+            setAnalysisStatus({ stage: "extracting", message: "Dokumenter lest. Starter AI-analyse...", candidatesFound: 0 });
 
-            // Poll for progress
-            const pollInterval = setInterval(async () => {
+            if (!chunks || chunks.length === 0) {
+                // No text found case
+                await fetch(`/api/flytlink/kravsporing/projects/${projectId}/analyze/process`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ analysisId, isFinal: true }),
+                });
+                toast.warning("Ingen tekst funnet i filene.");
+                setAnalyzing(false);
+                loadProject();
+                return;
+            }
+
+            // 2. Process Chunks (Stage 2) - Client-side iteration
+            let processedCount = 0;
+            let totalCandidates = 0;
+
+            // Concurrency limit (e.g., 3 parallel requests to avoid browser/network limits)
+            const CONCURRENCY = 3;
+            const chunksCopy = [...chunks];
+
+            const processNext = async (chunk: any) => {
                 try {
-                    const statusRes = await fetch(
-                        `/api/flytlink/kravsporing/projects/${projectId}/analyze?analysisId=${analysisId}`
-                    );
-                    if (statusRes.ok) {
-                        const { analysis } = await statusRes.json();
+                    const processRes = await fetch(`/api/flytlink/kravsporing/projects/${projectId}/analyze/process`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ analysisId, chunk, userId: project?.id /* Not strictly needed if session user used, but passed for consistency */ }),
+                    });
 
-                        if (analysis.status === "COMPLETED") {
-                            clearInterval(pollInterval);
-                            setProgress(100);
-                            toast.success(`Analyse fullført! ${analysis._count.requirements} krav funnet.`);
-                            setFiles([]);
-                            loadProject();
-                            loadRequirements();
-                            setAnalyzing(false);
-                            setAnalyzing(false);
-                            setCurrentAnalysisId(null);
+                    if (!processRes.ok) throw new Error("Chunk failed");
+                    const data = await processRes.json();
 
-                            // Load fresh data and show summary
-                            loadProject(); // This updates the analyses list
-                            loadRequirements();
+                    processedCount++;
+                    totalCandidates += (data.requirementsFound || 0);
 
-                            // We need to fetch the specific analysis details or find it in the refreshed project list
-                            // Ideally, we'd wait for loadProject to finish, but for now we can just use the completed event info
-                            // or better, fetch the single analysis to show summary
-                            fetch(`/api/flytlink/kravsporing/projects/${projectId}/analyze?analysisId=${analysisId}`)
-                                .then(r => r.json())
-                                .then(d => {
-                                    if (d.analysis) {
-                                        setSelectedAnalysis(d.analysis);
-                                        setSummaryOpen(true);
-                                    }
-                                });
-
-                        } else if (analysis.status === "FAILED") {
-                        } else if (analysis.status === "FAILED") {
-                            clearInterval(pollInterval);
-                            toast.error(analysis.errorMessage || "Analyse feilet");
-                            setAnalyzing(false);
-                            setCurrentAnalysisId(null);
-                        } else if (analysis.status === "CANCELLED") {
-                            clearInterval(pollInterval);
-                            toast.info("Analyse avbrutt");
-                            setAnalyzing(false);
-                            setAnalysisStatus({ stage: "cancelled", message: "Analyse avbrutt" });
-                            setCurrentAnalysisId(null);
-                        } else {
-                            // Still processing - update progress and status
-                            setProgress((prev) => Math.min(prev + 5, 95));
-
-                            // Update status info if available
-                            if (analysis.currentStage) {
-                                setAnalysisStatus({
-                                    stage: analysis.currentStage,
-                                    message: getStageMessage(analysis.currentStage),
-                                    candidatesFound: analysis.candidatesFound,
-                                    requirementsValidated: analysis.requirementsValidated,
-                                    costNok: analysis.apiCostNok,
-                                    activeKeys: analysis.activeKeys,
-                                });
-                            }
-                        }
-                    }
+                    // Update UI
+                    const pct = Math.round((processedCount / chunks.length) * 100);
+                    setProgress(pct);
+                    setAnalysisStatus(prev => ({
+                        ...prev!,
+                        stage: "finding",
+                        message: `Analyserer del ${processedCount} av ${chunks.length}...`,
+                        candidatesFound: totalCandidates
+                    }));
                 } catch (err) {
-                    console.error("Error polling analysis status:", err);
+                    console.error("Chunk error:", err);
+                    // Continue anyway, don't break whole analysis? Or retry?
+                    // For now, simple continue, maybe count failures
                 }
-            }, 2000);
+            };
 
-            // Timeout after 5 minutes
-            setTimeout(() => {
-                clearInterval(pollInterval);
-                if (analyzing) {
-                    toast.error("Analyse tok for lang tid");
-                    setAnalyzing(false);
-                }
-            }, 300000);
+            // Execute with concurrency
+            // We use a simple P-Limit style approach or just simple batching
+            for (let i = 0; i < chunksCopy.length; i += CONCURRENCY) {
+                const batch = chunksCopy.slice(i, i + CONCURRENCY);
+                await Promise.all(batch.map(chunk => processNext(chunk)));
+            }
+
+            // 3. Finalize (Stage 3)
+            await fetch(`/api/flytlink/kravsporing/projects/${projectId}/analyze/process`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ analysisId, isFinal: true }),
+            });
+
+            toast.success(`Analyse fullført! ${totalCandidates} krav identifisert.`);
+            setFiles([]);
+            setAnalyzing(false);
+            setCurrentAnalysisId(null);
+
+            // Refresh data
+            loadProject();
+            loadRequirements();
+
+            // Open summary
+            fetch(`/api/flytlink/kravsporing/projects/${projectId}/analyze?analysisId=${analysisId}`)
+                .then(r => r.json())
+                .then(d => {
+                    if (d.analysis) {
+                        setSelectedAnalysis(d.analysis);
+                        setSummaryOpen(true);
+                    }
+                });
 
         } catch (err) {
+            console.error("Analysis loop error:", err);
             toast.error(err instanceof Error ? err.message : "Analyse feilet");
             setAnalyzing(false);
             setAnalysisStatus(null);
