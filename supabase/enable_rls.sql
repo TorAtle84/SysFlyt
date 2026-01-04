@@ -80,6 +80,10 @@ CREATE POLICY "Allow all for authenticated service" ON "public"."ProductDatashee
 ALTER TABLE "public"."Notification" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all for authenticated service" ON "public"."Notification" FOR ALL USING (true) WITH CHECK (true);
 
+-- Feedback
+ALTER TABLE "public"."Feedback" ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all for authenticated service" ON "public"."Feedback" FOR ALL USING (true) WITH CHECK (true);
+
 -- 18. FunctionTestRow
 ALTER TABLE "public"."FunctionTestRow" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all for authenticated service" ON "public"."FunctionTestRow" FOR ALL USING (true) WITH CHECK (true);

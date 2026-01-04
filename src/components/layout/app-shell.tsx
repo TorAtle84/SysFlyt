@@ -18,11 +18,13 @@ import {
   FileSearch,
   Users,
   ArrowRightLeft,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { TotpWarningBanner } from "@/components/totp/totp-warning-banner";
 import { NotificationDropdown } from "@/components/layout/notification-dropdown";
+import { FeedbackLauncher } from "@/components/feedback/feedback-launcher";
 import { LinkDogProvider, LinkDogPopup } from "@/components/linkdog";
 
 interface TotpWarning {
@@ -52,6 +54,7 @@ const flytlinkNavItems = [
 const adminItems = [
   { href: "/syslink/admin/approvals", label: "Godkjenninger", icon: Shield },
   { href: "/syslink/admin/users", label: "Brukere", icon: Users },
+  { href: "/syslink/admin/feedback", label: "Tilbakemeldinger", icon: MessageSquare },
 ];
 
 export function AppShell({ children, sidebar, variant = "syslink" }: AppShellProps) {
@@ -224,6 +227,7 @@ export function AppShell({ children, sidebar, variant = "syslink" }: AppShellPro
             />
           </Link>
           <div className={cn("flex items-center gap-2", leftSidebarCollapsed ? "lg:hidden" : "")}>
+            <FeedbackLauncher />
             <NotificationDropdown />
           </div>
         </div>

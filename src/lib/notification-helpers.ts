@@ -182,6 +182,19 @@ export function getNotificationContent(notification: Notification): Notification
         };
     }
 
+    if (normalizedType === "feedback_warning" && notification.metadata) {
+        const meta = notification.metadata as {
+            message?: string;
+            category?: string;
+        };
+        const categoryLabel = meta.category ? ` (${meta.category})` : "";
+        return {
+            icon: AlertTriangle,
+            text: `Tilbakemeldingen din ble avvist${categoryLabel}${meta.message ? `: "${meta.message}"` : ""}`,
+            link: null,
+        };
+    }
+
     if (notification.metadata) {
         const meta = notification.metadata as { message?: string; link?: string };
         if (typeof meta.message === "string" && meta.message.trim()) {
